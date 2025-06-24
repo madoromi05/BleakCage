@@ -1,0 +1,61 @@
+
+# OS/Editor 一般
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Unity 一時ファイル
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Mm]emoryCaptures/
+Assets/Unity.VisualScripting.Generated/
+
+# ビルド成果物やキャッシュ
+*.stacktrace
+*.apk
+*.aab
+*.unitypackage
+*.exe
+*.app
+*.pdb
+
+# ユーザー固有の設定
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+
+# Rider / VSCode
+.idea/
+.vscode/
+*.code-workspace
+
+# その他のIDE
+*.tmproj
+*.sublime-project
+*.sublime-workspace
+
+# バージョン管理しないアセット
+Assets/AssetStoreTools*
+
+# 旧式のCollaborate
+.collabignore
+
+# ログやクラッシュレポート
+*.log
+*.diff
+
+# 環境アセット
+Assets/Fantasy Forest Environment Free Sample/
+Assets/Fantasy Skybox FREE/
