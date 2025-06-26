@@ -4,13 +4,13 @@ using UnityEngine.UI;
 
 public class CardView : MonoBehaviour
 {
-    [SerializeField] Text nameText;
+    [SerializeField] Text CardID;
     //[SerializeField] TMP_Text WeaponDamargeText;
     [SerializeField] Image iconImage;
 
     public void Show(CardModel cardModel)
     {
-        nameText.text = cardModel.name;
+        CardID.text = cardModel.CardId.ToString();
         iconImage.sprite = cardModel.icon;
     }
 }

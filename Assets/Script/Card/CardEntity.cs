@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardEntity", menuName = "Create CardEntity")]
 public class CardEntity : ScriptableObject
 {
-    public new string name;     // カード名
-    public int WeaponAttack;    // HP
+    public int CardID;
+    public int WeaponAttack;    // 武器の攻撃力
     public Sprite icon;         // 画像（アイコン）
 }
