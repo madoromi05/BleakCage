@@ -16,7 +16,6 @@ public class CardModel
         CardEntity cardEntity = Resources.Load<CardEntity>("CardEntityList/Card" + cardID);
 
         // æ“¾‚µ‚½ƒf[ƒ^‚ğCardModel‚É”½‰f
-        name = cardEntity.name;
         WeaponAttack = cardEntity.WeaponAttack;
         icon = cardEntity.icon;
     }
