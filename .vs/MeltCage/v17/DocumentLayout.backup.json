@@ -3,20 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\mador\\unity_project\\MeltCage\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|c:\\users\\mador\\unity_project\\meltcage\\assets\\script\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|c:\\users\\mador\\unity_project\\meltcage\\assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|c:\\users\\mador\\unity_project\\meltcage\\assets\\script\\data\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|c:\\users\\mador\\unity_project\\meltcage\\assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|c:\\users\\mador\\unity_project\\meltcage\\assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,56 +26,59 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "CardView.cs",
-              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardView.cs",
-              "RelativeDocumentMoniker": "Assets\\Script\\Card\\CardView.cs",
-              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardView.cs",
-              "RelativeToolTip": "Assets\\Script\\Card\\CardView.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardView.cs",
+              "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardView.cs",
+              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardView.cs",
+              "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardView.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwwAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-25T14:39:45.465Z",
+              "WhenOpened": "2025-06-28T04:43:38.127Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "CardControlle.cs",
-              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardControlle.cs",
-              "RelativeDocumentMoniker": "Assets\\Script\\Card\\CardControlle.cs",
-              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardControlle.cs",
-              "RelativeToolTip": "Assets\\Script\\Card\\CardControlle.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAASAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "CardModel.cs",
+              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardModel.cs",
+              "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardModel.cs",
+              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardModel.cs",
+              "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-25T14:38:44.19Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "CardEntity.cs",
-              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardEntity.cs",
-              "RelativeDocumentMoniker": "Assets\\Script\\Card\\CardEntity.cs",
-              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardEntity.cs",
-              "RelativeToolTip": "Assets\\Script\\Card\\CardEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-25T14:25:42.953Z"
+              "WhenOpened": "2025-06-28T04:43:37.461Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "CardModel.cs",
-              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardModel.cs",
-              "RelativeDocumentMoniker": "Assets\\Script\\Card\\CardModel.cs",
-              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Card\\CardModel.cs",
-              "RelativeToolTip": "Assets\\Script\\Card\\CardModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAArAAAAAAAAAA==",
+              "Title": "CardEntity.cs",
+              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardEntity.cs",
+              "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardEntity.cs",
+              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardEntity.cs",
+              "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwkAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-24T11:03:39.209Z"
+              "WhenOpened": "2025-06-28T04:43:36.609Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CardControlle.cs",
+              "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardControlle.cs",
+              "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardControlle.cs",
+              "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardControlle.cs",
+              "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardControlle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-28T04:43:35.597Z",
+              "EditorCaption": ""
             }
           ]
         }
