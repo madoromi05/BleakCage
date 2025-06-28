@@ -8,10 +8,13 @@ using UnityEngine;
 // </summary>
 
 [CreateAssetMenu(fileName = "PlayerEntity", menuName = "Create PlayerEntity")]
-public class CardEntity : ScriptableObject
+public class PlayerCharacterEntity : ScriptableObject
 {
-    public int PlayerID;                  // カード固有ID
-    public string PlayerName;             // カード名
+    public int PlayerID;                // キャラクター固有ID
+    public string PlayerName;           // キャラクター名
+    public int PlayerAttack;            // キャラクター攻撃力
+    public int PlayerHP;                // チャラクターのHP
     public int basePower;               // 基本威力
-    public Sprite icon;                 // アイコン画像
+    public Sprite SDChracter;           // SDキャラ画像
+    public Sprite characterSprite;      // 立ち絵画像
 }
