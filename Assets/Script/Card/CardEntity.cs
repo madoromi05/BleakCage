@@ -2,11 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// カードデータ本体
+// <summary>
+// スキルカードデータの定義
+//編集をしやすくするために置いているだけなのでここからデータ参照はしない
+// </summary>
+
 [CreateAssetMenu(fileName = "CardEntity", menuName = "Create CardEntity")]
 public class CardEntity : ScriptableObject
 {
-    public int CardID;
-    public int WeaponAttack;    // 武器の攻撃力
-    public Sprite icon;         // 画像（アイコン）
+    public enum CardType
+    {
+        Character,  // キャラ付き
+        Weapon,     // 武器付き
+        Universal   // 汎用
+    }
+
+    public enum AttackAttribute
+    {
+        Slash,      // 斬
+        Blunt,      // 鈍
+        Pierce,     // 突
+        Bullet      // 弾
+    }
+
+    public int cardID;                  // カード固有ID
+    public string cardName;             // カード名
+    public CardType cardType;           // カードタイプ
+    public AttackAttribute attribute;   // 攻撃属性
+    public int basePower;               // 基本威力
+    public Sprite icon;                 // アイコン画像
+    public string description;          // 説明文
 }

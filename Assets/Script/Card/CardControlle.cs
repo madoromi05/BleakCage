@@ -1,5 +1,6 @@
 using UnityEngine;
 
+//UI、データをゲームにsetするクラス
 public class CardController : MonoBehaviour
 {
     // カードデータを表示する
