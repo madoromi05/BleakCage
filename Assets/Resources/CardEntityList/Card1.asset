@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
   m_Name: Card1
   m_EditorClassIdentifier: 
-  CardID: 1
-  WeaponAttack: 5
+  cardID: 0
+  cardName: "\u5375\u306E\u5927\u7206\u767A"
+  cardType: 0
+  attribute: 1
+  basePower: 5
   icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  description: t

@@ -6,13 +6,13 @@ using UnityEngine.UI;
 //Œø‰Ê“™‚ÍŠÖŒW‚È‚¢
 public class CardView : MonoBehaviour
 {
-    [SerializeField] Text CardId;
-    [SerializeField] Text attackAttribute;//UŒ‚‘®«
+    [SerializeField] TextMeshProUGUI CardName;
+    [SerializeField] TextMeshProUGUI attackAttribute;//UŒ‚‘®«
     [SerializeField] Image iconImage;
 
     public void Show(CardModel cardModel)
     {
-        CardId.text = cardModel.CardId.ToString();
+        CardName.text = cardModel.CardName;
         attackAttribute.text = cardModel.Attribute.ToString();
         iconImage.sprite = cardModel.Icon;
     }
