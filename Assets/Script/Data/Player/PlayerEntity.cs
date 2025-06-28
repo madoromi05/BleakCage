@@ -8,7 +8,7 @@ using UnityEngine;
 // </summary>
 
 [CreateAssetMenu(fileName = "PlayerEntity", menuName = "Create PlayerEntity")]
-public class CardEntity : ScriptableObject
+public class PlayerEntity : ScriptableObject
 {
     public int PlayerID;                  // カード固有ID
     public string PlayerName;             // カード名

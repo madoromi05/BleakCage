@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// <summary>
-// スキルカードデータの定義
-//編集をしやすくするために置いているだけなのでここからデータ参照はしない
-// </summary>
+/// <summary>
+/// スキルカードデータの定義
+/// 編集をしやすくするために置いているだけなのでここからデータ参照はしない
+/// </summary>
 
 [CreateAssetMenu(fileName = "CardEntity", menuName = "Create CardEntity")]
 public class CardEntity : ScriptableObject

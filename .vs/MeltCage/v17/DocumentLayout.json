@@ -7,20 +7,20 @@
       "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\player\\playerentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\data\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|c:\\users\\mador\\unity_project\\meltcage\\assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|C:\\Users\\mador\\unity_project\\MeltCage\\assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F22E73F2-D56D-76E9-0E9A-9827C3547934}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -40,22 +40,23 @@
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Player\\PlayerEntity.cs",
               "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Player\\PlayerEntity.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Player\\PlayerEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAwAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-28T04:52:45.915Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "CardView.cs",
               "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardView.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardView.cs",
               "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardView.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardView.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAADwvwwAAAAlAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwoAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-28T04:43:38.127Z"
+              "WhenOpened": "2025-06-28T04:43:38.127Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -72,28 +73,29 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "CardEntity.cs",
               "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardEntity.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardEntity.cs",
               "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardEntity.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-28T04:43:36.609Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "CardControlle.cs",
               "DocumentMoniker": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardControlle.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardControlle.cs",
               "ToolTip": "C:\\Users\\mador\\unity_project\\MeltCage\\Assets\\Script\\Data\\Card\\CardControlle.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardControlle.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-28T04:43:35.597Z"
+              "WhenOpened": "2025-06-28T04:43:35.597Z",
+              "EditorCaption": ""
             }
           ]
         }
