@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections; // IEnumerator ‚ðŽg‚¤‚½‚ß‚É•K—v
 
-public class GameManager : MonoBehaviour
+public class BattleManager : MonoBehaviour
 {
     bool isPlayerTurn;
     [SerializeField] CardController cardPrefab;

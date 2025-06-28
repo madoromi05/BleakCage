@@ -1,6 +1,9 @@
 using UnityEngine;
 
-// カードのデータを管理するクラス
+/// <summary>
+///     カードのデータを管理するクラス
+/// </summary>
+
 public class CardModel
 {
     public int CardId { get; set; }

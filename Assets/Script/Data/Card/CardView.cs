@@ -1,9 +1,11 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+/// <summary>
+/// UI‚Å•\Ž¦‚³‚¹‚é‚à‚Ì‚ðŒˆ‚ß‚é
+/// Œø‰Ê“™‚ÍŠÖŒW‚È‚¢
+/// </summary>
 
-//UI‚Å•\Ž¦‚³‚¹‚é‚à‚Ì‚ðŒˆ‚ß‚é
-//Œø‰Ê“™‚ÍŠÖŒW‚È‚¢
 public class CardView : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI CardName;
