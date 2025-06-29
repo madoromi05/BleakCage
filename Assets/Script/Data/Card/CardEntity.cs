@@ -28,7 +28,7 @@ public class CardEntity : ScriptableObject
     public int cardID;                  // カード固有ID
     public string cardName;             // カード名
     public CardType cardType;           // カードタイプ
-    public AttackAttribute attribute;   // 攻撃属性
+    public AttackAttribute attribute;   // 属性
     public int basePower;               // 基本威力
     public Sprite icon;                 // アイコン画像
     public string description;          // 説明文
