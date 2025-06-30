@@ -8,7 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyEntity", menuName = "Create EnemyEntity")]
 public class EnemyEntity : ScriptableObject
 {
-    public enum AttackAttribute
+    public enum Attribute
     {
         Slash,      // a
         Blunt,      // “İ
@@ -16,9 +16,10 @@ public class EnemyEntity : ScriptableObject
         Bullet      // ’e
     }
 
-    public int PlayerID;                // EnemyŒÅ—LID
-    public string PlayerName;           // Enemy–¼
+    public int EnemyID;                // EnemyŒÅ—LID
+    public string EnemyName;           // Enemy–¼
     public int CharacterAttack;         // ƒLƒƒƒ‰UŒ‚—Í
     public int CharacterDefense;        // ƒLƒƒƒ‰–hŒä—Í
-    public Sprite icon;                 // ƒAƒCƒRƒ“‰æ‘œ
+    public Attribute EnemyAttribute;   // ‘®«
+    public Sprite icon;                 // í“¬’†‰æ‘œ
 }

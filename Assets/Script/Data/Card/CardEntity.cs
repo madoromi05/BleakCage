@@ -17,7 +17,7 @@ public class CardEntity : ScriptableObject
         Universal   // 汎用
     }
 
-    public enum AttackAttribute
+    public enum Attribute
     {
         Slash,      // 斬
         Blunt,      // 鈍
@@ -28,7 +28,7 @@ public class CardEntity : ScriptableObject
     public int cardID;                  // カード固有ID
     public string cardName;             // カード名
     public CardType cardType;           // カードタイプ
-    public AttackAttribute attribute;   // 属性
+    public Attribute CardAttribute;     // 属性
     public int basePower;               // 基本威力
     public Sprite icon;                 // アイコン画像
     public string description;          // 説明文

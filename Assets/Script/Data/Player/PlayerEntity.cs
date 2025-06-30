@@ -10,7 +10,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerEntity", menuName = "Create PlayerEntity")]
 public class PlayerEntity : ScriptableObject
 {
-    public enum AttackAttribute
+    public enum Attribute
     {
         Slash,      // a
         Blunt,      // “İ
@@ -22,7 +22,7 @@ public class PlayerEntity : ScriptableObject
     public string PlayerName;           // Player–¼
     public int CharacterAttack;         // ƒLƒƒƒ‰UŒ‚—Í
     public int CharacterDefense;        // ƒLƒƒƒ‰–hŒä—Í
-    public AttackAttribute attribute;   // ‘®«
+    public Attribute PlayerAttribute;   // ‘®«
     public Sprite Icon;                 // —§‚¿ŠG‰æ‘œ
     public Sprite SDIcon;               //SDƒLƒƒƒ‰
 }
