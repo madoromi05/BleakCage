@@ -10,12 +10,14 @@ public class CardView : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI CardName;
     [SerializeField] TextMeshProUGUI attackAttribute;   //çUåÇëÆê´
+    [SerializeField] TextMeshProUGUI Description;
     [SerializeField] Image iconImage;
 
     public void Show(CardModel cardModel)
     {
         CardName.text = cardModel.CardName;
         attackAttribute.text = cardModel.CardAttribute.ToString();
+        Description.text = cardModel.CardDescription;
         iconImage.sprite = cardModel.CardIcon;
     }
 }

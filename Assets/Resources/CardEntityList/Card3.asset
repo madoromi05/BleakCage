@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
   m_Name: Card3
   m_EditorClassIdentifier: 
-  cardID: 2
+  cardId: 3
   cardName: "\u9B42\u306E\u756A\u4EBA\u3000\u30DF\u30F3\u30C8"
   cardType: 0
-  attribute: 0
+  CardAttribute: 0
   basePower: 0
-  icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  description: d
+  CardIcon: {fileID: 0}
+  CardDescription: 
