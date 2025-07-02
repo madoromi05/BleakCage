@@ -16,6 +16,6 @@ public class CardView : MonoBehaviour
     {
         CardName.text = cardModel.CardName;
         attackAttribute.text = cardModel.CardAttribute.ToString();
-        iconImage.sprite = cardModel.Icon;
+        iconImage.sprite = cardModel.CardIcon;
     }
 }

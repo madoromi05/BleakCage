@@ -25,11 +25,11 @@ public class CardEntity : ScriptableObject
         Bullet      // 弾
     }
 
-    public int cardID;                  // カード固有ID
+    public int cardId;                  // カード固有ID
     public string cardName;             // カード名
     public CardType cardType;           // カードタイプ
     public Attribute CardAttribute;     // 属性
     public int basePower;               // 基本威力
-    public Sprite icon;                 // アイコン画像
-    public string description;          // 説明文
+    public Sprite CardIcon;             // アイコン画像
+    public string CardDescription;      // 説明文
 }

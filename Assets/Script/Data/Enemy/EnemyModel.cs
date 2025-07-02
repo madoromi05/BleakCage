@@ -4,10 +4,11 @@ public class EnemyModel
 {
     public int EnemyId { get; set; }
     public string EnemyName { get; set; }
-    public int Attack { get; set; }
-    public int Defense { get; set; }
-    public EnemyEntity.Attribute EnemyAttribute { get; set; }
-    public Sprite Icon { get; set; }
+    public float EnemyHP { get; set; }                // EnemyのHP
+    public float EnemyAttackPower { get; set; }       // キャラ攻撃力
+    public float EnemyDefensePower { get; set; }      // キャラ防御力
+    public EnemyEntity.Attribute EnemyAttribute { get; set; } // 属性
+    public Sprite EnemyIcon { get; set; }             // 戦闘中画像
 
     // コンストラクタ（敵IDを引数にしてデータを読み込む）
     public EnemyModel(int enemyId)
@@ -22,11 +23,12 @@ public class EnemyModel
         }
 
         // 取得したデータをEnemyModelに反映
-        EnemyId = enemyEntity.EnemyID;
+        EnemyId = enemyEntity.EnemyId;
         EnemyName = enemyEntity.EnemyName;
-        Attack = enemyEntity.CharacterAttack;
-        Defense = enemyEntity.CharacterDefense;
+        EnemyHP = enemyEntity.EnemyHP;
+        EnemyAttackPower = enemyEntity.EnemyAttackPower;
+        EnemyDefensePower = enemyEntity.EnemyDefensePower;
         EnemyAttribute = enemyEntity.EnemyAttribute;
-        Icon = enemyEntity.icon;
+        EnemyIcon = enemyEntity.EnemyIcon;
     }
 }

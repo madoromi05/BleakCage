@@ -11,8 +11,8 @@ public class CardModel
     public CardEntity.CardType CardType { get; set; }
     public CardEntity.Attribute CardAttribute { get; set; }
     public int BasePower { get; set; }
-    public Sprite Icon { get; set; }
-    public string Description { get; set; }
+    public Sprite CardIcon { get; set; }
+    public string CardDescription { get; set; }
 
     // コンストラクタ（カードIDを引数にしてデータを読み込む）
     public CardModel(int cardID)
@@ -21,12 +21,12 @@ public class CardModel
         CardEntity cardEntity = Resources.Load<CardEntity>("CardEntityList/Card" + cardID);
 
         // 取得したデータをCardModelに反映
-        CardId = cardEntity.cardID;
+        CardId = cardEntity.cardId;
         CardName = cardEntity.cardName;
         CardType = cardEntity.cardType;
         CardAttribute = cardEntity.CardAttribute;
         BasePower = cardEntity.basePower;
-        Icon = cardEntity.icon;
-        Description = cardEntity.description;
+        CardIcon = cardEntity.CardIcon;
+        CardDescription = cardEntity.CardDescription;
     }
 }

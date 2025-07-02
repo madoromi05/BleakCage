@@ -18,9 +18,9 @@ public class WeaponEntity : ScriptableObject
 
     public int WeaponID;                // WeaponŒÅ—LID
     public string WeaponName;           // Weapon–¼
-    public int WeaponAttack;            // •ŠíUŒ‚—Í
+    public int WeaponAttackPower;       // •ŠíUŒ‚—Í
     public Attribute WeaponAttribute;   // ‘®«
     public int PeakyCoefficient;        // “Á‰»ŒW”
-    public string description;          // à–¾•¶
-    public Sprite icon;                 // ‰æ‘œ
+    public Sprite WeaponIcon;           // ‰æ‘œ
+    public string WeaponDescription;    // à–¾•¶
 }

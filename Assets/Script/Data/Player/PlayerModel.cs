@@ -4,11 +4,12 @@ public class PlayerModel : MonoBehaviour
 {
     public int PlayerId { get; set; }
     public string PlayerName { get; set; }
-    public int Attack { get; set; }
-    public int Defense { get; set; }
+    public int PlayerHP { get; set; }
+    public int PlayerAttackPower { get; set; }
+    public int PlayerDefensePower { get; set; }
     public PlayerEntity.Attribute PlayerAttribute { get; set; }
-    public Sprite Icon { get; set; }
-    public Sprite SDIcon { get; set; }
+    public Sprite PlayerIcon { get; set; }
+    public Sprite PlayerSDIcon { get; set; }
 
     // コンストラクタ（プレイヤーIDを引数にしてデータを読み込む）
     public PlayerModel(int playerId)
@@ -23,12 +24,13 @@ public class PlayerModel : MonoBehaviour
         }
 
         // 取得したデータをPlayerModelに反映
-        PlayerId = playerEntity.PlayerID;
+        PlayerId = playerEntity.PlayerId;
         PlayerName = playerEntity.PlayerName;
-        Attack = playerEntity.CharacterAttack;
-        Defense = playerEntity.CharacterDefense;
+        PlayerHP = playerEntity.PlayerHP;
+        PlayerAttackPower = playerEntity.PlayerAttackPower;
+        PlayerDefensePower = playerEntity.PlayerDefensePower;
         PlayerAttribute = playerEntity.PlayerAttribute;
-        Icon = playerEntity.Icon;
-        SDIcon = playerEntity.SDIcon;
+        PlayerIcon = playerEntity.PlayerIcon;
+        PlayerSDIcon = playerEntity.PlayerSDIcon;
     }
 }

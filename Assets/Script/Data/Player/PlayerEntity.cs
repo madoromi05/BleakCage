@@ -18,11 +18,12 @@ public class PlayerEntity : ScriptableObject
         Bullet      // ’e
     }
 
-    public int PlayerID;                // PlayerŒÅ—LID
+    public int PlayerId;                // PlayerŒÅ—LID
     public string PlayerName;           // Player–¼
-    public int CharacterAttack;         // ƒLƒƒƒ‰UŒ‚—Í
-    public int CharacterDefense;        // ƒLƒƒƒ‰–hŒä—Í
+    public int PlayerHP;                // PlayerHp
+    public int PlayerAttackPower;       // ƒLƒƒƒ‰UŒ‚—Í
+    public int PlayerDefensePower;      // ƒLƒƒƒ‰–hŒä—Í
     public Attribute PlayerAttribute;   // ‘®«
-    public Sprite Icon;                 // —§‚¿ŠG‰æ‘œ
-    public Sprite SDIcon;               //SDƒLƒƒƒ‰
+    public Sprite PlayerIcon;           // —§‚¿ŠG‰æ‘œ
+    public Sprite PlayerSDIcon;         // SDƒLƒƒƒ‰
 }
