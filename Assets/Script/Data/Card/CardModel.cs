@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-///     カードのデータを管理するクラス
-/// </summary>
-
 public class CardModel
 {
     public int CardId { get; set; }
@@ -14,13 +10,22 @@ public class CardModel
     public Sprite CardIcon { get; set; }
     public string CardDescription { get; set; }
 
-    // コンストラクタ（カードIDを引数にしてデータを読み込む）
+    // 説明文を置換した結果を返すプロパティ
+    public string ResolvedDescription
+    {
+        get
+        {
+            return CardDescription
+                .Replace("{Type}", CardType.ToString())
+                .Replace("{Attribute}", CardAttribute.ToString())
+                .Replace("{Power}", BasePower.ToString());
+        }
+    }
+
     public CardModel(int cardID)
     {
-        // Resourcesフォルダからカードデータを取得
         CardEntity cardEntity = Resources.Load<CardEntity>("CardEntityList/Card" + cardID);
 
-        // 取得したデータをCardModelに反映
         CardId = cardEntity.cardId;
         CardName = cardEntity.cardName;
         CardType = cardEntity.cardType;

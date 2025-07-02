@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 /// <summary>
 /// UI‚Å•\Ž¦‚³‚¹‚é‚à‚Ì‚ðŒˆ‚ß‚é
 /// Œø‰Ê“™‚ÍŠÖŒW‚È‚¢
@@ -17,7 +18,7 @@ public class CardView : MonoBehaviour
     {
         CardName.text = cardModel.CardName;
         attackAttribute.text = cardModel.CardAttribute.ToString();
-        Description.text = cardModel.CardDescription;
+        Description.text = cardModel.ResolvedDescription;
         iconImage.sprite = cardModel.CardIcon;
     }
 }

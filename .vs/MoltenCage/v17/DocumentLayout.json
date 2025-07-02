@@ -7,16 +7,20 @@
       "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\tools\\cardentitytableeditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\player\\playerentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\player\\playerentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\player\\playerentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\player\\playerentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\weapon\\weaponmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -29,10 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\player\\playermodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\player\\playermodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0ACF38BE-1AFD-DEE9-AD9C-D38F77A534F6}|Assembly-CSharp.csproj|C:\\unity\\MoltenCage\\assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -70,13 +70,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "CardEntity.cs",
               "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardEntity.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardEntity.cs",
               "ToolTip": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardEntity.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardEntity.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAADwvyEAAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-02T02:58:42.588Z",
               "IsPinned": true,
@@ -90,7 +90,7 @@
               "RelativeDocumentMoniker": "Assets\\Script\\Tools\\CardEntityTableEditor.cs",
               "ToolTip": "C:\\unity\\MoltenCage\\Assets\\Script\\Tools\\CardEntityTableEditor.cs",
               "RelativeToolTip": "Assets\\Script\\Tools\\CardEntityTableEditor.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAYwF8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAB8AAAAAAAAAAAA2wC0AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-02T06:02:04.445Z",
               "IsPinned": true,
@@ -98,15 +98,29 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "CardView.cs",
               "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardView.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardView.cs",
               "ToolTip": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardView.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardView.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-02T03:24:55.031Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CardModel.cs",
+              "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardModel.cs",
+              "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardModel.cs",
+              "ToolTip": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardModel.cs",
+              "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardModel.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAywA8AAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-02T02:58:49.051Z",
               "IsPinned": true,
               "EditorCaption": ""
             },
@@ -116,19 +130,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "CardModel.cs",
-              "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardModel.cs",
-              "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardModel.cs",
-              "ToolTip": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Card\\CardModel.cs",
-              "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardModel.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAmwB0AAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T02:58:49.051Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "WeaponEntity.cs",
               "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Weapon\\WeaponEntity.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Weapon\\WeaponEntity.cs",
@@ -136,12 +138,11 @@
               "RelativeToolTip": "Assets\\Script\\Data\\Weapon\\WeaponEntity.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T03:11:36.707Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-02T03:11:36.707Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "WeaponModel.cs",
               "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Weapon\\WeaponModel.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Weapon\\WeaponModel.cs",
@@ -149,12 +150,11 @@
               "RelativeToolTip": "Assets\\Script\\Data\\Weapon\\WeaponModel.cs",
               "ViewState": "AgIAAAUAAAAAAAAAAAAswB4AAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T03:11:44.504Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-02T03:11:44.504Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "PlayerModel.cs",
               "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Player\\PlayerModel.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Player\\PlayerModel.cs",
@@ -166,7 +166,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "PlayerEntity.cs",
               "DocumentMoniker": "C:\\unity\\MoltenCage\\Assets\\Script\\Data\\Player\\PlayerEntity.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Player\\PlayerEntity.cs",
@@ -174,8 +174,7 @@
               "RelativeToolTip": "Assets\\Script\\Data\\Player\\PlayerEntity.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-30T08:37:35.198Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-30T08:37:35.198Z"
             },
             {
               "$type": "Document",

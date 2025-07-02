@@ -17,5 +17,5 @@ MonoBehaviour:
   cardType: 0
   CardAttribute: 0
   basePower: 5
-  CardIcon: {fileID: 0}
-  CardDescription: "  {Type}\u5C5E\u6027\u306E{Attribute}\u653B\u6483\u30AB\u30FC\u30C9\u3002\u57FA\u672C\u653B\u6483\u529B\u306F{Power}\u3002"
+  CardIcon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  CardDescription: "{Type}\u5C5E\u6027\u306E{Attribute}\u653B\u6483\u30AB\u30FC\u30C9\u3002\u57FA\u672C\u653B\u6483\u529B\u306F{Power}\u3002"

@@ -34,9 +34,9 @@ public class CardEntityTableEditor : EditorWindow
         return template
             .Replace("{Type}", card.cardType.ToString())
             .Replace("{Attribute}", card.CardAttribute.ToString())
-            .Replace("{Power}", card.basePower.ToString());
+            .Replace("{Power}", card.basePower.ToString())
+            .Replace("\\", "\n");
     }
-
 
     private void OnGUI()
     {
