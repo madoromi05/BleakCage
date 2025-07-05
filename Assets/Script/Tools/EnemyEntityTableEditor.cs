@@ -5,7 +5,6 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
 
-
 /// <summary>
 /// EnemyのGUIでのデータ管理ツール
 /// </summary>
@@ -15,6 +14,12 @@ public class EnemyEntityTableEditor : EditorWindow
     private List<EnemyEntity> enemyList;
     private string newEnemyName = "Enemy";
     private string savePath = "Assets/Resources/EnemyEntityList";
+    private bool showResolvedDescription = true; // 解決済み説明文を表示するかどうか
+
+    // プレビュー用の変数
+    private EnemyEntity previewEnemy;
+    private bool showPreview = false;
+    private Vector2 previewScrollPos;
 
     [MenuItem("Tools/Enemy Entity Table")]
     public static void OpenWindow()
@@ -38,6 +43,90 @@ public class EnemyEntityTableEditor : EditorWindow
     }
 
     /// <summary>
+    /// 属性の日本語表示名を取得
+    /// </summary>
+    private string GetAttributeDisplayName(EnemyEntity.Attribute attribute)
+    {
+        switch (attribute)
+        {
+            case EnemyEntity.Attribute.Slash:
+                return "斬";
+            case EnemyEntity.Attribute.Blunt:
+                return "鈍";
+            case EnemyEntity.Attribute.Pierce:
+                return "突";
+            case EnemyEntity.Attribute.Bullet:
+                return "弾";
+            default:
+                return attribute.ToString();
+        }
+    }
+
+    /// <summary>
+    /// 説明文のプレースホルダーを実際の値に置換
+    /// </summary>
+    private string GetResolvedDescription(EnemyEntity enemy)
+    {
+        if (string.IsNullOrEmpty(enemy.EnemyDescription))
+            return "";
+
+        return enemy.EnemyDescription
+            .Replace("{Name}", enemy.EnemyName)
+            .Replace("{HP}", enemy.EnemyHP.ToString())
+            .Replace("{Attack}", enemy.EnemyAttackPower.ToString())
+            .Replace("{Defense}", enemy.EnemyDefensePower.ToString())
+            .Replace("{Attribute}", GetAttributeDisplayName(enemy.EnemyAttribute));
+    }
+
+    /// <summary>
+    /// 敵プレビューの表示
+    /// </summary>
+    private void DrawEnemyPreview(EnemyEntity enemy)
+    {
+        if (enemy == null) return;
+
+        EditorGUILayout.BeginVertical("box", GUILayout.Width(300), GUILayout.Height(400));
+
+        // 敵名
+        EditorGUILayout.LabelField("敵名", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField(enemy.EnemyName, EditorStyles.largeLabel);
+
+        EditorGUILayout.Space();
+
+        // アイコン表示
+        if (enemy.EnemyIcon != null)
+        {
+            EditorGUILayout.LabelField("アイコン", EditorStyles.boldLabel);
+            Rect iconRect = GUILayoutUtility.GetRect(64, 64, GUILayout.Width(64), GUILayout.Height(64));
+            GUI.DrawTexture(iconRect, enemy.EnemyIcon.texture);
+        }
+
+        EditorGUILayout.Space();
+
+        // 属性
+        EditorGUILayout.LabelField("属性", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField(GetAttributeDisplayName(enemy.EnemyAttribute));
+
+        EditorGUILayout.Space();
+
+        // 説明文
+        EditorGUILayout.LabelField("説明文", EditorStyles.boldLabel);
+        string resolvedDesc = GetResolvedDescription(enemy);
+        EditorGUILayout.TextArea(resolvedDesc, EditorStyles.wordWrappedLabel, GUILayout.Height(100));
+
+        EditorGUILayout.Space();
+
+        // 詳細情報
+        EditorGUILayout.LabelField("詳細情報", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField($"ID: {enemy.EnemyId}");
+        EditorGUILayout.LabelField($"HP: {enemy.EnemyHP}");
+        EditorGUILayout.LabelField($"攻撃力: {enemy.EnemyAttackPower}");
+        EditorGUILayout.LabelField($"防御力: {enemy.EnemyDefensePower}");
+
+        EditorGUILayout.EndVertical();
+    }
+
+    /// <summary>
     /// 見た目の表示
     /// </summary>
     private void OnGUI()
@@ -58,6 +147,13 @@ public class EnemyEntityTableEditor : EditorWindow
 
         EditorGUILayout.Space();
 
+        // 表示オプション
+        EditorGUILayout.BeginHorizontal();
+        showResolvedDescription = EditorGUILayout.Toggle("説明文を表示", showResolvedDescription);
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space();
+
         // 新規作成セクション
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("新規作成", GUILayout.Width(80)))
@@ -73,6 +169,12 @@ public class EnemyEntityTableEditor : EditorWindow
 
         EditorGUILayout.Space();
 
+        // メイン表示エリア
+        EditorGUILayout.BeginHorizontal();
+
+        // 左側：テーブル表示
+        EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
         // テーブル表示
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
@@ -85,6 +187,7 @@ public class EnemyEntityTableEditor : EditorWindow
         GUILayout.Label("Defense", GUILayout.Width(60));
         GUILayout.Label("Attribute", GUILayout.Width(80));
         GUILayout.Label("Icon", GUILayout.Width(60));
+        GUILayout.Label(showResolvedDescription ? "Description (解決済み)" : "Description (生データ)", GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
 
         // 削除予定のアイテムを記録するリスト
@@ -109,6 +212,26 @@ public class EnemyEntityTableEditor : EditorWindow
             enemy.EnemyAttribute = (EnemyEntity.Attribute)EditorGUILayout.EnumPopup(enemy.EnemyAttribute, GUILayout.Width(80));
             enemy.EnemyIcon = (Sprite)EditorGUILayout.ObjectField(enemy.EnemyIcon, typeof(Sprite), false, GUILayout.Width(60));
 
+            // 説明文の表示（編集は生データのみ、表示は選択に応じて切り替え）
+            EditorGUILayout.BeginVertical(GUILayout.Width(400));
+
+            // 編集用の生データフィールド
+            enemy.EnemyDescription = EditorGUILayout.TextArea(enemy.EnemyDescription, GUILayout.Width(500), GUILayout.Height(40));
+
+            // 表示用の解決済みフィールド（読み取り専用）
+            if (showResolvedDescription)
+            {
+                EditorGUILayout.LabelField("表示用:", EditorStyles.miniLabel);
+                string resolvedDesc = GetResolvedDescription(enemy);
+
+                // 解決済み説明文を読み取り専用で表示
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.TextArea(resolvedDesc, GUILayout.Width(500), GUILayout.Height(40));
+                EditorGUI.EndDisabledGroup();
+            }
+
+            EditorGUILayout.EndVertical();
+
             // 変更があったら保存処理
             if (EditorGUI.EndChangeCheck())
             {
@@ -120,7 +243,16 @@ public class EnemyEntityTableEditor : EditorWindow
             }
 
             // アクションボタン
-            EditorGUILayout.BeginHorizontal(GUILayout.Width(100));
+            EditorGUILayout.BeginHorizontal(GUILayout.Width(140));
+
+            // プレビューボタン
+            GUI.backgroundColor = Color.cyan;
+            if (GUILayout.Button("プレビュー", GUILayout.Width(65)))
+            {
+                previewEnemy = enemy;
+                showPreview = true;
+            }
+            GUI.backgroundColor = Color.white;
 
             // 選択ボタン
             if (GUILayout.Button("選択", GUILayout.Width(45)))
@@ -154,9 +286,48 @@ public class EnemyEntityTableEditor : EditorWindow
 
         EditorGUILayout.EndScrollView();
 
+        EditorGUILayout.EndVertical();
+
+        // 右側：プレビュー表示
+        if (showPreview && previewEnemy != null)
+        {
+            EditorGUILayout.BeginVertical(GUILayout.Width(320));
+
+            // プレビューヘッダー
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("敵プレビュー", EditorStyles.boldLabel);
+            if (GUILayout.Button("×", GUILayout.Width(20)))
+            {
+                showPreview = false;
+                previewEnemy = null;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
+            // プレビュー表示
+            previewScrollPos = EditorGUILayout.BeginScrollView(previewScrollPos);
+            DrawEnemyPreview(previewEnemy);
+            EditorGUILayout.EndScrollView();
+
+            EditorGUILayout.EndVertical();
+        }
+
+        EditorGUILayout.EndHorizontal();
+
         // 統計情報
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField($"合計: {enemyList.Count} 体の敵", EditorStyles.miniLabel);
+
+        // プレースホルダー使用例の表示
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("使用可能なプレースホルダー:", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("  {Name} - 敵の名前", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {HP} - HP", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Attack} - 攻撃力", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Defense} - 防御力", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Attribute} - 属性（斬、鈍、突、弾）", EditorStyles.miniLabel);
+
         EditorGUILayout.EndVertical();
     }
 
@@ -182,6 +353,7 @@ public class EnemyEntityTableEditor : EditorWindow
         newEnemy.EnemyAttackPower = 0;
         newEnemy.EnemyDefensePower = 0;
         newEnemy.EnemyAttribute = EnemyEntity.Attribute.Slash;
+        newEnemy.EnemyDescription = "{Name}は{Attribute}属性の敵で、HP{HP}、攻撃力{Attack}、防御力{Defense}を持つ。";
 
         // ファイル名を生成（重複を避ける）
         string fileName = $"{newEnemyName}_{newEnemy.EnemyId}.asset";

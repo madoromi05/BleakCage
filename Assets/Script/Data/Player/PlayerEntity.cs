@@ -26,4 +26,5 @@ public class PlayerEntity : ScriptableObject
     public Attribute PlayerAttribute;   // 属性
     public Sprite PlayerIcon;           // 立ち絵画像
     public Sprite PlayerSDIcon;         // SDキャラ
+    public string PlayerDescription;    // プレイヤーの説明文
 }

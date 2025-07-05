@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d3c018646e21a49aa77767cf36f2b1, type: 3}
   m_Name: Enemy1
   m_EditorClassIdentifier: 
-  EnemyID: 1
+  EnemyId: 0
   EnemyName: "\u30C9\u30AE\u30E9\u30B4\u30F3\u30D0\u30B9\u30BF\u30FC"
-  CharacterAttack: 1
-  CharacterDefense: 3
+  EnemyHP: 0
+  EnemyAttackPower: 0
+  EnemyDefensePower: 0
   EnemyAttribute: 0
-  icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  EnemyIcon: {fileID: 0}
+  EnemyDescription: '{Name}'

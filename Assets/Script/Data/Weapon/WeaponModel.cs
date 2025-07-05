@@ -6,7 +6,6 @@ public class WeaponModel
     public string WeaponName { get; set; }
     public int WeaponAttackPower { get; set; }
     public WeaponEntity.Attribute WeaponAttribute { get; set; }
-    public WeaponEntity.WeaponCategory WeaponCategory { get; set; }
     public int PeakyCoefficient { get; set; }
     public string Description { get; set; }
     public Sprite Icon { get; set; }
@@ -28,7 +27,6 @@ public class WeaponModel
         WeaponName = weaponEntity.WeaponName;
         WeaponAttackPower = weaponEntity.WeaponAttackPower;
         WeaponAttribute = weaponEntity.WeaponAttribute;
-        WeaponCategory = weaponEntity.weaponCategory;
         PeakyCoefficient = weaponEntity.PeakyCoefficient;
         Icon = weaponEntity.WeaponIcon;
         Description = weaponEntity.WeaponDescription;

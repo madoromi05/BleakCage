@@ -10,6 +10,7 @@ public class PlayerModel : MonoBehaviour
     public PlayerEntity.Attribute PlayerAttribute { get; set; }
     public Sprite PlayerIcon { get; set; }
     public Sprite PlayerSDIcon { get; set; }
+    public string PlayerDescription { get; set; }
 
     // コンストラクタ（プレイヤーIDを引数にしてデータを読み込む）
     public PlayerModel(int playerId)
@@ -32,5 +33,6 @@ public class PlayerModel : MonoBehaviour
         PlayerAttribute = playerEntity.PlayerAttribute;
         PlayerIcon = playerEntity.PlayerIcon;
         PlayerSDIcon = playerEntity.PlayerSDIcon;
+        PlayerDescription = playerEntity.PlayerDescription;
     }
 }

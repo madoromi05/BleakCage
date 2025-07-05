@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa5da05d11580a4098ff3e40525460f, type: 3}
   m_Name: Player1
   m_EditorClassIdentifier: 
-  PlayerID: 1
+  PlayerId: 0
   PlayerName: "\u30BD\u30D5\u30C8\u30D0\u30F3\u30AF"
-  CharacterAttack: 0
-  CharacterDefense: 0
+  PlayerHP: 0
+  PlayerAttackPower: 0
+  PlayerDefensePower: 0
   PlayerAttribute: 0
-  Icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  SDIcon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  PlayerIcon: {fileID: 0}
+  PlayerSDIcon: {fileID: 0}
+  PlayerDescription: '{Attack}'

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardId: 1
   cardName: "\u5375\u306E\u5927\u7206\u767A"
-  cardType: 2
-  CardAttribute: 0
-  basePower: 5
+  cardType: 1
+  CardAttribute: 1
+  basePower: 10
   CardIcon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   CardDescription: "{Type}\u5C5E\u6027\u306E{Attribute}\u653B\u6483\u30AB\u30FC\u30C9\u3002\u57FA\u672C\u653B\u6483\u529B\u306F{Power}"

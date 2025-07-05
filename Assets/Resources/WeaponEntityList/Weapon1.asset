@@ -16,7 +16,6 @@ MonoBehaviour:
   WeaponName: 
   WeaponAttackPower: 0
   WeaponAttribute: 1
-  weaponCategory: 0
   PeakyCoefficient: 0
   WeaponIcon: {fileID: 0}
-  WeaponDescription: 
+  WeaponDescription: '{Attribute}'

@@ -43,6 +43,44 @@ public class CardEntityTableEditor : EditorWindow
     }
 
     /// <summary>
+    /// カードタイプの日本語表示名を取得
+    /// </summary>
+    private string GetCardTypeDisplayName(CardEntity.CardType cardType)
+    {
+        switch (cardType)
+        {
+            case CardEntity.CardType.Character:
+                return "キャラ付き";
+            case CardEntity.CardType.Weapon:
+                return "武器付き";
+            case CardEntity.CardType.Universal:
+                return "汎用";
+            default:
+                return cardType.ToString();
+        }
+    }
+
+    /// <summary>
+    /// 属性の日本語表示名を取得
+    /// </summary>
+    private string GetAttributeDisplayName(CardEntity.Attribute attribute)
+    {
+        switch (attribute)
+        {
+            case CardEntity.Attribute.Slash:
+                return "斬";
+            case CardEntity.Attribute.Blunt:
+                return "鈍";
+            case CardEntity.Attribute.Pierce:
+                return "突";
+            case CardEntity.Attribute.Bullet:
+                return "弾";
+            default:
+                return attribute.ToString();
+        }
+    }
+
+    /// <summary>
     /// 説明文のプレースホルダーを実際の値に置換
     /// </summary>
     private string GetResolvedDescription(CardEntity card)
@@ -51,8 +89,8 @@ public class CardEntityTableEditor : EditorWindow
             return "";
 
         return card.CardDescription
-            .Replace("{Type}", card.cardType.ToString())
-            .Replace("{Attribute}", card.CardAttribute.ToString())
+            .Replace("{Type}", GetCardTypeDisplayName(card.cardType))
+            .Replace("{Attribute}", GetAttributeDisplayName(card.CardAttribute))
             .Replace("{Power}", card.basePower.ToString());
     }
 
@@ -83,7 +121,7 @@ public class CardEntityTableEditor : EditorWindow
 
         // 攻撃属性
         EditorGUILayout.LabelField("攻撃属性", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField(card.CardAttribute.ToString());
+        EditorGUILayout.LabelField(GetAttributeDisplayName(card.CardAttribute));
 
         EditorGUILayout.Space();
 
@@ -97,7 +135,7 @@ public class CardEntityTableEditor : EditorWindow
         // 詳細情報
         EditorGUILayout.LabelField("詳細情報", EditorStyles.boldLabel);
         EditorGUILayout.LabelField($"ID: {card.cardId}");
-        EditorGUILayout.LabelField($"タイプ: {card.cardType}");
+        EditorGUILayout.LabelField($"タイプ: {GetCardTypeDisplayName(card.cardType)}");
         EditorGUILayout.LabelField($"威力: {card.basePower}");
 
         EditorGUILayout.EndVertical();
@@ -127,7 +165,6 @@ public class CardEntityTableEditor : EditorWindow
         // 表示オプション
         EditorGUILayout.BeginHorizontal();
         showResolvedDescription = EditorGUILayout.Toggle("説明文を表示", showResolvedDescription);
-        // showPreview = EditorGUILayout.Toggle("プレビュー表示", showPreview);
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.Space();
@@ -298,8 +335,8 @@ public class CardEntityTableEditor : EditorWindow
         // プレースホルダー使用例の表示
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("使用可能なプレースホルダー:", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("  {Type} - カードタイプ", EditorStyles.miniLabel);
-        EditorGUILayout.LabelField("  {Attribute} - 属性", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Type} - カードタイプ（キャラ付き、武器付き、汎用）", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Attribute} - 属性（斬、鈍、突、弾）", EditorStyles.miniLabel);
         EditorGUILayout.LabelField("  {Power} - 基本威力", EditorStyles.miniLabel);
 
         EditorGUILayout.EndVertical();

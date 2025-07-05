@@ -14,6 +14,12 @@ public class WeaponEntityTableEditor : EditorWindow
     private List<WeaponEntity> weaponList;
     private string newWeaponName = "Weapon";
     private string savePath = "Assets/Resources/WeaponEntityList";
+    private bool showResolvedDescription = true; // 解決済み説明文を表示するかどうか
+
+    // プレビュー用の変数
+    private WeaponEntity previewWeapon;
+    private bool showPreview = false;
+    private Vector2 previewScrollPos;
 
     [MenuItem("Tools/Weapon Entity Table")]
     public static void OpenWindow()
@@ -37,6 +43,87 @@ public class WeaponEntityTableEditor : EditorWindow
     }
 
     /// <summary>
+    /// 属性の日本語表示名を取得
+    /// </summary>
+    private string GetAttributeDisplayName(WeaponEntity.Attribute attribute)
+    {
+        switch (attribute)
+        {
+            case WeaponEntity.Attribute.Slash:
+                return "斬";
+            case WeaponEntity.Attribute.Blunt:
+                return "鈍";
+            case WeaponEntity.Attribute.Pierce:
+                return "突";
+            case WeaponEntity.Attribute.Bullet:
+                return "弾";
+            default:
+                return attribute.ToString();
+        }
+    }
+    /// <summary>
+    /// 説明文のプレースホルダーを実際の値に置換
+    /// </summary>
+    private string GetResolvedDescription(WeaponEntity weapon)
+    {
+        if (string.IsNullOrEmpty(weapon.WeaponDescription))
+            return "";
+
+        return weapon.WeaponDescription
+            .Replace("{Name}", weapon.WeaponName)
+            .Replace("{Attack}", weapon.WeaponAttackPower.ToString())
+            .Replace("{Attribute}", GetAttributeDisplayName(weapon.WeaponAttribute))
+            .Replace("{Peaky}", weapon.PeakyCoefficient.ToString());
+    }
+
+    /// <summary>
+    /// 武器プレビューの表示
+    /// </summary>
+    private void DrawWeaponPreview(WeaponEntity weapon)
+    {
+        if (weapon == null) return;
+
+        EditorGUILayout.BeginVertical("box", GUILayout.Width(300), GUILayout.Height(400));
+
+        // 武器名
+        EditorGUILayout.LabelField("武器名", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField(weapon.WeaponName, EditorStyles.largeLabel);
+
+        EditorGUILayout.Space();
+
+        // アイコン表示
+        if (weapon.WeaponIcon != null)
+        {
+            EditorGUILayout.LabelField("アイコン", EditorStyles.boldLabel);
+            Rect iconRect = GUILayoutUtility.GetRect(64, 64, GUILayout.Width(64), GUILayout.Height(64));
+            GUI.DrawTexture(iconRect, weapon.WeaponIcon.texture);
+        }
+
+        EditorGUILayout.Space();
+
+        // 属性とカテゴリ
+        EditorGUILayout.LabelField("属性", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField(GetAttributeDisplayName(weapon.WeaponAttribute));
+
+        EditorGUILayout.Space();
+
+        // 説明文
+        EditorGUILayout.LabelField("説明文", EditorStyles.boldLabel);
+        string resolvedDesc = GetResolvedDescription(weapon);
+        EditorGUILayout.TextArea(resolvedDesc, EditorStyles.wordWrappedLabel, GUILayout.Height(100));
+
+        EditorGUILayout.Space();
+
+        // 詳細情報
+        EditorGUILayout.LabelField("詳細情報", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField($"ID: {weapon.WeaponID}");
+        EditorGUILayout.LabelField($"攻撃力: {weapon.WeaponAttackPower}");
+        EditorGUILayout.LabelField($"特化係数: {weapon.PeakyCoefficient}");
+
+        EditorGUILayout.EndVertical();
+    }
+
+    /// <summary>
     /// 見た目の表示
     /// </summary>
     private void OnGUI()
@@ -57,6 +144,13 @@ public class WeaponEntityTableEditor : EditorWindow
 
         EditorGUILayout.Space();
 
+        // 表示オプション
+        EditorGUILayout.BeginHorizontal();
+        showResolvedDescription = EditorGUILayout.Toggle("説明文を表示", showResolvedDescription);
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space();
+
         // 新規作成セクション
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("新規作成", GUILayout.Width(80)))
@@ -72,6 +166,12 @@ public class WeaponEntityTableEditor : EditorWindow
 
         EditorGUILayout.Space();
 
+        // メイン表示エリア
+        EditorGUILayout.BeginHorizontal();
+
+        // 左側：テーブル表示
+        EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
         // テーブル表示
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
@@ -81,10 +181,9 @@ public class WeaponEntityTableEditor : EditorWindow
         GUILayout.Label("Name", GUILayout.Width(120));
         GUILayout.Label("Attack", GUILayout.Width(60));
         GUILayout.Label("Attribute", GUILayout.Width(80));
-        GUILayout.Label("Category", GUILayout.Width(100));
         GUILayout.Label("Peaky", GUILayout.Width(50));
         GUILayout.Label("Icon", GUILayout.Width(60));
-        GUILayout.Label("Description", GUILayout.Width(150));
+        GUILayout.Label(showResolvedDescription ? "Description" : "Description (生データ)", GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
 
         // 削除予定のアイテムを記録するリスト
@@ -105,10 +204,28 @@ public class WeaponEntityTableEditor : EditorWindow
             weapon.WeaponName = EditorGUILayout.TextField(weapon.WeaponName, GUILayout.Width(120));
             weapon.WeaponAttackPower = EditorGUILayout.IntField(weapon.WeaponAttackPower, GUILayout.Width(60));
             weapon.WeaponAttribute = (WeaponEntity.Attribute)EditorGUILayout.EnumPopup(weapon.WeaponAttribute, GUILayout.Width(80));
-            weapon.weaponCategory = (WeaponEntity.WeaponCategory)EditorGUILayout.EnumPopup(weapon.weaponCategory, GUILayout.Width(100));
             weapon.PeakyCoefficient = EditorGUILayout.IntField(weapon.PeakyCoefficient, GUILayout.Width(50));
             weapon.WeaponIcon = (Sprite)EditorGUILayout.ObjectField(weapon.WeaponIcon, typeof(Sprite), false, GUILayout.Width(60));
-            weapon.WeaponDescription = EditorGUILayout.TextField(weapon.WeaponDescription, GUILayout.Width(150));
+
+            // 説明文の表示（編集は生データのみ、表示は選択に応じて切り替え）
+            EditorGUILayout.BeginVertical(GUILayout.Width(400));
+
+            // 編集用の生データフィールド
+            weapon.WeaponDescription = EditorGUILayout.TextArea(weapon.WeaponDescription, GUILayout.Width(500), GUILayout.Height(40));
+
+            // 表示用の解決済みフィールド（読み取り専用）
+            if (showResolvedDescription)
+            {
+                EditorGUILayout.LabelField("表示用:", EditorStyles.miniLabel);
+                string resolvedDesc = GetResolvedDescription(weapon);
+
+                // 解決済み説明文を読み取り専用で表示
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.TextArea(resolvedDesc, GUILayout.Width(500), GUILayout.Height(40));
+                EditorGUI.EndDisabledGroup();
+            }
+
+            EditorGUILayout.EndVertical();
 
             // 変更があったら保存処理
             if (EditorGUI.EndChangeCheck())
@@ -121,7 +238,16 @@ public class WeaponEntityTableEditor : EditorWindow
             }
 
             // アクションボタン
-            EditorGUILayout.BeginHorizontal(GUILayout.Width(100));
+            EditorGUILayout.BeginHorizontal(GUILayout.Width(140));
+
+            // プレビューボタン
+            GUI.backgroundColor = Color.cyan;
+            if (GUILayout.Button("プレビュー", GUILayout.Width(65)))
+            {
+                previewWeapon = weapon;
+                showPreview = true;
+            }
+            GUI.backgroundColor = Color.white;
 
             // 選択ボタン
             if (GUILayout.Button("選択", GUILayout.Width(45)))
@@ -155,9 +281,48 @@ public class WeaponEntityTableEditor : EditorWindow
 
         EditorGUILayout.EndScrollView();
 
+        EditorGUILayout.EndVertical();
+
+        // 右側：プレビュー表示
+        if (showPreview && previewWeapon != null)
+        {
+            EditorGUILayout.BeginVertical(GUILayout.Width(320));
+
+            // プレビューヘッダー
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("武器プレビュー", EditorStyles.boldLabel);
+            if (GUILayout.Button("×", GUILayout.Width(20)))
+            {
+                showPreview = false;
+                previewWeapon = null;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
+            // プレビュー表示
+            previewScrollPos = EditorGUILayout.BeginScrollView(previewScrollPos);
+            DrawWeaponPreview(previewWeapon);
+            EditorGUILayout.EndScrollView();
+
+            EditorGUILayout.EndVertical();
+        }
+
+        EditorGUILayout.EndHorizontal();
+
         // 統計情報
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField($"合計: {weaponList.Count} 個の武器", EditorStyles.miniLabel);
+
+        // プレースホルダー使用例の表示
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("使用可能なプレースホルダー:", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("  {Name} - 武器の名前", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Attack} - 攻撃力", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Attribute} - 属性（斬、鈍、突、弾）", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Category} - カテゴリ（片手剣、両手剣など）", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField("  {Peaky} - 特化係数", EditorStyles.miniLabel);
+
         EditorGUILayout.EndVertical();
     }
 
@@ -181,9 +346,8 @@ public class WeaponEntityTableEditor : EditorWindow
         newWeapon.WeaponName = "NotName";
         newWeapon.WeaponAttackPower = 0;
         newWeapon.WeaponAttribute = WeaponEntity.Attribute.Slash;
-        newWeapon.weaponCategory = WeaponEntity.WeaponCategory.OneHandSword;
         newWeapon.PeakyCoefficient = 0;
-        newWeapon.WeaponDescription = "";
+        newWeapon.WeaponDescription = "{Name}は{Attribute}属性の{Category}で、攻撃力{Attack}、特化係数{Peaky}を持つ。";
 
         // ファイル名を生成（重複を避ける）
         string fileName = $"{newWeaponName}_{newWeapon.WeaponID}.asset";
