@@ -9,7 +9,7 @@ public class CardModel
     public int CardId { get; set; }
     public string CardName { get; set; }
     public CardEntity.CardType CardType { get; set; }
-    public CardEntity.AttackAttribute Attribute { get; set; }
+    public CardEntity.Attribute CardAttribute { get; set; }
     public int BasePower { get; set; }
     public Sprite Icon { get; set; }
     public string Description { get; set; }
@@ -24,7 +24,7 @@ public class CardModel
         CardId = cardEntity.cardID;
         CardName = cardEntity.cardName;
         CardType = cardEntity.cardType;
-        Attribute = cardEntity.attribute;
+        CardAttribute = cardEntity.CardAttribute;
         BasePower = cardEntity.basePower;
         Icon = cardEntity.icon;
         Description = cardEntity.description;

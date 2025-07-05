@@ -2,16 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// <summary>
-//  Playerデータの定義
-//  編集をしやすくするために置いているだけなのでここからデータ参照はしない
-// </summary>
+/// <summary>
+///  Playerデータの定義
+///  編集をしやすくするために置いているだけなのでここからデータ参照はしない
+/// </summary>
 
 [CreateAssetMenu(fileName = "PlayerEntity", menuName = "Create PlayerEntity")]
 public class PlayerEntity : ScriptableObject
 {
-    public int PlayerID;                  // カード固有ID
-    public string PlayerName;             // カード名
-    public int basePower;               // 基本威力
-    public Sprite icon;                 // アイコン画像
+    public enum Attribute
+    {
+        Slash,      // 斬
+        Blunt,      // 鈍
+        Pierce,     // 突
+        Bullet      // 弾
+    }
+
+    public int PlayerID;                // Player固有ID
+    public string PlayerName;           // Player名
+    public int CharacterAttack;         // キャラ攻撃力
+    public int CharacterDefense;        // キャラ防御力
+    public Attribute PlayerAttribute;   // 属性
+    public Sprite Icon;                 // 立ち絵画像
+    public Sprite SDIcon;               //SDキャラ
 }
