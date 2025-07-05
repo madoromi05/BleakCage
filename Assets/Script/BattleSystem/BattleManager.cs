@@ -1,11 +1,16 @@
 using UnityEngine;
-using System.Collections; // IEnumerator を使うために必要
+using System.Collections;
+using Unity.VisualScripting; // IEnumerator を使うために必要
+using System.Collections.Generic;
 
 public class BattleManager : MonoBehaviour
 {
     bool isPlayerTurn;
     [SerializeField] CardController cardPrefab;
     [SerializeField] Transform PlayerHandTransform;
+    [SerializeField] Dictionary<int, int> deck;
+    public int deckcardid;
+    public Transform hand;
 
     void Start()
     {
@@ -34,7 +39,7 @@ public class BattleManager : MonoBehaviour
     IEnumerator PlayerTurnCoroutine()
     {
         Debug.Log("プレイヤーのターン開始");
-
+        CreateCard(hand);
         // 10秒待機
         yield return new WaitForSeconds(10f);
 
@@ -65,7 +70,24 @@ public class BattleManager : MonoBehaviour
 
     void CreateCard(Transform hand)
     {
-        CardController card = Instantiate(cardPrefab, hand, false);
-        card.Init(1);
+        for(int i = 0; i < 3; i++)
+        {
+            int draw = Random.Range(0, 41);
+            CardController card = Instantiate(cardPrefab, hand, false);
+            card.Init(draw);
+        }
+        if(Input.GetKey(KeyCode.Alpha1))
+        {
+
+        }
+        else if(Input.GetKey(KeyCode.Alpha2))
+        {
+
+        }
+        else if(Input.GetKey(KeyCode.Alpha3))
+        {
+
+        }
+
     }
 }
