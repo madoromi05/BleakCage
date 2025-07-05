@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 属性を管理するコード使わなくてもいいかも
+/// </summary>
 public class AttributeData : MonoBehaviour
 {
     public enum Attribute

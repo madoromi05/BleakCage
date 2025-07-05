@@ -9,13 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3d3c018646e21a49aa77767cf36f2b1, type: 3}
-  m_Name: Enemy1
+  m_Script: {fileID: 11500000, guid: 9d27d474f917e344babb8dd1c8a7cd12, type: 3}
+  m_Name: Weapon_1
   m_EditorClassIdentifier: 
-  EnemyID: 1
-  EnemyName: "\u30AD\u30E9"
-  EnemyHp: 0
-  CharacterAttack: 0
-  CharacterDefense: 0
-  EnemyAttribute: 0
-  icon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  WeaponID: 1
+  WeaponName: NotName
+  WeaponAttackPower: 0
+  WeaponAttribute: 0
+  weaponCategory: 0
+  PeakyCoefficient: 0
+  WeaponIcon: {fileID: 0}
+  WeaponDescription: 

@@ -8,18 +8,34 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponEntity", menuName = "Create WeaponEntity")]
 public class WeaponEntity : ScriptableObject
 {
+    public enum WeaponCategory
+    {
+        OneHandSword,       // •ĞèŒ•
+        TwoHandSword,       // —¼èŒ•
+        KATANA,             // “
+        Polearm,            // ’·•¿•Ší
+        MartialArts,        // Œp
+        Shield,             // ‚
+        Whip,               // •Ú
+        Rapier,             // ƒŒƒCƒsƒA
+        Mace,               // ƒƒCƒX
+        Gun,                // e
+        CompositeWeapon     // •¡‡•Ší
+    }
+
     public enum Attribute
     {
-        Slash,      // a
-        Blunt,      // “İ
-        Pierce,     // “Ë
-        Bullet      // ’e
+        Slash,              // a
+        Blunt,              // “İ
+        Pierce,             // “Ë
+        Bullet              // ’e
     }
 
     public int WeaponID;                // WeaponŒÅ—LID
     public string WeaponName;           // Weapon–¼
     public int WeaponAttackPower;       // •ŠíUŒ‚—Í
     public Attribute WeaponAttribute;   // ‘®«
+    public WeaponCategory weaponCategory;
     public int PeakyCoefficient;        // “Á‰»ŒW”
     public Sprite WeaponIcon;           // ‰æ‘œ
     public string WeaponDescription;    // à–¾•¶
