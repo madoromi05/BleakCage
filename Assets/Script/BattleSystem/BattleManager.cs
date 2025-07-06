@@ -75,6 +75,7 @@ public class BattleManager : MonoBehaviour
             int draw = Random.Range(0, 41);
             CardController card = Instantiate(cardPrefab, hand, false);
             card.Init(draw);
+            deck.Remove(i);
         }
         if(Input.GetKey(KeyCode.Alpha1))
         {
