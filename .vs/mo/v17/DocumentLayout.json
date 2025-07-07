@@ -7,6 +7,13 @@
       "RelativeMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\battlesystem\\battlemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|C:\\Users\\obich\\mo\\assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\obich\\OneDrive\\\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\\\u3076\u3061\u7953\u3048\uFF01\u9752\u9AEA\u3061\u3083\u3093\\Assets\\script\\enemymikan\\enemymikan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|C:\\Users\\obich\\mo\\assets\\script\\data\\deck\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\deck\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -21,10 +28,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|C:\\Users\\obich\\mo\\assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|C:\\Users\\obich\\mo\\assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{46A4AC31-C0A5-46B3-0E74-4A79A04283E2}|Assembly-CSharp.csproj|solutionrelative:assets\\script\\data\\card\\cardcontrolle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,7 +41,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "CardControlle.cs",
               "DocumentMoniker": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Card\\CardControlle.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardControlle.cs",
@@ -47,7 +50,8 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-30T07:29:23.099Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -57,7 +61,7 @@
               "RelativeDocumentMoniker": "Assets\\Script\\BattleSystem\\BattleManager.cs",
               "ToolTip": "C:\\Users\\obich\\mo\\Assets\\Script\\BattleSystem\\BattleManager.cs",
               "RelativeToolTip": "Assets\\Script\\BattleSystem\\BattleManager.cs",
-              "ViewState": "AgIAAEIAAAAAAAAAAAAewFEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAFEAAAAAAAAAAAAAAHUAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-30T07:33:53.582Z",
               "IsPinned": true,
@@ -65,32 +69,43 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
+              "Title": "enemymikan.cs",
+              "DocumentMoniker": "C:\\Users\\obich\\OneDrive\\\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\\\u3076\u3061\u7953\u3048\uFF01\u9752\u9AEA\u3061\u3083\u3093\\Assets\\script\\enemymikan\\enemymikan.cs",
+              "RelativeDocumentMoniker": "..\\OneDrive\\\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\\\u3076\u3061\u7953\u3048\uFF01\u9752\u9AEA\u3061\u3083\u3093\\Assets\\script\\enemymikan\\enemymikan.cs",
+              "ToolTip": "C:\\Users\\obich\\OneDrive\\\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\\\u3076\u3061\u7953\u3048\uFF01\u9752\u9AEA\u3061\u3083\u3093\\Assets\\script\\enemymikan\\enemymikan.cs",
+              "RelativeToolTip": "..\\OneDrive\\\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\\\u3076\u3061\u7953\u3048\uFF01\u9752\u9AEA\u3061\u3083\u3093\\Assets\\script\\enemymikan\\enemymikan.cs",
+              "ViewState": "AgIAAE0BAAAAAAAAAAAAAJgBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-07T07:35:51.9Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "Deck.cs",
               "DocumentMoniker": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Deck\\Deck.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Deck\\Deck.cs",
               "ToolTip": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Deck\\Deck.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Deck\\Deck.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAIwA0AAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-30T07:43:30.774Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-30T07:43:30.774Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "CardEntity.cs",
               "DocumentMoniker": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Card\\CardEntity.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardEntity.cs",
               "ToolTip": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Card\\CardEntity.cs",
               "RelativeToolTip": "Assets\\Script\\Data\\Card\\CardEntity.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAqwBsAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-30T07:29:00.34Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "CardView.cs",
               "DocumentMoniker": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Card\\CardView.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardView.cs",
@@ -102,7 +117,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "CardModel.cs",
               "DocumentMoniker": "C:\\Users\\obich\\mo\\Assets\\Script\\Data\\Card\\CardModel.cs",
               "RelativeDocumentMoniker": "Assets\\Script\\Data\\Card\\CardModel.cs",
