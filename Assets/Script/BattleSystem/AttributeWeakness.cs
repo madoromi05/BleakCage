@@ -8,8 +8,8 @@
 public class AttributeWeakness : MonoBehaviour
 {
     [Header("属性設定")]
-    public AttributeData.Attribute weakAgainstAttribute;               // 弱点属性
-    public AttributeData.CharacterAttribute weakAgainstCharacterType;  // 敵の種類
+    public AttackAttributeType weakAgainstAttribute;               // 弱点属性
+    public DefensAttributeType weakAgainstCharacterType;           // 敵の種類
 
     [Header("計算")]
     public float finalDamage;       // 最終ダメージ
@@ -68,53 +68,53 @@ public class AttributeWeakness : MonoBehaviour
     /// <summary>
     /// 攻撃属性と敵の種類から相性係数を取得
     /// </summary>
-    private float GetRelationCoefficient(AttributeData.Attribute attackAttr, AttributeData.CharacterAttribute enemyAttr)
+    private float GetRelationCoefficient(AttackAttributeType attackAttr, DefensAttributeType enemyAttr)
     {
         // 相性係数のデフォルト値 (普通の場合)
         float coefficient = 1f;
 
         switch (attackAttr)
         {
-            case AttributeData.Attribute.Slash: // 斬
+            case AttackAttributeType.Slash: // 斬
                 switch (enemyAttr)
                 {
-                    case AttributeData.CharacterAttribute.Repulsive: // 斥力:有利
+                    case DefensAttributeType.Repulsive:  // 斥力:有利
                         coefficient = correlationCoefficient;
                         break;
-                    case AttributeData.CharacterAttribute.Sturdy:    // 堅牢:不利
+                    case DefensAttributeType.Hardness:   // 堅牢:不利
                         coefficient = 1f / correlationCoefficient;
                         break;
                         // 軟体:普通 (デフォルト値)
                 }
                 break;
 
-            case AttributeData.Attribute.Blunt: // 鈍
+            case AttackAttributeType.Blunt: // 鈍
                 switch (enemyAttr)
                 {
-                    case AttributeData.CharacterAttribute.Soft:      // 軟体:有利
+                    case DefensAttributeType.Softness:   // 軟体:有利
                         coefficient = correlationCoefficient;
                         break;
-                    case AttributeData.CharacterAttribute.Repulsive: // 斥力:不利
+                    case DefensAttributeType.Repulsive:  // 斥力:不利
                         coefficient = 1f / correlationCoefficient;
                         break;
                         // 堅牢:普通 (デフォルト値)
                 }
                 break;
 
-            case AttributeData.Attribute.Pierce: // 突
+            case AttackAttributeType.Pierce: // 突
                 switch (enemyAttr)
                 {
-                    case AttributeData.CharacterAttribute.Sturdy:    // 堅牢:有利
+                    case DefensAttributeType.Hardness:  // 堅牢:有利
                         coefficient = correlationCoefficient;
                         break;
-                    case AttributeData.CharacterAttribute.Soft:      // 軟体:不利
+                    case DefensAttributeType.Softness:   // 軟体:不利
                         coefficient = 1f / correlationCoefficient;
                         break;
                         // 斥力:普通 (デフォルト値)
                 }
                 break;
 
-            case AttributeData.Attribute.Bullet: // 弾
+            case AttackAttributeType.Bullet: // 弾
                 // 弾属性は全て普通 (デフォルト値)
                 break;
         }
