@@ -66,6 +66,6 @@ public class BattleManager : MonoBehaviour
     void CreateCard(Transform hand)
     {
         CardController card = Instantiate(cardPrefab, hand, false);
-        card.Init(1);
+        //card.Init();
     }
 }

@@ -1,29 +1,31 @@
 using UnityEngine;
 
+/// <summary>
+/// 実行時に使用される敵キャラクターのモデルクラス
+/// </summary>
 public class EnemyModel
 {
-    public int EnemyId { get; set; }
-    public string EnemyName { get; set; }
-    public float EnemyHP { get; set; }                          // EnemyのHP
-    public float EnemyAttackPower { get; set; }                 // キャラ攻撃力
-    public float EnemyDefensePower { get; set; }                // キャラ防御力
-    public EnemyEntity.Attribute EnemyAttribute { get; set; }   // 属性
-    public Sprite EnemyIcon { get; set; }                       // 戦闘中画像
-    public string EnemyDescription { get; set; }                //説明文
+    public int EnemyId { get; private set; }                          // 敵のID
+    public string EnemyName { get; private set; }                     // 敵の名前
+    public float EnemyHP { get; private set; }                        // 敵のHP
+    public float EnemyAttackPower { get; private set; }              // 攻撃力
+    public float EnemyDefensePower { get; private set; }             // 防御力
+    public AttackAttributeType EnemyAttribute { get; private set; }  // 属性
+    public Sprite EnemyIcon { get; private set; }                    // 表示アイコン
+    public string EnemyDescription { get; private set; }             // 説明文
 
-    // コンストラクタ（敵IDを引数にしてデータを読み込む）
-    public EnemyModel(int enemyId)
+    /// <summary>
+    /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
+    /// </summary>
+    /// <param name="enemyId">敵のID</param>
+    public EnemyModel(EnemyEntity enemyEntity)
     {
-        // Resourcesフォルダから敵データを取得
-        EnemyEntity enemyEntity = Resources.Load<EnemyEntity>("EnemyEntityList/Enemy" + enemyId);
-
+        //初期化
         if (enemyEntity == null)
         {
-            Debug.LogError($"EnemyEntity not found for ID: {enemyId}");
+            Debug.LogError("enemyEntity is null");
             return;
         }
-
-        // 取得したデータをEnemyModelに反映
         EnemyId = enemyEntity.EnemyId;
         EnemyName = enemyEntity.EnemyName;
         EnemyHP = enemyEntity.EnemyHP;

@@ -1,36 +1,47 @@
 using UnityEngine;
 
-public class PlayerModel : MonoBehaviour
+/// <summary>
+/// ゲーム中で使用するプレイヤーモデル（プレイヤーのステータスなど）
+/// ScriptableObjectのPlayerEntityから初期化される
+/// </summary>
+public class PlayerModel
 {
-    public int PlayerId { get; set; }
-    public string PlayerName { get; set; }
-    public int PlayerHP { get; set; }
-    public int PlayerAttackPower { get; set; }
-    public int PlayerDefensePower { get; set; }
-    public PlayerEntity.Attribute PlayerAttribute { get; set; }
-    public Sprite PlayerIcon { get; set; }
-    public Sprite PlayerSDIcon { get; set; }
-    public string PlayerDescription { get; set; }
+    public int PlayerId { get; private set; }
+    public string PlayerName { get; private set; }
+    public int PlayerLevel { get; private set; }
 
-    // コンストラクタ（プレイヤーIDを引数にしてデータを読み込む）
-    public PlayerModel(int playerId)
+    public float PlayerHP { get; private set; }
+    public float PlayerAttackPower { get; private set; }
+    public float PlayerDefensePower { get; private set; }
+
+    public AttackAttributeType PlayerAttribute { get; private set; }
+
+    public Sprite PlayerIcon { get; private set; }
+    public Sprite PlayerSDIcon { get; private set; }
+    public string PlayerDescription { get; private set; }
+
+    /// <summary>
+    /// コンストラクタ：IDからScriptableObjectを読み込んでモデルを生成
+    /// </summary>
+    public PlayerModel(PlayerEntity playerEntity)
     {
-        // Resourcesフォルダからプレイヤーデータを取得
-        PlayerEntity playerEntity = Resources.Load<PlayerEntity>("PlayerEntityList/Player" + playerId);
-
+        //初期化
         if (playerEntity == null)
         {
-            Debug.LogError($"PlayerEntity not found for ID: {playerId}");
+            Debug.LogError("PlayerEntity is null");
             return;
         }
 
-        // 取得したデータをPlayerModelに反映
         PlayerId = playerEntity.PlayerId;
         PlayerName = playerEntity.PlayerName;
+        PlayerLevel = playerEntity.PlayerLevel;
+
         PlayerHP = playerEntity.PlayerHP;
         PlayerAttackPower = playerEntity.PlayerAttackPower;
         PlayerDefensePower = playerEntity.PlayerDefensePower;
+
         PlayerAttribute = playerEntity.PlayerAttribute;
+
         PlayerIcon = playerEntity.PlayerIcon;
         PlayerSDIcon = playerEntity.PlayerSDIcon;
         PlayerDescription = playerEntity.PlayerDescription;

@@ -1,33 +1,35 @@
 using UnityEngine;
 
+/// <summary>
+/// 武器の情報を保持するモデルクラス。リソースからデータをロードして構成される。
+/// </summary>
 public class WeaponModel
 {
-    public int WeaponId { get; set; }
-    public string WeaponName { get; set; }
-    public int WeaponAttackPower { get; set; }
-    public WeaponEntity.Attribute WeaponAttribute { get; set; }
-    public int PeakyCoefficient { get; set; }
-    public string Description { get; set; }
-    public Sprite Icon { get; set; }
+    public int WeaponId { get; set; }                         // 武器のID
+    public string WeaponName { get; set; }                    // 武器名
+    public float WeaponAttackPower { get; set; }              // 攻撃力
+    public AttackAttributeType WeaponAttribute { get; set; }  // 属性
+    public float PeakyCoefficient { get; set; }               // 特化係数（ピーキー度）
+    public string Description { get; set; }                   // 武器の説明文
+    public Sprite Icon { get; set; }                          // アイコン画像
 
-    // コンストラクタ（武器IDを引数にしてデータを読み込む）
-    public WeaponModel(int weaponId)
+    /// <summary>
+    /// コンストラクタ：指定IDに基づいてResourcesからWeaponEntityを読み込み、モデルに変換する
+    /// </summary>
+    public WeaponModel(WeaponEntity weaponEntity)
     {
-        // Resourcesフォルダから武器データを取得
-        WeaponEntity weaponEntity = Resources.Load<WeaponEntity>("WeaponEntityList/Weapon" + weaponId);
-
+        //初期化
         if (weaponEntity == null)
         {
-            Debug.LogError($"WeaponEntity not found for ID: {weaponId}");
+            Debug.LogError("weaponEntity is null");
             return;
         }
-
-        // 取得したデータをWeaponModelに反映
-        WeaponId = weaponEntity.WeaponID;
+        
+        WeaponId = (int)weaponEntity.WeaponId;
         WeaponName = weaponEntity.WeaponName;
         WeaponAttackPower = weaponEntity.WeaponAttackPower;
         WeaponAttribute = weaponEntity.WeaponAttribute;
-        PeakyCoefficient = weaponEntity.PeakyCoefficient;
+        PeakyCoefficient = weaponEntity.WeaponPeakyCoefficient;
         Icon = weaponEntity.WeaponIcon;
         Description = weaponEntity.WeaponDescription;
     }

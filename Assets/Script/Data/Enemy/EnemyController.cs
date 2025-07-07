@@ -10,9 +10,9 @@ public class EnemyController : MonoBehaviour
 
     }
 
-    public void Init(int cardID)
+    public void Init(EnemyEntity enemyEntity)
     {
         // CardModelを作成し、データを適用
-        model = new EnemyModel(cardID);
+        model = new EnemyModel(enemyEntity);
     }
 }
