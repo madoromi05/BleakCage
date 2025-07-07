@@ -45,7 +45,7 @@ public class CardView : MonoBehaviour
             .Replace("{AttackCount}", model.AttackCount.ToString())
             .Replace("{TargetCount}", model.TargetCount.ToString())
             .Replace("{Passive}", model.IsPassive ? "èÌéûî≠ìÆ" : "égópå^")
-            .Replace("{OutputModifier}", model.OutputModifier.ToString("F2"));
+            .Replace("{OutputMod}", model.OutputModifier.ToString("F2"));
     }
 
     private string GetCardTypeName(CardEntity.CardTypeData type)
