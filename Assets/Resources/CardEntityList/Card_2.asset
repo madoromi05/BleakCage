@@ -12,10 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
   m_Name: Card_2
   m_EditorClassIdentifier: 
-  cardId: 2
-  cardName: "\u30B7\u30E5\u30D6\u30CB\u30B0\u30E9\u30B9"
-  cardType: 0
-  CardAttribute: 0
-  basePower: 0
+  CardId: 2
+  CardName: 
   CardIcon: {fileID: 0}
   CardDescription: 
+  CardType: 0
+  CardAttribute: 0
+  CardAttackCount: 0
+  CardTargetCount: 0
+  CardPassive: 0
+  CardAttackPower: 0
+  CardHitRate: 0
+  CardOutputModifier: 0
+  CardDefensePenetration: 0

@@ -15,7 +15,6 @@ public class CardModel
     public int TargetCount { get; private set; }
     public bool IsPassive { get; private set; }
 
-    public float AttackPower { get; private set; }
     public float HitRate { get; private set; }
     public float OutputModifier { get; private set; }
     public float DefensePenetration { get; private set; }
@@ -27,29 +26,28 @@ public class CardModel
     /// CardEntity からデータを読み取って CardModel を生成する
     /// </summary>
     /// <param name="entity">ScriptableObjectから読み込んだCardEntity</param>
-    public CardModel(CardEntity cardEntity)
+    public CardModel(CardEntity entity)
     {
-        if (cardEntity == null)
+        if (entity == null)
         {
             Debug.LogError("CardEntity is null.");
             return;
         }
 
-        CardId = cardEntity.CardId;
-        CardName = cardEntity.CardName;
-        CardType = cardEntity.CardType;
-        CardAttribute = cardEntity.CardAttribute;
+        CardId = entity.CardId;
+        CardName = entity.CardName;
+        CardIcon = entity.CardIcon;
+        CardDescription = entity.CardDescription;
 
-        AttackCount = cardEntity.CardAttackCount;
-        TargetCount = cardEntity.CardTargetCount;
-        IsPassive = cardEntity.CardPassive;
+        CardType = entity.CardType;
+        CardAttribute = entity.CardAttribute;
 
-        AttackPower = cardEntity.CardAttackPower;
-        HitRate = cardEntity.CardHitRate;
-        OutputModifier = cardEntity.CardOutputModifier;
-        DefensePenetration = cardEntity.CardDefensePenetration;
+        AttackCount = entity.CardAttackCount;
+        TargetCount = entity.CardTargetCount;
+        IsPassive = entity.CardPassive;
 
-        CardIcon = cardEntity.CardIcon;
-        CardDescription = cardEntity.CardDescription;
+        HitRate = entity.CardHitRate;
+        OutputModifier = entity.CardOutputModifier;
+        DefensePenetration = entity.CardDefensePenetration;
     }
 }

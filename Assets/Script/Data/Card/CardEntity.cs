@@ -21,14 +21,14 @@ public class CardEntity : ScriptableObject
     public string CardName;                     // カード名
     public Sprite CardIcon;                     // アイコン画像
     public string CardDescription;              // 説明文
-    public CardTypeData CardType;               // カードタイプ
 
+    public CardTypeData CardType;               // カードタイプ
     public AttackAttributeType CardAttribute;   // 属性
+
     public int CardAttackCount;                 // 攻撃回数
     public int CardTargetCount;                 // 攻撃体数
     public bool CardPassive;                    // パッシブ効果判定
 
-    public float CardAttackPower;               // 基本威力
     public float CardHitRate;                   // 命中率
     public float CardOutputModifier;            // 出力調整
     public float CardDefensePenetration;        // 防御貫通 
