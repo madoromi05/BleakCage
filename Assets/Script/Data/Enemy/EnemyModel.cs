@@ -5,9 +5,9 @@ using UnityEngine;
 /// </summary>
 public class EnemyModel
 {
-    public int EnemyId { get; private set; }                          // “G‚ÌID
-    public string EnemyName { get; private set; }                     // “G‚Ì–¼‘O
-    public float EnemyHP { get; private set; }                        // “G‚ÌHP
+    public int EnemyId { get; private set; }                         // “G‚ÌID
+    public string EnemyName { get; private set; }                    // “G‚Ì–¼‘O
+    public float EnemyHP { get; private set; }                       // “G‚ÌHP
     public float EnemyAttackPower { get; private set; }              // UŒ‚—Í
     public float EnemyDefensePower { get; private set; }             // –hŒä—Í
     public AttackAttributeType EnemyAttribute { get; private set; }  // ‘®«
@@ -18,21 +18,21 @@ public class EnemyModel
     /// ScriptableObject(EnemyEntity)‚©‚çƒf[ƒ^‚ğ“Ç‚İ‚ñ‚Åƒ‚ƒfƒ‹‚É”½‰f
     /// </summary>
     /// <param name="enemyId">“G‚ÌID</param>
-    public EnemyModel(EnemyEntity enemyEntity)
+    public EnemyModel(EnemyEntity Entity)
     {
         //‰Šú‰»
-        if (enemyEntity == null)
+        if (Entity == null)
         {
             Debug.LogError("enemyEntity is null");
             return;
         }
-        EnemyId = enemyEntity.EnemyId;
-        EnemyName = enemyEntity.EnemyName;
-        EnemyHP = enemyEntity.EnemyHP;
-        EnemyAttackPower = enemyEntity.EnemyAttackPower;
-        EnemyDefensePower = enemyEntity.EnemyDefensePower;
-        EnemyAttribute = enemyEntity.EnemyAttribute;
-        EnemyIcon = enemyEntity.EnemyIcon;
-        EnemyDescription = enemyEntity.EnemyDescription;
+        EnemyId = Entity.EnemyId;
+        EnemyName = Entity.EnemyName;
+        EnemyHP = Entity.EnemyHP;
+        EnemyAttackPower = Entity.EnemyAttackPower;
+        EnemyDefensePower = Entity.EnemyDefensePower;
+        EnemyAttribute = Entity.EnemyAttribute;
+        EnemyIcon = Entity.EnemyIcon;
+        EnemyDescription = Entity.EnemyDescription;
     }
 }

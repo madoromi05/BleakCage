@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 具体的なデータを管理する
+/// </summary>
 public class EnemyController : MonoBehaviour
 {
     // カードデータを管理する
