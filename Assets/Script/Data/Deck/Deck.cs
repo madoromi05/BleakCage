@@ -22,7 +22,7 @@ public class Deck : MonoBehaviour
         if(cardcount < 42)
         {
             //カードをデッキに入れる
-            CardID = cards[i].cardID;
+            CardID = cards[i].CardId;
             decklist[cardcount] = CardID;
             dicdecklist[cardcount] = CardID;
             cardcount++;
