@@ -10,9 +10,9 @@ public class WeaponController : MonoBehaviour
 
     }
 
-    public void Init(int WeaponID)
+    public void Init(WeaponEntity weaponEntity)
     {
-        // PlayerModelを作成し、データを適用
-        model = new WeaponModel(WeaponID);
+        // CardModelを作成し、データを適用
+        model = new WeaponModel(weaponEntity);
     }
 }

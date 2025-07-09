@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
+  m_Name: Card_1
+  m_EditorClassIdentifier: 
+  CardId: 1
+  CardName: "\u5375\u306E\u5927\u7206\u767A"
+  CardIcon: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  CardDescription: "{Type}\u5C5E\u6027\u306E{Attribute}\u653B\u6483\u30AB\u30FC\u30C9\u3002\u57FA\u672C\u653B\u6483\u529B\u306F{Type}"
+  CardType: 1
+  CardAttribute: 1
+  CardAttackCount: 0
+  CardTargetCount: 0
+  CardPassive: 0
+  CardHitRate: 0
+  CardOutputModifier: 0
+  CardDefensePenetration: 0

@@ -10,9 +10,9 @@ public class PlayeryController : MonoBehaviour
 
     }
 
-    public void Init(int PlayerID)
+    public void Init(PlayerEntity playerEntity)
     {
-        // PlayerModelを作成し、データを適用
-        model = new PlayerModel(PlayerID);
+        // CardModelを作成し、データを適用
+        model = new PlayerModel(playerEntity);
     }
 }

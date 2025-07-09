@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 具体的なデータを管理する
+/// </summary>
 public class EnemyController : MonoBehaviour
 {
     // カードデータを管理する
@@ -10,9 +13,9 @@ public class EnemyController : MonoBehaviour
 
     }
 
-    public void Init(int cardID)
+    public void Init(EnemyEntity enemyEntity)
     {
         // CardModelを作成し、データを適用
-        model = new EnemyModel(cardID);
+        model = new EnemyModel(enemyEntity);
     }
 }

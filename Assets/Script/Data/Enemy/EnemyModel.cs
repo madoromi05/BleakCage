@@ -1,32 +1,38 @@
 using UnityEngine;
 
+/// <summary>
+/// 実行時に使用される敵キャラクターのモデルクラス
+/// </summary>
 public class EnemyModel
 {
-    public int EnemyId { get; set; }
-    public string EnemyName { get; set; }
-    public int Attack { get; set; }
-    public int Defense { get; set; }
-    public EnemyEntity.Attribute EnemyAttribute { get; set; }
-    public Sprite Icon { get; set; }
+    public int EnemyId { get; private set; }                         // 敵のID
+    public string EnemyName { get; private set; }                    // 敵の名前
+    public float EnemyHP { get; private set; }                       // 敵のHP
+    public float EnemyAttackPower { get; private set; }              // 攻撃力
+    public float EnemyDefensePower { get; private set; }             // 防御力
+    public AttackAttributeType EnemyAttribute { get; private set; }  // 属性
+    public Sprite EnemyIcon { get; private set; }                    // 表示アイコン
+    public string EnemyDescription { get; private set; }             // 説明文
 
-    // コンストラクタ（敵IDを引数にしてデータを読み込む）
-    public EnemyModel(int enemyId)
+    /// <summary>
+    /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
+    /// </summary>
+    /// <param name="enemyId">敵のID</param>
+    public EnemyModel(EnemyEntity Entity)
     {
-        // Resourcesフォルダから敵データを取得
-        EnemyEntity enemyEntity = Resources.Load<EnemyEntity>("EnemyEntityList/Enemy" + enemyId);
-
-        if (enemyEntity == null)
+        //初期化
+        if (Entity == null)
         {
-            Debug.LogError($"EnemyEntity not found for ID: {enemyId}");
+            Debug.LogError("enemyEntity is null");
             return;
         }
-
-        // 取得したデータをEnemyModelに反映
-        EnemyId = enemyEntity.EnemyID;
-        EnemyName = enemyEntity.EnemyName;
-        Attack = enemyEntity.CharacterAttack;
-        Defense = enemyEntity.CharacterDefense;
-        EnemyAttribute = enemyEntity.EnemyAttribute;
-        Icon = enemyEntity.icon;
+        EnemyId = Entity.EnemyId;
+        EnemyName = Entity.EnemyName;
+        EnemyHP = Entity.EnemyHP;
+        EnemyAttackPower = Entity.EnemyAttackPower;
+        EnemyDefensePower = Entity.EnemyDefensePower;
+        EnemyAttribute = Entity.EnemyAttribute;
+        EnemyIcon = Entity.EnemyIcon;
+        EnemyDescription = Entity.EnemyDescription;
     }
 }

@@ -10,19 +10,16 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerEntity", menuName = "Create PlayerEntity")]
 public class PlayerEntity : ScriptableObject
 {
-    public enum Attribute
-    {
-        Slash,      // a
-        Blunt,      // “İ
-        Pierce,     // “Ë
-        Bullet      // ’e
-    }
+    public int PlayerId;                          // PlayerŒÅ—LID
+    public string PlayerName;                     // Player–¼
+    public AttackAttributeType PlayerAttribute;   // ‘®«
+    public Sprite PlayerIcon;                     // —§‚¿ŠG‰æ‘œ
+    public Sprite PlayerSDIcon;                   // SDƒLƒƒƒ‰
+    public string PlayerDescription;              // ƒvƒŒƒCƒ„[‚Ìà–¾•¶
 
-    public int PlayerID;                // PlayerŒÅ—LID
-    public string PlayerName;           // Player–¼
-    public int CharacterAttack;         // ƒLƒƒƒ‰UŒ‚—Í
-    public int CharacterDefense;        // ƒLƒƒƒ‰–hŒä—Í
-    public Attribute PlayerAttribute;   // ‘®«
-    public Sprite Icon;                 // —§‚¿ŠG‰æ‘œ
-    public Sprite SDIcon;               //SDƒLƒƒƒ‰
+    public int PlayerLevel;                       // PlayerLevel
+
+    public float PlayerHP;                        // PlayerHp
+    public float PlayerAttackPower;               // ƒLƒƒƒ‰UŒ‚—Í
+    public float PlayerDefensePower;              // ƒLƒƒƒ‰–hŒä—Í
 }

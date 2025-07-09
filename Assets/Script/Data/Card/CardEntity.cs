@@ -10,26 +10,29 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardEntity", menuName = "Create CardEntity")]
 public class CardEntity : ScriptableObject
 {
-    public enum CardType
+    public enum CardTypeData
     {
         Character,  // キャラ付き
         Weapon,     // 武器付き
         Universal   // 汎用
     }
 
-    public enum Attribute
-    {
-        Slash,      // 斬
-        Blunt,      // 鈍
-        Pierce,     // 突
-        Bullet      // 弾
-    }
+    public int CardId;                          // カード固有ID
+    public string CardName;                     // カード名
+    public Sprite CardIcon;                     // アイコン画像
+    public string CardDescription;              // 説明文
 
-    public int cardID;                  // カード固有ID
-    public string cardName;             // カード名
-    public CardType cardType;           // カードタイプ
-    public Attribute CardAttribute;     // 属性
-    public int basePower;               // 基本威力
-    public Sprite icon;                 // アイコン画像
-    public string description;          // 説明文
+    public CardTypeData CardType;               // カードタイプ
+    public AttackAttributeType CardAttribute;   // 属性
+
+    public int RestrictedCharacterId;           // キャラ制限用Id
+    public int RestrictedWeaponId;              // 武器制限用Id
+
+    public int CardAttackCount;                 // 攻撃回数
+    public int CardTargetCount;                 // 攻撃体数
+    public bool CardPassive;                    // パッシブ効果判定
+
+    public float CardHitRate;                   // 命中率
+    public float CardOutputModifier;            // 出力調整
+    public float CardDefensePenetration;        // 防御貫通 
 }

@@ -8,19 +8,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponEntity", menuName = "Create WeaponEntity")]
 public class WeaponEntity : ScriptableObject
 {
-    public enum Attribute
-    {
-        Slash,      // a
-        Blunt,      // “İ
-        Pierce,     // “Ë
-        Bullet      // ’e
-    }
+    public float WeaponId;                          // WeaponŒÅ—LID
+    public string WeaponName;                       // Weapon–¼
+    public AttackAttributeType WeaponAttribute;     // ‘®«
+    public Sprite WeaponIcon;                       // ‰æ‘œ
+    public string WeaponDescription;                // à–¾•¶
 
-    public int WeaponID;                // WeaponŒÅ—LID
-    public string WeaponName;           // Weapon–¼
-    public int WeaponAttack;            // •ŠíUŒ‚—Í
-    public Attribute WeaponAttribute;   // ‘®«
-    public int PeakyCoefficient;        // “Á‰»ŒW”
-    public string description;          // à–¾•¶
-    public Sprite icon;                 // ‰æ‘œ
+    public float WeaponAttackPower;                 // •ŠíUŒ‚—Í
+    public float WeaponPeakyCoefficient;            // “Á‰»ŒW”
 }
