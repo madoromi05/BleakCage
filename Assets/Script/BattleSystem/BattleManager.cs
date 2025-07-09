@@ -12,8 +12,11 @@ public class BattleManager : MonoBehaviour
     public int deckcardid;
     public Transform hand;
 
+    private CardModelFactory cardFactory;
+
     void Start()
     {
+        cardFactory = new CardModelFactory();
         StartGame();
     }
 
@@ -73,8 +76,12 @@ public class BattleManager : MonoBehaviour
         for(int i = 0; i < 3; i++)
         {
             int draw = Random.Range(0, 41);
-            CardController card = Instantiate(cardPrefab, hand, false);
-            card.Init(draw);
+            CardModel cardModel = cardFactory.CreateFromId(draw);
+            if (cardModel == null)
+            {
+                Debug.LogWarning($"CardModel not found for ID: {draw}");
+                continue;
+            }
         }
         if(Input.GetKey(KeyCode.Alpha1))
         {
@@ -88,6 +95,5 @@ public class BattleManager : MonoBehaviour
         {
 
         }
-
     }
 }
