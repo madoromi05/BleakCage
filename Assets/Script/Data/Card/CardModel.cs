@@ -11,16 +11,17 @@ public class CardModel
     public CardEntity.CardTypeData CardType { get; private set; }
     public AttackAttributeType CardAttribute { get; private set; }
 
-    public int AttackCount { get; private set; }
-    public int TargetCount { get; private set; }
-    public bool IsPassive { get; private set; }
+    public int AttackCount { get; private set; }                                // 攻撃回数
+    public int TargetCount { get; private set; }                                // 攻撃対象数
+    public bool IsPassive { get; private set; }                                 // パッシブ効果なのかどうか
+    public float HitRate { get; private set; }                                  // 命中率(1～0)
 
-    public float HitRate { get; private set; }
-    public float OutputModifier { get; private set; }
-    public float DefensePenetration { get; private set; }
+    public float OutputModifier { get; private set; }                           // 出力調整
+    public float DefensePenetration { get; private set; }                       // 防御貫通率
 
-    public Sprite CardIcon { get; private set; }
-    public string CardDescription { get; private set; }
+    public Sprite CardIcon { get; private set; }                                // CardのIcon
+    public string CardDescription { get; private set; }                         // Cardの説明文
+    public ICardRestrictionStrategy RestrictionStrategy { get; private set; }   // Card特定の物に装備させるためのもの
 
     /// <summary>
     /// CardEntity からデータを読み取って CardModel を生成する

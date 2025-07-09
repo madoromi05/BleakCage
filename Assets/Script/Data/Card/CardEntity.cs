@@ -25,6 +25,9 @@ public class CardEntity : ScriptableObject
     public CardTypeData CardType;               // カードタイプ
     public AttackAttributeType CardAttribute;   // 属性
 
+    public int RestrictedCharacterId;           // キャラ制限用Id
+    public int RestrictedWeaponId;              // 武器制限用Id
+
     public int CardAttackCount;                 // 攻撃回数
     public int CardTargetCount;                 // 攻撃体数
     public bool CardPassive;                    // パッシブ効果判定
