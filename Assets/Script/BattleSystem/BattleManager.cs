@@ -8,18 +8,44 @@ public class BattleManager : MonoBehaviour
     bool isPlayerTurn;
     [SerializeField] CardController cardPrefab;
     [SerializeField] Transform PlayerHandTransform;
-    [SerializeField] Dictionary<int, int> deck;
-
-    List<int> handcard;
     List<CardController> card;
-    public int deckcardid;
     public Transform hand;
+
+    //デッキ
+    [SerializeField] Dictionary<int, int> deck;
+    //何回目に何が破棄されたか
+    private Dictionary<int, int> trush;
+    //0から41のリスト
+    private List<int> random;
+    //手札のカードID
+    List<int> handcard;
+    //選択されたカードにわかるようにチェックを出す
     public GameObject check;
+    //手札の１，２，３の判定
     bool hand1, hand2, hand3;
+    //手札の１，２，３が選ばれたか
+    int hand1count, hand2count, hand3count;
+    //2枚の選択上限
     int limitcard = 0;
+    //全ターンを通して破棄された回数
+    int trushcount = 0;
+    //１ターンを通して破棄された回数
+    int trushturncount = 0;
+    //デッキ枚数
+    int decksheet = 42;
+    //選択されたカード枚数
+    int selectcard = 0; 
 
     void Start()
     {
+        card = new List<CardController>();
+        handcard = new List<int>();
+        trush = new Dictionary<int, int>();
+        random = new List<int>();
+        for (int i = 0; i < decksheet; i++)
+        {
+            random.Add(i);
+        }
         StartGame();
     }
 
@@ -76,70 +102,130 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator CreateCard(Transform hand)
     {
-        //三枚提示
-        for(int i = 0; i < 3; i++)
+        Cardcreate();
+        float timer = 0f;
+        while (timer < 10)
         {
-            int draw = Random.Range(0, 41);
-            card[i] = Instantiate(cardPrefab, hand, false);
-            deck.Remove(draw);
-            handcard[i] = draw;
-        }
-
-        //選択し、選択されたものにチェックを表示する
-        if(Input.GetKey(KeyCode.Alpha1))
-        {
-            if (limitcard < 2)
+            //選択し、選択されたものにチェックを表示する
+           if(Input.GetKeyDown(KeyCode.Alpha1))
             {
+                //一枚目選択
+                if (limitcard < 2)
+                {
+                    hand1 = !hand1;
+                    Instantiate(check, hand, hand1);
+                }
                 hand1 = !hand1;
-                Instantiate(check, hand, hand1);
+                if(hand1)
+                {
+                    limitcard += 1;
+                    selectcard += 1;
+                    hand1count = 1;
+                }
+                else 
+                {
+                    limitcard -= 1;
+                    selectcard -= 1;
+                    hand1count = 0;
+                }
             }
-            hand1 = !hand1;
-            if(hand1)
+            else if(Input.GetKeyDown(KeyCode.Alpha2))
             {
-                limitcard += 1;
+                //二枚目選択
+                if(limitcard < 2)
+                {
+                   hand2 = !hand2;
+                    Instantiate(check, hand, hand2);
+                }
+
+                if (hand2)
+                {
+                    limitcard += 1;
+                    selectcard += 1;
+                   hand2count = 1;
+                }
+                else
+                {
+                    limitcard -= 1;
+                    selectcard -= 1;
+                    hand2count = 0;
+                }
             }
-            else 
+            else if(Input.GetKeyDown(KeyCode.Alpha3))
             {
-                limitcard -= 1;
-            }
-                Instantiate(check, hand, hand1);
-        }
-        else if(Input.GetKey(KeyCode.Alpha2))
-        {
-            if(limitcard < 2)
-            {
-                hand2 = !hand2;
-                Instantiate(check, hand, hand2);
+                //三枚目選択
+                if (limitcard < 2)
+                {
+                   hand3 = !hand3;
+                   Instantiate(check, hand, hand3);
+                }
+
+                if (hand3)
+                {
+                    limitcard += 1;
+                    selectcard += 1;
+                    hand3count = 1;
+                }
+                else
+                {
+                    limitcard -= 1;
+                    selectcard -= 1;
+                    hand3count = 0;
+                }
             }
 
-            if (hand2)
+            if (Input.GetKeyDown(KeyCode.KeypadEnter))
             {
-                limitcard += 1;
-            }
-            else
-            {
-                limitcard -= 1;
-            }
-        }
-        else if(Input.GetKey(KeyCode.Alpha3))
-        {
-            if (limitcard < 2)
-            {
-                hand3 = !hand3;
-                Instantiate(check, hand, hand3);
-            }
+                //破棄と再製
+                if (selectcard < 3 && selectcard > 0 || trushturncount < 3)
+                {
+                    if (hand1count == 1)
+                    {
+                        trush[trushcount] = handcard[0];
+                        trushcount++;
+                    }
+                    if (hand2count == 1)
+                    {
 
-            if (hand3)
-            {
-                limitcard += 1;
+                        trush[trushcount] = handcard[1];
+                        trushcount++;
+                    }
+                    if (hand3count == 1)
+                    {
+
+                        trush[trushcount] = handcard[2];
+                        trushcount++;
+                    }
+                    trushturncount++;
+                    Cardcreate();
+                }
             }
-            else
-            {
-                limitcard -= 1;
-            }
+            timer += Time.deltaTime;
+            yield return null;
         }
-        yield return new WaitForSeconds(10f);
+
+        //ここでのことを全て初期化
+        trushturncount = 0;
+        hand1count = 0;
+        hand2count = 0;
+        hand3count = 0;
+        limitcard = 0;
+
+        handcard.Clear();
 
         yield break ;
+    }
+    void Cardcreate()
+    {
+
+        //三枚提示
+        for (int i = 0; i < 3; i++)
+        {
+            int draw = Random.Range(0, 41);
+            var c = Instantiate(cardPrefab, hand, false);
+            card.Add(c);
+            deck.Remove(draw);
+            handcard.Add(draw);
+        }
     }
 }
