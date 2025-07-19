@@ -53,9 +53,9 @@ public class CardView : MonoBehaviour
         switch (type)
         {
             case CardEntity.CardTypeData.Character: return "ƒLƒƒƒ‰";
-            case CardEntity.CardTypeData.Weapon: return "•Ší";
+            case CardEntity.CardTypeData.Weapon:    return "•Ší";
             case CardEntity.CardTypeData.Universal: return "”Ä—p";
-            default: return type.ToString();
+            default:                                return type.ToString();
         }
     }
 
@@ -63,11 +63,11 @@ public class CardView : MonoBehaviour
     {
         switch (attr)
         {
-            case AttackAttributeType.Slash: return "a";
-            case AttackAttributeType.Blunt: return "“İ";
+            case AttackAttributeType.Slash:  return "a";
+            case AttackAttributeType.Blunt:  return "“İ";
             case AttackAttributeType.Pierce: return "“Ë";
             case AttackAttributeType.Bullet: return "’e";
-            default: return attr.ToString();
+            default:                         return attr.ToString();
         }
     }
 }

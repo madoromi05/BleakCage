@@ -7,63 +7,79 @@ using System.Collections.Generic;
 /// </summary>
 public class Deck : MonoBehaviour
 {
-    public List<int> decklist;
-    public List<int> objecter;
-    public List<CardEntity> cards;
-    public Dictionary<int,int> dicdecklist;
     [SerializeField] private GameObject characters;
     [SerializeField] private GameObject weapons;
-    int CardID;
-    int cardcount = 0;
-    int decksheet = 42;
 
-    void DeckKeep(int i)
-    {
-        if(cardcount < decksheet)
-        {
-            //カードをデッキに入れる
-            CardID = cards[i].CardId;
-            decklist[cardcount] = CardID;
-            dicdecklist[cardcount] = CardID;
-            cardcount++;
-        }
-    }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public List<int> decklist;                          //実際に使用するデッキのIDリスト
+    public List<int> objecter;                          //カードのインデックスなどを一時的に格納するリスト。
+    public List<CardEntity> cards;                      // カードのデータを保持するリスト
+    public Dictionary<int, int> dicdecklist;            // デッキのIDをキーとした辞書。カードIDをキー、インデックスを値とする。
+
+    private int CardID;                                 //処理中のカードID
+    private int cardcount = 0;                          // 現在のデッキに入っているカードの数
+    private int decksheet = 42;                         // デッキの最大枚数
+
     void Start()
     {
         //一旦初期化
         decklist = new List<int>();
         objecter = new List<int>();
         cards = new List<CardEntity>();
-        dicdecklist = new Dictionary<int,int>();
+        dicdecklist = new Dictionary<int, int>();
 
-        for(int i = 0; i < decksheet; i++)
+        for (int i = 0; i < decksheet; i++)
         {
             decklist.Add(-1);
         }
+
+        // --- 仮に1～5のCardIDを登録 ---
+        for (int i = 1; i <= 5; i++)
+        {
+            CardEntity entity = Resources.Load<CardEntity>($"CardEntityList/Card_{i}");
+            if (entity != null)
+            {
+                cards.Add(entity);
+                DeckKeep(entity);
+            }
+            else
+            {
+                Debug.LogWarning($"CardEntity not found: Card_{i}");
+            }
+        }
     }
 
-    void SearchCard()
+    private void DeckKeep(CardEntity cardEntity)
     {
-        //武器やキャラをWeaponTagやCharacterTagで見つける
-
-        if(weapons != null)
+        if (cardcount < decksheet)
         {
-            for(int i = 0; i < 3; i++)
-            {
-                DeckKeep(objecter[i]);
-            }
-            objecter.Clear();
-        }
-        if(characters != null)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                DeckKeep(objecter[i]);
-            }
-            objecter.Clear();
+            //カードをデッキに入れる
+            CardID = cardEntity.CardId;
+            decklist[cardcount] = CardID;
+            dicdecklist[cardcount] = CardID;
+            cardcount++;
         }
     }
 
-    //起動スイッチはキャラとかつくってからで
+    //編集するときに管理したい感はある
+    //void SearchCard()
+    //{
+    //    //武器やキャラをWeaponTagやCharacterTagで見つける
+
+    //    if(weapons != null)
+    //    {
+    //        for(int i = 0; i < 3; i++)
+    //        {
+    //            DeckKeep(objecter[i]);
+    //        }
+    //        objecter.Clear();
+    //    }
+    //    if(characters != null)
+    //    {
+    //        for (int i = 0; i < 3; i++)
+    //        {
+    //            DeckKeep(objecter[i]);
+    //        }
+    //        objecter.Clear();
+    //    }
+    //}
 }

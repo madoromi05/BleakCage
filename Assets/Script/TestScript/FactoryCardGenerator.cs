@@ -18,7 +18,7 @@ public class FactotyCardGenerator : MonoBehaviour
         CreateCard(PlayerHandTransform);
     }
 
-    void CreateCard(Transform hand)
+   @public void CreateCard(Transform hand)
     {
         // CardController‚ğ¶¬
         CardController card = Instantiate(cardPrefab, hand, false);

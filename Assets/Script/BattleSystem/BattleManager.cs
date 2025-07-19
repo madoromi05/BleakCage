@@ -11,30 +11,18 @@ public class BattleManager : MonoBehaviour
     List<CardController> card;
     public Transform hand;
 
-    //デッキ
-    [SerializeField] Dictionary<int, int> deck;
-    //何回目に何が破棄されたか
-    private Dictionary<int, int> trush;
-    //0から41のリスト
-    private List<int> random;
-    //手札のカードID
-    List<int> handcard;
-    //選択されたカードにわかるようにチェックを出す
-    public GameObject check;
-    //手札の１，２，３の判定
-    bool hand1, hand2, hand3;
-    //手札の１，２，３が選ばれたか
-    int hand1count, hand2count, hand3count;
-    //2枚の選択上限
-    int limitcard = 0;
-    //全ターンを通して破棄された回数
-    int trushcount = 0;
-    //１ターンを通して破棄された回数
-    int trushturncount = 0;
-    //デッキ枚数
-    int decksheet = 42;
-    //選択されたカード枚数
-    int selectcard = 0; 
+    [SerializeField] Dictionary<int, int> deck;     //デッキ
+    private Dictionary<int, int> trush;             //何回目に何が破棄されたか
+    private List<int> random;                       //0から41のリスト
+    List<int> handcard;                             //手札のカードID
+    public GameObject check;                        //選択されたカードにわかるようにチェックを出す
+    bool hand1, hand2, hand3;                       //手札の1,2,3の判定
+    int hand1count, hand2count, hand3count;         //手札の1,2,3が選ばれたか
+    int limitcard = 0;                              //2枚の選択上限
+    int trushcount = 0;                             //全ターンを通して破棄された回数
+    int trushturncount = 0;                         //１ターンを通して破棄された回数
+    int decksheet = 42;                             //デッキ上限枚数
+    int selectcard = 0;                             //選択されたカード枚数
 
     void Start()
     {
