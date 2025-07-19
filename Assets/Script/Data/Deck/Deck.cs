@@ -11,15 +11,15 @@ public class Deck : MonoBehaviour
     public List<int> objecter;
     public List<CardEntity> cards;
     public Dictionary<int,int> dicdecklist;
-
-    GameObject weapons;
-    GameObject characters;
+    [SerializeField] private GameObject characters;
+    [SerializeField] private GameObject weapons;
     int CardID;
     int cardcount = 0;
+    int decksheet = 42;
 
     void DeckKeep(int i)
     {
-        if(cardcount < 42)
+        if(cardcount < decksheet)
         {
             //カードをデッキに入れる
             CardID = cards[i].CardId;
@@ -37,7 +37,7 @@ public class Deck : MonoBehaviour
         cards = new List<CardEntity>();
         dicdecklist = new Dictionary<int,int>();
 
-        for(int i = 0; i < 42; i++)
+        for(int i = 0; i < decksheet; i++)
         {
             decklist.Add(-1);
         }
@@ -46,8 +46,6 @@ public class Deck : MonoBehaviour
     void SearchCard()
     {
         //武器やキャラをWeaponTagやCharacterTagで見つける
-        weapons = GameObject.FindGameObjectWithTag("Weapon");
-        characters = GameObject.FindGameObjectWithTag("Character");
 
         if(weapons != null)
         {
@@ -68,9 +66,4 @@ public class Deck : MonoBehaviour
     }
 
     //起動スイッチはキャラとかつくってからで
-
-    void Update()
-    {
-
-    }
 }
