@@ -13,15 +13,16 @@ MonoBehaviour:
   m_Name: Card_3
   m_EditorClassIdentifier: 
   CardId: 3
-  CardName: 
+  CardName: "\u30AB\u30E9\u30B9"
   CardIcon: {fileID: 0}
   CardDescription: 
   CardType: 0
   CardAttribute: 0
+  RestrictedCharacterId: 0
+  RestrictedWeaponId: 0
   CardAttackCount: 0
   CardTargetCount: 0
   CardPassive: 0
-  CardAttackPower: 0
   CardHitRate: 0
   CardOutputModifier: 0
   CardDefensePenetration: 0

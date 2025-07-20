@@ -32,8 +32,7 @@ public class Deck : MonoBehaviour
             decklist.Add(-1);
         }
 
-        // --- ‰¼‚É1`5‚ÌCardID‚ğ“o˜^ ---
-        for (int i = 1; i <= 5; i++)
+        for (int i = 1; i <= decksheet; i++)
         {
             CardEntity entity = Resources.Load<CardEntity>($"CardEntityList/Card_{i}");
             if (entity != null)
