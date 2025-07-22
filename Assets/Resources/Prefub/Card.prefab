@@ -439,10 +439,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -548,7 +548,7 @@ MonoBehaviour:
   CardName: {fileID: 4289466954114429774}
   attackAttribute: {fileID: 2649367337728679519}
   Description: {fileID: 5382103145826800291}
-  iconImage: {fileID: 2229079258328300567}
+  IconImage: {fileID: 0}
 --- !u!114 &7699136889019067178
 MonoBehaviour:
   m_ObjectHideFlags: 0

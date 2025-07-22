@@ -8,10 +8,10 @@ public class BattleManager : MonoBehaviour
 {
     [SerializeField] CardController cardPrefab;
     [SerializeField] Transform PlayerHandTransform;
-    [SerializeField] private GameObject checkEffect;    // 選択されたカードにエフェクト付与用
+    [SerializeField] private GameObject checkEffect;            // 選択されたカードにエフェクト付与用
 
     List<CardController> card;
-    private CardModelFactory cardModelFactory;          // カードモデル生成用
+    private CardModelFactory cardModelFactory;                  // カードモデル生成用
 
     private List<int> selectedCardsThisTurn = new List<int>();  // 選択されたカードのIDを保持
     private List<int> excludedCardsThisTurn = new List<int>();　// 破棄されたカードのIDを保持
@@ -21,8 +21,8 @@ public class BattleManager : MonoBehaviour
     private int decksheet = 42;                                 // デッキの最大枚数
 
     // カード選択状態管理
-    private bool[] handSelected = new bool[3];                   // 各カード（3枚）が選択されているかどうか
-    private GameObject[] selectionEffects = new GameObject[3];   // 各カードの選択エフェクト
+    private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
+    private GameObject[] selectionEffects = new GameObject[3];  // 各カードの選択エフェクト
 
     void Start()
     {

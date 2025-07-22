@@ -72,7 +72,7 @@ using UnityEngine.InputSystem.Utilities;
 /// }
 /// </code>
 /// </example>
-public partial class @Controls: IInputActionCollection2, IDisposable
+public partial class @BattleControls: IInputActionCollection2, IDisposable
 {
     /// <summary>
     /// Provides access to the underlying asset instance.
@@ -82,7 +82,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     /// <summary>
     /// Constructs a new instance.
     /// </summary>
-    public @Controls()
+    public @BattleControls()
     {
         asset = InputActionAsset.FromJson(@"{
     ""name"": ""InputSystem_Actions"",
@@ -99,6 +99,33 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CardSelectOne"",
+                    ""type"": ""Button"",
+                    ""id"": ""7d94e3bc-90a7-42a4-b713-defba64a48d1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CardSelectSelect"",
+                    ""type"": ""Button"",
+                    ""id"": ""622fa351-90b2-4d17-a82d-e584f72a86dc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CardSelectTree"",
+                    ""type"": ""Button"",
+                    ""id"": ""ce52ad26-6f8f-4f94-bf2f-7e6a9cf95cf1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -110,6 +137,39 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""DisCard"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e74ef7b7-ad9e-4571-93ef-5919f75b781a"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CardSelectOne"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f73c2eef-cda9-4858-a377-ff26561e53d7"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CardSelectSelect"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f460a72a-8bb5-4858-a538-4270555d6c6a"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CardSelectTree"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -182,11 +242,14 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         // BattaleAction
         m_BattaleAction = asset.FindActionMap("BattaleAction", throwIfNotFound: true);
         m_BattaleAction_DisCard = m_BattaleAction.FindAction("DisCard", throwIfNotFound: true);
+        m_BattaleAction_CardSelectOne = m_BattaleAction.FindAction("CardSelectOne", throwIfNotFound: true);
+        m_BattaleAction_CardSelectSelect = m_BattaleAction.FindAction("CardSelectSelect", throwIfNotFound: true);
+        m_BattaleAction_CardSelectTree = m_BattaleAction.FindAction("CardSelectTree", throwIfNotFound: true);
     }
 
-    ~@Controls()
+    ~@BattleControls()
     {
-        UnityEngine.Debug.Assert(!m_BattaleAction.enabled, "This will cause a leak and performance issues, Controls.BattaleAction.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_BattaleAction.enabled, "This will cause a leak and performance issues, BattleControls.BattaleAction.Disable() has not been called.");
     }
 
     /// <summary>
@@ -263,21 +326,36 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_BattaleAction;
     private List<IBattaleActionActions> m_BattaleActionActionsCallbackInterfaces = new List<IBattaleActionActions>();
     private readonly InputAction m_BattaleAction_DisCard;
+    private readonly InputAction m_BattaleAction_CardSelectOne;
+    private readonly InputAction m_BattaleAction_CardSelectSelect;
+    private readonly InputAction m_BattaleAction_CardSelectTree;
     /// <summary>
     /// Provides access to input actions defined in input action map "BattaleAction".
     /// </summary>
     public struct BattaleActionActions
     {
-        private @Controls m_Wrapper;
+        private @BattleControls m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public BattaleActionActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public BattaleActionActions(@BattleControls wrapper) { m_Wrapper = wrapper; }
         /// <summary>
         /// Provides access to the underlying input action "BattaleAction/DisCard".
         /// </summary>
         public InputAction @DisCard => m_Wrapper.m_BattaleAction_DisCard;
+        /// <summary>
+        /// Provides access to the underlying input action "BattaleAction/CardSelectOne".
+        /// </summary>
+        public InputAction @CardSelectOne => m_Wrapper.m_BattaleAction_CardSelectOne;
+        /// <summary>
+        /// Provides access to the underlying input action "BattaleAction/CardSelectSelect".
+        /// </summary>
+        public InputAction @CardSelectSelect => m_Wrapper.m_BattaleAction_CardSelectSelect;
+        /// <summary>
+        /// Provides access to the underlying input action "BattaleAction/CardSelectTree".
+        /// </summary>
+        public InputAction @CardSelectTree => m_Wrapper.m_BattaleAction_CardSelectTree;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -307,6 +385,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @DisCard.started += instance.OnDisCard;
             @DisCard.performed += instance.OnDisCard;
             @DisCard.canceled += instance.OnDisCard;
+            @CardSelectOne.started += instance.OnCardSelectOne;
+            @CardSelectOne.performed += instance.OnCardSelectOne;
+            @CardSelectOne.canceled += instance.OnCardSelectOne;
+            @CardSelectSelect.started += instance.OnCardSelectSelect;
+            @CardSelectSelect.performed += instance.OnCardSelectSelect;
+            @CardSelectSelect.canceled += instance.OnCardSelectSelect;
+            @CardSelectTree.started += instance.OnCardSelectTree;
+            @CardSelectTree.performed += instance.OnCardSelectTree;
+            @CardSelectTree.canceled += instance.OnCardSelectTree;
         }
 
         /// <summary>
@@ -321,6 +408,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @DisCard.started -= instance.OnDisCard;
             @DisCard.performed -= instance.OnDisCard;
             @DisCard.canceled -= instance.OnDisCard;
+            @CardSelectOne.started -= instance.OnCardSelectOne;
+            @CardSelectOne.performed -= instance.OnCardSelectOne;
+            @CardSelectOne.canceled -= instance.OnCardSelectOne;
+            @CardSelectSelect.started -= instance.OnCardSelectSelect;
+            @CardSelectSelect.performed -= instance.OnCardSelectSelect;
+            @CardSelectSelect.canceled -= instance.OnCardSelectSelect;
+            @CardSelectTree.started -= instance.OnCardSelectTree;
+            @CardSelectTree.performed -= instance.OnCardSelectTree;
+            @CardSelectTree.canceled -= instance.OnCardSelectTree;
         }
 
         /// <summary>
@@ -433,5 +529,26 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDisCard(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CardSelectOne" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCardSelectOne(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CardSelectSelect" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCardSelectSelect(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CardSelectTree" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCardSelectTree(InputAction.CallbackContext context);
     }
 }
