@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting; // IEnumerator を使うために必要
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,15 +13,31 @@ public class BattleManager : MonoBehaviour
     private CardModelFactory cardModelFactory;                  // カードモデル生成用
 
     private List<int> selectedCardsThisTurn = new List<int>();  // 選択されたカードのIDを保持
-    private List<int> excludedCardsThisTurn = new List<int>();　// 破棄されたカードのIDを保持
+    private List<int> excludedCardsThisTurn = new List<int>();  // 破棄されたカードのIDを保持
     List<int> handcard;                                         // 手札のカードID
     private bool isPlayerTurn;                                  // プレイヤーのターンかどうか
     private float turnTime = 10f;                               // ターンの制限時間（秒）
     private int decksheet = 42;                                 // デッキの最大枚数
+    private InputReader inputReader;                            // 入力を管理するクラス（必要に応じて実装）
 
     // カード選択状態管理
     private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
     private GameObject[] selectionEffects = new GameObject[3];  // 各カードの選択エフェクト
+
+    private bool inputEnabled = false;                          // 入力を受け付けるかどうかのフラグ
+
+    private void Awake()
+    {
+        inputReader = GetComponent<InputReader>();
+        inputReader.CardSelectEvent += OnCardSelect;
+        inputReader.DisCardEvent += OnDisCard;
+    }
+
+    private void OnDestroy()
+    {
+        inputReader.CardSelectEvent -= OnCardSelect;
+        inputReader.DisCardEvent -= OnDisCard;
+    }
 
     void Start()
     {
@@ -93,52 +108,16 @@ public class BattleManager : MonoBehaviour
         Cardcreate();
         float timer = 0f;
 
+        inputEnabled = true; // 入力を受付開始
+
         //カード選択メゾット
         while (timer < turnTime)
         {
-            //選択し、選択されたものにチェックを表示する
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                CardSelect(0);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                CardSelect(1);
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                CardSelect(2);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                for (int i = 0; i < handSelected.Length; i++)
-                {
-                    if (handSelected[i])
-                    {
-                        selectedCardsThisTurn.Add(handcard[i]); // 選ばれたカードを追加
-                    }
-                    else
-                    {
-                        excludedCardsThisTurn.Add(handcard[i]); // 選ばれなかったカードを一時除外
-                    }
-                }
-
-                Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
-                Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
-
-                //選択状態をリセット
-                ResetSelectionEffects();
-                for (int i = 0; i < handSelected.Length; i++)
-                {
-                    handSelected[i] = false;
-                }
-
-                Cardcreate();
-            }
             timer += Time.deltaTime;
             yield return null;
         }
+
+        inputEnabled = false; // 入力を受付終了
         handcard.Clear();
 
         yield break;
@@ -267,5 +246,46 @@ public class BattleManager : MonoBehaviour
                 selectionEffects[i] = null;
             }
         }
+    }
+
+    /// <summary>
+    /// 入力: カード選択イベント
+    /// </summary>
+    private void OnCardSelect(int index)
+    {
+        if (!inputEnabled) return;
+        CardSelect(index);
+    }
+
+    /// <summary>
+    /// 入力: 決定ボタンイベント
+    /// </summary>
+    private void OnDisCard()
+    {
+        if (!inputEnabled) return;
+
+        for (int i = 0; i < handSelected.Length; i++)
+        {
+            if (handSelected[i])
+            {
+                selectedCardsThisTurn.Add(handcard[i]); // 選ばれたカードを追加
+            }
+            else
+            {
+                excludedCardsThisTurn.Add(handcard[i]); // 選ばれなかったカードを一時除外
+            }
+        }
+
+        Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
+        Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
+
+        //選択状態をリセット
+        ResetSelectionEffects();
+        for (int i = 0; i < handSelected.Length; i++)
+        {
+            handSelected[i] = false;
+        }
+
+        Cardcreate();
     }
 }

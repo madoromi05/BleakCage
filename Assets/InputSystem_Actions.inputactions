@@ -2,7 +2,7 @@
     "name": "InputSystem_Actions",
     "maps": [
         {
-            "name": "BattaleAction",
+            "name": "BattleAction",
             "id": "67587e3e-a508-47ce-9bbc-324c982a84b9",
             "actions": [
                 {
@@ -20,11 +20,11 @@
                     "id": "7d94e3bc-90a7-42a4-b713-defba64a48d1",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Press",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "CardSelectSelect",
+                    "name": "CardSelectTwo",
                     "type": "Button",
                     "id": "622fa351-90b2-4d17-a82d-e584f72a86dc",
                     "expectedControlType": "",
@@ -47,7 +47,7 @@
                     "name": "",
                     "id": "7293fc9d-9fe7-4df3-b294-8fc428e75072",
                     "path": "<Keyboard>/enter",
-                    "interactions": "Tap",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "DisCard",
@@ -58,7 +58,7 @@
                     "name": "",
                     "id": "e74ef7b7-ad9e-4571-93ef-5919f75b781a",
                     "path": "<Keyboard>/1",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "CardSelectOne",
@@ -69,10 +69,10 @@
                     "name": "",
                     "id": "f73c2eef-cda9-4858-a377-ff26561e53d7",
                     "path": "<Keyboard>/2",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "CardSelectSelect",
+                    "action": "CardSelectTwo",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -80,7 +80,7 @@
                     "name": "",
                     "id": "f460a72a-8bb5-4858-a538-4270555d6c6a",
                     "path": "<Keyboard>/3",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "CardSelectTree",

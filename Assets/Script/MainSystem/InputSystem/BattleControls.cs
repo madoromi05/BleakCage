@@ -88,7 +88,7 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
     ""name"": ""InputSystem_Actions"",
     ""maps"": [
         {
-            ""name"": ""BattaleAction"",
+            ""name"": ""BattleAction"",
             ""id"": ""67587e3e-a508-47ce-9bbc-324c982a84b9"",
             ""actions"": [
                 {
@@ -106,11 +106,11 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
                     ""id"": ""7d94e3bc-90a7-42a4-b713-defba64a48d1"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""CardSelectSelect"",
+                    ""name"": ""CardSelectTwo"",
                     ""type"": ""Button"",
                     ""id"": ""622fa351-90b2-4d17-a82d-e584f72a86dc"",
                     ""expectedControlType"": """",
@@ -133,7 +133,7 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""7293fc9d-9fe7-4df3-b294-8fc428e75072"",
                     ""path"": ""<Keyboard>/enter"",
-                    ""interactions"": ""Tap"",
+                    ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""DisCard"",
@@ -144,7 +144,7 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""e74ef7b7-ad9e-4571-93ef-5919f75b781a"",
                     ""path"": ""<Keyboard>/1"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""CardSelectOne"",
@@ -155,10 +155,10 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""f73c2eef-cda9-4858-a377-ff26561e53d7"",
                     ""path"": ""<Keyboard>/2"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""CardSelectSelect"",
+                    ""action"": ""CardSelectTwo"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -166,7 +166,7 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""f460a72a-8bb5-4858-a538-4270555d6c6a"",
                     ""path"": ""<Keyboard>/3"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""CardSelectTree"",
@@ -239,17 +239,17 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         }
     ]
 }");
-        // BattaleAction
-        m_BattaleAction = asset.FindActionMap("BattaleAction", throwIfNotFound: true);
-        m_BattaleAction_DisCard = m_BattaleAction.FindAction("DisCard", throwIfNotFound: true);
-        m_BattaleAction_CardSelectOne = m_BattaleAction.FindAction("CardSelectOne", throwIfNotFound: true);
-        m_BattaleAction_CardSelectSelect = m_BattaleAction.FindAction("CardSelectSelect", throwIfNotFound: true);
-        m_BattaleAction_CardSelectTree = m_BattaleAction.FindAction("CardSelectTree", throwIfNotFound: true);
+        // BattleAction
+        m_BattleAction = asset.FindActionMap("BattleAction", throwIfNotFound: true);
+        m_BattleAction_DisCard = m_BattleAction.FindAction("DisCard", throwIfNotFound: true);
+        m_BattleAction_CardSelectOne = m_BattleAction.FindAction("CardSelectOne", throwIfNotFound: true);
+        m_BattleAction_CardSelectTwo = m_BattleAction.FindAction("CardSelectTwo", throwIfNotFound: true);
+        m_BattleAction_CardSelectTree = m_BattleAction.FindAction("CardSelectTree", throwIfNotFound: true);
     }
 
     ~@BattleControls()
     {
-        UnityEngine.Debug.Assert(!m_BattaleAction.enabled, "This will cause a leak and performance issues, BattleControls.BattaleAction.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_BattleAction.enabled, "This will cause a leak and performance issues, BattleControls.BattleAction.Disable() has not been called.");
     }
 
     /// <summary>
@@ -322,44 +322,44 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // BattaleAction
-    private readonly InputActionMap m_BattaleAction;
-    private List<IBattaleActionActions> m_BattaleActionActionsCallbackInterfaces = new List<IBattaleActionActions>();
-    private readonly InputAction m_BattaleAction_DisCard;
-    private readonly InputAction m_BattaleAction_CardSelectOne;
-    private readonly InputAction m_BattaleAction_CardSelectSelect;
-    private readonly InputAction m_BattaleAction_CardSelectTree;
+    // BattleAction
+    private readonly InputActionMap m_BattleAction;
+    private List<IBattleActionActions> m_BattleActionActionsCallbackInterfaces = new List<IBattleActionActions>();
+    private readonly InputAction m_BattleAction_DisCard;
+    private readonly InputAction m_BattleAction_CardSelectOne;
+    private readonly InputAction m_BattleAction_CardSelectTwo;
+    private readonly InputAction m_BattleAction_CardSelectTree;
     /// <summary>
-    /// Provides access to input actions defined in input action map "BattaleAction".
+    /// Provides access to input actions defined in input action map "BattleAction".
     /// </summary>
-    public struct BattaleActionActions
+    public struct BattleActionActions
     {
         private @BattleControls m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public BattaleActionActions(@BattleControls wrapper) { m_Wrapper = wrapper; }
+        public BattleActionActions(@BattleControls wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "BattaleAction/DisCard".
+        /// Provides access to the underlying input action "BattleAction/DisCard".
         /// </summary>
-        public InputAction @DisCard => m_Wrapper.m_BattaleAction_DisCard;
+        public InputAction @DisCard => m_Wrapper.m_BattleAction_DisCard;
         /// <summary>
-        /// Provides access to the underlying input action "BattaleAction/CardSelectOne".
+        /// Provides access to the underlying input action "BattleAction/CardSelectOne".
         /// </summary>
-        public InputAction @CardSelectOne => m_Wrapper.m_BattaleAction_CardSelectOne;
+        public InputAction @CardSelectOne => m_Wrapper.m_BattleAction_CardSelectOne;
         /// <summary>
-        /// Provides access to the underlying input action "BattaleAction/CardSelectSelect".
+        /// Provides access to the underlying input action "BattleAction/CardSelectTwo".
         /// </summary>
-        public InputAction @CardSelectSelect => m_Wrapper.m_BattaleAction_CardSelectSelect;
+        public InputAction @CardSelectTwo => m_Wrapper.m_BattleAction_CardSelectTwo;
         /// <summary>
-        /// Provides access to the underlying input action "BattaleAction/CardSelectTree".
+        /// Provides access to the underlying input action "BattleAction/CardSelectTree".
         /// </summary>
-        public InputAction @CardSelectTree => m_Wrapper.m_BattaleAction_CardSelectTree;
+        public InputAction @CardSelectTree => m_Wrapper.m_BattleAction_CardSelectTree;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
-        public InputActionMap Get() { return m_Wrapper.m_BattaleAction; }
+        public InputActionMap Get() { return m_Wrapper.m_BattleAction; }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
         public void Enable() { Get().Enable(); }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
@@ -367,9 +367,9 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
         public bool enabled => Get().enabled;
         /// <summary>
-        /// Implicitly converts an <see ref="BattaleActionActions" /> to an <see ref="InputActionMap" /> instance.
+        /// Implicitly converts an <see ref="BattleActionActions" /> to an <see ref="InputActionMap" /> instance.
         /// </summary>
-        public static implicit operator InputActionMap(BattaleActionActions set) { return set.Get(); }
+        public static implicit operator InputActionMap(BattleActionActions set) { return set.Get(); }
         /// <summary>
         /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
         /// </summary>
@@ -377,20 +377,20 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
         /// </remarks>
-        /// <seealso cref="BattaleActionActions" />
-        public void AddCallbacks(IBattaleActionActions instance)
+        /// <seealso cref="BattleActionActions" />
+        public void AddCallbacks(IBattleActionActions instance)
         {
-            if (instance == null || m_Wrapper.m_BattaleActionActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_BattaleActionActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_BattleActionActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_BattleActionActionsCallbackInterfaces.Add(instance);
             @DisCard.started += instance.OnDisCard;
             @DisCard.performed += instance.OnDisCard;
             @DisCard.canceled += instance.OnDisCard;
             @CardSelectOne.started += instance.OnCardSelectOne;
             @CardSelectOne.performed += instance.OnCardSelectOne;
             @CardSelectOne.canceled += instance.OnCardSelectOne;
-            @CardSelectSelect.started += instance.OnCardSelectSelect;
-            @CardSelectSelect.performed += instance.OnCardSelectSelect;
-            @CardSelectSelect.canceled += instance.OnCardSelectSelect;
+            @CardSelectTwo.started += instance.OnCardSelectTwo;
+            @CardSelectTwo.performed += instance.OnCardSelectTwo;
+            @CardSelectTwo.canceled += instance.OnCardSelectTwo;
             @CardSelectTree.started += instance.OnCardSelectTree;
             @CardSelectTree.performed += instance.OnCardSelectTree;
             @CardSelectTree.canceled += instance.OnCardSelectTree;
@@ -402,8 +402,8 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         /// <remarks>
         /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
         /// </remarks>
-        /// <seealso cref="BattaleActionActions" />
-        private void UnregisterCallbacks(IBattaleActionActions instance)
+        /// <seealso cref="BattleActionActions" />
+        private void UnregisterCallbacks(IBattleActionActions instance)
         {
             @DisCard.started -= instance.OnDisCard;
             @DisCard.performed -= instance.OnDisCard;
@@ -411,21 +411,21 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
             @CardSelectOne.started -= instance.OnCardSelectOne;
             @CardSelectOne.performed -= instance.OnCardSelectOne;
             @CardSelectOne.canceled -= instance.OnCardSelectOne;
-            @CardSelectSelect.started -= instance.OnCardSelectSelect;
-            @CardSelectSelect.performed -= instance.OnCardSelectSelect;
-            @CardSelectSelect.canceled -= instance.OnCardSelectSelect;
+            @CardSelectTwo.started -= instance.OnCardSelectTwo;
+            @CardSelectTwo.performed -= instance.OnCardSelectTwo;
+            @CardSelectTwo.canceled -= instance.OnCardSelectTwo;
             @CardSelectTree.started -= instance.OnCardSelectTree;
             @CardSelectTree.performed -= instance.OnCardSelectTree;
             @CardSelectTree.canceled -= instance.OnCardSelectTree;
         }
 
         /// <summary>
-        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="BattaleActionActions.UnregisterCallbacks(IBattaleActionActions)" />.
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="BattleActionActions.UnregisterCallbacks(IBattleActionActions)" />.
         /// </summary>
-        /// <seealso cref="BattaleActionActions.UnregisterCallbacks(IBattaleActionActions)" />
-        public void RemoveCallbacks(IBattaleActionActions instance)
+        /// <seealso cref="BattleActionActions.UnregisterCallbacks(IBattleActionActions)" />
+        public void RemoveCallbacks(IBattleActionActions instance)
         {
-            if (m_Wrapper.m_BattaleActionActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_BattleActionActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
@@ -435,21 +435,21 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
         /// </remarks>
-        /// <seealso cref="BattaleActionActions.AddCallbacks(IBattaleActionActions)" />
-        /// <seealso cref="BattaleActionActions.RemoveCallbacks(IBattaleActionActions)" />
-        /// <seealso cref="BattaleActionActions.UnregisterCallbacks(IBattaleActionActions)" />
-        public void SetCallbacks(IBattaleActionActions instance)
+        /// <seealso cref="BattleActionActions.AddCallbacks(IBattleActionActions)" />
+        /// <seealso cref="BattleActionActions.RemoveCallbacks(IBattleActionActions)" />
+        /// <seealso cref="BattleActionActions.UnregisterCallbacks(IBattleActionActions)" />
+        public void SetCallbacks(IBattleActionActions instance)
         {
-            foreach (var item in m_Wrapper.m_BattaleActionActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_BattleActionActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_BattaleActionActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_BattleActionActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
     /// <summary>
-    /// Provides a new <see cref="BattaleActionActions" /> instance referencing this action map.
+    /// Provides a new <see cref="BattleActionActions" /> instance referencing this action map.
     /// </summary>
-    public BattaleActionActions @BattaleAction => new BattaleActionActions(this);
+    public BattleActionActions @BattleAction => new BattleActionActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     /// <summary>
     /// Provides access to the input control scheme.
@@ -516,11 +516,11 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         }
     }
     /// <summary>
-    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "BattaleAction" which allows adding and removing callbacks.
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "BattleAction" which allows adding and removing callbacks.
     /// </summary>
-    /// <seealso cref="BattaleActionActions.AddCallbacks(IBattaleActionActions)" />
-    /// <seealso cref="BattaleActionActions.RemoveCallbacks(IBattaleActionActions)" />
-    public interface IBattaleActionActions
+    /// <seealso cref="BattleActionActions.AddCallbacks(IBattleActionActions)" />
+    /// <seealso cref="BattleActionActions.RemoveCallbacks(IBattleActionActions)" />
+    public interface IBattleActionActions
     {
         /// <summary>
         /// Method invoked when associated input action "DisCard" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
@@ -537,12 +537,12 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCardSelectOne(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "CardSelectSelect" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "CardSelectTwo" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnCardSelectSelect(InputAction.CallbackContext context);
+        void OnCardSelectTwo(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "CardSelectTree" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
