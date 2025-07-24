@@ -5,289 +5,55 @@ using System.Linq;
 
 public class BattleManager : MonoBehaviour
 {
-    [SerializeField] CardController cardPrefab;
-    [SerializeField] Transform PlayerHandTransform;
-    [SerializeField] private GameObject checkEffect;            // 選択されたカードにエフェクト付与用
-
-    List<CardController> card;
-    private CardModelFactory cardModelFactory;                  // カードモデル生成用
-
-    private List<int> selectedCardsThisTurn = new List<int>();  // 選択されたカードのIDを保持
-    private List<int> excludedCardsThisTurn = new List<int>();  // 破棄されたカードのIDを保持
-    List<int> handcard;                                         // 手札のカードID
-    private bool isPlayerTurn;                                  // プレイヤーのターンかどうか
-    private float turnTime = 10f;                               // ターンの制限時間（秒）
-    private int decksheet = 42;                                 // デッキの最大枚数
-    private InputReader inputReader;                            // 入力を管理するクラス（必要に応じて実装）
-
-    // カード選択状態管理
-    private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
-    private GameObject[] selectionEffects = new GameObject[3];  // 各カードの選択エフェクト
-
-    private bool inputEnabled = false;                          // 入力を受け付けるかどうかのフラグ
-
-    private void Awake()
-    {
-        inputReader = GetComponent<InputReader>();
-        inputReader.CardSelectEvent += OnCardSelect;
-        inputReader.DisCardEvent += OnDisCard;
-    }
-
-    private void OnDestroy()
-    {
-        inputReader.CardSelectEvent -= OnCardSelect;
-        inputReader.DisCardEvent -= OnDisCard;
-    }
+    [SerializeField] private PlayerTurn playerTurn;
+    private float turnTime = 10f;
 
     void Start()
     {
-        card = new List<CardController>();
-        handcard = new List<int>();
-        cardModelFactory = new CardModelFactory();
-        StartGame();
-    }
-
-    private void StartGame()
-    {
-        isPlayerTurn = true;
-        TurnCalc();                         // Playerのターンを開始
-    }
-
-    private void TurnCalc()
-    {
-        if (isPlayerTurn)
-        {
-            StartCoroutine(PlayerTurnCoroutine()); // コルーチンでプレイヤーターンを管理
-        }
-        else
-        {
-            EnemyTurn();
-        }
-    }
-
-    private IEnumerator PlayerTurnCoroutine()
-    {
-        Debug.Log("プレイヤーのターン開始");
-        // カードを生成して表示
-        yield return StartCoroutine(CreateCard(PlayerHandTransform));
-
-        Debug.Log("10秒経過したのでターンを終了します");
-        ChangeTurn(); // 敵のターンに切り替え
-    }
-
-    private void EnemyTurn()
-    {
-        Debug.Log("敵のターンです");
-        ChangeTurn(); // すぐにプレイヤーターンに戻す（必要に応じて修正）
-    }
-
-    private void ChangeTurn()
-    {
-        isPlayerTurn = !isPlayerTurn;
-
-        selectedCardsThisTurn.Clear();
-        excludedCardsThisTurn.Clear();
-        for (int i = 0; i < handSelected.Length; i++)
-        {
-            handSelected[i] = false;
-        }
-
-        // 選択エフェクトをリセット
-        ResetSelectionEffects();
-
-        TurnCalc();
+        playerTurn.TurnFinished += OnPlayerTurnFinished;
+        StartCoroutine(StartPlayerTurnWithTimer());
     }
 
     /// <summary>
-    /// 待機しているときだけ入力受付
+    /// プレイヤーのターンを10秒間開始
     /// </summary>
-    /// <param name="hand"></param>
-    /// <returns></returns>
-    private IEnumerator CreateCard(Transform hand)
+    private IEnumerator StartPlayerTurnWithTimer()
     {
-        Cardcreate();
+        Debug.Log("【プレイヤーターン開始】");
+        playerTurn.StartPlayerTurn();
+
         float timer = 0f;
-
-        inputEnabled = true; // 入力を受付開始
-
-        //カード選択メゾット
         while (timer < turnTime)
         {
             timer += Time.deltaTime;
             yield return null;
         }
 
-        inputEnabled = false; // 入力を受付終了
-        handcard.Clear();
-
-        yield break;
-    }
-
-    private void Cardcreate()
-    {
-        // 既存のカードを消す
-        foreach (Transform child in PlayerHandTransform)
-        {
-            Destroy(child.gameObject);
-        }
-
-        card.Clear();
-        handcard.Clear();
-        ResetSelectionEffects();
-
-        //三枚提示
-        for (int i = 0; i < 3; i++)
-        {
-            int draw;
-            do
-            {
-                draw = Random.Range(1, decksheet + 1); // CardEntityのIDは1から始まる想定
-            } while (excludedCardsThisTurn.Contains(draw)); // 除外されたカードは引かない
-
-            var c = Instantiate(cardPrefab, PlayerHandTransform, false);
-
-            // CardModelFactoryを使ってCardModelを生成し、カードを初期化
-            CardModel cardModel = cardModelFactory.CreateFromId(draw);
-            if (cardModel != null)
-            {
-                c.Init(cardModel);
-            }
-            else
-            {
-                Debug.LogError($"カードID {draw} の読み込みに失敗しました");
-            }
-
-            card.Add(c);
-            handcard.Add(draw);
-        }
+        playerTurn.FinishPlayerTurn(); // 強制終了（手動でも終了可能）
     }
 
     /// <summary>
-    /// CardNumber番目のカードを選択するメゾット
-    /// 
+    /// プレイヤーターン終了 → 敵ターン → プレイヤーターン再開
     /// </summary>
-    private void CardSelect(int CardNumber)
+    private void OnPlayerTurnFinished()
     {
-        if (CardNumber < 0 || CardNumber >= handSelected.Length || CardNumber >= card.Count)
-        {
-            Debug.LogError($"無効なカード番号: {CardNumber}");
-            return;
-        }
-
-        // 選択がされていなかったとき
-        if (!handSelected[CardNumber])
-        {
-            // 選択制限チェック
-            if (!CanSelectCard())
-            {
-                Debug.Log("選択可能なカードは2枚までです。");
-                return;
-            }
-
-            // 選択状態を有効化する
-            handSelected[CardNumber] = true;
-            ShowSelectionEffect(CardNumber);
-        }
-        // 選択されているとき
-        else if (handSelected[CardNumber])
-        {
-            // 選択エフェクトを無効化する 
-            HideSelectionEffect(CardNumber);
-            // 選択状態を解除する
-            handSelected[CardNumber] = false;
-        }
-
-        Debug.Log($"カード{CardNumber + 1}が{(handSelected[CardNumber] ? "選択" : "選択解除")}されました");
+        Debug.Log("【プレイヤーターン終了】");
+        StartCoroutine(EnemyTurn());
     }
 
     /// <summary>
-    /// カードを選択できるかチェック
+    /// 敵のターン（仮実装）→ すぐにプレイヤーターン再開
     /// </summary>
-    private bool CanSelectCard()
+    private IEnumerator EnemyTurn()
     {
-        int selectedCount = handSelected.Count(x => x);
-        return selectedCount < 2;
-    }
+        Debug.Log("【敵ターン開始】");
 
-    /// <summary>
-    /// 選択エフェクトを表示
-    /// </summary>
-    private void ShowSelectionEffect(int cardIndex)
-    {
-        if (checkEffect != null && cardIndex < card.Count)
-        {
-            var effect = Instantiate(checkEffect, card[cardIndex].transform.position, Quaternion.identity);
-            effect.transform.SetParent(card[cardIndex].transform);
-            selectionEffects[cardIndex] = effect;
-        }
-    }
+        // ここに敵の行動処理を書く（今は0.5秒待機のダミー）
+        yield return new WaitForSeconds(0.5f);
 
-    /// <summary>
-    /// 選択エフェクトを非表示
-    /// </summary>
-    private void HideSelectionEffect(int cardIndex)
-    {
-        if (selectionEffects[cardIndex] != null)
-        {
-            Destroy(selectionEffects[cardIndex]);
-            selectionEffects[cardIndex] = null;
-        }
-    }
+        Debug.Log("【敵ターン終了】");
 
-    /// <summary>
-    /// 全ての選択エフェクトをリセット
-    /// </summary>
-    private void ResetSelectionEffects()
-    {
-        for (int i = 0; i < selectionEffects.Length; i++)
-        {
-            if (selectionEffects[i] != null)
-            {
-                Destroy(selectionEffects[i]);
-                selectionEffects[i] = null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 入力: カード選択イベント
-    /// 1,2,3ボタンでカードを選択
-    /// </summary>
-    private void OnCardSelect(int index)
-    {
-        if (!inputEnabled) return;
-        CardSelect(index);
-    }
-
-    /// <summary>
-    /// 入力: 決定ボタンイベント
-    /// </summary>
-    private void OnDisCard()
-    {
-        if (!inputEnabled) return;
-
-        for (int i = 0; i < handSelected.Length; i++)
-        {
-            if (handSelected[i])
-            {
-                selectedCardsThisTurn.Add(handcard[i]); // 選ばれたカードを追加
-            }
-            else
-            {
-                excludedCardsThisTurn.Add(handcard[i]); // 選ばれなかったカードを一時除外
-            }
-        }
-
-        Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
-        Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
-
-        //選択状態をリセット
-        ResetSelectionEffects();
-        for (int i = 0; i < handSelected.Length; i++)
-        {
-            handSelected[i] = false;
-        }
-
-        Cardcreate();
+        // 次のプレイヤーターン開始
+        StartCoroutine(StartPlayerTurnWithTimer());
     }
 }

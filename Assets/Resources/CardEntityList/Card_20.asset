@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Card_20
   m_EditorClassIdentifier: 
   CardId: 20
-  CardName: New Card
+  CardName: "\u75B2\u308C\u305F"
   CardIcon: {fileID: 0}
   CardDescription: "\u65B0\u3057\u3044\u30AB\u30FC\u30C9\u306E\u8AAC\u660E\u6587"
   CardType: 2
