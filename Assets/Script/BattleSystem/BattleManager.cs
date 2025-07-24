@@ -164,6 +164,7 @@ public class BattleManager : MonoBehaviour
 
     /// <summary>
     /// CardNumber番目のカードを選択するメゾット
+    /// 
     /// </summary>
     private void CardSelect(int CardNumber)
     {
@@ -250,6 +251,7 @@ public class BattleManager : MonoBehaviour
 
     /// <summary>
     /// 入力: カード選択イベント
+    /// 1,2,3ボタンでカードを選択
     /// </summary>
     private void OnCardSelect(int index)
     {
