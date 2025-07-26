@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Enemy_1
   m_EditorClassIdentifier: 
   EnemyId: 1
-  EnemyName: NotName
-  EnemyHP: 0
-  EnemyAttackPower: 0
-  EnemyDefensePower: 0
+  EnemyName: "\u30A8\u30EC\u30CB\u30E4\u8A18"
   EnemyAttribute: 0
+  EnemyDefensAttribute: 1
   EnemyIcon: {fileID: 0}
+  EnemyDescription: 
+  EnemyHP: 100
+  EnemyAttackPower: 0
+  EnemyDefensePower: 10

@@ -8,7 +8,7 @@ public class WeaponModel
     public int WeaponId { get; set; }                         // 武器のID
     public string WeaponName { get; set; }                    // 武器名
     public float WeaponAttackPower { get; set; }              // 攻撃力
-    public AttackAttributeType WeaponAttribute { get; set; }  // 属性
+    public AttributeType WeaponAttribute { get; set; }        // 属性
     public float PeakyCoefficient { get; set; }               // 特化係数（ピーキー度）
     public string Description { get; set; }                   // 武器の説明文
     public Sprite Icon { get; set; }                          // アイコン画像

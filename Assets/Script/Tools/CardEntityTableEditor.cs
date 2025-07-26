@@ -106,7 +106,7 @@ public class CardEntityTableEditor : EditorWindow
             card.CardId = EditorGUILayout.IntField(card.CardId, GUILayout.Width(30));
             card.CardName = EditorGUILayout.TextField(card.CardName, GUILayout.Width(120));
             card.CardType = (CardEntity.CardTypeData)EditorGUILayout.EnumPopup(card.CardType, GUILayout.Width(80));
-            card.CardAttribute = (AttackAttributeType)EditorGUILayout.EnumPopup(card.CardAttribute, GUILayout.Width(80));
+            card.CardAttribute = (AttributeType)EditorGUILayout.EnumPopup(card.CardAttribute, GUILayout.Width(80));
             card.CardHitRate = EditorGUILayout.FloatField(card.CardHitRate, GUILayout.Width(80));
             card.CardOutputModifier = EditorGUILayout.FloatField(card.CardOutputModifier, GUILayout.Width(80));
             card.CardDefensePenetration = EditorGUILayout.FloatField(card.CardDefensePenetration, GUILayout.Width(80));
@@ -175,7 +175,7 @@ public class CardEntityTableEditor : EditorWindow
         newCard.CardId = GetNextAvailableId();
         newCard.CardName = "New Card";
         newCard.CardType = CardEntity.CardTypeData.Universal;
-        newCard.CardAttribute = AttackAttributeType.Bullet;
+        newCard.CardAttribute = AttributeType.Bullet;
         newCard.CardHitRate = 1.0f;
         newCard.CardOutputModifier = 1.0f;
         newCard.CardDefensePenetration = 0.0f;

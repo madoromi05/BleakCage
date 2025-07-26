@@ -3,13 +3,39 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// Battleの流れを管理するクラス 
+/// </summary>
 public class BattleManager : MonoBehaviour
 {
     [SerializeField] private PlayerTurn playerTurn;
     private float turnTime = 10f;
+    private EnemyModel enemyModel;
+    private PlayerModel playerModel;
+    private WeaponModel weaponModel;
 
     void Start()
     {
+        // @Demoサーバーからデータ取得してIDを得たと仮定
+        int receivedPlayerId = 1;
+        int receivedEnemyId  = 1;
+        int receivedWeaponId = 1;
+
+        // Factoryを使ってModelを生成（Entityは内部で読み込み）
+        PlayerModelFactory playerFactory = new PlayerModelFactory();
+        EnemyModelFactory enemyFactory = new EnemyModelFactory();
+
+        playerModel = playerFactory.CreateFromId(receivedPlayerId);
+        enemyModel = enemyFactory.CreateFromId(receivedEnemyId);
+        weaponModel = new WeaponModelFactory().CreateFromId(receivedWeaponId);
+
+        if (playerModel == null || enemyModel == null)
+        {
+            Debug.LogError("プレイヤーまたは敵の初期化に失敗しました");
+            return;
+        }
+
+        playerTurn.Setup(playerModel, enemyModel ,weaponModel);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
@@ -49,7 +75,7 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【敵ターン開始】");
 
         // ここに敵の行動処理を書く（今は0.5秒待機のダミー）
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.0f);
 
         Debug.Log("【敵ターン終了】");
 

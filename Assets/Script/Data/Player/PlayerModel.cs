@@ -10,11 +10,11 @@ public class PlayerModel
     public string PlayerName { get; private set; }
     public int PlayerLevel { get; private set; }
 
-    public float PlayerHP { get; private set; }
+    public float PlayerHP { get; set; }
     public float PlayerAttackPower { get; private set; }
     public float PlayerDefensePower { get; private set; }
 
-    public AttackAttributeType PlayerAttribute { get; private set; }
+    public AttributeType PlayerAttribute { get; private set; }
 
     public Sprite PlayerIcon { get; private set; }
     public Sprite PlayerSDIcon { get; private set; }

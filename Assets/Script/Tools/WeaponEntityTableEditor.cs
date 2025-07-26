@@ -80,7 +80,7 @@ public class WeaponEntityTableEditor : EditorWindow
             weapon.WeaponId = (uint)EditorGUILayout.IntField((int)weapon.WeaponId, GUILayout.Width(40));
             weapon.WeaponName = EditorGUILayout.TextField(weapon.WeaponName, GUILayout.Width(120));
             weapon.WeaponAttackPower = EditorGUILayout.FloatField(weapon.WeaponAttackPower, GUILayout.Width(60));
-            weapon.WeaponAttribute = (AttackAttributeType)EditorGUILayout.EnumPopup(weapon.WeaponAttribute, GUILayout.Width(80));
+            weapon.WeaponAttribute = (AttributeType)EditorGUILayout.EnumPopup(weapon.WeaponAttribute, GUILayout.Width(80));
             weapon.WeaponPeakyCoefficient = EditorGUILayout.FloatField(weapon.WeaponPeakyCoefficient, GUILayout.Width(60));
             weapon.WeaponIcon = (Sprite)EditorGUILayout.ObjectField(weapon.WeaponIcon, typeof(Sprite), false, GUILayout.Width(60));
             weapon.WeaponDescription = EditorGUILayout.TextArea(weapon.WeaponDescription, GUILayout.Width(200), GUILayout.Height(40));
@@ -140,7 +140,7 @@ public class WeaponEntityTableEditor : EditorWindow
         newWeapon.WeaponId = (uint)GetNextAvailableId();
         newWeapon.WeaponName = "New Weapon";
         newWeapon.WeaponAttackPower = 10f;
-        newWeapon.WeaponAttribute = AttackAttributeType.Bullet;
+        newWeapon.WeaponAttribute = AttributeType.Bullet;
         newWeapon.WeaponPeakyCoefficient = 1.0f;
         newWeapon.WeaponDescription = "新しい武器の説明文";
 

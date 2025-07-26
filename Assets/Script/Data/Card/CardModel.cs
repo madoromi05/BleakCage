@@ -9,7 +9,7 @@ public class CardModel
     public int CardId { get; private set; }
     public string CardName { get; private set; }
     public CardEntity.CardTypeData CardType { get; private set; }
-    public AttackAttributeType CardAttribute { get; private set; }
+    public AttributeType CardAttribute { get; private set; }
 
     public int AttackCount { get; private set; }                                // 攻撃回数
     public int TargetCount { get; private set; }                                // 攻撃対象数

@@ -23,7 +23,7 @@ public class CardEntity : ScriptableObject
     public string CardDescription;              // 説明文
 
     public CardTypeData CardType;               // カードタイプ
-    public AttackAttributeType CardAttribute;   // 属性
+    public AttributeType CardAttribute;         // 属性
 
     public int RestrictedCharacterId;           // キャラ制限用Id
     public int RestrictedWeaponId;              // 武器制限用Id

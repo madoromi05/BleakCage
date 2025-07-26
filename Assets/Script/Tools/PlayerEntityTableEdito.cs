@@ -87,7 +87,7 @@ public class PlayerEntityTableEditor : EditorWindow
             player.PlayerHP = EditorGUILayout.FloatField(player.PlayerHP, GUILayout.Width(60));
             player.PlayerAttackPower = EditorGUILayout.FloatField(player.PlayerAttackPower, GUILayout.Width(60));
             player.PlayerDefensePower = EditorGUILayout.FloatField(player.PlayerDefensePower, GUILayout.Width(60));
-            player.PlayerAttribute = (AttackAttributeType)EditorGUILayout.EnumPopup(player.PlayerAttribute, GUILayout.Width(80));
+            player.PlayerAttribute = (AttributeType)EditorGUILayout.EnumPopup(player.PlayerAttribute, GUILayout.Width(80));
             player.PlayerIcon = (Sprite)EditorGUILayout.ObjectField(player.PlayerIcon, typeof(Sprite), false, GUILayout.Width(60));
             player.PlayerSDIcon = (Sprite)EditorGUILayout.ObjectField(player.PlayerSDIcon, typeof(Sprite), false, GUILayout.Width(60));
             player.PlayerDescription = EditorGUILayout.TextArea(player.PlayerDescription, GUILayout.Width(500), GUILayout.Height(40));
@@ -153,7 +153,7 @@ public class PlayerEntityTableEditor : EditorWindow
         newPlayer.PlayerHP = 100f;
         newPlayer.PlayerAttackPower = 10f;
         newPlayer.PlayerDefensePower = 5f;
-        newPlayer.PlayerAttribute = AttackAttributeType.Slash;
+        newPlayer.PlayerAttribute = AttributeType.Slash;
         newPlayer.PlayerDescription = "新しいプレイヤーの説明文";
 
         string fileName = $"{newPlayerName}_{newPlayer.PlayerId}.asset";

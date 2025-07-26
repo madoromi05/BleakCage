@@ -39,6 +39,7 @@ public class CardModelFactory
 
     /// <summary>
     /// 複数のCardModelを一括生成
+    /// いらないかも
     /// </summary>
     /// <param name="cardIds">カードIDの配列</param>
     /// <returns>CardModelの配列（失敗したものはnull）</returns>

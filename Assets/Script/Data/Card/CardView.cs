@@ -59,14 +59,14 @@ public class CardView : MonoBehaviour
         }
     }
 
-    private string GetAttributeName(AttackAttributeType attr)
+    private string GetAttributeName(AttributeType attr)
     {
         switch (attr)
         {
-            case AttackAttributeType.Slash:  return "Ža";
-            case AttackAttributeType.Blunt:  return "“Ý";
-            case AttackAttributeType.Pierce: return "“Ë";
-            case AttackAttributeType.Bullet: return "’e";
+            case AttributeType.Slash:  return "Ža";
+            case AttributeType.Blunt:  return "“Ý";
+            case AttributeType.Pierce: return "“Ë";
+            case AttributeType.Bullet: return "’e";
             default:                         return attr.ToString();
         }
     }

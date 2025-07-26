@@ -10,16 +10,24 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] Transform PlayerHandTransform;
     [SerializeField] private GameObject checkEffect;            // 選択されたカードにエフェクト付与用
 
-    private List<CardController> card = new();                  // 初期Deck取得
+    private InputReader inputReader;                            // 入力を管理するクラス
+    private PlayerModel playerModel;                            // プレイヤーモデル
+    private EnemyModel enemyModel;                              // 敵モデル
+    private WeaponModel weaponModel;
     private CardModelFactory cardModelFactory;                  // カードモデル生成用
 
+    private List<CardController> card = new();                  // 初期Deck取得
     private List<int> selectedCardsThisTurn = new List<int>();  // 選択されたカードのIDを保持
     private List<int> excludedCardsThisTurn = new List<int>();  // 破棄されたカードのIDを保持
     private List<int> handcard = new();                         // 手札のカードID
+    private Queue<ICardCommand> commandQueue = new();           // コマンドキュー
     private bool isPlayerTurn;                                  // プレイヤーのターンかどうか
     private int decksheet = 42;                                 // デッキの最大枚数
-    private InputReader inputReader;                            // 入力を管理するクラス（必要に応じて実装）
     private bool inputEnabled = false;                          // 入力を受け付けるかどうかのフラ
+    private bool isProcessing = false;                          // 処理中フラグを追加
+    private float lastInputTime = 0f;                           // 前回入力時刻
+    private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
+
 
     // カード選択状態管理
     private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
@@ -36,6 +44,13 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
+    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel)
+    {
+        this.playerModel = playerModel;
+        this.enemyModel = enemyModel;
+        this.weaponModel = weaponModel;
+    }
+
     private void OnDestroy()
     {
         inputReader.CardSelectEvent -= OnCardSelect;
@@ -44,6 +59,7 @@ public class PlayerTurn : MonoBehaviour
 
     public void StartPlayerTurn()
     {
+        commandQueue.Clear();
         selectedCardsThisTurn.Clear();
         excludedCardsThisTurn.Clear();
         inputEnabled = true;
@@ -72,20 +88,35 @@ public class PlayerTurn : MonoBehaviour
         Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
         Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
 
-        TurnFinished?.Invoke();
+        // ターン終わりにCardの効果処理
+        StartCoroutine(ExecuteCardCommands());
     }
     /// 1,2,3ボタンでカードを選択
     /// </summary>
     private void OnCardSelect(int index)
     {
-        if (!inputEnabled) return;
+        if (!inputEnabled || isProcessing) return;
+
+        // クールタイム処理
+        if (Time.time - lastInputTime < inputCooldown) return;
+        lastInputTime = Time.time;
+
+        isProcessing = true;  // 処理ロック
+
         CardSelect(index);
+        isProcessing = false; // 処理ロック解除
     }
 
     private void OnDisCard()
     {
-        if (!inputEnabled) return;
+        if (!inputEnabled || isProcessing) return;
+
+        if (Time.time - lastInputTime < inputCooldown) return;
+        lastInputTime = Time.time;
+
+        isProcessing = true;  // 処理ロック
         DeisCard();
+        isProcessing = false;
     }
 
     /// <summary>
@@ -227,6 +258,14 @@ public class PlayerTurn : MonoBehaviour
     {
         if (!inputEnabled) return;
 
+        // 選択されているカードがない場合は何もしない
+        int selectedCount = handSelected.Count(x => x);
+        if (selectedCount == 0)
+        {
+            Debug.Log("1枚以上カードを選択してください。");
+            return;
+        }
+
         for (int i = 0; i < handSelected.Length; i++)
         {
             if (handSelected[i])
@@ -250,5 +289,38 @@ public class PlayerTurn : MonoBehaviour
         }
 
         CreateCard();
+    }
+
+    private IEnumerator ExecuteCardCommands()
+    {
+        foreach (var selectedId in selectedCardsThisTurn)
+        {
+            var cardModel = cardModelFactory.CreateFromId(selectedId);
+            if (cardModel == null)
+            {
+                Debug.LogWarning($"カードID {selectedId} のカードが存在しません");
+                continue;
+            }
+
+            if (cardModel.CardAttribute == AttributeType.Heal) {
+                // 回復値は仮に0.2f割合で回復
+                commandQueue.Enqueue(new HealCardCommand(playerModel, 0.2f, useRatio: true));
+            }
+            // Heal以外は攻撃処理
+            else
+            {
+                commandQueue.Enqueue(new AttackCardCommand(playerModel, enemyModel , cardModel, weaponModel));
+            }
+        }
+
+        // 順に実行
+        while (commandQueue.Count > 0)
+        {
+            var command = commandQueue.Dequeue();
+            command.Do();
+            yield return new WaitForSeconds(0.3f); // 任意のウェイト
+        }
+
+        Debug.Log("カード効果の実行完了");
     }
 }

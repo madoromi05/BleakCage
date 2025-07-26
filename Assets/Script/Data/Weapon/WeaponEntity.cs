@@ -10,7 +10,7 @@ public class WeaponEntity : ScriptableObject
 {
     public float WeaponId;                          // WeaponŒÅ—LID
     public string WeaponName;                       // Weapon–¼
-    public AttackAttributeType WeaponAttribute;     // ‘®«
+    public AttributeType WeaponAttribute;           // ‘®«
     public Sprite WeaponIcon;                       // ‰æ‘œ
     public string WeaponDescription;                // à–¾•¶
 

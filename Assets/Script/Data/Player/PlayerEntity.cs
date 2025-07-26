@@ -12,7 +12,7 @@ public class PlayerEntity : ScriptableObject
 {
     public int PlayerId;                          // Player固有ID
     public string PlayerName;                     // Player名
-    public AttackAttributeType PlayerAttribute;   // 属性
+    public AttributeType PlayerAttribute;         // 属性
     public Sprite PlayerIcon;                     // 立ち絵画像
     public Sprite PlayerSDIcon;                   // SDキャラ
     public string PlayerDescription;              // プレイヤーの説明文

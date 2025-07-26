@@ -86,7 +86,7 @@ public class EnemyEntityTableEditor : EditorWindow
             enemy.EnemyHP = EditorGUILayout.FloatField(enemy.EnemyHP, GUILayout.Width(80));
             enemy.EnemyAttackPower = EditorGUILayout.FloatField(enemy.EnemyAttackPower, GUILayout.Width(80));
             enemy.EnemyDefensePower = EditorGUILayout.FloatField(enemy.EnemyDefensePower, GUILayout.Width(80));
-            enemy.EnemyAttribute = (AttackAttributeType)EditorGUILayout.EnumPopup(enemy.EnemyAttribute, GUILayout.Width(80));
+            enemy.EnemyAttribute = (AttributeType)EditorGUILayout.EnumPopup(enemy.EnemyAttribute, GUILayout.Width(80));
             enemy.EnemyIcon = (Sprite)EditorGUILayout.ObjectField(enemy.EnemyIcon, typeof(Sprite), false, GUILayout.Width(60));
             enemy.EnemyDescription = EditorGUILayout.TextArea(enemy.EnemyDescription, GUILayout.Width(500), GUILayout.Height(40));
 
@@ -149,7 +149,7 @@ public class EnemyEntityTableEditor : EditorWindow
         newEnemy.EnemyHP = 100f;
         newEnemy.EnemyAttackPower = 10f;
         newEnemy.EnemyDefensePower = 5f;
-        newEnemy.EnemyAttribute = AttackAttributeType.Bullet;
+        newEnemy.EnemyAttribute = AttributeType.Bullet;
         newEnemy.EnemyDescription = "新しい敵の説明文";
 
         string fileName = $"{newEnemyName}_{newEnemy.EnemyId}.asset";

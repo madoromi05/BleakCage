@@ -8,23 +8,23 @@
 public class AttributeWeakness : MonoBehaviour
 {
     [Header("属性設定")]
-    public AttackAttributeType weakAgainstAttribute;               // 弱点属性
+    public AttributeType weakAgainstAttribute;                     // 弱点属性
     public DefensAttributeType weakAgainstCharacterType;           // 敵の種類
 
     [Header("計算")]
-    public float finalDamage;       // 最終ダメージ
-    public float efficiency;        // 攻撃効率
+    public float finalDamage;                                      // 最終ダメージ
+    public float efficiency;                                       // 攻撃効率
 
     [Header("動的な値")]
-    public float attackerPower;     // 攻撃側のパワー
-    public float weaponPower;       // 武器の基本パワー
-    public float peakyCoefficient;  // ピーキー係数
-    public float defenderPower;     // 防御側のパワー
+    public float attackerPower;                                    // 攻撃側のパワー
+    public float weaponPower;                                      // 武器の基本パワー
+    public float peakyCoefficient;                                 // ピーキー係数
+    public float defenderPower;                                    // 防御側のパワー
 
     [Header("難易度によって変わる値")]
-    public float correlationCoefficient = 1.5f;  // 相関係数 (デフォルト値)
-    public float outputAdjustment = 1.0f;        // 出力調整 (デフォルト値)
-    public float decayAdjustment = 1.0f;         // 減衰調整 (デフォルト値)
+    public float correlationCoefficient = 1.5f;                    // 相関係数 (デフォルト値)
+    public float outputAdjustment = 1.0f;                          // 出力調整 (デフォルト値)
+    public float decayAdjustment = 1.0f;                           // 減衰調整 (デフォルト値)
 
     /// <summary>
     /// ダメージ計算を実行
@@ -68,14 +68,14 @@ public class AttributeWeakness : MonoBehaviour
     /// <summary>
     /// 攻撃属性と敵の種類から相性係数を取得
     /// </summary>
-    private float GetRelationCoefficient(AttackAttributeType attackAttr, DefensAttributeType enemyAttr)
+    private float GetRelationCoefficient(AttributeType attackAttr, DefensAttributeType enemyAttr)
     {
         // 相性係数のデフォルト値 (普通の場合)
         float coefficient = 1f;
 
         switch (attackAttr)
         {
-            case AttackAttributeType.Slash: // 斬
+            case AttributeType.Slash: // 斬
                 switch (enemyAttr)
                 {
                     case DefensAttributeType.Repulsive:  // 斥力:有利
@@ -88,7 +88,7 @@ public class AttributeWeakness : MonoBehaviour
                 }
                 break;
 
-            case AttackAttributeType.Blunt: // 鈍
+            case AttributeType.Blunt: // 鈍
                 switch (enemyAttr)
                 {
                     case DefensAttributeType.Softness:   // 軟体:有利
@@ -101,7 +101,7 @@ public class AttributeWeakness : MonoBehaviour
                 }
                 break;
 
-            case AttackAttributeType.Pierce: // 突
+            case AttributeType.Pierce: // 突
                 switch (enemyAttr)
                 {
                     case DefensAttributeType.Hardness:  // 堅牢:有利
@@ -114,7 +114,7 @@ public class AttributeWeakness : MonoBehaviour
                 }
                 break;
 
-            case AttackAttributeType.Bullet: // 弾
+            case AttributeType.Bullet: // 弾
                 // 弾属性は全て普通 (デフォルト値)
                 break;
         }

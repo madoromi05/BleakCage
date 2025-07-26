@@ -20,9 +20,9 @@ MonoBehaviour:
   CardAttribute: 0
   RestrictedCharacterId: 0
   RestrictedWeaponId: 0
-  CardAttackCount: 0
-  CardTargetCount: 0
+  CardAttackCount: 1
+  CardTargetCount: 1
   CardPassive: 0
-  CardHitRate: 0
-  CardOutputModifier: 0
+  CardHitRate: 1
+  CardOutputModifier: 1
   CardDefensePenetration: 0

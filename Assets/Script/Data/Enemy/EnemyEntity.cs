@@ -8,13 +8,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyEntity", menuName = "Create EnemyEntity")]
 public class EnemyEntity : ScriptableObject
 {
-    public int EnemyId;                           // EnemyŒÅ—LID
-    public string EnemyName;                      // Enemy–¼
-    public AttackAttributeType EnemyAttribute;    // UŒ‚‘®«
-    public Sprite EnemyIcon;                      // í“¬’†‰æ‘œ
-    public string EnemyDescription;               // à–¾•¶
+    public int EnemyId;                              // EnemyŒÅ—LID
+    public string EnemyName;                         // Enemy–¼
+    public AttributeType EnemyAttribute;             // UŒ‚‘®«
+    public DefensAttributeType EnemyDefensAttribute; // –hŒä‘®«
+    public Sprite EnemyIcon;                         // í“¬’†‰æ‘œ
+    public string EnemyDescription;                  // à–¾•¶
 
-    public float EnemyHP;                         // Enemy‚ÌHP
-    public float EnemyAttackPower;                // ƒLƒƒƒ‰UŒ‚—Í
-    public float EnemyDefensePower;               // ƒLƒƒƒ‰–hŒä—Í
+    public float EnemyHP;                            // Enemy‚ÌHP
+    public float EnemyAttackPower;                   // ƒLƒƒƒ‰UŒ‚—Í
+    public float EnemyDefensePower;                  // ƒLƒƒƒ‰–hŒä—Í
 }

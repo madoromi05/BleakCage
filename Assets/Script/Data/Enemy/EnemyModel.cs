@@ -7,10 +7,10 @@ public class EnemyModel
 {
     public int EnemyId { get; private set; }                         // “G‚ÌID
     public string EnemyName { get; private set; }                    // “G‚Ì–¼‘O
-    public float EnemyHP { get; private set; }                       // “G‚ÌHP
+    public float EnemyHP { get; set; }                               // “G‚ÌHP
     public float EnemyAttackPower { get; private set; }              // UŒ‚—Í
     public float EnemyDefensePower { get; private set; }             // –hŒä—Í
-    public AttackAttributeType EnemyAttribute { get; private set; }  // ‘®«
+    public AttributeType EnemyAttribute { get; private set; }        // ‘®«
     public Sprite EnemyIcon { get; private set; }                    // •\¦ƒAƒCƒRƒ“
     public string EnemyDescription { get; private set; }             // à–¾•¶
 

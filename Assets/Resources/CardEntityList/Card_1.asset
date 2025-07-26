@@ -18,9 +18,11 @@ MonoBehaviour:
   CardDescription: "{Type}\u5C5E\u6027\u306E{Attribute}\u653B\u6483\u30AB\u30FC\u30C9\u3002\u57FA\u672C\u653B\u6483\u529B\u306F{Type}"
   CardType: 1
   CardAttribute: 1
-  CardAttackCount: 0
-  CardTargetCount: 0
+  RestrictedCharacterId: 0
+  RestrictedWeaponId: 0
+  CardAttackCount: 1
+  CardTargetCount: 1
   CardPassive: 0
-  CardHitRate: 0
-  CardOutputModifier: 0
+  CardHitRate: 1
+  CardOutputModifier: 1
   CardDefensePenetration: 0
