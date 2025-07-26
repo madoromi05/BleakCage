@@ -33,7 +33,7 @@ public class PlayerTurn : MonoBehaviour
     private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
     private GameObject[] selectionEffects = new GameObject[3];  // 各カードの選択エフェクト
 
-    public event System.Action TurnFinished;
+    public event System.Action TurnFinished;                    // ターン終了イベント
 
     private void Awake()
     {
@@ -322,5 +322,8 @@ public class PlayerTurn : MonoBehaviour
         }
 
         Debug.Log("カード効果の実行完了");
+
+        // ターン終了イベントを発火
+        TurnFinished?.Invoke();
     }
 }

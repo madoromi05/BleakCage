@@ -8,11 +8,11 @@ using System.Linq;
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
-    [SerializeField] private PlayerTurn playerTurn;
-    private float turnTime = 10f;
-    private EnemyModel enemyModel;
-    private PlayerModel playerModel;
-    private WeaponModel weaponModel;
+    [SerializeField] private PlayerTurn playerTurn;         // プレイヤーのターンを管理するコンポーネント
+    private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
+    private EnemyModel enemyModel;                          // 敵のモデル
+    private PlayerModel playerModel;                        // プレイヤーのモデル
+    private WeaponModel weaponModel;                        // 武器のモデル
 
     void Start()
     {
