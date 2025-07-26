@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Player_1
   m_EditorClassIdentifier: 
   PlayerId: 1
-  PlayerName: NotName
-  PlayerHP: 0
-  PlayerAttackPower: 0
-  PlayerDefensePower: 0
+  PlayerName: "\u30AE\u30E5\u30B9\u30BF\u30FC\u30D6"
   PlayerAttribute: 0
   PlayerIcon: {fileID: 0}
   PlayerSDIcon: {fileID: 0}
+  PlayerDescription: 
+  PlayerLevel: 10
+  PlayerHP: 100
+  PlayerAttackPower: 1000
+  PlayerDefensePower: 10

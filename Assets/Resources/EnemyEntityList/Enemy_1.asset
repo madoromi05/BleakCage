@@ -19,5 +19,5 @@ MonoBehaviour:
   EnemyIcon: {fileID: 0}
   EnemyDescription: 
   EnemyHP: 100
-  EnemyAttackPower: 0
+  EnemyAttackPower: 10
   EnemyDefensePower: 10

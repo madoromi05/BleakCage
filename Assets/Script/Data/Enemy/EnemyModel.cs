@@ -5,14 +5,15 @@ using UnityEngine;
 /// </summary>
 public class EnemyModel
 {
-    public int EnemyId { get; private set; }                         // “G‚ÌID
-    public string EnemyName { get; private set; }                    // “G‚Ì–¼‘O
-    public float EnemyHP { get; set; }                               // “G‚ÌHP
-    public float EnemyAttackPower { get; private set; }              // UŒ‚—Í
-    public float EnemyDefensePower { get; private set; }             // –hŒä—Í
-    public AttributeType EnemyAttribute { get; private set; }        // ‘®«
-    public Sprite EnemyIcon { get; private set; }                    // •\¦ƒAƒCƒRƒ“
-    public string EnemyDescription { get; private set; }             // à–¾•¶
+    public int EnemyId { get; private set; }                                // “G‚ÌID
+    public string EnemyName { get; private set; }                           // “G‚Ì–¼‘O
+    public float EnemyHP { get; set; }                                      // “G‚ÌHP
+    public float EnemyAttackPower { get; private set; }                     // UŒ‚—Í
+    public float EnemyDefensePower { get; private set; }                    // –hŒä—Í
+    public AttributeType EnemyAttribute { get; private set; }               // UŒ‚‘®«
+    public DefensAttributeType EnemyDefensAttribute { get; private set; }   // –hŒä‘®«
+    public Sprite EnemyIcon { get; private set; }                           // •\¦ƒAƒCƒRƒ“
+    public string EnemyDescription { get; private set; }                    // à–¾•¶
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)‚©‚çƒf[ƒ^‚ğ“Ç‚İ‚ñ‚Åƒ‚ƒfƒ‹‚É”½‰f
@@ -32,6 +33,7 @@ public class EnemyModel
         EnemyAttackPower = Entity.EnemyAttackPower;
         EnemyDefensePower = Entity.EnemyDefensePower;
         EnemyAttribute = Entity.EnemyAttribute;
+        EnemyDefensAttribute = Entity.EnemyDefensAttribute;
         EnemyIcon = Entity.EnemyIcon;
         EnemyDescription = Entity.EnemyDescription;
     }

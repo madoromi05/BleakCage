@@ -17,52 +17,25 @@ public class AttackCardCommand : ICardCommand
 
     public bool Do()
     {
-        if (player == null)
-        {
-            Debug.LogError("[AttackCardCommand] player is null");
-            return false;
-        }
-        if (enemy == null)
-        {
-            Debug.LogError("[AttackCardCommand] enemy is null");
-            return false;
-        }
-        if (card == null)
-        {
-            Debug.LogError("[AttackCardCommand] card is null");
-            return false;
-        }
-        if (weapon == null)
-        {
-            Debug.LogError("[AttackCardCommand] weapon is null");
-            return false;
-        }
-
-        if (enemy.EnemyName == null)
-        {
-            Debug.LogError("[AttackCardCommand] enemy.EnemyName is null");
-            return false;
-        }
-
         var damageSystemGo = new GameObject("TempDamageCalc");
-        if (damageSystemGo == null)
-        {
-            Debug.LogError("[AttackCardCommand] failed to create TempDamageCalc GameObject");
-            return false;
-        }
         var damageSystem = damageSystemGo.AddComponent<AttributeWeakness>();
-        if (damageSystem == null)
-        {
-            Debug.LogError("[AttackCardCommand] failed to add AttributeWeakness component");
-            return false;
-        }
 
-        damageSystem.attackerPower = player.PlayerAttackPower;
-        damageSystem.weaponPower = weapon.WeaponAttackPower;
-        damageSystem.peakyCoefficient = weapon.PeakyCoefficient;
-        damageSystem.defenderPower = enemy.EnemyDefensePower;
-        damageSystem.weakAgainstAttribute = card.CardAttribute;
-        damageSystem.weakAgainstCharacterType = (DefensAttributeType)enemy.EnemyAttribute;
+        damageSystem.weakAgainstAttribute = card.CardAttribute;                                     // カードの属性
+        damageSystem.attackerPower = player.PlayerAttackPower;                                      // プレイヤーの攻撃力
+        damageSystem.weaponPower = weapon.WeaponAttackPower;                                        // 武器の攻撃力
+        damageSystem.peakyCoefficient = weapon.PeakyCoefficient;                                    // ピーキー係数
+        damageSystem.defenderPower = enemy.EnemyDefensePower;                                       // 敵の防御力
+        damageSystem.weakAgainstAttribute = card.CardAttribute;                                     // カードの属性
+        damageSystem.weakAgainstCharacterType = (DefensAttributeType)enemy.EnemyDefensAttribute;    // 敵の防御属性
+
+        Debug.Log($"[AttackCardCommand] " +
+          $"プレイヤー: {player.PlayerName}, " +
+          $"プレイヤー攻撃力: {damageSystem.attackerPower}, " +
+          $"武器攻撃力: {damageSystem.weaponPower}, " +
+          $"ピーキー係数: {damageSystem.peakyCoefficient}, " +
+          $"敵の防御力: {damageSystem.defenderPower}, " +
+          $"カード属性: {damageSystem.weakAgainstAttribute}, " +
+          $"敵の防御属性: {damageSystem.weakAgainstCharacterType}");
 
         damageSystem.CalculateDamage();
 

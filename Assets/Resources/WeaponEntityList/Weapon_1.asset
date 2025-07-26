@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d27d474f917e344babb8dd1c8a7cd12, type: 3}
   m_Name: Weapon_1
   m_EditorClassIdentifier: 
-  WeaponID: 1
+  WeaponId: 0
   WeaponName: NotName
-  WeaponAttackPower: 0
   WeaponAttribute: 0
-  weaponCategory: 0
-  PeakyCoefficient: 0
   WeaponIcon: {fileID: 0}
   WeaponDescription: 
+  WeaponAttackPower: 10
+  WeaponPeakyCoefficient: 1
