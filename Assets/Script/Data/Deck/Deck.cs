@@ -1,6 +1,7 @@
 using NUnit.Framework;
-using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// カードを初期デッキとして保持する
@@ -10,20 +11,18 @@ public class Deck : MonoBehaviour
     [SerializeField] private GameObject characters;
     [SerializeField] private GameObject weapons;
 
-    public List<int> decklist;                          //実際に使用するデッキのIDリスト
-    public List<int> objecter;                          //カードのインデックスなどを一時的に格納するリスト。
+    public List<int> decklist;                          // 実際に使用するデッキのIDリスト
     public List<CardEntity> cards;                      // カードのデータを保持するリスト
     public Dictionary<int, int> dicdecklist;            // デッキのIDをキーとした辞書。カードIDをキー、インデックスを値とする。
+    public List<int> drawPile = new();
 
     private int CardID;                                 //処理中のカードID
     private int cardcount = 0;                          // 現在のデッキに入っているカードの数
     private int decksheet = 42;                         // デッキの最大枚数
 
-    void Start()
+        void Start()
     {
-        //一旦初期化
         decklist = new List<int>();
-        objecter = new List<int>();
         cards = new List<CardEntity>();
         dicdecklist = new Dictionary<int, int>();
 
@@ -39,6 +38,7 @@ public class Deck : MonoBehaviour
             {
                 cards.Add(entity);
                 DeckKeep(entity);
+                drawPile.Add(CardID);
             }
             else
             {
@@ -51,12 +51,26 @@ public class Deck : MonoBehaviour
     {
         if (cardcount < decksheet)
         {
-            //カードをデッキに入れる
             CardID = cardEntity.CardId;
             decklist[cardcount] = CardID;
             dicdecklist[cardcount] = CardID;
             cardcount++;
         }
+    }
+
+    public bool TryDrawCard(List<int> excludeIds, out int cardId)
+    {
+        var candidates = drawPile.Where(id => !excludeIds.Contains(id)).ToList();
+        if (candidates.Count == 0)
+        {
+            cardId = -1;
+            Debug.LogWarning("除外リストによりカードが引けません");
+            return false;
+        }
+
+        int randIndex = Random.Range(0, candidates.Count);
+        cardId = candidates[randIndex];
+        return true;
     }
 
     //編集するときに管理したい感はある
