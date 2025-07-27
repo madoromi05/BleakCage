@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerId: 1
   PlayerName: "\u30AE\u30E5\u30B9\u30BF\u30FC\u30D6"
-  PlayerAttribute: 0
+  PlayerAttribute: 3
   PlayerIcon: {fileID: 0}
   PlayerSDIcon: {fileID: 0}
   PlayerDescription: 

@@ -1,5 +1,7 @@
 using UnityEngine;
-
+/// <summary>
+/// 選択したカードが敵に攻撃するコマンド
+///</summary>
 public class AttackCardCommand : ICardCommand
 {
     private PlayerModel player;

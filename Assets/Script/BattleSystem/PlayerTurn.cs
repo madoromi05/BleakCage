@@ -166,7 +166,6 @@ public class PlayerTurn : MonoBehaviour
 
     /// <summary>
     /// CardNumber番目のカードを選択するメゾット
-    /// 
     /// </summary>
     private void CardSelect(int CardNumber)
     {
@@ -291,6 +290,9 @@ public class PlayerTurn : MonoBehaviour
         CreateCard();
     }
 
+    /// <summary>
+    ///  PlayerからEnemyへカードの効果を実行するコルーチン
+    ///</summary>
     private IEnumerator ExecuteCardCommands()
     {
         foreach (var selectedId in selectedCardsThisTurn)
@@ -302,6 +304,7 @@ public class PlayerTurn : MonoBehaviour
                 continue;
             }
 
+            //HealCard
             if (cardModel.CardAttribute == AttributeType.Heal) {
                 // 回復値は仮に0.2f割合で回復
                 commandQueue.Enqueue(new HealCardCommand(playerModel, 0.2f, useRatio: true));
@@ -318,7 +321,7 @@ public class PlayerTurn : MonoBehaviour
         {
             var command = commandQueue.Dequeue();
             command.Do();
-            yield return new WaitForSeconds(0.3f); // 任意のウェイト
+            yield return new WaitForSeconds(0.1f);
         }
 
         Debug.Log("カード効果の実行完了");
