@@ -13,6 +13,8 @@ public class BattleManager : MonoBehaviour
     private EnemyModel enemyModel;                          // 敵のモデル
     private PlayerModel playerModel;                        // プレイヤーのモデル
     private WeaponModel weaponModel;                        // 武器のモデル
+    [SerializeField] private Deck deck;
+
 
     void Start()
     {
@@ -35,7 +37,7 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        playerTurn.Setup(playerModel, enemyModel ,weaponModel);
+        playerTurn.Setup(playerModel, enemyModel ,weaponModel,deck);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
     }

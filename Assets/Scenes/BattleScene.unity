@@ -151,6 +151,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTurn: {fileID: 120127628}
+  deck: {fileID: 782690699}
 --- !u!4 &120127626
 Transform:
   m_ObjectHideFlags: 0
@@ -192,6 +193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 7699136889019067178, guid: 9db2d9eed3b92c54db8b383069db691c, type: 3}
   PlayerHandTransform: {fileID: 457889571}
+  deck: {fileID: 782690699}
   checkEffect: {fileID: 2083197548}
 --- !u!1 &330585543
 GameObject:
@@ -789,8 +791,8 @@ MonoBehaviour:
   characters: {fileID: 0}
   weapons: {fileID: 0}
   decklist: 
-  objecter: 
   cards: []
+  drawPile: 
 --- !u!4 &782690700
 Transform:
   m_ObjectHideFlags: 0
@@ -1185,43 +1187,43 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.08343696
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.250004
+      value: 0.22834682
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 62.01685
+      value: 63.757023
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.67104805
+      value: 0.67994356
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.21668026
+      value: -0.19410503
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.6730937
+      value: -0.67994356
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.22291073
+      value: 0.19410503
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0.531
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -90.001
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 36.22
+      value: 31.865
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_Name

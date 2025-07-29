@@ -8,7 +8,7 @@ public class PlayerTurn : MonoBehaviour
 {
     [SerializeField] CardController cardPrefab;
     [SerializeField] Transform PlayerHandTransform;
-    [SerializeField] private GameObject checkEffect;            // 選択されたカードにエフェクト付与用
+    [SerializeField] private Deck deck;                         // デッキ情報を保持するクラス
 
     private InputReader inputReader;                            // 入力を管理するクラス
     private PlayerModel playerModel;                            // プレイヤーモデル
@@ -22,7 +22,6 @@ public class PlayerTurn : MonoBehaviour
     private List<int> handcard = new();                         // 手札のカードID
     private Queue<ICardCommand> commandQueue = new();           // コマンドキュー
     private bool isPlayerTurn;                                  // プレイヤーのターンかどうか
-    private int decksheet = 42;                                 // デッキの最大枚数
     private bool inputEnabled = false;                          // 入力を受け付けるかどうかのフラ
     private bool isProcessing = false;                          // 処理中フラグを追加
     private float lastInputTime = 0f;                           // 前回入力時刻
@@ -31,7 +30,6 @@ public class PlayerTurn : MonoBehaviour
 
     // カード選択状態管理
     private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
-    private GameObject[] selectionEffects = new GameObject[3];  // 各カードの選択エフェクト
 
     public event System.Action TurnFinished;                    // ターン終了イベント
 
@@ -44,11 +42,12 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
-    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel)
+    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel, Deck deck)
     {
         this.playerModel = playerModel;
         this.enemyModel = enemyModel;
         this.weaponModel = weaponModel;
+        this.deck = deck;
     }
 
     private void OnDestroy()
@@ -65,29 +64,14 @@ public class PlayerTurn : MonoBehaviour
         inputEnabled = true;
         handcard.Clear();
 
+        Debug.Log("除外リストの内容（StartPlayerTurn）: " + string.Join(",", excludedCardsThisTurn));
+
         card.Clear();
         CreateCard();
     }
 
     public void FinishPlayerTurn()
     {
-        inputEnabled = false;
-
-        for (int i = 0; i < handSelected.Length; i++)
-        {
-            if (handSelected[i])
-                selectedCardsThisTurn.Add(handcard[i]);
-            else
-                excludedCardsThisTurn.Add(handcard[i]);
-
-            handSelected[i] = false;
-        }
-
-        ResetSelectionEffects();
-
-        Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
-        Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
-
         // ターン終わりにCardの効果処理
         StartCoroutine(ExecuteCardCommands());
     }
@@ -105,6 +89,8 @@ public class PlayerTurn : MonoBehaviour
 
         CardSelect(index);
         isProcessing = false; // 処理ロック解除
+
+        Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
     }
 
     private void OnDisCard()
@@ -127,6 +113,9 @@ public class PlayerTurn : MonoBehaviour
 
     private void CreateCard()
     {
+        // handSelectedとselectionEffectsを完全初期化
+        handSelected = new bool[3];
+
         // 既存のカードを消す
         foreach (Transform child in PlayerHandTransform)
         {
@@ -135,32 +124,26 @@ public class PlayerTurn : MonoBehaviour
 
         card.Clear();
         handcard.Clear();
-        ResetSelectionEffects();
 
         //三枚提示
         for (int i = 0; i < 3; i++)
         {
-            int draw;
-            do
+            if (deck.TryDrawCard(excludedCardsThisTurn, out int drawId))
             {
-                draw = Random.Range(1, decksheet + 1); // CardEntityのIDは1から始まる想定
-            } while (excludedCardsThisTurn.Contains(draw)); // 除外されたカードは引かない
+                var c = Instantiate(cardPrefab, PlayerHandTransform, false);
+                CardModel cardModel = cardModelFactory.CreateFromId(drawId);
+                if (cardModel != null)
+                {
+                    c.Init(cardModel);
+                }
+                else
+                {
+                    Debug.LogError($"カードID {drawId} の読み込みに失敗しました");
+                }
 
-            var c = Instantiate(cardPrefab, PlayerHandTransform, false);
-
-            // CardModelFactoryを使ってCardModelを生成し、カードを初期化
-            CardModel cardModel = cardModelFactory.CreateFromId(draw);
-            if (cardModel != null)
-            {
-                c.Init(cardModel);
+                card.Add(c);
+                handcard.Add(drawId);
             }
-            else
-            {
-                Debug.LogError($"カードID {draw} の読み込みに失敗しました");
-            }
-
-            card.Add(c);
-            handcard.Add(draw);
         }
     }
 
@@ -187,13 +170,10 @@ public class PlayerTurn : MonoBehaviour
 
             // 選択状態を有効化する
             handSelected[CardNumber] = true;
-            ShowSelectionEffect(CardNumber);
         }
         // 選択されているとき
         else if (handSelected[CardNumber])
         {
-            // 選択エフェクトを無効化する 
-            HideSelectionEffect(CardNumber);
             // 選択状態を解除する
             handSelected[CardNumber] = false;
         }
@@ -211,47 +191,7 @@ public class PlayerTurn : MonoBehaviour
     }
 
     /// <summary>
-    /// 選択エフェクトを表示
-    /// </summary>
-    private void ShowSelectionEffect(int cardIndex)
-    {
-        if (checkEffect != null && cardIndex < card.Count)
-        {
-            var effect = Instantiate(checkEffect, card[cardIndex].transform.position, Quaternion.identity);
-            effect.transform.SetParent(card[cardIndex].transform);
-            selectionEffects[cardIndex] = effect;
-        }
-    }
-
-    /// <summary>
-    /// 選択エフェクトを非表示
-    /// </summary>
-    private void HideSelectionEffect(int cardIndex)
-    {
-        if (selectionEffects[cardIndex] != null)
-        {
-            Destroy(selectionEffects[cardIndex]);
-            selectionEffects[cardIndex] = null;
-        }
-    }
-
-    /// <summary>
-    /// 全ての選択エフェクトをリセット
-    /// </summary>
-    private void ResetSelectionEffects()
-    {
-        for (int i = 0; i < selectionEffects.Length; i++)
-        {
-            if (selectionEffects[i] != null)
-            {
-                Destroy(selectionEffects[i]);
-                selectionEffects[i] = null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 入力: 決定ボタンイベント
+    /// 入力: Enterボタンイベント
     /// </summary>
     private void DeisCard()
     {
@@ -281,7 +221,6 @@ public class PlayerTurn : MonoBehaviour
         Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
 
         //選択状態をリセット
-        ResetSelectionEffects();
         for (int i = 0; i < handSelected.Length; i++)
         {
             handSelected[i] = false;
@@ -290,9 +229,6 @@ public class PlayerTurn : MonoBehaviour
         CreateCard();
     }
 
-    /// <summary>
-    ///  PlayerからEnemyへカードの効果を実行するコルーチン
-    ///</summary>
     private IEnumerator ExecuteCardCommands()
     {
         foreach (var selectedId in selectedCardsThisTurn)
@@ -304,15 +240,15 @@ public class PlayerTurn : MonoBehaviour
                 continue;
             }
 
-            //HealCard
-            if (cardModel.CardAttribute == AttributeType.Heal) {
+            if (cardModel.CardAttribute == AttributeType.Heal)
+            {
                 // 回復値は仮に0.2f割合で回復
                 commandQueue.Enqueue(new HealCardCommand(playerModel, 0.2f, useRatio: true));
             }
             // Heal以外は攻撃処理
             else
             {
-                commandQueue.Enqueue(new AttackCardCommand(playerModel, enemyModel , cardModel, weaponModel));
+                commandQueue.Enqueue(new AttackCardCommand(playerModel, enemyModel, cardModel, weaponModel));
             }
         }
 
@@ -321,7 +257,7 @@ public class PlayerTurn : MonoBehaviour
         {
             var command = commandQueue.Dequeue();
             command.Do();
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.3f); // 任意のウェイト
         }
 
         Debug.Log("カード効果の実行完了");
@@ -329,4 +265,18 @@ public class PlayerTurn : MonoBehaviour
         // ターン終了イベントを発火
         TurnFinished?.Invoke();
     }
+
+    private List<int> GetCurrentlySelectedCardIds()
+    {
+        List<int> selectedIds = new();
+        for (int i = 0; i < handSelected.Length; i++)
+        {
+            if (handSelected[i] && i < handcard.Count)
+            {
+                selectedIds.Add(handcard[i]);
+            }
+        }
+        return selectedIds;
+    }
+
 }
