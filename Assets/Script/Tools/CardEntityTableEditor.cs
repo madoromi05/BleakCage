@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Linq;
 using System.IO;
 
@@ -11,8 +13,6 @@ public class CardEntityTableEditor : EditorWindow
 {
     private Vector2 scrollPos;
     private List<CardEntity> cardList;
-    private string newCardName = "Card";
-    private string savePath = "Assets/Resources/CardEntityList";
 
     [MenuItem("Tools/Card Entity Table")]
     public static void OpenWindow()
@@ -25,27 +25,23 @@ public class CardEntityTableEditor : EditorWindow
         LoadData();
     }
 
-    private void LoadData()
+    private async void LoadData()
     {
-        string[] guids = AssetDatabase.FindAssets("t:CardEntity", new string[] { savePath });
-        cardList = guids
-            .Select(guid => AssetDatabase.LoadAssetAtPath<CardEntity>(AssetDatabase.GUIDToAssetPath(guid)))
-            .Where(card => card != null)
-            .ToList();
-    }
+        cardList = new List<CardEntity>();
 
-    private string GetCardTypeDisplayName(CardEntity.CardTypeData cardType)
-    {
-        switch (cardType)
+        AsyncOperationHandle<IList<CardEntity>> handle =
+            Addressables.LoadAssetsAsync<CardEntity>("CardEntity", null);
+
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
         {
-            case CardEntity.CardTypeData.Character:
-                return "キャラ付き";
-            case CardEntity.CardTypeData.Weapon:
-                return "武器付き";
-            case CardEntity.CardTypeData.Universal:
-                return "汎用";
-            default:
-                return cardType.ToString();
+            cardList = handle.Result?.Where(c => c != null).ToList() ?? new List<CardEntity>();
+            Repaint(); // << 再描画して即座に反映
+        }
+        else
+        {
+            Debug.LogWarning($"CardEntity のロードに失敗しました（Status: {handle.Status}）");
         }
     }
 
@@ -54,6 +50,7 @@ public class CardEntityTableEditor : EditorWindow
         if (cardList == null)
         {
             LoadData();
+            return;
         }
 
         EditorGUILayout.BeginVertical("box");
@@ -78,20 +75,23 @@ public class CardEntityTableEditor : EditorWindow
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
+        cardList = cardList.OrderBy(c => c.CardIdentifier).ToList();
+
         // ヘッダー行
         EditorGUILayout.BeginHorizontal();
         GUILayout.Label("ID", GUILayout.Width(30));
-        GUILayout.Label("Name", GUILayout.Width(120));
+        GUILayout.Label("名前", GUILayout.Width(120));
         GUILayout.Label("Type", GUILayout.Width(80));
-        GUILayout.Label("Attribute", GUILayout.Width(80));
-        GUILayout.Label("HitRate", GUILayout.Width(80));
-        GUILayout.Label("OutputMod", GUILayout.Width(80));
-        GUILayout.Label("Penetration", GUILayout.Width(80));
-        GUILayout.Label("AttackCount", GUILayout.Width(80));
-        GUILayout.Label("TargetCount", GUILayout.Width(80));
+        GUILayout.Label("装備可能武器ID", GUILayout.Width(150));
+        GUILayout.Label("攻撃属性", GUILayout.Width(80));
+        GUILayout.Label("出力調整", GUILayout.Width(80));
+        GUILayout.Label("命中率", GUILayout.Width(80));
+        GUILayout.Label("防御貫通率", GUILayout.Width(80));
+        GUILayout.Label("攻撃回数", GUILayout.Width(80));
+        GUILayout.Label("攻撃対数", GUILayout.Width(80));
         GUILayout.Label("Passive", GUILayout.Width(60));
         GUILayout.Label("Icon", GUILayout.Width(60));
-        GUILayout.Label("Description", GUILayout.Width(200));
+        GUILayout.Label("説明文", GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
 
         List<CardEntity> toDelete = new List<CardEntity>();
@@ -103,12 +103,32 @@ public class CardEntityTableEditor : EditorWindow
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
 
-            card.CardId = EditorGUILayout.IntField(card.CardId, GUILayout.Width(30));
+            card.CardIdentifier = EditorGUILayout.IntField(card.CardIdentifier, GUILayout.Width(30));
             card.CardName = EditorGUILayout.TextField(card.CardName, GUILayout.Width(120));
             card.CardType = (CardEntity.CardTypeData)EditorGUILayout.EnumPopup(card.CardType, GUILayout.Width(80));
+
+            // 装備可能武器ID入力欄
+            string weaponIds = string.Join(",", card.EquippableWeaponIdentifier ?? new int[0]);
+            string newWeaponIds = EditorGUILayout.TextField(weaponIds, GUILayout.Width(150));
+
+            if (newWeaponIds != weaponIds)
+            {
+                try
+                {
+                    card.EquippableWeaponIdentifier = newWeaponIds
+                        .Split(',')
+                        .Select(s => int.Parse(s.Trim()))
+                        .ToArray();
+                }
+                catch
+                {
+                    Debug.LogError("装備可能武器IDの入力に誤りがあります。整数をカンマ区切りで入力してください。");
+                }
+            }
+
             card.CardAttribute = (AttributeType)EditorGUILayout.EnumPopup(card.CardAttribute, GUILayout.Width(80));
-            card.CardHitRate = EditorGUILayout.FloatField(card.CardHitRate, GUILayout.Width(80));
             card.CardOutputModifier = EditorGUILayout.FloatField(card.CardOutputModifier, GUILayout.Width(80));
+            card.CardHitRate = EditorGUILayout.FloatField(card.CardHitRate, GUILayout.Width(80));
             card.CardDefensePenetration = EditorGUILayout.FloatField(card.CardDefensePenetration, GUILayout.Width(80));
             card.CardAttackCount = EditorGUILayout.IntField(card.CardAttackCount, GUILayout.Width(80));
             card.CardTargetCount = EditorGUILayout.IntField(card.CardTargetCount, GUILayout.Width(80));
@@ -164,16 +184,16 @@ public class CardEntityTableEditor : EditorWindow
 
     private void CreateNewCard()
     {
-        if (!Directory.Exists(savePath))
+        string createPath = "Assets/AddressableAssets/CardEntityList";
+        if (!Directory.Exists(createPath))
         {
-            Directory.CreateDirectory(savePath);
-            AssetDatabase.Refresh();
+            Directory.CreateDirectory(createPath);
         }
 
         CardEntity newCard = ScriptableObject.CreateInstance<CardEntity>();
 
-        newCard.CardId = GetNextAvailableId();
-        newCard.CardName = "New Card";
+        newCard.CardIdentifier = GetNextAvailableId();
+        newCard.CardName = $"Card_{newCard.CardIdentifier}";
         newCard.CardType = CardEntity.CardTypeData.Universal;
         newCard.CardAttribute = AttributeType.Bullet;
         newCard.CardHitRate = 1.0f;
@@ -184,34 +204,33 @@ public class CardEntityTableEditor : EditorWindow
         newCard.CardPassive = false;
         newCard.CardDescription = "新しいカードの説明文";
 
-        string fileName = $"{newCardName}_{newCard.CardId}.asset";
-        string filePath = Path.Combine(savePath, fileName);
-        int counter = 1;
+        string fileName = $"Card_{newCard.CardIdentifier}.asset";
+        string fullPath = Path.Combine(createPath, fileName);
 
-        while (File.Exists(filePath))
-        {
-            fileName = $"{newCardName}_{newCard.CardId}_{counter}.asset";
-            filePath = Path.Combine(savePath, fileName);
-            counter++;
-        }
-
-        AssetDatabase.CreateAsset(newCard, filePath);
+        AssetDatabase.CreateAsset(newCard, fullPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+
+        // Addressablesラベル追加（ラベル名: CardEntity）
+        var settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+        var entry = settings.CreateOrMoveEntry(AssetDatabase.AssetPathToGUID(fullPath), settings.DefaultGroup);
+        entry.SetLabel("CardEntity", true);
 
         LoadData();
         Selection.activeObject = newCard;
         EditorGUIUtility.PingObject(newCard);
 
-        Debug.Log($"新しいCardEntity '{newCard.CardName}' を作成しました: {filePath}");
+        Debug.Log($"新しいCardEntity '{newCard.CardName}' を作成しました: {fullPath}");
     }
 
     private void DeleteCard(CardEntity card)
     {
-        if (card == null) return;
-
         string assetPath = AssetDatabase.GetAssetPath(card);
         if (string.IsNullOrEmpty(assetPath)) return;
+
+        var guid = AssetDatabase.AssetPathToGUID(assetPath);
+        var settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+        settings.RemoveAssetEntry(guid);
 
         if (AssetDatabase.DeleteAsset(assetPath))
         {
@@ -226,10 +245,9 @@ public class CardEntityTableEditor : EditorWindow
 
     private int GetNextAvailableId()
     {
-        if (cardList == null || cardList.Count == 0)
+        if (cardList == null || cardList.Count == 0 || !cardList.Any(c => c != null))
             return 1;
 
-        int maxId = cardList.Where(c => c != null).Max(c => c.CardId);
-        return maxId + 1;
+        return cardList.Where(c => c != null).Max(c => c.CardIdentifier) + 1;
     }
 }

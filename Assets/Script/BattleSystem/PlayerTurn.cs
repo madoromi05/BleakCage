@@ -1,14 +1,15 @@
 // PlayerTurn.cs
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.Pool;
 
 public class PlayerTurn : MonoBehaviour
 {
     [SerializeField] CardController cardPrefab;
     [SerializeField] Transform PlayerHandTransform;
-    [SerializeField] private Deck deck;                         // デッキ情報を保持するクラス
+    [SerializeField] private BattleCardDeck deck;                         // デッキ情報を保持するクラス
 
     private InputReader inputReader;                            // 入力を管理するクラス
     private PlayerModel playerModel;                            // プレイヤーモデル
@@ -27,7 +28,6 @@ public class PlayerTurn : MonoBehaviour
     private float lastInputTime = 0f;                           // 前回入力時刻
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
 
-
     // カード選択状態管理
     private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
 
@@ -42,7 +42,7 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
-    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel, Deck deck)
+    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel, BattleCardDeck deck)
     {
         this.playerModel = playerModel;
         this.enemyModel = enemyModel;

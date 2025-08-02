@@ -13,7 +13,7 @@ public class BattleManager : MonoBehaviour
     private EnemyModel enemyModel;                          // 敵のモデル
     private PlayerModel playerModel;                        // プレイヤーのモデル
     private WeaponModel weaponModel;                        // 武器のモデル
-    [SerializeField] private Deck deck;
+    [SerializeField] private BattleCardDeck deck;
 
 
     void Start()

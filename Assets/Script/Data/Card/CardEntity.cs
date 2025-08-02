@@ -17,16 +17,14 @@ public class CardEntity : ScriptableObject
         Universal   // 汎用
     }
 
-    public int CardId;                          // カード固有ID
+    public int CardIdentifier;                  // カード固有ID
     public string CardName;                     // カード名
+    public int[] EquippableWeaponIdentifier;    // 武器ID
     public Sprite CardIcon;                     // アイコン画像
     public string CardDescription;              // 説明文
 
     public CardTypeData CardType;               // カードタイプ
     public AttributeType CardAttribute;         // 属性
-
-    public int RestrictedCharacterId;           // キャラ制限用Id
-    public int RestrictedWeaponId;              // 武器制限用Id
 
     public int CardAttackCount;                 // 攻撃回数
     public int CardTargetCount;                 // 攻撃体数
