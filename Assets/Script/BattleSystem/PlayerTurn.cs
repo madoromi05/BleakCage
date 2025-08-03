@@ -1,14 +1,15 @@
 // PlayerTurn.cs
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.Pool;
 
 public class PlayerTurn : MonoBehaviour
 {
-    [SerializeField] CardController cardPrefab;
-    [SerializeField] Transform PlayerHandTransform;
-    [SerializeField] private Deck deck;                         // デッキ情報を保持するクラス
+    [SerializeField] private CardController cardPrefab;
+    [SerializeField] private Transform playerHandTransform;
+    [SerializeField] private BattleCardDeck deck;
 
     private InputReader inputReader;                            // 入力を管理するクラス
     private PlayerModel playerModel;                            // プレイヤーモデル
@@ -27,7 +28,6 @@ public class PlayerTurn : MonoBehaviour
     private float lastInputTime = 0f;                           // 前回入力時刻
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
 
-
     // カード選択状態管理
     private bool[] handSelected = new bool[3];                  // 各カード（3枚）が選択されているかどうか
 
@@ -42,12 +42,12 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
-    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel, Deck deck)
+    public void Setup(PlayerModel playerModel, EnemyModel enemyModel, WeaponModel weaponModel, PlayerCardDeck playerDeck, BattleCardDeck battleDeck)
     {
         this.playerModel = playerModel;
         this.enemyModel = enemyModel;
         this.weaponModel = weaponModel;
-        this.deck = deck;
+        battleDeck.InitFromPlayerDeck(playerDeck);
     }
 
     private void OnDestroy()
@@ -117,7 +117,7 @@ public class PlayerTurn : MonoBehaviour
         handSelected = new bool[3];
 
         // 既存のカードを消す
-        foreach (Transform child in PlayerHandTransform)
+        foreach (Transform child in playerHandTransform)
         {
             Destroy(child.gameObject);
         }
@@ -130,7 +130,7 @@ public class PlayerTurn : MonoBehaviour
         {
             if (deck.TryDrawCard(excludedCardsThisTurn, out int drawId))
             {
-                var c = Instantiate(cardPrefab, PlayerHandTransform, false);
+                var c = Instantiate(cardPrefab, playerHandTransform, false);
                 CardModel cardModel = cardModelFactory.CreateFromId(drawId);
                 if (cardModel != null)
                 {
