@@ -9,16 +9,25 @@ using static UnityEngine.Rendering.GPUSort;
 /// </summary>
 public class BattleCardDeck : MonoBehaviour
 {
-    public PlayerCardDeck playerDeck;
-    private List<int> drawPile; // ドロップ可能なカードIDリスト
+    private List<int> battleCardDeck = new();
+    private List<int> destructionCard = new List<int>(); // 破棄したカードのIDリスト
     void Start()
     {
-        drawPile = new List<int>();
+        destructionCard = new List<int>();
     }
 
+    public void InitFromPlayerDeck(PlayerCardDeck playerCardDeck)
+    {
+        // プレイヤーデッキから初期デッキをコピー
+        battleCardDeck = new List<int>(playerCardDeck.decklist);
+        // シャッフル
+        battleCardDeck = battleCardDeck.OrderBy(x => Random.value).ToList();
+    }
+
+    // 破棄したデッキを引かないようにする
     public bool TryDrawCard(List<int> excludeIds, out int cardId)
     {
-        var candidates = drawPile.Where(id => !excludeIds.Contains(id)).ToList();
+        var candidates = destructionCard.Where(id => !excludeIds.Contains(id)).ToList();
         if (candidates.Count == 0)
         {
             cardId = -1;

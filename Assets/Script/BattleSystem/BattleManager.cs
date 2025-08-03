@@ -9,11 +9,12 @@ using System.Linq;
 public class BattleManager : MonoBehaviour
 {
     [SerializeField] private PlayerTurn playerTurn;         // プレイヤーのターンを管理するコンポーネント
+    [SerializeField] private BattleCardDeck battleDeck;
+    [SerializeField] private PlayerCardDeck playerDeck;
     private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
     private EnemyModel enemyModel;                          // 敵のモデル
     private PlayerModel playerModel;                        // プレイヤーのモデル
     private WeaponModel weaponModel;                        // 武器のモデル
-    [SerializeField] private BattleCardDeck deck;
 
 
     void Start()
@@ -37,7 +38,7 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        playerTurn.Setup(playerModel, enemyModel ,weaponModel,deck);
+        playerTurn.Setup(playerModel, enemyModel ,weaponModel,playerDeck,battleDeck);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
