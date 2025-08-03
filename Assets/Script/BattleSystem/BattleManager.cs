@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-
+﻿using System.Collections;
+using System.Drawing;
+using System.Runtime.CompilerServices;
+using TMPro;
+using UnityEngine;
 /// <summary>
 /// Battleの流れを管理するクラス 
 /// </summary>
@@ -11,11 +11,12 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private PlayerTurn playerTurn;         // プレイヤーのターンを管理するコンポーネント
     [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private PlayerCardDeck playerDeck;
-    private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
     private EnemyModel enemyModel;                          // 敵のモデル
     private PlayerModel playerModel;                        // プレイヤーのモデル
     private WeaponModel weaponModel;                        // 武器のモデル
+    private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
 
+    public TextMeshProUGUI timeText;                        //時間を表示する変数
     void Start()
     {
         // @Demoサーバーからデータ取得してIDを得たと仮定
@@ -47,13 +48,13 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator StartPlayerTurnWithTimer()
     {
-        Debug.Log("【プレイヤーターン開始】");
+         Debug.Log("【プレイヤーターン開始】");
         playerTurn.StartPlayerTurn();
 
-        float timer = 0f;
-        while (timer < turnTime)
+        while (turnTime >= 0)
         {
-            timer += Time.deltaTime;
+            turnTime -= Time.deltaTime;
+            timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
 
@@ -82,6 +83,7 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【敵ターン終了】");
 
         // 次のプレイヤーターン開始
+        turnTime = 10f;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
 }

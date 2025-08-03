@@ -14,7 +14,7 @@ public class PlayerTurn : MonoBehaviour
     private InputReader inputReader;                            // 入力を管理するクラス
     private PlayerModel playerModel;                            // プレイヤーモデル
     private EnemyModel enemyModel;                              // 敵モデル
-    private WeaponModel weaponModel;
+    private WeaponModel weaponModel;                            // 武器モデル
     private CardModelFactory cardModelFactory;                  // カードモデル生成用
 
     private List<CardController> card = new();                  // 初期Deck取得
@@ -73,9 +73,11 @@ public class PlayerTurn : MonoBehaviour
         // ターン終わりにCardの効果処理
         StartCoroutine(ExecuteCardCommands());
     }
+
+    /// <summary
     /// 1,2,3ボタンでカードを選択
     /// </summary>
-    private void OnCardSelect(int index)
+    private void OnCardSelect(int inputNumber)
     {
         if (!inputEnabled || isProcessing) return;
 
@@ -83,10 +85,9 @@ public class PlayerTurn : MonoBehaviour
         if (Time.time - lastInputTime < inputCooldown) return;
         lastInputTime = Time.time;
 
-        isProcessing = true;  // 処理ロック
-
-        CardSelect(index);
-        isProcessing = false; // 処理ロック解除
+        isProcessing = true;  // 処理停止
+        CardSelect(inputNumber);
+        isProcessing = false;
 
         Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
     }
@@ -148,16 +149,16 @@ public class PlayerTurn : MonoBehaviour
     /// <summary>
     /// CardNumber番目のカードを選択するメゾット
     /// </summary>
-    private void CardSelect(int CardNumber)
+    private void CardSelect(int inputNumber)
     {
-        if (CardNumber < 0 || CardNumber >= handSelected.Length || CardNumber >= card.Count)
+        if (inputNumber < 0 || inputNumber >= handSelected.Length || inputNumber >= card.Count)
         {
-            Debug.Log($"無効なカード番号: {CardNumber}");
+            Debug.Log($"無効なカード番号: {inputNumber}");
             return;
         }
 
         // 選択がされていなかったとき
-        if (!handSelected[CardNumber])
+        if (!handSelected[inputNumber])
         {
             // 選択制限チェック
             if (!CanSelectCard())
@@ -167,16 +168,15 @@ public class PlayerTurn : MonoBehaviour
             }
 
             // 選択状態を有効化する
-            handSelected[CardNumber] = true;
+            handSelected[inputNumber] = true;
         }
         // 選択されているとき
-        else if (handSelected[CardNumber])
+        else if (handSelected[inputNumber])
         {
             // 選択状態を解除する
-            handSelected[CardNumber] = false;
+            handSelected[inputNumber] = false;
         }
-
-        Debug.Log($"カード{CardNumber + 1}が{(handSelected[CardNumber] ? "選択" : "選択解除")}されました");
+        Debug.Log($"カード{inputNumber + 1}が{(handSelected[inputNumber] ? "選択" : "選択解除")}されました");
     }
 
     /// <summary>
