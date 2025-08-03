@@ -7,9 +7,9 @@ using static UnityEngine.Rendering.GPUSort;
 /// </summary>
 public class PlayerCardDeck : MonoBehaviour
 {
-    public List<int> decklist { get; protected set; } = new List<int>();                            // 実際に使用するデッキのIDリスト
-    public List<CardEntity> cards { get; protected set; } = new List<CardEntity>();                 // カードのデータを保持するリスト
-    public Dictionary<int, int> dicdecklist { get; protected set; } = new Dictionary<int, int>();   // デッキのIDをキーとした辞書。カードIDをキー、インデックスを値とする。
+    public List<int> Decklist { get; protected set; } = new List<int>();     // 実際に使用するデッキのIDリスト
+    private List<CardEntity> cards = new List<CardEntity>();                 // カードのデータを保持するリスト
+    private Dictionary<int, int> dicdecklist = new Dictionary<int, int>();   // デッキのIDをキーとした辞書。カードIDをキー、インデックスを値とする。
 
     private int cardIdentifier;                         //処理中のカードID
     private int cardcount = 0;                          // 現在のデッキに入っているカードの数
@@ -22,14 +22,14 @@ public class PlayerCardDeck : MonoBehaviour
 
     private void CreateDeck()
     {
-        decklist.Clear();
+        Decklist.Clear();
         cards.Clear();
         dicdecklist.Clear();
         cardcount = 0;
 
         for (int i = 0; i < decksheet; i++)
         {
-            decklist.Add(-1);
+            Decklist.Add(-1);
         }
 
         for (int i = 1; i <= decksheet; i++)
@@ -53,7 +53,7 @@ public class PlayerCardDeck : MonoBehaviour
         if (cardcount < decksheet)
         {
             cardIdentifier = cardEntity.CardIdentifier;
-            decklist.Add(cardIdentifier);
+            Decklist.Add(cardIdentifier);
             dicdecklist[cardIdentifier] = cardcount;
             cardcount++;
         }

@@ -11,15 +11,11 @@ public class BattleCardDeck : MonoBehaviour
 {
     private List<int> battleCardDeck = new();
     private List<int> destructionCard = new List<int>(); // 破棄したカードのIDリスト
-    void Start()
-    {
-        destructionCard = new List<int>();
-    }
 
     public void InitFromPlayerDeck(PlayerCardDeck playerCardDeck)
     {
         // プレイヤーデッキから初期デッキをコピー
-        battleCardDeck = new List<int>(playerCardDeck.decklist);
+        battleCardDeck = new List<int>(playerCardDeck.Decklist);
         // シャッフル
         battleCardDeck = battleCardDeck.OrderBy(x => Random.value).ToList();
     }

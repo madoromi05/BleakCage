@@ -16,7 +16,6 @@ public class BattleManager : MonoBehaviour
     private PlayerModel playerModel;                        // プレイヤーのモデル
     private WeaponModel weaponModel;                        // 武器のモデル
 
-
     void Start()
     {
         // @Demoサーバーからデータ取得してIDを得たと仮定
