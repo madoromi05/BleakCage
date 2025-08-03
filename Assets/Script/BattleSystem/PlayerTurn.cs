@@ -22,7 +22,6 @@ public class PlayerTurn : MonoBehaviour
     private List<int> excludedCardsThisTurn = new List<int>();  // 破棄されたカードのIDを保持
     private List<int> handcard = new();                         // 手札のカードID
     private Queue<ICardCommand> commandQueue = new();           // コマンドキュー
-    private bool isPlayerTurn;                                  // プレイヤーのターンかどうか
     private bool inputEnabled = false;                          // 入力を受け付けるかどうかのフラ
     private bool isProcessing = false;                          // 処理中フラグを追加
     private float lastInputTime = 0f;                           // 前回入力時刻
@@ -64,8 +63,7 @@ public class PlayerTurn : MonoBehaviour
         inputEnabled = true;
         handcard.Clear();
 
-        Debug.Log("除外リストの内容（StartPlayerTurn）: " + string.Join(",", excludedCardsThisTurn));
-
+        deck.ResetBattleDeck(deck.battleCardDeck);
         card.Clear();
         CreateCard();
     }
@@ -128,7 +126,7 @@ public class PlayerTurn : MonoBehaviour
         //三枚提示
         for (int i = 0; i < 3; i++)
         {
-            if (deck.TryDrawCard(excludedCardsThisTurn, out int drawId))
+            if (deck.TryDrawCard(out int drawId))
             {
                 var c = Instantiate(cardPrefab, playerHandTransform, false);
                 CardModel cardModel = cardModelFactory.CreateFromId(drawId);
@@ -154,7 +152,7 @@ public class PlayerTurn : MonoBehaviour
     {
         if (CardNumber < 0 || CardNumber >= handSelected.Length || CardNumber >= card.Count)
         {
-            Debug.LogError($"無効なカード番号: {CardNumber}");
+            Debug.Log($"無効なカード番号: {CardNumber}");
             return;
         }
 

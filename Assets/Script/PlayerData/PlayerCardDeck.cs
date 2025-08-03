@@ -7,13 +7,11 @@ using static UnityEngine.Rendering.GPUSort;
 /// </summary>
 public class PlayerCardDeck : MonoBehaviour
 {
-    public List<int> Decklist { get; protected set; } = new List<int>();     // 実際に使用するデッキのIDリスト
-    private List<CardEntity> cards = new List<CardEntity>();                 // カードのデータを保持するリスト
-    private Dictionary<int, int> dicdecklist = new Dictionary<int, int>();   // デッキのIDをキーとした辞書。カードIDをキー、インデックスを値とする。
-
-    private int cardIdentifier;                         //処理中のカードID
-    private int cardcount = 0;                          // 現在のデッキに入っているカードの数
+    [SerializeField] private List<CardEntity>  deckList = new List<CardEntity>();             // カードのデータを保持するリスト
+    public List<CardEntity> DeckList => deckList;
     private int decksheet = 42;                         // デッキの最大枚数
+
+    public bool IsDeckReady { get; private set; } = false;
 
     void Start()
     {
@@ -22,40 +20,21 @@ public class PlayerCardDeck : MonoBehaviour
 
     private void CreateDeck()
     {
-        Decklist.Clear();
-        cards.Clear();
-        dicdecklist.Clear();
-        cardcount = 0;
-
-        for (int i = 0; i < decksheet; i++)
-        {
-            Decklist.Add(-1);
-        }
+        deckList.Clear();
+        IsDeckReady = false; // 準備中にリセット
 
         for (int i = 1; i <= decksheet; i++)
         {
             CardEntity entity = Resources.Load<CardEntity>($"CardEntityList/Card_{i}");
             if (entity != null)
             {
-                cards.Add(entity);
-                DeckKeep(entity);
+                deckList.Add(entity);
             }
             else
             {
                 Debug.LogWarning($"CardEntity not found: Card_{i}");
             }
         }
-    }
-
-    // IDを指定してCardEntityをデッキに追加する
-    private void DeckKeep(CardEntity cardEntity)
-    {
-        if (cardcount < decksheet)
-        {
-            cardIdentifier = cardEntity.CardIdentifier;
-            Decklist.Add(cardIdentifier);
-            dicdecklist[cardIdentifier] = cardcount;
-            cardcount++;
-        }
+        IsDeckReady = true; // デッキ準備完了
     }
 }

@@ -12,14 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
   m_Name: Card_2
   m_EditorClassIdentifier: 
-  CardId: 2
+  CardIdentifier: 42
   CardName: mimimi
+  EquippableWeaponIdentifier: 
   CardIcon: {fileID: 0}
   CardDescription: 
   CardType: 0
   CardAttribute: 0
-  RestrictedCharacterId: 0
-  RestrictedWeaponId: 0
   CardAttackCount: 1
   CardTargetCount: 1
   CardPassive: 0
