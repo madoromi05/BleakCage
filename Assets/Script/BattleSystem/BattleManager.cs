@@ -38,8 +38,16 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
+        // StartPlayerTurn();を経由していない
+        // PlayerDeck
         playerTurn.Setup(playerModel, enemyModel ,weaponModel,playerDeck,battleDeck);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
+        StartCoroutine(StartPlayerTurnWithTimer());
+    }
+
+    private void StartPlayerTurn()
+    {
+        turnTime = 10f;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
 
@@ -83,7 +91,6 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【敵ターン終了】");
 
         // 次のプレイヤーターン開始
-        turnTime = 10f;
-        StartCoroutine(StartPlayerTurnWithTimer());
+        StartPlayerTurn();
     }
 }
