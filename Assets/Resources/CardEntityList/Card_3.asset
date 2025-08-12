@@ -19,9 +19,9 @@ MonoBehaviour:
   CardDescription: 
   CardType: 0
   CardAttribute: 0
-  CardAttackCount: 1
+  CardAttackCount: 200000
   CardTargetCount: 1
   CardPassive: 0
   CardHitRate: 1
-  CardOutputModifier: 1
+  CardOutputModifier: 2000
   CardDefensePenetration: 0

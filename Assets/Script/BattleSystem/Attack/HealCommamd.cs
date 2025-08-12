@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class HealCardCommand : ICardCommand
+public class HealCardCommand : ICommand
 {
     private readonly PlayerModel player;
     private readonly float healRatio;  // 0.1f ‚È‚Ç

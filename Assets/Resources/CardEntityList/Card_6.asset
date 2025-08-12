@@ -19,9 +19,9 @@ MonoBehaviour:
   CardDescription: "\u65B0\u3057\u3044\u30AB\u30FC\u30C9\u306E\u8AAC\u660E\u6587"
   CardType: 2
   CardAttribute: 3
-  CardAttackCount: 1
+  CardAttackCount: 40000
   CardTargetCount: 1
   CardPassive: 0
   CardHitRate: 1
-  CardOutputModifier: 1
+  CardOutputModifier: 2000
   CardDefensePenetration: 0

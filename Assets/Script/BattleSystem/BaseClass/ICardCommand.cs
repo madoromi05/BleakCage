@@ -1,9 +1,9 @@
 using System.Collections;
 
 /// <summary>
-/// Card効果を発動するためのコマンドインターフェース
+/// コマンドインターフェース
 /// </summary>
-public interface ICardCommand
+public interface ICommand
 {
     bool Do();
     bool Undo();

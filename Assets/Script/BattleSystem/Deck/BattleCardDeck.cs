@@ -23,19 +23,25 @@ public class BattleCardDeck : MonoBehaviour
 
         StartCoroutine(WaitForDeckReady(playerCardDeck));
     }
-    // PlayerDeckの準備が完了するまで待機
+
+    /// <summary>
+    /// BattleDeckの生成タイミングがPlayerよりも先にならないように
+    /// PlayerDeckの準備が完了するまで処理待機
+    /// </summary>
     private IEnumerator WaitForDeckReady(PlayerCardDeck playerCardDeck)
     {
         while (!playerCardDeck.IsDeckReady)
         {
-            yield return null; // 1フレーム待機
+            yield return null;
         }
 
         // 準備が完了したらデッキをコピー
         ResetBattleDeck(playerCardDeck.DeckList);
     }
 
-    // ターン開始時に呼ぶ（デッキをリセット）
+    /// <summary>
+    /// ターン開始時に呼ぶ（デッキをリセット）
+    /// </summary>
     public void ResetBattleDeck(List<CardEntity> sourceDeck)
     {
         // PlayerDeckから新しいリストを作成し、シャッフル
@@ -46,13 +52,14 @@ public class BattleCardDeck : MonoBehaviour
         Debug.Log("Battle deck reset. Cards: " + battleCardDeck.Count);
     }
 
-    // カードを引く（除外リストを考慮）
+    /// <summary>
+    /// カードを引く（除外リストを考慮）
+    /// </summary>
     public bool TryDrawCard(out int cardId)
     {
         // 除外リストにないカードのみ候補にする
         var candidates = battleCardDeck
-            .Where(card => !destructionCard.Contains(card.CardIdentifier))
-            .ToList();
+            .Where(card => !destructionCard.Contains(card.CardIdentifier)).ToList();
 
         if (candidates.Count == 0)
         {

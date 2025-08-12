@@ -13,38 +13,44 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private PlayerCardDeck playerDeck;
     private EnemyModel enemyModel;                          // 敵のモデル
     private PlayerModel playerModel;                        // プレイヤーのモデル
+    private PlayerRuntime playerRuntime;
     private WeaponModel weaponModel;                        // 武器のモデル
+    private WeaponRuntime weaponRuntime;
     private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
 
     public TextMeshProUGUI timeText;                        //時間を表示する変数
+
     void Start()
     {
         // @Demoサーバーからデータ取得してIDを得たと仮定
-        int receivedPlayerId = 1;
-        int receivedEnemyId  = 1;
-        int receivedWeaponId = 1;
+        int mockPlayerId = 1;
+        int mockEnemyId  = 1;
+        int mockWeaponId = 1;
 
         // Factoryを使ってModelを生成（Entityは内部で読み込み）
         PlayerModelFactory playerFactory = new PlayerModelFactory();
         EnemyModelFactory enemyFactory = new EnemyModelFactory();
 
-        playerModel = playerFactory.CreateFromId(receivedPlayerId);
-        enemyModel = enemyFactory.CreateFromId(receivedEnemyId);
-        weaponModel = new WeaponModelFactory().CreateFromId(receivedWeaponId);
+        playerModel = playerFactory.CreateFromId(mockPlayerId);
+        enemyModel = enemyFactory.CreateFromId(mockEnemyId);
+        weaponModel = new WeaponModelFactory().CreateFromId(mockWeaponId);
 
-        if (playerModel == null || enemyModel == null)
-        {
-            Debug.LogError("プレイヤーまたは敵の初期化に失敗しました");
-            return;
-        }
+        IAttackStrategy defaultStrategy = new AttributeWeakness();
+        playerRuntime = new PlayerRuntime(playerModel, defaultStrategy);
+        weaponRuntime = new WeaponRuntime(weaponModel);
 
-        // StartPlayerTurn();を経由していない
+        // プレイヤーに武器を装備させる
+        playerRuntime.EquipWeapon(weaponRuntime);
+
         // PlayerDeck
-        playerTurn.Setup(playerModel, enemyModel ,weaponModel,playerDeck,battleDeck);
+        playerTurn.Setup(playerRuntime, weaponRuntime, enemyModel, playerDeck, battleDeck);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
-        StartCoroutine(StartPlayerTurnWithTimer());
+        StartPlayerTurn();
     }
 
+    /// <summary>
+    /// Playerターン開始時の処理
+    /// </summary>
     private void StartPlayerTurn()
     {
         turnTime = 10f;

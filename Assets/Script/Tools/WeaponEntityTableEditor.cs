@@ -77,7 +77,7 @@ public class WeaponEntityTableEditor : EditorWindow
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
 
-            weapon.WeaponId = (uint)EditorGUILayout.IntField((int)weapon.WeaponId, GUILayout.Width(40));
+            weapon.WeaponIdentifyer = (uint)EditorGUILayout.IntField((int)weapon.WeaponIdentifyer, GUILayout.Width(40));
             weapon.WeaponName = EditorGUILayout.TextField(weapon.WeaponName, GUILayout.Width(120));
             weapon.WeaponAttackPower = EditorGUILayout.FloatField(weapon.WeaponAttackPower, GUILayout.Width(60));
             weapon.WeaponAttribute = (AttributeType)EditorGUILayout.EnumPopup(weapon.WeaponAttribute, GUILayout.Width(80));
@@ -137,20 +137,20 @@ public class WeaponEntityTableEditor : EditorWindow
         }
 
         WeaponEntity newWeapon = ScriptableObject.CreateInstance<WeaponEntity>();
-        newWeapon.WeaponId = (uint)GetNextAvailableId();
+        newWeapon.WeaponIdentifyer = (uint)GetNextAvailableId();
         newWeapon.WeaponName = "New Weapon";
         newWeapon.WeaponAttackPower = 10f;
         newWeapon.WeaponAttribute = AttributeType.Bullet;
         newWeapon.WeaponPeakyCoefficient = 1.0f;
         newWeapon.WeaponDescription = "新しい武器の説明文";
 
-        string fileName = $"{newWeaponName}_{newWeapon.WeaponId}.asset";
+        string fileName = $"{newWeaponName}_{newWeapon.WeaponIdentifyer}.asset";
         string filePath = Path.Combine(savePath, fileName);
         int counter = 1;
 
         while (File.Exists(filePath))
         {
-            fileName = $"{newWeaponName}_{newWeapon.WeaponId}_{counter}.asset";
+            fileName = $"{newWeaponName}_{newWeapon.WeaponIdentifyer}_{counter}.asset";
             filePath = Path.Combine(savePath, fileName);
             counter++;
         }
@@ -189,7 +189,7 @@ public class WeaponEntityTableEditor : EditorWindow
         if (weaponList == null || weaponList.Count == 0)
             return 1;
 
-        int maxId = weaponList.Where(w => w != null).Max(w => (int)w.WeaponId);
+        int maxId = weaponList.Where(w => w != null).Max(w => (int)w.WeaponIdentifyer);
         return maxId + 1;
     }
 }

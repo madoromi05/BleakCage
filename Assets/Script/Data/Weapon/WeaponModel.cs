@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 武器の情報を保持するモデルクラス。リソースからデータをロードして構成される。
+/// こちらは、静的なデータのみを管理する
 /// </summary>
 public class WeaponModel
 {
@@ -25,7 +26,7 @@ public class WeaponModel
             return;
         }
         
-        WeaponId = (int)weaponEntity.WeaponId;
+        WeaponId = (int)weaponEntity.WeaponIdentifyer;
         WeaponName = weaponEntity.WeaponName;
         WeaponAttackPower = weaponEntity.WeaponAttackPower;
         WeaponAttribute = weaponEntity.WeaponAttribute;
