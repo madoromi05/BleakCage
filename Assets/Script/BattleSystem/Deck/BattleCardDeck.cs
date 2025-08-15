@@ -55,24 +55,24 @@ public class BattleCardDeck : MonoBehaviour
     /// <summary>
     /// カードを引く（除外リストを考慮）
     /// </summary>
-    public bool TryDrawCard(out int cardId)
+    public bool TryDrawCard(out int cardID)
     {
         // 除外リストにないカードのみ候補にする
         var candidates = battleCardDeck
-            .Where(card => !destructionCard.Contains(card.CardIdentifier)).ToList();
+            .Where(card => !destructionCard.Contains(card.ID)).ToList();
 
         if (candidates.Count == 0)
         {
-            cardId = -1;
+            cardID = -1;
             return false;
         }
 
         // ランダムに1枚選ぶ
         int randIndex = Random.Range(0, candidates.Count);
-        cardId = candidates[randIndex].CardIdentifier;
+        cardID = candidates[randIndex].ID;
 
         // 選んだカードを除外リストに追加（同じターンで再び引かない）
-        destructionCard.Add(cardId);
+        destructionCard.Add(cardID);
 
         return true;
     }

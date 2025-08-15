@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class CardView : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI CardName;
+    [SerializeField] TextMeshProUGUI Name;
     [SerializeField] TextMeshProUGUI attackAttribute;   // 攻撃属性のみ表示
     [SerializeField] TextMeshProUGUI Description;
     [SerializeField] Image IconImage;
@@ -21,26 +21,25 @@ public class CardView : MonoBehaviour
             return;
         }
 
-        if (CardName != null)
-            CardName.text = cardModel.CardName;
+        if (Name != null) Name.text = cardModel.Name;
 
         // 属性名（日本語）だけを表示
         if (attackAttribute != null)
-            attackAttribute.text = GetAttributeName(cardModel.CardAttribute);
+            attackAttribute.text = GetAttributeName(cardModel.Attribute);
 
         // 説明文テンプレートを置換
         if (Description != null)
-            Description.text = ReplacePlaceholders(cardModel.CardDescription, cardModel);
+            Description.text = ReplacePlaceholders(cardModel.Description, cardModel);
 
         if (IconImage != null)
-            IconImage.sprite = cardModel.CardIcon;
+            IconImage.sprite = cardModel.Icon;
     }
 
     private string ReplacePlaceholders(string input, CardModel model)
     {
         return input
-            .Replace("{Type}", GetCardTypeName(model.CardType))
-            .Replace("{Attribute}", GetAttributeName(model.CardAttribute))
+            .Replace("{Type}", GetCardTypeName(model.Type))
+            .Replace("{Attribute}", GetAttributeName(model.Attribute))
             .Replace("{HitRate}", Mathf.RoundToInt(model.HitRate * 100).ToString() + "%")
             .Replace("{AttackCount}", model.AttackCount.ToString())
             .Replace("{TargetCount}", model.TargetCount.ToString())

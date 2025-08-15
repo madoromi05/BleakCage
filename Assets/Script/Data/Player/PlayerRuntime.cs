@@ -8,7 +8,7 @@ using System.Linq;
 /// </summary>
 public class PlayerRuntime
 {
-    public int Identifyer { get; private set; }
+    public int ID { get; private set; }
     public string Name { get; private set; }
     public float CurrentHP { get; set; }
     private readonly float _baseAttackPower;
@@ -19,7 +19,7 @@ public class PlayerRuntime
 
     public PlayerRuntime(PlayerModel model, IAttackStrategy strategy)
     {
-        Identifyer = model.PlayerId;
+        ID = model.PlayerId;
         Name = model.PlayerName;
         CurrentHP = model.PlayerHP;
         _baseAttackPower = model.PlayerAttackPower;

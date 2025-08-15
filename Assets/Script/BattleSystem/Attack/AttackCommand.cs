@@ -23,9 +23,9 @@ public class AttackCardCommand : ICommand
 
     public bool Do()
     {
-        Debug.Log($"攻撃実行: Player='{player.Identifyer}' が " +
-                 $"Weapon='{weapon.Identifyer}' と " +
-                 $"Card(ID)='{card.Identifyer}' を使って " +
+        Debug.Log($"攻撃実行: Player='{player.ID}' が " +
+                 $"Weapon='{weapon.ID}' と " +
+                 $"Card(ID)='{card.ID}' を使って " +
                  $"Enemy='{enemy.EnemyId}' に攻撃！");
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card ,enemy);
 

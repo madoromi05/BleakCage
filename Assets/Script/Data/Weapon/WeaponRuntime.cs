@@ -6,25 +6,23 @@ using System.Linq;
 /// </summary>
 public class WeaponRuntime : IAttackComponent
 {
-    public int Identifyer { get; private set; }
+    public int ID { get; private set; }
     public string Name { get; private set; }
     public AttributeType Attribute { get; private set; }
     public float PeakyCoefficient { get; private set; }
-    private readonly float _baseAttackPower;
-
-    // ★追加：自身を装備しているプレイヤーへの参照
     public PlayerRuntime ParentPlayer { get; private set; }
 
+    private readonly float _baseAttackPower;
     private readonly List<CardRuntime> _slottedCards = new List<CardRuntime>();
     public IEnumerable<CardRuntime> SlottedCards => _slottedCards.AsReadOnly();
 
-    public WeaponRuntime(WeaponModel model)
+    public WeaponRuntime(WeaponModel weaponModel)
     {
-        Identifyer = model.WeaponId;
-        Name = model.WeaponName;
-        _baseAttackPower = model.WeaponAttackPower;
-        Attribute = model.WeaponAttribute;
-        PeakyCoefficient = model.PeakyCoefficient;
+        ID = weaponModel.ID;
+        Name = weaponModel.Name;
+        _baseAttackPower = weaponModel.AttackPower;
+        Attribute = weaponModel.Attribute;
+        PeakyCoefficient = weaponModel.PeakyCoefficient;
     }
 
     public float GetPower()

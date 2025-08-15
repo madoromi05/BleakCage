@@ -75,7 +75,7 @@ public class CardEntityTableEditor : EditorWindow
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
-        cardList = cardList.OrderBy(c => c.CardIdentifier).ToList();
+        cardList = cardList.OrderBy(c => c.ID).ToList();
 
         // ヘッダー行
         EditorGUILayout.BeginHorizontal();
@@ -103,19 +103,19 @@ public class CardEntityTableEditor : EditorWindow
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
 
-            card.CardIdentifier = EditorGUILayout.IntField(card.CardIdentifier, GUILayout.Width(30));
-            card.CardName = EditorGUILayout.TextField(card.CardName, GUILayout.Width(120));
-            card.CardType = (CardEntity.CardTypeData)EditorGUILayout.EnumPopup(card.CardType, GUILayout.Width(80));
+            card.ID = EditorGUILayout.IntField(card.ID, GUILayout.Width(30));
+            card.Name = EditorGUILayout.TextField(card.Name, GUILayout.Width(120));
+            card.Type = (CardEntity.CardTypeData)EditorGUILayout.EnumPopup(card.Type, GUILayout.Width(80));
 
             // 装備可能武器ID入力欄
-            string weaponIds = string.Join(",", card.EquippableWeaponIdentifier ?? new int[0]);
+            string weaponIds = string.Join(",", card.EquipableWeaponID ?? new int[0]);
             string newWeaponIds = EditorGUILayout.TextField(weaponIds, GUILayout.Width(150));
 
             if (newWeaponIds != weaponIds)
             {
                 try
                 {
-                    card.EquippableWeaponIdentifier = newWeaponIds
+                    card.EquipableWeaponID = newWeaponIds
                         .Split(',')
                         .Select(s => int.Parse(s.Trim()))
                         .ToArray();
@@ -126,15 +126,15 @@ public class CardEntityTableEditor : EditorWindow
                 }
             }
 
-            card.CardAttribute = (AttributeType)EditorGUILayout.EnumPopup(card.CardAttribute, GUILayout.Width(80));
-            card.CardOutputModifier = EditorGUILayout.FloatField(card.CardOutputModifier, GUILayout.Width(80));
-            card.CardHitRate = EditorGUILayout.FloatField(card.CardHitRate, GUILayout.Width(80));
-            card.CardDefensePenetration = EditorGUILayout.FloatField(card.CardDefensePenetration, GUILayout.Width(80));
-            card.CardAttackCount = EditorGUILayout.IntField(card.CardAttackCount, GUILayout.Width(80));
-            card.CardTargetCount = EditorGUILayout.IntField(card.CardTargetCount, GUILayout.Width(80));
-            card.CardPassive = EditorGUILayout.Toggle(card.CardPassive, GUILayout.Width(60));
-            card.CardIcon = (Sprite)EditorGUILayout.ObjectField(card.CardIcon, typeof(Sprite), false, GUILayout.Width(60));
-            card.CardDescription = EditorGUILayout.TextArea(card.CardDescription, GUILayout.Width(600), GUILayout.Height(40));
+            card.Attribute = (AttributeType)EditorGUILayout.EnumPopup(card.Attribute, GUILayout.Width(80));
+            card.OutputModifier = EditorGUILayout.FloatField(card.OutputModifier, GUILayout.Width(80));
+            card.HitRate = EditorGUILayout.FloatField(card.HitRate, GUILayout.Width(80));
+            card.DefensePenetration = EditorGUILayout.FloatField(card.DefensePenetration, GUILayout.Width(80));
+            card.AttackCount = EditorGUILayout.IntField(card.AttackCount, GUILayout.Width(80));
+            card.TargetCount = EditorGUILayout.IntField(card.TargetCount, GUILayout.Width(80));
+            card.Passive = EditorGUILayout.Toggle(card.Passive, GUILayout.Width(60));
+            card.Icon = (Sprite)EditorGUILayout.ObjectField(card.Icon, typeof(Sprite), false, GUILayout.Width(60));
+            card.Description = EditorGUILayout.TextArea(card.Description, GUILayout.Width(600), GUILayout.Height(40));
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -142,7 +142,7 @@ public class CardEntityTableEditor : EditorWindow
                 EditorUtility.SetDirty(card);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
-                Debug.Log($"CardEntity '{card.CardName}' を自動保存しました");
+                Debug.Log($"CardEntity '{card.Name}' を自動保存しました");
             }
 
             EditorGUILayout.BeginHorizontal(GUILayout.Width(100));
@@ -157,7 +157,7 @@ public class CardEntityTableEditor : EditorWindow
             if (GUILayout.Button("削除", GUILayout.Width(45)))
             {
                 if (EditorUtility.DisplayDialog("削除確認",
-                    $"'{card.CardName}' を削除しますか？\nこの操作は元に戻せません。",
+                    $"'{card.Name}' を削除しますか？\nこの操作は元に戻せません。",
                     "削除", "キャンセル"))
                 {
                     toDelete.Add(card);
@@ -192,19 +192,19 @@ public class CardEntityTableEditor : EditorWindow
 
         CardEntity newCard = ScriptableObject.CreateInstance<CardEntity>();
 
-        newCard.CardIdentifier = GetNextAvailableId();
-        newCard.CardName = $"Card_{newCard.CardIdentifier}";
-        newCard.CardType = CardEntity.CardTypeData.Universal;
-        newCard.CardAttribute = AttributeType.Bullet;
-        newCard.CardHitRate = 1.0f;
-        newCard.CardOutputModifier = 1.0f;
-        newCard.CardDefensePenetration = 0.0f;
-        newCard.CardAttackCount = 1;
-        newCard.CardTargetCount = 1;
-        newCard.CardPassive = false;
-        newCard.CardDescription = "新しいカードの説明文";
+        newCard.ID = GetNextAvailableId();
+        newCard.Name = $"Card_{newCard.ID}";
+        newCard.Type = CardEntity.CardTypeData.Universal;
+        newCard.Attribute = AttributeType.Bullet;
+        newCard.HitRate = 1.0f;
+        newCard.OutputModifier = 1.0f;
+        newCard.DefensePenetration = 0.0f;
+        newCard.AttackCount = 1;
+        newCard.TargetCount = 1;
+        newCard.Passive = false;
+        newCard.Description = "新しいカードの説明文";
 
-        string fileName = $"Card_{newCard.CardIdentifier}.asset";
+        string fileName = $"Card_{newCard.ID}.asset";
         string fullPath = Path.Combine(createPath, fileName);
 
         AssetDatabase.CreateAsset(newCard, fullPath);
@@ -220,7 +220,7 @@ public class CardEntityTableEditor : EditorWindow
         Selection.activeObject = newCard;
         EditorGUIUtility.PingObject(newCard);
 
-        Debug.Log($"新しいCardEntity '{newCard.CardName}' を作成しました: {fullPath}");
+        Debug.Log($"新しいCardEntity '{newCard.Name}' を作成しました: {fullPath}");
     }
 
     private void DeleteCard(CardEntity card)
@@ -234,12 +234,12 @@ public class CardEntityTableEditor : EditorWindow
 
         if (AssetDatabase.DeleteAsset(assetPath))
         {
-            Debug.Log($"CardEntity '{card.CardName}' を削除しました");
+            Debug.Log($"CardEntity '{card.Name}' を削除しました");
             LoadData();
         }
         else
         {
-            Debug.LogError($"CardEntity '{card.CardName}' の削除に失敗しました");
+            Debug.LogError($"CardEntity '{card.Name}' の削除に失敗しました");
         }
     }
 
@@ -248,6 +248,6 @@ public class CardEntityTableEditor : EditorWindow
         if (cardList == null || cardList.Count == 0 || !cardList.Any(c => c != null))
             return 1;
 
-        return cardList.Where(c => c != null).Max(c => c.CardIdentifier) + 1;
+        return cardList.Where(c => c != null).Max(c => c.ID) + 1;
     }
 }

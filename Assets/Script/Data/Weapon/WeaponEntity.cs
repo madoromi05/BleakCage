@@ -8,12 +8,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponEntity", menuName = "Create WeaponEntity")]
 public class WeaponEntity : ScriptableObject
 {
-    public float WeaponIdentifyer;                  // WeaponŒÅ—LID
-    public string WeaponName;                       // Weapon–¼
-    public AttributeType WeaponAttribute;           // ‘®«
-    public Sprite WeaponIcon;                       // ‰æ‘œ
-    public string WeaponDescription;                // à–¾•¶
+    public float ID;                          // WeaponŒÅ—LID
+    public string Name;                       // Weapon–¼
+    public AttributeType Attribute;           // ‘®«
+    public Sprite Icon;                       // ‰æ‘œ
+    public string Description;                // à–¾•¶
 
-    public float WeaponAttackPower;                 // •ŠíUŒ‚—Í
-    public float WeaponPeakyCoefficient;            // “Á‰»ŒW”
+    public float AttackPower;                 // •ŠíUŒ‚—Í
+    public float PeakyCoefficient;            // “Á‰»ŒW”
 }

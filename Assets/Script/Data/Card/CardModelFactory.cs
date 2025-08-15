@@ -11,7 +11,7 @@ public class CardModelFactory
     /// </summary>
     /// <param name="cardId">カードID</param>
     /// <returns>CardModel。生成に失敗した場合はnull</returns>
-    public CardModel CreateFromId(int cardId)
+    public CardModel CreateFromID(int cardId)
     {
         CardEntity cardEntity = LoadCardEntity(cardId);
         if (cardEntity == null)
@@ -54,7 +54,7 @@ public class CardModelFactory
         CardModel[] cardModels = new CardModel[cardIds.Length];
         for (int i = 0; i < cardIds.Length; i++)
         {
-            cardModels[i] = CreateFromId(cardIds[i]);
+            cardModels[i] = CreateFromID(cardIds[i]);
         }
         return cardModels;
     }
