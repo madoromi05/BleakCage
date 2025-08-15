@@ -1,55 +1,66 @@
 using System.Collections.Generic;
-using System.Linq;
+using System;
 
 /// <summary>
-///　武器のランタイムクラス
+///　動的または、UUIDで管理するためのクラス
 /// </summary>
 public class WeaponRuntime : IAttackComponent
 {
     public int ID { get; private set; }
-    public string Name { get; private set; }
+    public System.Guid InstanceID { get; private set; }
     public AttributeType Attribute { get; private set; }
     public float PeakyCoefficient { get; private set; }
     public PlayerRuntime ParentPlayer { get; private set; }
 
-    private readonly float _baseAttackPower;
-    private readonly List<CardRuntime> _slottedCards = new List<CardRuntime>();
-    public IEnumerable<CardRuntime> SlottedCards => _slottedCards.AsReadOnly();
+    private readonly float attackPower;
+    private readonly List<CardRuntime> slottedCards = new List<CardRuntime>();
 
     public WeaponRuntime(WeaponModel weaponModel)
     {
         ID = weaponModel.ID;
-        Name = weaponModel.Name;
-        _baseAttackPower = weaponModel.AttackPower;
+        attackPower = weaponModel.AttackPower;
+        Attribute = weaponModel.Attribute;
+        PeakyCoefficient = weaponModel.PeakyCoefficient;
+    }
+
+    public WeaponRuntime(WeaponModel weaponModel, string instanceID)
+    {
+        ID = weaponModel.ID;
+        InstanceID = Guid.Parse(instanceID);
+        attackPower = weaponModel.AttackPower;
         Attribute = weaponModel.Attribute;
         PeakyCoefficient = weaponModel.PeakyCoefficient;
     }
 
     public float GetPower()
     {
-        float totalCardPower = _slottedCards.Sum(card => card.GetPower());
-        return _baseAttackPower + totalCardPower;
+        return attackPower;
     }
 
     /// <summary>
-    /// 親オブジェクト（プレイヤー）への参照を設定する内部メソッド
+    /// プレイヤーへの参照を設定する内部メソッド
     /// </summary>
     internal void SetParent(PlayerRuntime player)
     {
         ParentPlayer = player;
     }
-
+    /// <summary>
+    /// カードを武器に装着するメソッド
+    /// </summary>
     public void AddCard(CardRuntime card)
     {
         if (card == null) return;
-        _slottedCards.Add(card);
-        card.SetParent(this); // ★カードに親（この武器）を教える
+        slottedCards.Add(card);
+        card.SetParent(this);
     }
 
+    /// <summary>
+    /// カードを武器から外すメソッド
+    /// </summary>
     public void RemoveCard(CardRuntime card)
     {
         if (card == null) return;
-        card.SetParent(null); // ★親子関係を解除
-        _slottedCards.Remove(card);
+        card.SetParent(null);
+        slottedCards.Remove(card);
     }
 }

@@ -1,9 +1,7 @@
-﻿using NUnit.Framework;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.Rendering.GPUSort;
 
 /// <summary>
 /// カードをBattle開始時の初期デッキとして保持する
@@ -26,7 +24,7 @@ public class BattleCardDeck : MonoBehaviour
 
     /// <summary>
     /// BattleDeckの生成タイミングがPlayerよりも先にならないように
-    /// PlayerDeckの準備が完了するまで処理待機
+    /// <see cref="PlayerCardDeck">の準備が完了するまで処理待機
     /// </summary>
     private IEnumerator WaitForDeckReady(PlayerCardDeck playerCardDeck)
     {

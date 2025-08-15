@@ -1,47 +1,63 @@
-using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
+using System;
 
 /// <summary>
-/// プレイヤーのランタイムクラス
-/// プレイヤーのランタイムクラス
+/// 動的または、UUIDで管理するためのクラス
 /// </summary>
-public class PlayerRuntime
+
+public class PlayerRuntime : IAttackComponent
 {
     public int ID { get; private set; }
-    public string Name { get; private set; }
+    public System.Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
-    private readonly float _baseAttackPower;
-    private readonly IAttackStrategy _attackStrategy;
 
-    private readonly List<WeaponRuntime> _equippedWeapons = new List<WeaponRuntime>();
-    public IEnumerable<WeaponRuntime> EquippedWeapons => _equippedWeapons.AsReadOnly();
+    private readonly float baseAttackPower;
+    private readonly IAttackStrategy attackStrategy;
+
+    private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
 
     public PlayerRuntime(PlayerModel model, IAttackStrategy strategy)
     {
-        ID = model.PlayerId;
-        Name = model.PlayerName;
+        ID = model.PlayerID;
         CurrentHP = model.PlayerHP;
-        _baseAttackPower = model.PlayerAttackPower;
-        _attackStrategy = strategy;
+        baseAttackPower = model.PlayerAttackPower;
+        attackStrategy = strategy;
+    }
+
+    /// <summary>
+    /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
+    /// </summary>
+    public PlayerRuntime(PlayerModel model, IAttackStrategy strategy, string instanceID)
+    {
+        ID = model.PlayerID;
+        InstanceID = Guid.Parse(instanceID);
+        CurrentHP = model.PlayerHP;
+        baseAttackPower = model.PlayerAttackPower;
+        attackStrategy = strategy;
     }
 
     public float GetPower()
     {
-        return _baseAttackPower;
+        return baseAttackPower;
     }
 
+    /// <summary>
+    /// PlayreRuntimeに武器を装備するメソッド
+    /// </summary>
     public void EquipWeapon(WeaponRuntime weapon)
     {
         if (weapon == null) return;
-        _equippedWeapons.Add(weapon);
-        weapon.SetParent(this); // 武器に親（このプレイヤー）を教える
+        equippedWeapons.Add(weapon);
+        weapon.SetParent(this);
     }
 
+    /// <summary>
+    /// PlayerRuntimeから武器を外すメソッド
+    /// </summary>
     public void UnequipWeapon(WeaponRuntime weapon)
     {
         if (weapon == null) return;
-        weapon.SetParent(null); // 親子関係を解除
-        _equippedWeapons.Remove(weapon);
+        weapon.SetParent(null);
+        equippedWeapons.Remove(weapon);
     }
 }

@@ -8,28 +8,33 @@ using UnityEngine;
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
-    [SerializeField] private PlayerTurn playerTurn;         // プレイヤーのターンを管理するコンポーネント
+    public TextMeshProUGUI timeText;                        //時間を表示する変数
+
+    [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private PlayerCardDeck playerDeck;
-    private EnemyModel enemyModel;                          // 敵のモデル
-    private PlayerModel playerModel;                        // プレイヤーのモデル
+    private EnemyModel enemyModel;
+    private EnemyModelFactory enemyFactory;
+    private PlayerModel playerModel;
     private PlayerRuntime playerRuntime;
-    private WeaponModel weaponModel;                        // 武器のモデル
+    private PlayerModelFactory playerFactory;
+    private WeaponModel weaponModel;
     private WeaponRuntime weaponRuntime;
+    private WeaponModelFactory weaponFactory;
+    private CardModelFactory cardFactory;
     private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
-
-    public TextMeshProUGUI timeText;                        //時間を表示する変数
 
     void Start()
     {
+        playerFactory = new PlayerModelFactory();
+        enemyFactory  = new EnemyModelFactory();
+        weaponFactory = new WeaponModelFactory();
+        cardFactory   = new CardModelFactory();
+
         // @Demoサーバーからデータ取得してIDを得たと仮定
         int mockPlayerId = 1;
         int mockEnemyId  = 1;
         int mockWeaponId = 1;
-
-        // Factoryを使ってModelを生成（Entityは内部で読み込み）
-        PlayerModelFactory playerFactory = new PlayerModelFactory();
-        EnemyModelFactory enemyFactory = new EnemyModelFactory();
 
         playerModel = playerFactory.CreateFromId(mockPlayerId);
         enemyModel = enemyFactory.CreateFromId(mockEnemyId);
@@ -42,7 +47,7 @@ public class BattleManager : MonoBehaviour
         // プレイヤーに武器を装備させる
         playerRuntime.EquipWeapon(weaponRuntime);
 
-        // PlayerDeck
+        // PlayerDeck生成
         playerTurn.Setup(playerRuntime, weaponRuntime, enemyModel, playerDeck, battleDeck);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
         StartPlayerTurn();

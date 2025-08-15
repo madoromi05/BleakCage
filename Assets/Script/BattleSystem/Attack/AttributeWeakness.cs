@@ -9,7 +9,6 @@ public class AttributeWeakness : IAttackStrategy
 {
     [Header("難易度によって変わる値")]
     private float correlationCoefficient = 1.5f;                    // 相関係数 (デフォルト値)
-    private float outputAdjustment = 1.0f;                          // 出力調整 (デフォルト値)
     private float decayAdjustment = 1.0f;                           // 減衰調整 (デフォルト値)
 
     /// <summary>
@@ -31,7 +30,7 @@ public class AttributeWeakness : IAttackStrategy
         );
 
         // 3. 最終ダメージを計算
-        float finalDamage = weapon.GetPower() * efficiency * outputAdjustment;
+        float finalDamage = weapon.GetPower() * efficiency * cardRuntime.GetOutput();
         return finalDamage;
     }
 

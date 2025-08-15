@@ -3,7 +3,5 @@
 /// </summary>
 public interface IAttackComponent
 {
-    int ID {  get; }
-    string Name { get; }
-    float GetPower();
+    int ID { get; }
 }

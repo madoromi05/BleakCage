@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class PlayerModel
 {
-    public int PlayerId { get; private set; }
+    public int PlayerID { get; private set; }
     public string PlayerName { get; private set; }
     public int PlayerLevel { get; private set; }
 
@@ -32,7 +32,7 @@ public class PlayerModel
             return;
         }
 
-        PlayerId = playerEntity.PlayerId;
+        PlayerID = playerEntity.PlayerId;
         PlayerName = playerEntity.PlayerName;
         PlayerLevel = playerEntity.PlayerLevel;
 
