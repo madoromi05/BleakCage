@@ -24,7 +24,7 @@ public class PlayerTurn : MonoBehaviour
     private List<CardController> handCardControllers = new();   // 手札のカード表示
     private List<CardRuntime> handCards = new();                // 手札のカードdata
 
-    private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();  // 選択されたカードのIDを保持
+    private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();          // 選択されたカードのIDを保持
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>();  // 破棄されたカードのIDを保持
     private Queue<ICommand> commandQueue = new();               // コマンドキュー
 

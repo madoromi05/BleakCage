@@ -5,17 +5,20 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Linq;
 using System.IO;
-using UnityEditor.AddressableAssets; // AddressableAssetSettingsDefaultObject.Settings を使うために必要
+using UnityEditor.AddressableAssets;
 
 /// <summary>
-/// CardのGUIでのデータ管理ツール（修正版）
+/// CardのGUIでのデータ管理ツール（最終版）
 /// </summary>
 public class CardEntityTableEditor : EditorWindow
 {
     private Vector2 scrollPos;
     private List<CardEntity> cardList;
-    private bool isLoading = false; // << MOD: 非同期ロード中の状態を管理するフラグ
-    private HashSet<int> duplicateIds = new HashSet<int>(); // << ADD: 重複IDを保持するセット
+    private bool isLoading = false;
+    private HashSet<int> duplicateIds = new HashSet<int>();
+
+    // 非同期操作のハンドルをメンバー変数として保持
+    private AsyncOperationHandle<IList<CardEntity>> loadHandle;
 
     [MenuItem("Tools/Card Entity Table")]
     public static void OpenWindow()
@@ -28,53 +31,69 @@ public class CardEntityTableEditor : EditorWindow
         LoadData();
     }
 
+    private void OnDisable()
+    {
+        // ウィンドウが無効になる際、実行中の非同期ロード処理があれば必ず解放する
+        // これにより、PlayMode移行時などにawaitが迷子になるのを防ぐ
+        if (loadHandle.IsValid())
+        {
+            Addressables.Release(loadHandle);
+        }
+    }
+
     /// <summary>
     /// AddressablesからCardEntityを非同期でロードします。
     /// </summary>
     private async void LoadData()
     {
-        // << MOD: ロード中に再度呼び出されるのを防ぐ
         if (isLoading) return;
         isLoading = true;
-
-        // << MOD: cardListをクリアしてロード中であることを示す
         cardList = null;
         Repaint();
 
         try
         {
-            AsyncOperationHandle<IList<CardEntity>> handle =
-                Addressables.LoadAssetsAsync<CardEntity>("CardEntity", null);
+            loadHandle = Addressables.LoadAssetsAsync<CardEntity>("CardEntity", null);
+            await loadHandle.Task;
 
-            await handle.Task;
-
-            if (handle.Status == AsyncOperationStatus.Succeeded)
+            // ロード完了後、ハンドルが無効（OnDisableで解放済み）な場合は処理を中断
+            if (!loadHandle.IsValid())
             {
-                // << MOD: ロード成功時に一度だけソートする
-                cardList = handle.Result?.Where(c => c != null).OrderBy(c => c.ID).ToList() ?? new List<CardEntity>();
-                CheckForDuplicateIDs(); // << ADD: 重複IDのチェック
+                return;
+            }
+
+            if (loadHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                cardList = loadHandle.Result?.Where(c => c != null).OrderBy(c => c.ID).ToList() ?? new List<CardEntity>();
+                CheckForDuplicateIDs();
             }
             else
             {
-                Debug.LogWarning($"CardEntity のロードに失敗しました（Status: {handle.Status}）");
-                cardList = new List<CardEntity>(); // << MOD: 失敗時もリストを初期化してエラーを防ぐ
+                Debug.LogWarning($"CardEntity のロードに失敗しました（Status: {loadHandle.Status}）");
+                cardList = new List<CardEntity>();
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"An error occurred during data loading: {ex.Message}");
+            if (ex is System.OperationCanceledException)
+            {
+                Debug.Log("CardEntityのロードがキャンセルされました。");
+            }
+            else
+            {
+                Debug.LogError($"データロード中にエラーが発生しました: {ex.Message}");
+            }
             cardList = new List<CardEntity>();
         }
         finally
         {
             isLoading = false;
-            Repaint(); // 完了後にUIを再描画
+            Repaint();
         }
     }
 
     private void OnGUI()
     {
-        // << MOD: ロード中のUI表示
         if (isLoading)
         {
             EditorGUILayout.LabelField("データをロード中...", EditorStyles.centeredGreyMiniLabel);
@@ -83,16 +102,14 @@ public class CardEntityTableEditor : EditorWindow
 
         if (cardList == null)
         {
-            // OnEnable直後など、まだリストが準備できていない場合に表示
             EditorGUILayout.LabelField("初期化中...", EditorStyles.centeredGreyMiniLabel);
-            // OnEnableでLoadDataが呼ばれているので、ここでは何もしない
             return;
         }
 
-        DrawToolbar(); // << REFACTOR: ツールバー部分をメソッドに分割
+        DrawToolbar();
         EditorGUILayout.Space();
-        DrawCardTable(); // << REFACTOR: カード一覧テーブル部分をメソッドに分割
-        DrawFooter(); // << REFACTOR: フッター部分をメソッドに分割
+        DrawCardTable();
+        DrawFooter();
     }
 
     /// <summary>
@@ -121,27 +138,23 @@ public class CardEntityTableEditor : EditorWindow
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
-        DrawHeader(); // ヘッダーを描画
-
-        // << MOD: OnGUI内で毎回ソートするのをやめ、パフォーマンスを向上させる
-        // cardList = cardList.OrderBy(c => c.ID).ToList();
+        DrawHeader();
 
         List<CardEntity> toDelete = new List<CardEntity>();
 
-        foreach (var card in cardList)
+        // リストのコピーを作成してイテレーションすることで、編集中にリストが変更されてもエラーを防ぐ
+        foreach (var card in new List<CardEntity>(cardList))
         {
             if (card == null) continue;
-            DrawCardRow(card, toDelete); // 各カードの行を描画
+            DrawCardRow(card, toDelete);
         }
 
-        // 削除処理
         if (toDelete.Any())
         {
             foreach (var card in toDelete)
             {
-                DeleteCard(card);
+                DeleteCardAsset(card);
             }
-            // << MOD: 全データをリロードするのではなく、リストから直接削除してUIの応答性を上げる
             cardList.RemoveAll(toDelete.Contains);
             CheckForDuplicateIDs();
         }
@@ -180,7 +193,6 @@ public class CardEntityTableEditor : EditorWindow
     {
         EditorGUILayout.BeginHorizontal();
 
-        // << ADD: IDが重複している場合は背景色を変えて警告する
         Color originalColor = GUI.backgroundColor;
         if (duplicateIds.Contains(card.ID))
         {
@@ -189,26 +201,22 @@ public class CardEntityTableEditor : EditorWindow
 
         EditorGUI.BeginChangeCheck();
 
-        // --- 各プロパティのフィールド ---
         int newId = EditorGUILayout.IntField(card.ID, GUILayout.Width(40));
         if (newId != card.ID)
         {
             card.ID = newId;
-            // << ADD: IDが変更されたらリストをソートし、重複チェックを行う
             cardList = cardList.OrderBy(c => c.ID).ToList();
             CheckForDuplicateIDs();
         }
-        GUI.backgroundColor = originalColor; // IDフィールドの色を元に戻す
+        GUI.backgroundColor = originalColor;
 
         card.Name = EditorGUILayout.TextField(card.Name, GUILayout.Width(120));
         card.Type = (CardEntity.CardTypeData)EditorGUILayout.EnumPopup(card.Type, GUILayout.Width(80));
 
-        // 装備可能武器ID入力欄
         string weaponIds = string.Join(",", card.EquipableWeaponID ?? new int[0]);
         string newWeaponIds = EditorGUILayout.TextField(weaponIds, GUILayout.Width(150));
         if (newWeaponIds != weaponIds)
         {
-            // カンマ区切りの文字列をint配列に変換
             try
             {
                 card.EquipableWeaponID = string.IsNullOrEmpty(newWeaponIds)
@@ -231,26 +239,20 @@ public class CardEntityTableEditor : EditorWindow
         card.Icon = (Sprite)EditorGUILayout.ObjectField(card.Icon, typeof(Sprite), false, GUILayout.Width(60));
         card.Description = EditorGUILayout.TextArea(card.Description, GUILayout.ExpandWidth(true), GUILayout.Height(40));
 
-        // --- 変更の保存 ---
         if (EditorGUI.EndChangeCheck())
         {
-            // Undoを記録し、アセットをダーティとしてマーク（変更があったことをUnityに通知）
             Undo.RecordObject(card, "Modify CardEntity");
             EditorUtility.SetDirty(card);
-            // SaveAssetsを頻繁に呼ぶと重くなる可能性があるため、ここでは呼ばない選択肢もある
-            // AssetDatabase.SaveAssets(); 
-            // Debug.Log($"CardEntity '{card.Name}' を変更しました");
         }
 
-        // --- アクションボタン（選択、削除） ---
         EditorGUILayout.BeginVertical(GUILayout.Width(100));
         if (GUILayout.Button("Ping", GUILayout.Width(95)))
         {
             Selection.activeObject = card;
-            EditorGUIUtility.PingObject(card); // Projectビューでアセットをハイライト
+            EditorGUIUtility.PingObject(card);
         }
 
-        GUI.backgroundColor = new Color(1f, 0.6f, 0.6f); // 少し薄い赤色
+        GUI.backgroundColor = new Color(1f, 0.6f, 0.6f);
         if (GUILayout.Button("Delete", GUILayout.Width(95)))
         {
             if (EditorUtility.DisplayDialog("削除確認",
@@ -272,7 +274,6 @@ public class CardEntityTableEditor : EditorWindow
     private void DrawFooter()
     {
         EditorGUILayout.BeginVertical("box");
-        // << ADD: 重複IDがある場合に警告メッセージを表示
         if (duplicateIds.Any())
         {
             EditorGUILayout.HelpBox($"IDが重複しています: {string.Join(", ", duplicateIds)}", MessageType.Warning);
@@ -293,7 +294,6 @@ public class CardEntityTableEditor : EditorWindow
 
         newCard.ID = GetNextAvailableId();
         newCard.Name = $"New Card_{newCard.ID}";
-        // ... デフォルト値の設定 ...
         newCard.Type = CardEntity.CardTypeData.Universal;
         newCard.Attribute = AttributeType.Bullet;
         newCard.HitRate = 1.0f;
@@ -304,13 +304,11 @@ public class CardEntityTableEditor : EditorWindow
         newCard.Passive = false;
         newCard.Description = "新しいカードの説明文";
 
-        // ファイルパスが重複しないようにする
         string fileName = $"Card_{newCard.ID}.asset";
         string fullPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(createPath, fileName));
 
         AssetDatabase.CreateAsset(newCard, fullPath);
 
-        // Addressablesへの登録
         var settings = AddressableAssetSettingsDefaultObject.Settings;
         if (settings)
         {
@@ -321,25 +319,22 @@ public class CardEntityTableEditor : EditorWindow
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        // << MOD: 全データをリロードするのではなく、リストに追加してUIを即時反映させる
         cardList.Add(newCard);
-        cardList = cardList.OrderBy(c => c.ID).ToList(); // ソート
+        cardList = cardList.OrderBy(c => c.ID).ToList();
         CheckForDuplicateIDs();
         Repaint();
 
-        // 作成したアセットを選択状態にする
         Selection.activeObject = newCard;
         EditorGUIUtility.PingObject(newCard);
 
         Debug.Log($"新しいCardEntity '{newCard.Name}' を作成しました: {fullPath}");
     }
 
-    private void DeleteCard(CardEntity card)
+    private void DeleteCardAsset(CardEntity card)
     {
         string assetPath = AssetDatabase.GetAssetPath(card);
         if (string.IsNullOrEmpty(assetPath)) return;
 
-        // Addressablesから登録解除
         var settings = AddressableAssetSettingsDefaultObject.Settings;
         if (settings)
         {
@@ -347,7 +342,6 @@ public class CardEntityTableEditor : EditorWindow
             settings.RemoveAssetEntry(guid);
         }
 
-        // アセットファイルを削除
         if (AssetDatabase.DeleteAsset(assetPath))
         {
             Debug.Log($"CardEntity '{card.Name}' を削除しました");
@@ -363,22 +357,17 @@ public class CardEntityTableEditor : EditorWindow
     /// </summary>
     private int GetNextAvailableId()
     {
-        // リストが空の場合は、最初のIDとして1を返す
         if (cardList == null || !cardList.Any())
         {
             return 1;
         }
 
-        // 既存のIDをHashSetに格納して、高速に存在チェックできるようにする
         var existingIds = new HashSet<int>(cardList.Select(c => c.ID));
-
         int nextId = 1;
-        // ID 1から順に、使用されていない最小のIDを探す
         while (existingIds.Contains(nextId))
         {
             nextId++;
         }
-
         return nextId;
     }
 

@@ -11,12 +11,12 @@ public class CardModel
     public int[] EquipableWeaponIds { get; private set; } 
     public CardEntity.CardTypeData Type { get; private set; }
     public AttributeType Attribute { get; private set; }
-    public int AttackCount { get; private set; }                                // 攻撃回数
-    public int TargetCount { get; private set; }                                // 攻撃対象数
-    public bool IsPassive { get; private set; }                                 // パッシブ効果なのかどうか
-    public float HitRate { get; private set; }                                  // 命中率(1～0)
-    public float OutputModifier { get; private set; }                           // 出力調整
-    public float DefensePenetration { get; private set; }                       // 防御貫通率
+    public int AttackCount { get; private set; }                            // 攻撃回数
+    public int TargetCount { get; private set; }                            // 攻撃対象数
+    public bool IsPassive { get; private set; }                             // パッシブ効果なのかどうか
+    public float HitRate { get; private set; }                              // 命中率(1～0)
+    public float OutputModifier { get; private set; }                       // 出力調整
+    public float DefensePenetration { get; private set; }                   // 防御貫通率
     public Sprite Icon { get; private set; }                                // CardのIcon
     public string Description { get; private set; }                         // Cardの説明文
 

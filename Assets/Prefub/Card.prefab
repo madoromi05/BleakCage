@@ -683,7 +683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0e40db0f8402b4589dd66fffda73e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CardName: {fileID: 4289466954114429774}
+  Name: {fileID: 4289466954114429774}
   attackAttribute: {fileID: 2649367337728679519}
   Description: {fileID: 5382103145826800291}
   IconImage: {fileID: 0}
