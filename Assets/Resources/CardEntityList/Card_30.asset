@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
   m_Name: Card_30
   m_EditorClassIdentifier: 
-  CardIdentifier: 29
-  CardName: "\u7FBD\u3070\u305F\u304F\u524D\u6B6F"
-  EquippableWeaponIdentifier: 
-  CardIcon: {fileID: 0}
-  CardDescription: "\u65B0\u3057\u3044\u30AB\u30FC\u30C9\u306E\u8AAC\u660E\u6587"
-  CardType: 2
-  CardAttribute: 3
-  CardAttackCount: 1
-  CardTargetCount: 1
-  CardPassive: 0
-  CardHitRate: 1
-  CardOutputModifier: 1
-  CardDefensePenetration: 0
+  ID: 30
+  Name: Card_30
+  EquipableWeaponID: 
+  Icon: {fileID: 0}
+  Description: "\u65B0\u3057\u3044\u30AB\u30FC\u30C9\u306E\u8AAC\u660E\u6587"
+  Type: 2
+  Attribute: 3
+  AttackCount: 1
+  TargetCount: 1
+  Passive: 0
+  HitRate: 1
+  OutputModifier: 1
+  DefensePenetration: 0

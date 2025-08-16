@@ -17,20 +17,20 @@ public class CardEntity : ScriptableObject
         Universal   // 汎用
     }
 
-    public int CardIdentifier;                  // カード固有ID
-    public string CardName;                     // カード名
-    public int[] EquippableWeaponIdentifier;    // 武器ID
-    public Sprite CardIcon;                     // アイコン画像
-    public string CardDescription;              // 説明文
+    public int ID;                          // カード固有ID
+    public string Name;                     // カード名
+    public int[] EquipableWeaponID;        // 武器ID
+    public Sprite Icon;                     // アイコン画像
+    public string Description;              // 説明文
 
-    public CardTypeData CardType;               // カードタイプ
-    public AttributeType CardAttribute;         // 属性
+    public CardTypeData Type;               // カードタイプ
+    public AttributeType Attribute;         // 属性
 
-    public int CardAttackCount;                 // 攻撃回数
-    public int CardTargetCount;                 // 攻撃体数
-    public bool CardPassive;                    // パッシブ効果判定
+    public int AttackCount;                 // 攻撃回数
+    public int TargetCount;                 // 攻撃体数
+    public bool Passive;                    // パッシブ効果判定
 
-    public float CardHitRate;                   // 命中率
-    public float CardOutputModifier;            // 出力調整
-    public float CardDefensePenetration;        // 防御貫通 
+    public float HitRate;                   // 命中率
+    public float OutputModifier;            // 出力調整
+    public float DefensePenetration;        // 防御貫通 
 }

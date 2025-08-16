@@ -6,16 +6,14 @@ using UnityEngine;
 /// </summary>
 public class PlayerModel
 {
-    public int PlayerId { get; private set; }
+    public int PlayerID { get; private set; }
     public string PlayerName { get; private set; }
     public int PlayerLevel { get; private set; }
 
     public float PlayerHP { get; set; }
     public float PlayerAttackPower { get; private set; }
     public float PlayerDefensePower { get; private set; }
-
     public AttributeType PlayerAttribute { get; private set; }
-
     public Sprite PlayerIcon { get; private set; }
     public Sprite PlayerSDIcon { get; private set; }
     public string PlayerDescription { get; private set; }
@@ -32,7 +30,7 @@ public class PlayerModel
             return;
         }
 
-        PlayerId = playerEntity.PlayerId;
+        PlayerID = playerEntity.PlayerId;
         PlayerName = playerEntity.PlayerName;
         PlayerLevel = playerEntity.PlayerLevel;
 

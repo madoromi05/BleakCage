@@ -77,13 +77,13 @@ public class WeaponEntityTableEditor : EditorWindow
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
 
-            weapon.WeaponId = (uint)EditorGUILayout.IntField((int)weapon.WeaponId, GUILayout.Width(40));
-            weapon.WeaponName = EditorGUILayout.TextField(weapon.WeaponName, GUILayout.Width(120));
-            weapon.WeaponAttackPower = EditorGUILayout.FloatField(weapon.WeaponAttackPower, GUILayout.Width(60));
-            weapon.WeaponAttribute = (AttributeType)EditorGUILayout.EnumPopup(weapon.WeaponAttribute, GUILayout.Width(80));
-            weapon.WeaponPeakyCoefficient = EditorGUILayout.FloatField(weapon.WeaponPeakyCoefficient, GUILayout.Width(60));
-            weapon.WeaponIcon = (Sprite)EditorGUILayout.ObjectField(weapon.WeaponIcon, typeof(Sprite), false, GUILayout.Width(60));
-            weapon.WeaponDescription = EditorGUILayout.TextArea(weapon.WeaponDescription, GUILayout.Width(200), GUILayout.Height(40));
+            weapon.ID = (uint)EditorGUILayout.IntField((int)weapon.ID, GUILayout.Width(40));
+            weapon.Name = EditorGUILayout.TextField(weapon.Name, GUILayout.Width(120));
+            weapon.AttackPower = EditorGUILayout.FloatField(weapon.AttackPower, GUILayout.Width(60));
+            weapon.Attribute = (AttributeType)EditorGUILayout.EnumPopup(weapon.Attribute, GUILayout.Width(80));
+            weapon.PeakyCoefficient = EditorGUILayout.FloatField(weapon.PeakyCoefficient, GUILayout.Width(60));
+            weapon.Icon = (Sprite)EditorGUILayout.ObjectField(weapon.Icon, typeof(Sprite), false, GUILayout.Width(60));
+            weapon.Description = EditorGUILayout.TextArea(weapon.Description, GUILayout.Width(200), GUILayout.Height(40));
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -91,7 +91,7 @@ public class WeaponEntityTableEditor : EditorWindow
                 EditorUtility.SetDirty(weapon);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
-                Debug.Log($"WeaponEntity '{weapon.WeaponName}' を自動保存しました");
+                Debug.Log($"WeaponEntity '{weapon.Name}' を自動保存しました");
             }
 
             EditorGUILayout.BeginHorizontal(GUILayout.Width(100));
@@ -105,7 +105,7 @@ public class WeaponEntityTableEditor : EditorWindow
             if (GUILayout.Button("削除", GUILayout.Width(45)))
             {
                 if (EditorUtility.DisplayDialog("削除確認",
-                    $"'{weapon.WeaponName}' を削除しますか？\nこの操作は元に戻せません。",
+                    $"'{weapon.Name}' を削除しますか？\nこの操作は元に戻せません。",
                     "削除", "キャンセル"))
                 {
                     toDelete.Add(weapon);
@@ -137,20 +137,20 @@ public class WeaponEntityTableEditor : EditorWindow
         }
 
         WeaponEntity newWeapon = ScriptableObject.CreateInstance<WeaponEntity>();
-        newWeapon.WeaponId = (uint)GetNextAvailableId();
-        newWeapon.WeaponName = "New Weapon";
-        newWeapon.WeaponAttackPower = 10f;
-        newWeapon.WeaponAttribute = AttributeType.Bullet;
-        newWeapon.WeaponPeakyCoefficient = 1.0f;
-        newWeapon.WeaponDescription = "新しい武器の説明文";
+        newWeapon.ID = (uint)GetNextAvailableId();
+        newWeapon.Name = "New Weapon";
+        newWeapon.AttackPower = 10f;
+        newWeapon.Attribute = AttributeType.Bullet;
+        newWeapon.PeakyCoefficient = 1.0f;
+        newWeapon.Description = "新しい武器の説明文";
 
-        string fileName = $"{newWeaponName}_{newWeapon.WeaponId}.asset";
+        string fileName = $"{newWeaponName}_{newWeapon.ID}.asset";
         string filePath = Path.Combine(savePath, fileName);
         int counter = 1;
 
         while (File.Exists(filePath))
         {
-            fileName = $"{newWeaponName}_{newWeapon.WeaponId}_{counter}.asset";
+            fileName = $"{newWeaponName}_{newWeapon.ID}_{counter}.asset";
             filePath = Path.Combine(savePath, fileName);
             counter++;
         }
@@ -163,7 +163,7 @@ public class WeaponEntityTableEditor : EditorWindow
         Selection.activeObject = newWeapon;
         EditorGUIUtility.PingObject(newWeapon);
 
-        Debug.Log($"新しいWeaponEntity '{newWeapon.WeaponName}' を作成しました: {filePath}");
+        Debug.Log($"新しいWeaponEntity '{newWeapon.Name}' を作成しました: {filePath}");
     }
 
     private void DeleteWeapon(WeaponEntity weapon)
@@ -175,12 +175,12 @@ public class WeaponEntityTableEditor : EditorWindow
 
         if (AssetDatabase.DeleteAsset(assetPath))
         {
-            Debug.Log($"WeaponEntity '{weapon.WeaponName}' を削除しました");
+            Debug.Log($"WeaponEntity '{weapon.Name}' を削除しました");
             LoadData();
         }
         else
         {
-            Debug.LogError($"WeaponEntity '{weapon.WeaponName}' の削除に失敗しました");
+            Debug.LogError($"WeaponEntity '{weapon.Name}' の削除に失敗しました");
         }
     }
 
@@ -189,7 +189,7 @@ public class WeaponEntityTableEditor : EditorWindow
         if (weaponList == null || weaponList.Count == 0)
             return 1;
 
-        int maxId = weaponList.Where(w => w != null).Max(w => (int)w.WeaponId);
+        int maxId = weaponList.Where(w => w != null).Max(w => (int)w.ID);
         return maxId + 1;
     }
 }
