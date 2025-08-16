@@ -21,6 +21,7 @@ public class CharacterData
 {
     public string InstanceId;
     public int CharacterId;
+    public List<CardData> EquippedCards;
     public List<WeaponData> EquippedWeapons;
 }
 

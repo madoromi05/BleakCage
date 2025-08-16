@@ -25,7 +25,7 @@ public class WeaponModel
             Debug.LogError("weaponEntity is null");
             return;
         }
-        
+
         ID = (int)weaponEntity.ID;
         Name = weaponEntity.Name;
         AttackPower = weaponEntity.AttackPower;
@@ -33,5 +33,14 @@ public class WeaponModel
         PeakyCoefficient = weaponEntity.PeakyCoefficient;
         Icon = weaponEntity.Icon;
         Description = weaponEntity.Description;
+    }
+
+    public WeaponModel(int Id, string name, float attackPower, AttributeType attribute, float peakyCoefficient)
+    {
+        this.ID = Id;
+        this.Name = name;
+        this.AttackPower = attackPower;
+        this.Attribute = attribute;
+        this.PeakyCoefficient = peakyCoefficient;
     }
 }

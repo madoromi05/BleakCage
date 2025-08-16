@@ -7,6 +7,7 @@ public class CardRuntime : IAttackComponent
     public int ID { get; private set; }
     public System.Guid InstanceID { get; private set; }
     public WeaponRuntime weaponRuntime { get; private set; }     // カードが装着されている武器への参照
+    public AttributeType attribute { get; private set; }
 
     private readonly float _outputModifier;
     public CardRuntime(CardModel model)
@@ -14,6 +15,7 @@ public class CardRuntime : IAttackComponent
         InstanceID = System.Guid.NewGuid();
         ID = model.ID;
         _outputModifier = model.OutputModifier;
+        attribute = model.Attribute;
     }
 
     /// <summary>

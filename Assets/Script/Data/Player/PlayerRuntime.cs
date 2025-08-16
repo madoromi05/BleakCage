@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 /// <summary>
 /// 動的または、UUIDで管理するためのクラス
@@ -10,19 +11,11 @@ public class PlayerRuntime : IAttackComponent
     public int ID { get; private set; }
     public System.Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
-
-    private readonly float baseAttackPower;
-    private readonly IAttackStrategy attackStrategy;
+    public WeaponRuntime InnateWeapon { get; private set; }//Player装備のための武器
 
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
-
-    public PlayerRuntime(PlayerModel model, IAttackStrategy strategy)
-    {
-        ID = model.PlayerID;
-        CurrentHP = model.PlayerHP;
-        baseAttackPower = model.PlayerAttackPower;
-        attackStrategy = strategy;
-    }
+    private readonly float baseAttackPower;
+    private readonly IAttackStrategy attackStrategy;
 
     /// <summary>
     /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
@@ -34,6 +27,10 @@ public class PlayerRuntime : IAttackComponent
         CurrentHP = model.PlayerHP;
         baseAttackPower = model.PlayerAttackPower;
         attackStrategy = strategy;
+
+        var innateWeaponModel = new WeaponModel(0, "Innate Skill", 10f, AttributeType.Bullet, 1.0f);
+        InnateWeapon = new WeaponRuntime(innateWeaponModel, System.Guid.NewGuid().ToString());
+        this.EquipWeapon(InnateWeapon);
     }
 
     public float GetPower()
@@ -59,5 +56,15 @@ public class PlayerRuntime : IAttackComponent
         if (weapon == null) return;
         weapon.SetParent(null);
         equippedWeapons.Remove(weapon);
+    }
+
+    /// <summary>
+    /// デバッグ用に内部のリストがnullでないか確認するメソッド
+    /// </summary>
+    public void CheckInternalListForDebug()
+    {
+        Debug.Log($"--- Inside PlayerRuntime Check ---");
+        // あなたのコードに合わせて変数名を `equippedWeapons` にしています
+        Debug.Log($"Checking equippedWeapons list: {(equippedWeapons == null ? "IS NULL!!! <- おそらくこれが原因です" : "is OK")}");
     }
 }

@@ -13,9 +13,7 @@ public class PlayerModel
     public float PlayerHP { get; set; }
     public float PlayerAttackPower { get; private set; }
     public float PlayerDefensePower { get; private set; }
-
     public AttributeType PlayerAttribute { get; private set; }
-
     public Sprite PlayerIcon { get; private set; }
     public Sprite PlayerSDIcon { get; private set; }
     public string PlayerDescription { get; private set; }

@@ -150,10 +150,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f4f9bac9e4b25439af32db63acbc3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeText: {fileID: 1571710206}
   playerTurn: {fileID: 120127628}
   battleDeck: {fileID: 782690699}
-  playerDeck: {fileID: 280275889}
-  timeText: {fileID: 1571710206}
 --- !u!4 &120127626
 Transform:
   m_ObjectHideFlags: 0
@@ -195,52 +194,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 7699136889019067178, guid: 9db2d9eed3b92c54db8b383069db691c, type: 3}
   playerHandTransform: {fileID: 457889571}
-  deck: {fileID: 782690699}
---- !u!1 &280275888
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 280275890}
-  - component: {fileID: 280275889}
-  m_Layer: 0
-  m_Name: PlayerDeck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &280275889
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 280275888}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 858bff0bb8225c142a4e4e50c67a166b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  deckList: []
---- !u!4 &280275890
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 280275888}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  battleDeck: {fileID: 782690699}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -834,8 +788,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71b3aedaa11899c4ab81b2e9b9c84e06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleCardDeck: []
-  destructionCard: 
 --- !u!4 &782690700
 Transform:
   m_ObjectHideFlags: 0
@@ -1402,4 +1354,3 @@ SceneRoots:
   - {fileID: 782690700}
   - {fileID: 1944950094}
   - {fileID: 2083197552}
-  - {fileID: 280275890}

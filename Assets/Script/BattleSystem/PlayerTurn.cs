@@ -24,8 +24,8 @@ public class PlayerTurn : MonoBehaviour
     private List<CardController> handCardControllers = new();   // 手札のカード表示
     private List<CardRuntime> handCards = new();                // 手札のカードdata
 
-    private List<int> selectedCardsThisTurn = new List<int>();  // 選択されたカードのIDを保持
-    private List<int> excludedCardsThisTurn = new List<int>();  // 破棄されたカードのIDを保持
+    private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();  // 選択されたカードのIDを保持
+    private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>();  // 破棄されたカードのIDを保持
     private Queue<ICommand> commandQueue = new();               // コマンドキュー
 
     private bool[] isCardSelected = new bool[3];                // 各カード（3枚）が選択されているかどうか
@@ -45,26 +45,18 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
-    public void Setup(PlayerRuntime playerRuntime, WeaponRuntime weaponRuntime, EnemyModel enemyModel, PlayerCardDeck playerDeck, BattleCardDeck battleDeck)
+    public void Setup(PlayerRuntime playerRuntime, EnemyModel enemyModel, BattleCardDeck battleDeck)
     {
         this.playerRuntime = playerRuntime;
         this.enemyModel = enemyModel;
-        this.weaponRuntime = weaponRuntime;
         this.battleDeck = battleDeck;
-        battleDeck.InitFromPlayerDeck(playerDeck);
-    }
-
-    private void OnDestroy()
-    {
-        inputReader.CardSelectEvent -= OnCardSelect;
-        inputReader.DisCardEvent -= OnConfirmSelectionAndRedraw;
     }
 
     public void StartPlayerTurn()
     {
         commandQueue.Clear();
         selectedCardsThisTurn.Clear();
-        excludedCardsThisTurn.Clear();
+        excludedCardInstancesThisTurn.Clear();
 
         battleDeck.ResetBattleDeck(battleDeck.battleCardDeck);　// 破棄カードをリセット
         inputEnabled = true;
@@ -95,17 +87,12 @@ public class PlayerTurn : MonoBehaviour
         //三枚提示
         for (int i = 0; i < 3; i++)
         {
-            if (battleDeck.TryDrawCard(out int drawId))
+            if (battleDeck.TryDrawCard(out CardRuntime drawnCard))
             {
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
-                CardModel cardModel = cardModelFactory.CreateFromID(drawId);
-                if (cardModel == null)
-                {
-                    Debug.LogError($"カードID {drawId} の読み込みに失敗しました");
-                }
+                CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
                 cardObject.Init(cardModel);
-                CardRuntime cardRuntimeInstance = new CardRuntime(cardModel);
-                handCards.Add(cardRuntimeInstance);
+                handCards.Add(drawnCard); // 実際のインスタンスを手札に追加
                 handCardControllers.Add(cardObject);
             }
         }
@@ -127,21 +114,6 @@ public class PlayerTurn : MonoBehaviour
         isInputLocked = false;
 
         Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
-    }
-
-    /// <summary>
-    /// タイマーと入力管理
-    /// </summary>
-    private void OnConfirmSelectionAndRedraw()
-    {
-        if (!inputEnabled || isInputLocked) return;
-
-        if (Time.time - lastInputTime < inputCooldown) return;
-        lastInputTime = Time.time;
-
-        isInputLocked = true;
-        ConfirmSelectionAndRedraw();
-        isInputLocked = false;
     }
 
     /// <summary>
@@ -184,6 +156,21 @@ public class PlayerTurn : MonoBehaviour
     }
 
     /// <summary>
+    /// タイマーと入力管理
+    /// </summary>
+    private void OnConfirmSelectionAndRedraw()
+    {
+        if (!inputEnabled || isInputLocked) return;
+
+        if (Time.time - lastInputTime < inputCooldown) return;
+        lastInputTime = Time.time;
+
+        isInputLocked = true;
+        ConfirmSelectionAndRedraw();
+        isInputLocked = false;
+    }
+
+    /// <summary>
     /// カードの選択を確定し、手札を再抽選する
     /// </summary>
     private void ConfirmSelectionAndRedraw()
@@ -197,22 +184,24 @@ public class PlayerTurn : MonoBehaviour
             Debug.Log("1枚以上カードを選択してください。");
             return;
         }
-         
+
         for (int i = 0; i < isCardSelected.Length; i++)
         {
-            int cardId = handCards[i].ID;
+            if (i >= handCards.Count) continue;
+
+            CardRuntime cardInstance = handCards[i];
             if (isCardSelected[i])
             {
-                selectedCardsThisTurn.Add(cardId);       // 選ばれたカードを追加
+                selectedCardsThisTurn.Add(cardInstance);
             }
             else
             {
-                excludedCardsThisTurn.Add(cardId); // 選ばれなかったカードを一時除外
+                excludedCardInstancesThisTurn.Add(cardInstance.InstanceID);
             }
         }
 
         Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
-        Debug.Log("除外カード: " + string.Join(",", excludedCardsThisTurn));
+        Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
 
         //選択状態をリセット
         for (int i = 0; i < isCardSelected.Length; i++)
@@ -230,18 +219,25 @@ public class PlayerTurn : MonoBehaviour
     {
         inputEnabled = false;
 
-        foreach (var selectedCardId in selectedCardsThisTurn)
+        foreach (var selectedCardRuntime in selectedCardsThisTurn)
         {
-            var cardModel = cardModelFactory.CreateFromID(selectedCardId);
-            if (cardModel == null)
+            // 1. このカードがアタッチされている特定の武器を取得する
+            WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime; // CardRuntimeが親であるWeaponRuntimeへの参照を持っている
+            if (weaponRuntime == null)
             {
-                Debug.LogWarning($"カードID {selectedCardId} のカードが存在しません");
+                Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
                 continue;
             }
 
-            var currentCardRuntime = new CardRuntime(cardModel);
+            // 2. その武器を所持しているプレイヤーを取得する
+            PlayerRuntime playerRuntime = weaponRuntime.ParentPlayer; // WeaponRuntimeが親であるPlayerRuntimeへの参照を持っている
+            if (playerRuntime == null)
+            {
+                Debug.LogError($"武器 {weaponRuntime.ID} ({weaponRuntime.InstanceID}) はどのプレイヤーにも所持されていません！");
+                continue;
+            }
 
-            if (cardModel.Attribute == AttributeType.Heal)
+            if (selectedCardRuntime.attribute == AttributeType.Heal)
             {
                 // 回復値は仮に0.2f割合で回復
                 // commandQueue.Enqueue(new HealCardCommand(playerModel, 0.2f, useRatio: true));
@@ -249,8 +245,7 @@ public class PlayerTurn : MonoBehaviour
             // Heal以外は攻撃処理
             else
             {
-                var selectedCardRuntime = new CardRuntime(cardModel);
-                commandQueue.Enqueue(new AttackCardCommand(playerRuntime, weaponRuntime, currentCardRuntime, enemyModel, damageStrategy));
+                commandQueue.Enqueue(new AttackCardCommand(playerRuntime, weaponRuntime, selectedCardRuntime, enemyModel, damageStrategy));
             }
         }
 
