@@ -1,5 +1,5 @@
 /// <summary>
-/// 攻撃の「方法」を定義するアルゴリズムの共通インターフェース
+/// 最も一般的な攻撃方法を定義するインターフェース
 /// </summary>
 public interface IAttackStrategy
 {
