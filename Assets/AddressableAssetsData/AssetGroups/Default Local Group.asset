@@ -69,12 +69,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - CardEntity
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4af3644b0e8ca904cb617bb48b40fe98
-    m_Address: Assets/Resources/CardEntityList/Card_38.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CardEntity
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4c8bfdec2d02fb140a43fa8a929e6643
     m_Address: Assets/Resources/CardEntityList/Card_25.asset
     m_ReadOnly: 0

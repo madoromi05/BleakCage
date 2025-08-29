@@ -4,7 +4,8 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// カードをBattle開始時の初期デッキとして保持する
+/// カードをターン開始時の初期デッキ管理クラス
+/// データベースから持ってきたデータを元に、ターン開始時にデッキをリセットする
 /// </summary>
 public class BattleCardDeck : MonoBehaviour
 {
