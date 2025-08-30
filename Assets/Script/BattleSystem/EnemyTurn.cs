@@ -16,14 +16,14 @@ public class EnemyTurn : MonoBehaviour
 
     public event System.Action EnemyTurnFinished;           // ターン終了イベント
 
-    private int enemycount = 0;
-    private int playercount = 0;
+    private int enemycount;
+    private int playercount = 1;
 
     private void Awake()
     {
         damageStrategy = new EnemyAttackDamage();
     }
-
+    
     public void EnemySetup(List<PlayerModel> players, List<EnemyModel> enemys)
     {
         this.players = players;
@@ -46,7 +46,7 @@ public class EnemyTurn : MonoBehaviour
         int choice = 4;
         while(true)
         {
-            choice = Random.Range(0, playercount);
+            choice = Random.Range(1, playercount + 1);
             if(players[choice] == null) continue;
             break;
         }
@@ -58,7 +58,7 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void Battle()
     {
-        for(int enemyattacker = 0; enemyattacker < enemycount; enemyattacker++)
+        for(int enemyattacker = 1; enemyattacker < enemycount; enemyattacker++)
         {
             enemyModel = enemys[enemyattacker];
             if (enemyModel == null)

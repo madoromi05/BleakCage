@@ -245,7 +245,7 @@ public class PlayerTurn : MonoBehaviour
             // HealˆÈŠO‚ÍUŒ‚ˆ—
             else
             {
-                commandQueue.Enqueue(new AttackCardCommand(playerRuntime, weaponRuntime, selectedCardRuntime, enemyModel, damageStrategy));
+                commandQueue.Enqueue(new AttackCommand(playerRuntime, weaponRuntime, selectedCardRuntime, enemyModel, damageStrategy));
             }
         }
 

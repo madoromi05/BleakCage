@@ -88,7 +88,7 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        for(int i = 0; i < 3; i++)
+        for(int i = 1; i < 4; i++)
         {
             EnemyModel enemy = enemyFactory.CreateFromId(i);
             predators.Add(enemy);
