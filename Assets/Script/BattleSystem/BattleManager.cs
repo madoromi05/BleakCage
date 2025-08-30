@@ -12,9 +12,11 @@ public class BattleManager : MonoBehaviour
     public TextMeshProUGUI timeText;                        //時間を表示する変数
 
     [SerializeField] private PlayerTurn playerTurn;
+    [SerializeField] private EnemyTurn enemyTurn;
     [SerializeField] private BattleCardDeck battleDeck;
 
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
+    private List<EnemyModel> predators = new List<EnemyModel>();
     private EnemyModel enemyModel;
     private EnemyModelFactory enemyFactory;
     private PlayerModel playerModel;
@@ -86,8 +88,17 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        for(int i = 0; i < 3; i++)
+        {
+            EnemyModel enemy = enemyFactory.CreateFromId(i);
+            predators.Add(enemy);
+        }
+
+
+
         int mockEnemyId = 1;
         enemyModel = enemyFactory.CreateFromId(mockEnemyId);
+
 
         battleDeck.InitFromCardList(allCardsForBattle);
 
@@ -138,8 +149,8 @@ public class BattleManager : MonoBehaviour
     private IEnumerator EnemyTurn()
     {
         Debug.Log("【敵ターン開始】");
+        enemyTurn.StartEnemyTurn();
 
-        // ここに敵の行動処理を書く（今は0.5秒待機のダミー）
         yield return new WaitForSeconds(1.0f);
 
         Debug.Log("【敵ターン終了】");

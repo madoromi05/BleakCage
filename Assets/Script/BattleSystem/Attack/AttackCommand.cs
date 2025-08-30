@@ -4,7 +4,7 @@ using static UnityEngine.GraphicsBuffer;
 /// <summary>
 /// 選択したカードが敵に攻撃するコマンド
 ///</summary>
-public class AttackCardCommand : ICommand
+public class AttackCommand : ICommand
 {
     private PlayerRuntime player;
     private EnemyModel enemy;
@@ -12,7 +12,7 @@ public class AttackCardCommand : ICommand
     private WeaponRuntime weapon;
     private IAttackStrategy damageStrategy;
 
-    public AttackCardCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyModel enemy, IAttackStrategy attackStrategy)
+    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyModel enemy, IAttackStrategy attackStrategy)
     {
         this.player = player;
         this.enemy = enemy;

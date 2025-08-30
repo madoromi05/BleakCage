@@ -27,7 +27,6 @@ public class PlayerRuntime : IAttackComponent
         CurrentHP = model.PlayerHP;
         baseAttackPower = model.PlayerAttackPower;
         attackStrategy = strategy;
-
         var innateWeaponModel = new WeaponModel(0, "Innate Skill", 10f, AttributeType.Bullet, 1.0f);
         InnateWeapon = new WeaponRuntime(innateWeaponModel, System.Guid.NewGuid().ToString());
         this.EquipWeapon(InnateWeapon);
