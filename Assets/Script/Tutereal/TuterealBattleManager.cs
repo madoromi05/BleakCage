@@ -1,92 +1,54 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
+
 /// <summary>
-/// Battleの流れを管理するクラス 
+/// Battleの流れを管理するクラス
 /// </summary>
 public class TuterealBattleManager : MonoBehaviour
 {
-    public TextMeshProUGUI timeText;                        //時間を表示する変数
+    public TextMeshProUGUI timeText;
 
-    [SerializeField] private PlayerTurn playerTurn;
+    [SerializeField] private TuterealPlayerTurn playerTurn;
     [SerializeField] private BattleCardDeck battleDeck;
-    [SerializeField] private PlayerProfile playerProfile; // プレイヤーデッキ
 
-    private List<PlayerRuntime> party = new List<PlayerRuntime>();
+    private List<PlayerRuntime> party;
     private EnemyModel enemyModel;
-    private EnemyModelFactory enemyFactory;
-    private PlayerModel playerModel;
-    private PlayerRuntime playerRuntime;
-    private PlayerModelFactory playerFactory;
-    private WeaponModel weaponModel;
-    private WeaponRuntime weaponRuntime;
-    private WeaponModelFactory weaponFactory;
-    private CardModelFactory cardFactory;
-    private float turnTime = 10f;                           // プレイヤーのターン時間（秒）
+    private float turnTime = 10f; // プレイヤーのターン時間（秒）
 
     void Start()
     {
-        playerFactory = new PlayerModelFactory();
-        enemyFactory = new EnemyModelFactory();
-        weaponFactory = new WeaponModelFactory();
-        cardFactory = new CardModelFactory();
+        // 1. PlayerDataLoaderを使ってパーティーとカードデータを読み込む
+        var dataLoader = new PlayerDataLoader();
+        DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
 
-        // 3. 読み込んだデータからランタイムの階層構造を構築
-        IAttackStrategy defaultStrategy = new AttributeWeakness();
-        List<CardRuntime> allCardsForBattle = new List<CardRuntime>();
+        // 2. 読み込んだデータをBattleManagerに設定
+        this.party = setupData.Party;
 
-        foreach (var charData in playerProfile.BattleCharacters)
-        {
-            PlayerModel playerModel = playerFactory.CreateFromId(charData.CharacterId);
-
-            if (playerModel == null)
-            {
-                Debug.LogError($"PlayerModelの生成に失敗しました。ID: {charData.CharacterId} のPlayerEntityがResources内に存在するか確認してください。");
-                continue; // このキャラクターの処理をスキップして次に進む
-            }
-
-            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId);
-            party.Add(playerRuntime);
-
-            // プレイヤーが直接持つカードを「見えない武器」にセット
-            if (charData.EquippedCards != null)
-            {
-                foreach (var cardData in charData.EquippedCards)
-                {
-                    CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
-                    CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
-                    playerRuntime.InnateWeapon.AddCard(cardRuntime); // InnateWeaponにカードを追加
-                    allCardsForBattle.Add(cardRuntime);
-                }
-            }
-
-            foreach (var weaponData in charData.EquippedWeapons)
-            {
-                WeaponModel weaponModel = weaponFactory.CreateFromId(weaponData.WeaponId);
-                WeaponRuntime weaponRuntime = new WeaponRuntime(weaponModel, weaponData.InstanceId);
-                playerRuntime.EquipWeapon(weaponRuntime); // Player -> Weapon の親子関係を確立
-
-                foreach (var cardData in weaponData.SlottedCards)
-                {
-                    CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
-                    CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
-                    weaponRuntime.AddCard(cardRuntime); // Weapon -> Card の親子関係を確立
-                    allCardsForBattle.Add(cardRuntime);
-                }
-            }
-        }
-
+        // 3. 敵を生成
+        var enemyFactory = new EnemyModelFactory();
         int mockEnemyId = 1;
         enemyModel = enemyFactory.CreateFromId(mockEnemyId);
 
-        battleDeck.InitFromCardList(allCardsForBattle);
-
-        // PlayerDeck生成
+        // 4. バトルデッキとプレイヤーのターンをセットアップ
+        battleDeck.InitFromCardList(setupData.AllCards);
         playerTurn.Setup(party[0], enemyModel, battleDeck);
         playerTurn.TurnFinished += OnPlayerTurnFinished;
+
+        // 5. バトル開始
+        StartPlayerTurn();
+    }
+
+    /// <summary>
+    /// チュートリアルの流れを管理する
+    /// </summary>
+    private IEnumerator TutorialSequence()
+    {
+        // チュートリアルの準備フェーズを開始し、タイマースタートの合図を待つ
+        yield return StartCoroutine(playerTurn.StartTutorialPhase());
+
+        // プレイヤーのターンを開始
         StartPlayerTurn();
     }
 
@@ -113,7 +75,7 @@ public class TuterealBattleManager : MonoBehaviour
             timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
-        playerTurn.FinishPlayerTurn(); // 強制終了（手動でも終了可能）
+        playerTurn.FinishPlayerTurn();
     }
 
     /// <summary>
@@ -132,12 +94,10 @@ public class TuterealBattleManager : MonoBehaviour
     {
         Debug.Log("【敵ターン開始】");
 
-        // ここに敵の行動処理を書く（今は0.5秒待機のダミー）
         yield return new WaitForSeconds(1.0f);
 
         Debug.Log("【敵ターン終了】");
 
-        // 次のプレイヤーターン開始
         StartPlayerTurn();
     }
 }

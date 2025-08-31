@@ -10,10 +10,9 @@ public static class TuterealDeckCreate
     /// データが存在しない場合にモックデータを作成し、保存する。
     /// これが初期デッキ（キャラクター、武器、カードの構成）になる。
     /// </summary>
-    /// <returns>作成されたプレイヤープロファイル</returns>
     public static PlayerProfile CreateAndSaveMockProfile()
     {
-        Debug.Log("モックのプレイヤープロファイル（キャラクター1体）を作成・保存します...");
+        Debug.Log("プレイヤーデッキ（キャラクター1体）を作成・保存します...");
 
         PlayerProfile profile = new PlayerProfile
         {
@@ -45,7 +44,7 @@ public static class TuterealDeckCreate
             var weapon = new WeaponData
             {
                 InstanceId = System.Guid.NewGuid().ToString(),
-                WeaponId = j, // 武器IDを 1～3 で割り振る
+                WeaponId = j,
                 SlottedCards = new List<CardData>()
             };
 
