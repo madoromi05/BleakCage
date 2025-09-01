@@ -28,45 +28,21 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
-        // 1. PlayerDataLoaderを使ってパーティーとカードデータを読み込む
+        // 1. パーティーとカードデータを読み込み
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-
-        // 2. 読み込んだPlayerデータをBattleManagerに設定
         this.party = setupData.Party;
 
         // 2. パーティ人数分 PlayerView を生成
-        for (int i = 0; i < party.Count; i++)
-        {
-            PlayerRuntime runtime = party[i];
-
-            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
-
-            PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            playerController.Init(runtime.PlayerModel);
-        }
+        partyPlayerView();
 
         // 3. 敵を生成(ID一から3まで)
-        var enemyFactory = new EnemyModelFactory();
-        for (int i = 0; i < 3; i++)
-        {
-            EnemyModel enemy = enemyFactory.CreateFromId(i + 1);
-            predators.Add(enemy);
-
-            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
-            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
-            enemyController.Init(enemy);
-        }
+        enemiesCreate();
 
         //最初の敵をターゲットとして設定する
         if (predators.Count > 0)
         {
             enemyModel = predators[0];
-        }
-        else
-        {
-            Debug.LogError("攻撃対象の敵が見つかりません！");
-            return;
         }
 
         List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
@@ -79,6 +55,33 @@ public class BattleManager : MonoBehaviour
 
         // 5. バトル開始
         StartPlayerTurn();
+    }
+
+    private void partyPlayerView()
+    {
+        for (int i = 0; i < party.Count; i++)
+        {
+            PlayerRuntime runtime = party[i];
+
+            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
+
+            PlayerController playerController = playerObject.GetComponent<PlayerController>();
+            playerController.Init(runtime.PlayerModel);
+        }
+    }
+
+    private void enemiesCreate()
+    {
+        var enemyFactory = new EnemyModelFactory();
+        for (int i = 0; i < 3; i++)
+        {
+            EnemyModel enemy = enemyFactory.CreateFromId(i + 1);
+            predators.Add(enemy);
+
+            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
+            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+            enemyController.Init(enemy);
+        }
     }
 
     /// <summary>
