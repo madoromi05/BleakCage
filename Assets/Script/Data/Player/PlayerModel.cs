@@ -9,13 +9,11 @@ public class PlayerModel
     public int PlayerID { get; private set; }
     public string PlayerName { get; private set; }
     public int PlayerLevel { get; private set; }
-
     public float PlayerHP { get; set; }
     public float PlayerAttackPower { get; private set; }
     public float PlayerDefensePower { get; private set; }
     public AttributeType PlayerAttribute { get; private set; }
-    public Sprite PlayerIcon { get; private set; }
-    public Sprite PlayerSDIcon { get; private set; }
+    public Sprite PlayerSprite { get; private set; }
     public string PlayerDescription { get; private set; }
 
     /// <summary>
@@ -40,8 +38,7 @@ public class PlayerModel
 
         PlayerAttribute = playerEntity.PlayerAttribute;
 
-        PlayerIcon = playerEntity.PlayerIcon;
-        PlayerSDIcon = playerEntity.PlayerSDIcon;
+        PlayerSprite = playerEntity.PlayerSprite;
         PlayerDescription = playerEntity.PlayerDescription;
     }
 }

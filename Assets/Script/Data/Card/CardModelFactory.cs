@@ -23,43 +23,6 @@ public class CardModelFactory
     }
 
     /// <summary>
-    /// CardEntityから直接CardModelを生成
-    /// </summary>
-    /// <param name="cardEntity">CardEntity</param>
-    /// <returns>CardModel。生成に失敗した場合はnull</returns>
-    public CardModel CreateFromEntity(CardEntity cardEntity)
-    {
-        if (cardEntity == null)
-        {
-            Debug.LogError("CardEntity is null");
-            return null;
-        }
-        return new CardModel(cardEntity);
-    }
-
-    /// <summary>
-    /// 複数のCardModelを一括生成
-    /// いらないかも
-    /// </summary>
-    /// <param name="cardIds">カードIDの配列</param>
-    /// <returns>CardModelの配列（失敗したものはnull）</returns>
-    public CardModel[] CreateMultipleFromIds(int[] cardIds)
-    {
-        if (cardIds == null || cardIds.Length == 0)
-        {
-            Debug.LogWarning("CardIds array is null or empty");
-            return new CardModel[0];
-        }
-
-        CardModel[] cardModels = new CardModel[cardIds.Length];
-        for (int i = 0; i < cardIds.Length; i++)
-        {
-            cardModels[i] = CreateFromID(cardIds[i]);
-        }
-        return cardModels;
-    }
-
-    /// <summary>
     /// CardEntityを読み込む
     /// </summary>
     /// <param name="cardId">カードID</param>

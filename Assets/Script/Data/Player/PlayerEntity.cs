@@ -13,8 +13,7 @@ public class PlayerEntity : ScriptableObject
     public int PlayerId;                          // Player固有ID
     public string PlayerName;                     // Player名
     public AttributeType PlayerAttribute;         // 属性
-    public Sprite PlayerIcon;                     // 立ち絵画像
-    public Sprite PlayerSDIcon;                   // SDキャラ
+    public Sprite PlayerSprite;
     public string PlayerDescription;              // プレイヤーの説明文
 
     public int PlayerLevel;                       // PlayerLevel

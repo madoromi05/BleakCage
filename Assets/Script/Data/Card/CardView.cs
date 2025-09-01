@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class CardView : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI Name;
-    [SerializeField] TextMeshProUGUI attackAttribute;   // UŒ‚‘®«‚Ì‚İ•\¦
+    [SerializeField] TextMeshProUGUI attackAttribute;
     [SerializeField] TextMeshProUGUI Description;
     [SerializeField] Image IconImage;
 

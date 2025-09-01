@@ -12,9 +12,13 @@ public class BattleManager : MonoBehaviour
 
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private BattleCardDeck battleDeck;
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private Transform partyTextureTransform;
 
-    private List<PlayerRuntime> party; // = new List<PlayerRuntime>(); // 初期化はStartで行う
+    private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
+    private List<PlayerRuntime> party;
     private EnemyModel enemyModel;
+    private List<EnemyModel> predators = new List<EnemyModel>();    // 敵のリスト
     private float turnTime = 10f; // プレイヤーのターン時間（秒）
 
     void Start()
@@ -23,13 +27,33 @@ public class BattleManager : MonoBehaviour
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
 
-        // 2. 読み込んだデータをBattleManagerに設定
+        // 2. 読み込んだPlayerデータをBattleManagerに設定
         this.party = setupData.Party;
 
-        // 3. 敵を生成
+        // 2. パーティ人数分 PlayerView を生成
+        for (int i = 0; i < party.Count; i++)
+        {
+            PlayerRuntime runtime = party[i];
+
+            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
+
+            PlayerController playerController = playerObject.GetComponent<PlayerController>();
+            if (playerController != null)
+            {
+                playerController.Init(runtime.PlayerModel);
+            }
+            else
+            {
+                Debug.LogError("PlayerControllerがPrefabにアタッチされていません！");
+            }
+        }
+        // 3. 敵を生成(ID一から3まで)
         var enemyFactory = new EnemyModelFactory();
-        int mockEnemyId = 1;
-        enemyModel = enemyFactory.CreateFromId(mockEnemyId);
+        for (int i = 0; i < 3; i++)
+        {
+            EnemyModel enemy = enemyFactory.CreateFromId(i+1);
+            predators.Add(enemy);
+        }
 
         // 4. バトルデッキとプレイヤーのターンをセットアップ
         battleDeck.InitFromCardList(setupData.AllCards);

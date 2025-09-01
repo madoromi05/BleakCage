@@ -23,42 +23,6 @@ public class EnemyModelFactory
     }
 
     /// <summary>
-    /// EnemyEntity‚©‚ç’¼ÚEnemyModel‚ğ¶¬
-    /// </summary>
-    /// <param name="enemyEntity">EnemyEntity</param>
-    /// <returns>EnemyModelB¶¬‚É¸”s‚µ‚½ê‡‚Ínull</returns>
-    public EnemyModel CreateFromEntity(EnemyEntity enemyEntity)
-    {
-        if (enemyEntity == null)
-        {
-            Debug.LogError("EnemyEntity is null");
-            return null;
-        }
-        return new EnemyModel(enemyEntity);
-    }
-
-    /// <summary>
-    /// •¡”‚ÌEnemyModel‚ğˆêŠ‡¶¬
-    /// </summary>
-    /// <param name="enemyIds">“GID‚Ì”z—ñ</param>
-    /// <returns>EnemyModel‚Ì”z—ñi¸”s‚µ‚½‚à‚Ì‚Ínullj</returns>
-    public EnemyModel[] CreateMultipleFromIds(int[] enemyIds)
-    {
-        if (enemyIds == null || enemyIds.Length == 0)
-        {
-            Debug.LogWarning("EnemyIds array is null or empty");
-            return new EnemyModel[0];
-        }
-
-        EnemyModel[] enemyModels = new EnemyModel[enemyIds.Length];
-        for (int i = 0; i < enemyIds.Length; i++)
-        {
-            enemyModels[i] = CreateFromId(enemyIds[i]);
-        }
-        return enemyModels;
-    }
-
-    /// <summary>
     /// EnemyEntity‚ğ“Ç‚İ‚Ş
     /// </summary>
     /// <param name="enemyId">“GID</param>

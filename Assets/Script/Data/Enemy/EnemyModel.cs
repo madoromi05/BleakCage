@@ -12,7 +12,7 @@ public class EnemyModel
     public float EnemyDefensePower { get; private set; }                    // 防御力
     public AttributeType EnemyAttribute { get; private set; }               // 攻撃属性
     public DefensAttributeType EnemyDefensAttribute { get; private set; }   // 防御属性
-    public Sprite EnemyIcon { get; private set; }                           // 表示アイコン
+    public Sprite EnemySprite { get; private set; }                           // 表示アイコン
     public string EnemyDescription { get; private set; }                    // 説明文
 
     /// <summary>
@@ -34,7 +34,7 @@ public class EnemyModel
         EnemyDefensePower = Entity.EnemyDefensePower;
         EnemyAttribute = Entity.EnemyAttribute;
         EnemyDefensAttribute = Entity.EnemyDefensAttribute;
-        EnemyIcon = Entity.EnemyIcon;
+        EnemySprite = Entity.EnemySprite;
         EnemyDescription = Entity.EnemyDescription;
     }
 }

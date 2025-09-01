@@ -68,7 +68,6 @@ public class PlayerEntityTableEditor : EditorWindow
         GUILayout.Label("DEF", GUILayout.Width(60));
         GUILayout.Label("Attr", GUILayout.Width(80));
         GUILayout.Label("Icon", GUILayout.Width(60));
-        GUILayout.Label("SD", GUILayout.Width(60));
         GUILayout.Label("Description", GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
 
@@ -88,8 +87,7 @@ public class PlayerEntityTableEditor : EditorWindow
             player.PlayerAttackPower = EditorGUILayout.FloatField(player.PlayerAttackPower, GUILayout.Width(60));
             player.PlayerDefensePower = EditorGUILayout.FloatField(player.PlayerDefensePower, GUILayout.Width(60));
             player.PlayerAttribute = (AttributeType)EditorGUILayout.EnumPopup(player.PlayerAttribute, GUILayout.Width(80));
-            player.PlayerIcon = (Sprite)EditorGUILayout.ObjectField(player.PlayerIcon, typeof(Sprite), false, GUILayout.Width(60));
-            player.PlayerSDIcon = (Sprite)EditorGUILayout.ObjectField(player.PlayerSDIcon, typeof(Sprite), false, GUILayout.Width(60));
+            player.PlayerSprite = (Sprite)EditorGUILayout.ObjectField(player.PlayerSprite, typeof(Sprite), false, GUILayout.Width(60));
             player.PlayerDescription = EditorGUILayout.TextArea(player.PlayerDescription, GUILayout.Width(500), GUILayout.Height(40));
 
             if (EditorGUI.EndChangeCheck())

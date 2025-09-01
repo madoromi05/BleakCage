@@ -23,42 +23,6 @@ public class PlayerModelFactory
     }
 
     /// <summary>
-    /// PlayerEntityから直接PlayerModelを生成
-    /// </summary>
-    /// <param name="playerEntity">PlayerEntity</param>
-    /// <returns>PlayerModel。生成に失敗した場合はnull</returns>
-    public PlayerModel CreateFromEntity(PlayerEntity playerEntity)
-    {
-        if (playerEntity == null)
-        {
-            Debug.LogError("PlayerEntity is null");
-            return null;
-        }
-        return new PlayerModel(playerEntity);
-    }
-
-    /// <summary>
-    /// 複数のPlayerModelを一括生成
-    /// </summary>
-    /// <param name="playerIds">プレイヤーIDの配列</param>
-    /// <returns>PlayerModelの配列（失敗したものはnull）</returns>
-    public PlayerModel[] CreateMultipleFromIds(int[] playerIds)
-    {
-        if (playerIds == null || playerIds.Length == 0)
-        {
-            Debug.LogWarning("PlayerIds array is null or empty");
-            return new PlayerModel[0];
-        }
-
-        PlayerModel[] playerModels = new PlayerModel[playerIds.Length];
-        for (int i = 0; i < playerIds.Length; i++)
-        {
-            playerModels[i] = CreateFromId(playerIds[i]);
-        }
-        return playerModels;
-    }
-
-    /// <summary>
     /// PlayerEntityを読み込む
     /// </summary>
     /// <param name="playerId">プレイヤーID</param>

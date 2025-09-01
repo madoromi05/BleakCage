@@ -12,6 +12,7 @@ public class PlayerRuntime : IAttackComponent
     public System.Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
     public WeaponRuntime InnateWeapon { get; private set; }//Player‘•”õ‚Ì‚½‚ß‚Ì•Ší
+    public PlayerModel PlayerModel { get; private set; }
 
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private readonly float baseAttackPower;
@@ -27,6 +28,7 @@ public class PlayerRuntime : IAttackComponent
         CurrentHP = model.PlayerHP;
         baseAttackPower = model.PlayerAttackPower;
         attackStrategy = strategy;
+        this.PlayerModel = model;
 
         var innateWeaponModel = new WeaponModel(0, "Innate Skill", 10f, AttributeType.Bullet, 1.0f);
         InnateWeapon = new WeaponRuntime(innateWeaponModel, System.Guid.NewGuid().ToString());

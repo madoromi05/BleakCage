@@ -87,7 +87,7 @@ public class EnemyEntityTableEditor : EditorWindow
             enemy.EnemyAttackPower = EditorGUILayout.FloatField(enemy.EnemyAttackPower, GUILayout.Width(80));
             enemy.EnemyDefensePower = EditorGUILayout.FloatField(enemy.EnemyDefensePower, GUILayout.Width(80));
             enemy.EnemyAttribute = (AttributeType)EditorGUILayout.EnumPopup(enemy.EnemyAttribute, GUILayout.Width(80));
-            enemy.EnemyIcon = (Sprite)EditorGUILayout.ObjectField(enemy.EnemyIcon, typeof(Sprite), false, GUILayout.Width(60));
+            enemy.EnemySprite = (Sprite)EditorGUILayout.ObjectField(enemy.EnemySprite, typeof(Sprite), false, GUILayout.Width(60));
             enemy.EnemyDescription = EditorGUILayout.TextArea(enemy.EnemyDescription, GUILayout.Width(500), GUILayout.Height(40));
 
             if (EditorGUI.EndChangeCheck())

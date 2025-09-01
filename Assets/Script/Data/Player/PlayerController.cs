@@ -1,18 +1,22 @@
 using UnityEngine;
 
-public class PlayeryController : MonoBehaviour
+/// <summary>
+/// UI、データをゲームにsetするクラス
+/// </summary>
+public class PlayerController : MonoBehaviour
 {
-    // Playerデータを管理する
+    PlayerView view;
     PlayerModel model;
 
     private void Awake()
     {
-
+        view = GetComponent<PlayerView>();
     }
 
-    public void Init(PlayerEntity playerEntity)
+    // CardModelから直接初期化するメソッドを追加
+    public void Init(PlayerModel playerModel)
     {
-        // CardModelを作成し、データを適用
-        model = new PlayerModel(playerEntity);
+        model = playerModel;
+        view.Show(model);
     }
 }
