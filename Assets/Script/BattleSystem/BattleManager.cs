@@ -13,7 +13,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform partyTextureTransform;
+    [SerializeField] private Transform enemyTextureTransform;
 
     private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
     private List<PlayerRuntime> party;
@@ -38,21 +40,19 @@ public class BattleManager : MonoBehaviour
             var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
 
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            if (playerController != null)
-            {
-                playerController.Init(runtime.PlayerModel);
-            }
-            else
-            {
-                Debug.LogError("PlayerControllerがPrefabにアタッチされていません！");
-            }
+            playerController.Init(runtime.PlayerModel);
         }
+
         // 3. 敵を生成(ID一から3まで)
         var enemyFactory = new EnemyModelFactory();
         for (int i = 0; i < 3; i++)
         {
-            EnemyModel enemy = enemyFactory.CreateFromId(i+1);
+            EnemyModel enemy = enemyFactory.CreateFromId(i + 1);
             predators.Add(enemy);
+
+            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
+            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+            enemyController.Init(enemy);
         }
 
         // 4. バトルデッキとプレイヤーのターンをセットアップ

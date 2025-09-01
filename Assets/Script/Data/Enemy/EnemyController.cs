@@ -5,17 +5,17 @@ using UnityEngine;
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
-    // カードデータを管理する
+    EnemyView view;
     EnemyModel model;
 
     private void Awake()
     {
-
+        view = GetComponent<EnemyView>();
     }
 
-    public void Init(EnemyEntity enemyEntity)
+    public void Init(EnemyModel enemyModel)
     {
-        // CardModelを作成し、データを適用
-        model = new EnemyModel(enemyEntity);
+        model = enemyModel;
+        view.Show(model);
     }
 }

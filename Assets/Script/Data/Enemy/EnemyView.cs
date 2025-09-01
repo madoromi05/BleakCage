@@ -6,18 +6,22 @@ using UnityEngine.UI;
 /// </summary>
 
 [RequireComponent(typeof(Image))]
-public class PlayerView : MonoBehaviour
+public class EnemyView : MonoBehaviour
 {
     private Image image;
-    private PlayerModel model;
+    private EnemyModel model;
 
     private void Awake()
     {
         image = GetComponent<Image>();
     }
-    public void Show(PlayerModel playerModel)
+    public void Show(EnemyModel enemyModel)
     {
-        model = playerModel;
-        image.sprite = model.PlayerSprite;
+        model = enemyModel;
+
+        if (image != null)
+        {
+            image.sprite = model.EnemySprite;
+        }
     }
 }

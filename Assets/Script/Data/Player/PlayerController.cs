@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour
         view = GetComponent<PlayerView>();
     }
 
-    // CardModel‚©‚ç’¼Ú‰Šú‰»‚·‚éƒƒ\ƒbƒh‚ğ’Ç‰Á
     public void Init(PlayerModel playerModel)
     {
         model = playerModel;
