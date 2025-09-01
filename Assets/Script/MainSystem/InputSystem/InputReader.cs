@@ -25,7 +25,6 @@ public class InputReader : MonoBehaviour, BattleControls.IBattleActionActions
         controls.BattleAction.Disable();
     }
 
-
     /// <summary>
     /// Input action methods
     /// </summary>

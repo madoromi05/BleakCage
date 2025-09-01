@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using System.Linq;
 
 /// <summary>
 /// Battleの流れを管理するクラス
@@ -56,6 +57,20 @@ public class BattleManager : MonoBehaviour
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
         }
+
+        //最初の敵をターゲットとして設定する
+        if (predators.Count > 0)
+        {
+            enemyModel = predators[0];
+        }
+        else
+        {
+            Debug.LogError("攻撃対象の敵が見つかりません！");
+            return;
+        }
+
+        List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
+        enemyTurn.EnemySetup(playerModels, predators);
 
         // 4. バトルデッキとプレイヤーのターンをセットアップ
         battleDeck.InitFromCardList(setupData.AllCards);

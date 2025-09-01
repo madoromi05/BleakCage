@@ -201,7 +201,7 @@ public class PlayerTurn : MonoBehaviour
         }
 
         Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
-        Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
+        //Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
 
         //選択状態をリセット
         for (int i = 0; i < isCardSelected.Length; i++)
