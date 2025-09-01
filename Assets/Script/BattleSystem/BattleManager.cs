@@ -11,6 +11,7 @@ public class BattleManager : MonoBehaviour
     public TextMeshProUGUI timeText;
 
     [SerializeField] private PlayerTurn playerTurn;
+    [SerializeField] private EnemyTurn enemyTurn;
     [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
@@ -18,9 +19,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform enemyTextureTransform;
 
     private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
-    private List<PlayerRuntime> party;
+    private List<PlayerRuntime> party = new List<PlayerRuntime>();
+    private List<EnemyModel> predators = new List<EnemyModel>();
+
     private EnemyModel enemyModel;
-    private List<EnemyModel> predators = new List<EnemyModel>();    // 敵のリスト
     private float turnTime = 10f; // プレイヤーのターン時間（秒）
 
     void Start()
@@ -105,6 +107,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator EnemyTurn()
     {
         Debug.Log("【敵ターン開始】");
+        enemyTurn.StartEnemyTurn();
 
         yield return new WaitForSeconds(1.0f);
 
