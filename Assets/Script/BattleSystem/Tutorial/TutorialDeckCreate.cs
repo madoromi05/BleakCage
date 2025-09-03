@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 初期デッキ（モックのプレイヤープロファイル）を作成するためのクラス
 /// </summary>
-public static class TuterealDeckCreate
+public static class TutorialDeckCreate
 {
     /// <summary>
     /// データが存在しない場合にモックデータを作成し、保存する。

@@ -12,13 +12,14 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private BattleCardDeck battleDeck;
 
-    public event System.Action TurnFinished;                    // ターン終了イベント
+    public event System.Action OnTurnFinished;
+    public event System.Action<int> OnCardSelected;
 
-    private InputReader inputReader;                            // 入力を管理するクラス
-    private PlayerRuntime playerRuntime;                        // プレイヤーRuntimeデータ
-    private EnemyModel enemyModel;                              // 敵モデル
-    private WeaponRuntime weaponRuntime;                        // 武器Runtimeデータ
-    private CardModelFactory cardModelFactory;                  // カードRuntimeデータ
+    private BattleInputReader inputReader;
+    private PlayerRuntime playerRuntime;
+    private EnemyModel enemyModel;
+    private WeaponRuntime weaponRuntime;
+    private CardModelFactory cardModelFactory;
     private CardRuntime cardRuntime;
 
     private List<CardController> handCardControllers = new();   // 手札のカード表示
@@ -26,7 +27,7 @@ public class PlayerTurn : MonoBehaviour
 
     private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();          // 選択されたカードのIDを保持
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>();  // 破棄されたカードのIDを保持
-    private Queue<ICommand> commandQueue = new();               // コマンドキュー
+    private Queue<ICommand> commandQueue = new();
 
     private bool[] isCardSelected = new bool[3];                // 各カード（3枚）が選択されているかどうか
     private bool inputEnabled = false;                          // ターン中全体の入力フラグ
@@ -37,7 +38,7 @@ public class PlayerTurn : MonoBehaviour
 
     private void Awake()
     {
-        inputReader = GetComponent<InputReader>();
+        inputReader = GetComponent<BattleInputReader>();
         inputReader.CardSelectEvent += OnCardSelect;
         inputReader.DisCardEvent += OnConfirmSelectionAndRedraw;
 
@@ -111,6 +112,7 @@ public class PlayerTurn : MonoBehaviour
 
         isInputLocked = true;
         CardSelect(inputNumber);
+        OnCardSelected?.Invoke(inputNumber);
         isInputLocked = false;
 
         Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
@@ -260,7 +262,7 @@ public class PlayerTurn : MonoBehaviour
         Debug.Log("カード効果の実行完了");
 
         // ターン終了イベントを発火
-        TurnFinished?.Invoke();
+        OnTurnFinished?.Invoke();
     }
 
     private List<int> GetCurrentlySelectedCardIds()

@@ -88,6 +88,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "TutorialAction",
+            "id": "a073e853-2b82-49f6-ba0b-021a1c6758e2",
+            "actions": [
+                {
+                    "name": "NextTutorial",
+                    "type": "Button",
+                    "id": "d311ac5e-fc53-4702-a6bd-d912be81e0a4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b32c2265-88df-4357-bed3-3e167db00e67",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "NextTutorial",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

@@ -72,7 +72,7 @@ using UnityEngine.InputSystem.Utilities;
 /// }
 /// </code>
 /// </example>
-public partial class @BattleControls: IInputActionCollection2, IDisposable
+public partial class @InputControls: IInputActionCollection2, IDisposable
 {
     /// <summary>
     /// Provides access to the underlying asset instance.
@@ -82,7 +82,7 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
     /// <summary>
     /// Constructs a new instance.
     /// </summary>
-    public @BattleControls()
+    public @InputControls()
     {
         asset = InputActionAsset.FromJson(@"{
     ""name"": ""InputSystem_Actions"",
@@ -174,6 +174,34 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""TutorialAction"",
+            ""id"": ""a073e853-2b82-49f6-ba0b-021a1c6758e2"",
+            ""actions"": [
+                {
+                    ""name"": ""NextTutorial"",
+                    ""type"": ""Button"",
+                    ""id"": ""d311ac5e-fc53-4702-a6bd-d912be81e0a4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""b32c2265-88df-4357-bed3-3e167db00e67"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""NextTutorial"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -245,11 +273,15 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         m_BattleAction_CardSelectOne = m_BattleAction.FindAction("CardSelectOne", throwIfNotFound: true);
         m_BattleAction_CardSelectTwo = m_BattleAction.FindAction("CardSelectTwo", throwIfNotFound: true);
         m_BattleAction_CardSelectTree = m_BattleAction.FindAction("CardSelectTree", throwIfNotFound: true);
+        // TutorialAction
+        m_TutorialAction = asset.FindActionMap("TutorialAction", throwIfNotFound: true);
+        m_TutorialAction_NextTutorial = m_TutorialAction.FindAction("NextTutorial", throwIfNotFound: true);
     }
 
-    ~@BattleControls()
+    ~@InputControls()
     {
-        UnityEngine.Debug.Assert(!m_BattleAction.enabled, "This will cause a leak and performance issues, BattleControls.BattleAction.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_BattleAction.enabled, "This will cause a leak and performance issues, InputControls.BattleAction.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_TutorialAction.enabled, "This will cause a leak and performance issues, InputControls.TutorialAction.Disable() has not been called.");
     }
 
     /// <summary>
@@ -334,12 +366,12 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
     /// </summary>
     public struct BattleActionActions
     {
-        private @BattleControls m_Wrapper;
+        private @InputControls m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public BattleActionActions(@BattleControls wrapper) { m_Wrapper = wrapper; }
+        public BattleActionActions(@InputControls wrapper) { m_Wrapper = wrapper; }
         /// <summary>
         /// Provides access to the underlying input action "BattleAction/DisCard".
         /// </summary>
@@ -450,6 +482,102 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="BattleActionActions" /> instance referencing this action map.
     /// </summary>
     public BattleActionActions @BattleAction => new BattleActionActions(this);
+
+    // TutorialAction
+    private readonly InputActionMap m_TutorialAction;
+    private List<ITutorialActionActions> m_TutorialActionActionsCallbackInterfaces = new List<ITutorialActionActions>();
+    private readonly InputAction m_TutorialAction_NextTutorial;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "TutorialAction".
+    /// </summary>
+    public struct TutorialActionActions
+    {
+        private @InputControls m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public TutorialActionActions(@InputControls wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "TutorialAction/NextTutorial".
+        /// </summary>
+        public InputAction @NextTutorial => m_Wrapper.m_TutorialAction_NextTutorial;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_TutorialAction; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="TutorialActionActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(TutorialActionActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="TutorialActionActions" />
+        public void AddCallbacks(ITutorialActionActions instance)
+        {
+            if (instance == null || m_Wrapper.m_TutorialActionActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_TutorialActionActionsCallbackInterfaces.Add(instance);
+            @NextTutorial.started += instance.OnNextTutorial;
+            @NextTutorial.performed += instance.OnNextTutorial;
+            @NextTutorial.canceled += instance.OnNextTutorial;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="TutorialActionActions" />
+        private void UnregisterCallbacks(ITutorialActionActions instance)
+        {
+            @NextTutorial.started -= instance.OnNextTutorial;
+            @NextTutorial.performed -= instance.OnNextTutorial;
+            @NextTutorial.canceled -= instance.OnNextTutorial;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="TutorialActionActions.UnregisterCallbacks(ITutorialActionActions)" />.
+        /// </summary>
+        /// <seealso cref="TutorialActionActions.UnregisterCallbacks(ITutorialActionActions)" />
+        public void RemoveCallbacks(ITutorialActionActions instance)
+        {
+            if (m_Wrapper.m_TutorialActionActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="TutorialActionActions.AddCallbacks(ITutorialActionActions)" />
+        /// <seealso cref="TutorialActionActions.RemoveCallbacks(ITutorialActionActions)" />
+        /// <seealso cref="TutorialActionActions.UnregisterCallbacks(ITutorialActionActions)" />
+        public void SetCallbacks(ITutorialActionActions instance)
+        {
+            foreach (var item in m_Wrapper.m_TutorialActionActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_TutorialActionActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="TutorialActionActions" /> instance referencing this action map.
+    /// </summary>
+    public TutorialActionActions @TutorialAction => new TutorialActionActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     /// <summary>
     /// Provides access to the input control scheme.
@@ -550,5 +678,20 @@ public partial class @BattleControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCardSelectTree(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "TutorialAction" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="TutorialActionActions.AddCallbacks(ITutorialActionActions)" />
+    /// <seealso cref="TutorialActionActions.RemoveCallbacks(ITutorialActionActions)" />
+    public interface ITutorialActionActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "NextTutorial" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNextTutorial(InputAction.CallbackContext context);
     }
 }

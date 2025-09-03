@@ -9,8 +9,6 @@ using System.Linq;
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
-    public TextMeshProUGUI timeText;
-
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
     [SerializeField] private BattleCardDeck battleDeck;
@@ -18,11 +16,13 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform partyTextureTransform;
     [SerializeField] private Transform enemyTextureTransform;
+    [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private TutorialManager tutorialManager;
 
-    private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
 
+    private bool isTutorialMode = false;
     private EnemyModel enemyModel;
     private float turnTime = 10f; // プレイヤーのターン時間（秒）
 
@@ -48,14 +48,15 @@ public class BattleManager : MonoBehaviour
 
         // 3. 敵を生成(ID一から3まで)
         var enemyFactory = new EnemyModelFactory();
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 1; i++)
         {
-            EnemyModel enemy = enemyFactory.CreateFromId(i + 1);
+            EnemyModel enemy = enemyFactory.CreateFromId(i);
             predators.Add(enemy);
 
             var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
+            Debug.Log($"敵(ID: {enemy.EnemyId})");
         }
 
         //最初の敵をターゲットとして設定する
@@ -72,13 +73,19 @@ public class BattleManager : MonoBehaviour
         List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, predators);
 
-        // 4. バトルデッキとプレイヤーのターンをセットアップ
         battleDeck.InitFromCardList(setupData.AllCards);
         playerTurn.Setup(party[0], enemyModel, battleDeck);
-        playerTurn.TurnFinished += OnPlayerTurnFinished;
+        //敵のIDが0の場合tuterealを開始する
+        if (predators[0].EnemyId == 0)
+        {
+            isTutorialMode = true;
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn);
 
-        // 5. バトル開始
-        StartPlayerTurn();
+        }
+        else
+        {
+            StartPlayerTurn();
+        }
     }
 
     /// <summary>
@@ -87,6 +94,7 @@ public class BattleManager : MonoBehaviour
     private void StartPlayerTurn()
     {
         turnTime = 10f;
+        playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
 
@@ -96,6 +104,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator StartPlayerTurnWithTimer()
     {
         Debug.Log("【プレイヤーターン開始】");
+        timeText.enabled = true;
         playerTurn.StartPlayerTurn();
 
         while (turnTime >= 0)
@@ -113,7 +122,10 @@ public class BattleManager : MonoBehaviour
     private void OnPlayerTurnFinished()
     {
         Debug.Log("【プレイヤーターン終了】");
-        StartCoroutine(EnemyTurn());
+        if (!isTutorialMode)
+        {
+            StartCoroutine(EnemyTurn());
+        }
     }
 
     /// <summary>
@@ -129,5 +141,24 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【敵ターン終了】");
 
         StartPlayerTurn();
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>
+    /// チュートリアル用にタイマーを停止させる
+    /// </summary>
+    public void StopTurnTimer()
+    {
+        StopCoroutine("StartPlayerTurnWithTimer"); // Coroutineを停止
+    }
+
+    /// <summary>
+    /// チュートリアル用にプレイヤーのターンを開始する（タイマーなし）
+    /// </summary>
+    public void StartPlayerTurnForTutorial()
+    {
+        Debug.Log("【プレイヤーターン開始 (チュートリアル)】");
+        playerTurn.StartPlayerTurn();
     }
 }
