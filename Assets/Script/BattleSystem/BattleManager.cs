@@ -18,6 +18,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform enemyTextureTransform;
     [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private TutorialManager tutorialManager;
+    [SerializeField] private TortrialInputReader tortrialInputReader;
 
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
@@ -75,12 +76,12 @@ public class BattleManager : MonoBehaviour
 
         battleDeck.InitFromCardList(setupData.AllCards);
         playerTurn.Setup(party[0], enemyModel, battleDeck);
+
         //敵のIDが0の場合tuterealを開始する
         if (predators[0].EnemyId == 0)
         {
             isTutorialMode = true;
-            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn);
-
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn,　tortrialInputReader);
         }
         else
         {
@@ -101,7 +102,7 @@ public class BattleManager : MonoBehaviour
     /// <summary>
     /// プレイヤーのターンを10秒間開始
     /// </summary>
-    private IEnumerator StartPlayerTurnWithTimer()
+    public IEnumerator StartPlayerTurnWithTimer()
     {
         Debug.Log("【プレイヤーターン開始】");
         timeText.enabled = true;

@@ -14,6 +14,7 @@ public class PlayerTurn : MonoBehaviour
 
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
+    public event System.Action<int, bool> OnCardSelectedForTutorial;
 
     private BattleInputReader inputReader;
     private PlayerRuntime playerRuntime;
@@ -34,6 +35,7 @@ public class PlayerTurn : MonoBehaviour
     private bool isInputLocked = false;                         // 入力受付処理中に他の入力を受け取らない
     private float lastInputTime = 0f;                           // 前回入力時刻
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
+    private bool isTutorialMode = false;
     private IAttackStrategy damageStrategy;
 
     private void Awake()
@@ -51,6 +53,11 @@ public class PlayerTurn : MonoBehaviour
         this.playerRuntime = playerRuntime;
         this.enemyModel = enemyModel;
         this.battleDeck = battleDeck;
+    }
+
+    public void SetTutorialMode(bool mode)
+    {
+        isTutorialMode = mode;
     }
 
     public void StartPlayerTurn()
@@ -73,7 +80,7 @@ public class PlayerTurn : MonoBehaviour
     /// <summary>
     /// デッキから手札を3枚引き、表示する
     /// </summary>
-    private void DrawHandCards()
+    public void DrawHandCards()
     {
         // 既存のカードを消す
         foreach (var contCard in handCardControllers)
@@ -93,7 +100,7 @@ public class PlayerTurn : MonoBehaviour
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
                 CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
                 cardObject.Init(cardModel);
-                handCards.Add(drawnCard); // 実際のインスタンスを手札に追加
+                handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
             }
         }
@@ -113,6 +120,11 @@ public class PlayerTurn : MonoBehaviour
         isInputLocked = true;
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
+
+        if (isTutorialMode)
+        {
+            OnCardSelectedForTutorial?.Invoke(inputNumber, isCardSelected[inputNumber]);
+        }
         isInputLocked = false;
 
         Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
@@ -164,6 +176,11 @@ public class PlayerTurn : MonoBehaviour
     {
         if (!inputEnabled || isInputLocked) return;
 
+        if (isTutorialMode)
+        {
+            // チュートリアル中は、このメソッドで再抽選を行わない
+            return;
+        }
         if (Time.time - lastInputTime < inputCooldown) return;
         lastInputTime = Time.time;
 

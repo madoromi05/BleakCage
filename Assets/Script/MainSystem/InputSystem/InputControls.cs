@@ -180,7 +180,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             ""id"": ""a073e853-2b82-49f6-ba0b-021a1c6758e2"",
             ""actions"": [
                 {
-                    ""name"": ""NextTutorial"",
+                    ""name"": ""Proceed"",
                     ""type"": ""Button"",
                     ""id"": ""d311ac5e-fc53-4702-a6bd-d912be81e0a4"",
                     ""expectedControlType"": """",
@@ -193,11 +193,11 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""b32c2265-88df-4357-bed3-3e167db00e67"",
-                    ""path"": ""<Keyboard>/enter"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""NextTutorial"",
+                    ""action"": ""Proceed"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -275,7 +275,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         m_BattleAction_CardSelectTree = m_BattleAction.FindAction("CardSelectTree", throwIfNotFound: true);
         // TutorialAction
         m_TutorialAction = asset.FindActionMap("TutorialAction", throwIfNotFound: true);
-        m_TutorialAction_NextTutorial = m_TutorialAction.FindAction("NextTutorial", throwIfNotFound: true);
+        m_TutorialAction_Proceed = m_TutorialAction.FindAction("Proceed", throwIfNotFound: true);
     }
 
     ~@InputControls()
@@ -486,7 +486,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     // TutorialAction
     private readonly InputActionMap m_TutorialAction;
     private List<ITutorialActionActions> m_TutorialActionActionsCallbackInterfaces = new List<ITutorialActionActions>();
-    private readonly InputAction m_TutorialAction_NextTutorial;
+    private readonly InputAction m_TutorialAction_Proceed;
     /// <summary>
     /// Provides access to input actions defined in input action map "TutorialAction".
     /// </summary>
@@ -499,9 +499,9 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         /// </summary>
         public TutorialActionActions(@InputControls wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "TutorialAction/NextTutorial".
+        /// Provides access to the underlying input action "TutorialAction/Proceed".
         /// </summary>
-        public InputAction @NextTutorial => m_Wrapper.m_TutorialAction_NextTutorial;
+        public InputAction @Proceed => m_Wrapper.m_TutorialAction_Proceed;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -528,9 +528,9 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_TutorialActionActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_TutorialActionActionsCallbackInterfaces.Add(instance);
-            @NextTutorial.started += instance.OnNextTutorial;
-            @NextTutorial.performed += instance.OnNextTutorial;
-            @NextTutorial.canceled += instance.OnNextTutorial;
+            @Proceed.started += instance.OnProceed;
+            @Proceed.performed += instance.OnProceed;
+            @Proceed.canceled += instance.OnProceed;
         }
 
         /// <summary>
@@ -542,9 +542,9 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         /// <seealso cref="TutorialActionActions" />
         private void UnregisterCallbacks(ITutorialActionActions instance)
         {
-            @NextTutorial.started -= instance.OnNextTutorial;
-            @NextTutorial.performed -= instance.OnNextTutorial;
-            @NextTutorial.canceled -= instance.OnNextTutorial;
+            @Proceed.started -= instance.OnProceed;
+            @Proceed.performed -= instance.OnProceed;
+            @Proceed.canceled -= instance.OnProceed;
         }
 
         /// <summary>
@@ -687,11 +687,11 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     public interface ITutorialActionActions
     {
         /// <summary>
-        /// Method invoked when associated input action "NextTutorial" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Proceed" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnNextTutorial(InputAction.CallbackContext context);
+        void OnProceed(InputAction.CallbackContext context);
     }
 }
