@@ -14,8 +14,6 @@ public class PlayerTurn : MonoBehaviour
 
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
-    public event System.Action<int, bool> OnCardSelectedForTutorial;
-    public event System.Action OnConfirmSelectionForTutorial;
 
     private BattleInputReader inputReader;
     private PlayerRuntime playerRuntime;
@@ -38,6 +36,10 @@ public class PlayerTurn : MonoBehaviour
     private float lastInputTime = 0f;                           // 前回入力時刻
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
     private IAttackStrategy damageStrategy;
+
+    // チュートリアル用のイベント
+    public event System.Action<int, bool> OnCardSelectedForTutorial;    // カード選択時
+    public event System.Action OnConfirmSelectionForTutorial;           // 選択確定時
 
     private void Awake()
     {
@@ -72,9 +74,9 @@ public class PlayerTurn : MonoBehaviour
         DrawHandCards();
     }
 
+    // ターン終わりにCardの効果処理
     public void FinishPlayerTurn()
     {
-        // ターン終わりにCardの効果処理
         StartCoroutine(ExecuteCardCommands());
     }
 
@@ -140,7 +142,6 @@ public class PlayerTurn : MonoBehaviour
             return;
         }
 
-        // 選択がされたとき
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
@@ -178,7 +179,6 @@ public class PlayerTurn : MonoBehaviour
         if (isTutorialMode)
         {
             OnConfirmSelectionForTutorial?.Invoke();
-            return;
         }
         else
         {
@@ -243,7 +243,7 @@ public class PlayerTurn : MonoBehaviour
         foreach (var selectedCardRuntime in selectedCardsThisTurn)
         {
             // 1. このカードがアタッチされている特定の武器を取得する
-            WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime; // CardRuntimeが親であるWeaponRuntimeへの参照を持っている
+            WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
             if (weaponRuntime == null)
             {
                 Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
@@ -251,7 +251,7 @@ public class PlayerTurn : MonoBehaviour
             }
 
             // 2. その武器を所持しているプレイヤーを取得する
-            PlayerRuntime playerRuntime = weaponRuntime.ParentPlayer; // WeaponRuntimeが親であるPlayerRuntimeへの参照を持っている
+            PlayerRuntime playerRuntime = weaponRuntime.ParentPlayer;
             if (playerRuntime == null)
             {
                 Debug.LogError($"武器 {weaponRuntime.ID} ({weaponRuntime.InstanceID}) はどのプレイヤーにも所持されていません！");
@@ -280,7 +280,6 @@ public class PlayerTurn : MonoBehaviour
 
         Debug.Log("カード効果の実行完了");
 
-        // ターン終了イベントを発火
         OnTurnFinished?.Invoke();
     }
 

@@ -25,11 +25,6 @@ public class TutorialManager : MonoBehaviour
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
 
-    private void Awake()
-    {
-        gifView.Initialize(tutorialGifImage);
-    }
-
     public void StartTutorialFlow(BattleManager bm, PlayerTurn pt, EnemyTurn et, TortrialInputReader ir)
     {
         this.battleManager = bm;
@@ -43,7 +38,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         playerTurn.OnCardSelectedForTutorial += HandleCardSelectedForTutorial;
-        playerTurn.OnConfirmSelectionForTutorial += HandleConfirmSelectionForTutorial;
+        playerTurn.OnConfirmSelectionForTutorial += HandleConfirmSelectionTutorial;
+        gifView.Initialize(tutorialGifImage);
+        tutorialUIPanel.SetActive(true);
         StartCoroutine(TutorialCoroutine());
     }
 
@@ -56,7 +53,7 @@ public class TutorialManager : MonoBehaviour
         if (playerTurn != null)
         {
             playerTurn.OnCardSelectedForTutorial -= HandleCardSelectedForTutorial;
-            playerTurn.OnConfirmSelectionForTutorial -= HandleConfirmSelectionForTutorial;
+            playerTurn.OnConfirmSelectionForTutorial -= HandleConfirmSelectionTutorial;
         }
     }
 
@@ -65,7 +62,7 @@ public class TutorialManager : MonoBehaviour
         canProceed = true;
     }
 
-    private void HandleConfirmSelectionForTutorial()
+    private void HandleConfirmSelectionTutorial()
     {
         hasConfirmedSelection = true;
     }
@@ -107,7 +104,7 @@ public class TutorialManager : MonoBehaviour
         tutorialMessages.Enqueue("まずはこのカード2つを選択してみてください。");
         tutorialMessages.Enqueue("Enterキーで次に進みましょう");
         tutorialMessages.Enqueue("ここからは好きなカードを選択してください。選択したらEnterキーで次に進み、可能な限り多くのスキルカードを選択し、多くのダメージが与えられるように頑張りましょう！");
-        tutorialMessages.Enqueue("次のEnterキー入力後、制限時間が開始します。");
+        tutorialMessages.Enqueue("次の左クリック入力後、制限時間が開始します。");
     }
 
     private IEnumerator PlayerTurnExplanationFlow()
@@ -145,14 +142,13 @@ public class TutorialManager : MonoBehaviour
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
+        tutorialUIPanel.SetActive(false);
         playerTurn.SetTutorialMode(false);
 
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         battleManager.StartCoroutine(battleManager.StartPlayerTurnWithTimer());
         yield return new WaitUntil(() => hasTurnFinished);
         playerTurn.OnTurnFinished -= OnPlayerTurnFinished;
-
-        Debug.Log("プレイヤーのターン終了。");
     }
 
     // メッセージ設定用の補助関数

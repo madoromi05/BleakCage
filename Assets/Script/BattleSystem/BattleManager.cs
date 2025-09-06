@@ -29,14 +29,11 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
-        // 1. PlayerDataLoaderを使ってパーティーとカードデータを読み込む
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-
-        // 2. 読み込んだPlayerデータをBattleManagerに設定
         this.party = setupData.Party;
 
-        // 2. パーティ人数分 PlayerView を生成
+        // パーティ人数分 PlayerView を生成
         for (int i = 0; i < party.Count; i++)
         {
             PlayerRuntime runtime = party[i];
@@ -47,7 +44,7 @@ public class BattleManager : MonoBehaviour
             playerController.Init(runtime.PlayerModel);
         }
 
-        // 3. 敵を生成(ID一から3まで)
+        // 3. 敵を生成
         var enemyFactory = new EnemyModelFactory();
         for (int i = 0; i < 1; i++)
         {
