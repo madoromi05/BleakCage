@@ -13,7 +13,6 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private GifView gifView;
 
     private TortrialInputReader inputReader;
-    private bool canProceed = false;
 
     private BattleManager battleManager;
     private PlayerTurn playerTurn;
@@ -23,6 +22,8 @@ public class TutorialManager : MonoBehaviour
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
     private List<int> currentlySelectedCards = new List<int>();
     private bool hasTurnFinished = false;
+    private bool canProceed = false;
+    private bool hasConfirmedSelection = false;
 
     private void Awake()
     {
@@ -42,6 +43,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         playerTurn.OnCardSelectedForTutorial += HandleCardSelectedForTutorial;
+        playerTurn.OnConfirmSelectionForTutorial += HandleConfirmSelectionForTutorial;
         StartCoroutine(TutorialCoroutine());
     }
 
@@ -54,12 +56,18 @@ public class TutorialManager : MonoBehaviour
         if (playerTurn != null)
         {
             playerTurn.OnCardSelectedForTutorial -= HandleCardSelectedForTutorial;
+            playerTurn.OnConfirmSelectionForTutorial -= HandleConfirmSelectionForTutorial;
         }
     }
 
     private void HandleProceedInput()
     {
         canProceed = true;
+    }
+
+    private void HandleConfirmSelectionForTutorial()
+    {
+        hasConfirmedSelection = true;
     }
 
     private void HandleCardSelectedForTutorial(int inputNumber, bool isSelected)
@@ -92,15 +100,19 @@ public class TutorialManager : MonoBehaviour
     {
         tutorialMessages = new Queue<string>();
         tutorialMessages.Enqueue("このフェーズでは、制限時間内に可能な限り多くのスキルカードを選択します。");
-        tutorialMessages.Enqueue("<gif：説明動画>\r\n文章：配られた3枚のスキルカードのうち、最低1枚、最大2枚を選択します。選択はテンキーで行うことができ、" +
-            "選択が終わったらEnterキーで残ったカードを破棄します。\r\n選んだカードはスタックされていき、破棄されたカードは\"修復\"するまでデッキに戻りません。" +
-            "\r\n破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
+        tutorialMessages.Enqueue("");
+        //tutorialMessages.Enqueue("<gif：説明動画>\r\n文章：配られた3枚のスキルカードのうち、最低1枚、最大2枚を選択します。選択はテンキーで行うことができ、" +
+        //    "選択が終わったらEnterキーで残ったカードを破棄します。\r\n選んだカードはスタックされていき、破棄されたカードは\"修復\"するまでデッキに戻りません。" +
+        //    "\r\n破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
         tutorialMessages.Enqueue("まずはこのカード2つを選択してみてください。");
+        tutorialMessages.Enqueue("Enterキーで次に進みましょう");
         tutorialMessages.Enqueue("ここからは好きなカードを選択してください。選択したらEnterキーで次に進み、可能な限り多くのスキルカードを選択し、多くのダメージが与えられるように頑張りましょう！");
+        tutorialMessages.Enqueue("次のEnterキー入力後、制限時間が開始します。");
     }
 
     private IEnumerator PlayerTurnExplanationFlow()
     {
+        playerTurn.SetTutorialMode(true);
         battleManager.StartPlayerTurnForTutorial();
 
         // 1. 最初のメッセージを表示
@@ -114,25 +126,26 @@ public class TutorialManager : MonoBehaviour
         canProceed = false;
         gifView.StopGif();
 
-        // 3. カード選択の説明メッセージを表示
+        // 3. まずはこのカード2つを選択してみてください。
         SetTutorialText(tutorialMessages.Dequeue());
-        yield return new WaitForSeconds(0.5f);
 
-        playerTurn.SetTutorialMode(true);
-        playerTurn.DrawHandCards();
+       yield return new WaitUntil(() => CardsSelectedProsess());
 
-        yield return new WaitUntil(() => CorrectCardsSelected());
+        // 4. Enterキーで次に進みましょう
+        SetTutorialText(tutorialMessages.Dequeue());
+        yield return new WaitUntil(() => hasConfirmedSelection);
 
-        // 4. 正しいカード選択後のメッセージ
-        SetTutorialText("素晴らしい！\nEnterキーで次に進みましょう。");
+        // 5. ここからは好きなカードを選択してください....
+        SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
-        // 5. 好きなカード選択のメッセージ
-        SetTutorialText(tutorialMessages.Dequeue() + "「次のEnterキー入力後、制限時間が開始します。」");
+        // 6.次の左クリック入力後、制限時間が開始します。
+        SetTutorialText(tutorialMessages.Dequeue());
+        yield return new WaitUntil(() => canProceed);
+        canProceed = false;
+
         playerTurn.SetTutorialMode(false);
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
 
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         battleManager.StartCoroutine(battleManager.StartPlayerTurnWithTimer());
@@ -160,7 +173,10 @@ public class TutorialManager : MonoBehaviour
         hasTurnFinished = true;
     }
 
-    private bool CorrectCardsSelected()
+    /// <summary>
+    /// カードが二枚選択されたかどうかの処理
+    /// </summary>
+    private bool CardsSelectedProsess()
     {
         return currentlySelectedCards.Count == tutorialTargetCards.Count && currentlySelectedCards.All(tutorialTargetCards.Contains);
     }

@@ -15,6 +15,7 @@ public class PlayerTurn : MonoBehaviour
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
     public event System.Action<int, bool> OnCardSelectedForTutorial;
+    public event System.Action OnConfirmSelectionForTutorial;
 
     private BattleInputReader inputReader;
     private PlayerRuntime playerRuntime;
@@ -33,9 +34,9 @@ public class PlayerTurn : MonoBehaviour
     private bool[] isCardSelected = new bool[3];                // 各カード（3枚）が選択されているかどうか
     private bool inputEnabled = false;                          // ターン中全体の入力フラグ
     private bool isInputLocked = false;                         // 入力受付処理中に他の入力を受け取らない
+    private bool isTutorialMode = false;
     private float lastInputTime = 0f;                           // 前回入力時刻
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
-    private bool isTutorialMode = false;
     private IAttackStrategy damageStrategy;
 
     private void Awake()
@@ -112,11 +113,9 @@ public class PlayerTurn : MonoBehaviour
     private void OnCardSelect(int inputNumber)
     {
         if (!inputEnabled || isInputLocked) return;
-
-        // クールタイム処理
         if (Time.time - lastInputTime < inputCooldown) return;
+        
         lastInputTime = Time.time;
-
         isInputLocked = true;
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
@@ -178,11 +177,14 @@ public class PlayerTurn : MonoBehaviour
 
         if (isTutorialMode)
         {
-            // チュートリアル中は、このメソッドで再抽選を行わない
+            OnConfirmSelectionForTutorial?.Invoke();
             return;
         }
-        if (Time.time - lastInputTime < inputCooldown) return;
-        lastInputTime = Time.time;
+        else
+        {
+            if (Time.time - lastInputTime < inputCooldown) return;
+            lastInputTime = Time.time;
+        }
 
         isInputLocked = true;
         ConfirmSelectionAndRedraw();
@@ -219,7 +221,7 @@ public class PlayerTurn : MonoBehaviour
             }
         }
 
-        Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
+        Debug.Log("実行するカード: " + string.Join(",", selectedCardsThisTurn.Select(c => c.ID)));
         //Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
 
         //選択状態をリセット
@@ -273,7 +275,7 @@ public class PlayerTurn : MonoBehaviour
         {
             var command = commandQueue.Dequeue();
             command.Do();
-            yield return new WaitForSeconds(0.3f); // 任意のウェイト
+            yield return new WaitForSeconds(0.3f);
         }
 
         Debug.Log("カード効果の実行完了");
