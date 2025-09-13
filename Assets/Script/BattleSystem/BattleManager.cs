@@ -13,6 +13,7 @@ public class BattleManager : MonoBehaviour
 
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
+    [SerializeField] private SelectTurn selectTurn;
     [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
