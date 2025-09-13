@@ -34,7 +34,30 @@ public class PlayerModelFactory
 
         if (playerEntity == null)
         {
-            Debug.LogWarning($"PlayerEntity not found at path: {path}");
+            Debug.LogError($"★★ ロード失敗: playerEntityオブジェクト自体がNULLです！ Path: {path}");
+        }
+        else
+        {
+            Debug.Log($"★★ ロード成功: playerEntityオブジェクトを正常に取得しました。 Path: {path}");
+
+            // 取得したオブジェクトの中身をすべてログに出す
+            if (playerEntity.PlayerSprite == null)
+            {
+                Debug.LogError("★★ 中身が空です: PlayerSpriteがNULLです！");
+            }
+            else
+            {
+                Debug.Log($"★★ 中身を確認: PlayerSpriteは '{playerEntity.PlayerSprite.name}' です。");
+            }
+
+            if (playerEntity.AnimationSet == null)
+            {
+                Debug.LogError("★★ 中身が空です: AnimationSetがNULLです！");
+            }
+            else
+            {
+                Debug.Log($"★★ 中身を確認: AnimationSetは '{playerEntity.AnimationSet.name}' です。");
+            }
         }
 
         return playerEntity;

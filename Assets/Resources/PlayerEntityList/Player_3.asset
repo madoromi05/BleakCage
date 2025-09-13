@@ -15,9 +15,10 @@ MonoBehaviour:
   PlayerId: 3
   PlayerName: "\u30DF\u30DF\u30DF"
   PlayerAttribute: 0
-  PlayerSprite: {fileID: 21300000, guid: ae297123f091bbf4e8f1835eb98fb293, type: 3}
+  PlayerSprite: {fileID: 1459035125, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
   PlayerDescription: "\u65B0\u3057\u3044\u30D7\u30EC\u30A4\u30E4\u30FC\u306E\u8AAC\u660E\u6587"
   PlayerLevel: 1
   PlayerHP: 100
   PlayerAttackPower: 10
   PlayerDefensePower: 5
+  AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}

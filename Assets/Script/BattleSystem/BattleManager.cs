@@ -42,6 +42,7 @@ public class BattleManager : MonoBehaviour
 
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
             playerController.Init(runtime.PlayerModel);
+            runtime.PlayerController = playerController;
         }
 
         // 3. 敵を生成

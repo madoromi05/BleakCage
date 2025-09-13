@@ -13,6 +13,7 @@ public class PlayerRuntime : IAttackComponent
     public float CurrentHP { get; set; }
     public WeaponRuntime InnateWeapon { get; private set; }//Player‘•”õ‚Ì‚½‚ß‚Ì•Ší
     public PlayerModel PlayerModel { get; private set; }
+    public PlayerController PlayerController { get; set; }
 
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private readonly float baseAttackPower;

@@ -15,7 +15,7 @@ public class PlayerModel
     public AttributeType PlayerAttribute { get; private set; }
     public Sprite PlayerSprite { get; private set; }
     public string PlayerDescription { get; private set; }
-
+    public AnimatorSet PlayerAnimator { get; private set; }
     /// <summary>
     /// コンストラクタ：IDからScriptableObjectを読み込んでモデルを生成
     /// </summary>
@@ -40,5 +40,6 @@ public class PlayerModel
 
         PlayerSprite = playerEntity.PlayerSprite;
         PlayerDescription = playerEntity.PlayerDescription;
+        PlayerAnimator = playerEntity.AnimationSet;
     }
 }
