@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d3c018646e21a49aa77767cf36f2b1, type: 3}
   m_Name: Enemy_0
   m_EditorClassIdentifier: 
-  EnemyId: 0
+  EnemyID: 0
   EnemyName: Tutorial
   EnemyAttribute: 3
   EnemyDefensAttribute: 0
@@ -21,3 +21,4 @@ MonoBehaviour:
   EnemyHP: 10
   EnemyAttackPower: 100000
   EnemyDefensePower: 1
+  AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}

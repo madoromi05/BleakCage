@@ -53,7 +53,7 @@ public class BattleManager : MonoBehaviour
         playerTurn.Setup(party[0], enemyModel, battleDeck);
 
         //敵のIDが0の場合tuterealを開始する
-        if (predators[0].EnemyId == 0)
+        if (predators[0].EnemyID == 0)
         {
             isTutorialMode = true;
             tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn,　tortrialInputReader);

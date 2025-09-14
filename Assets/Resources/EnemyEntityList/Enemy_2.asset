@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d3c018646e21a49aa77767cf36f2b1, type: 3}
   m_Name: Enemy_2
   m_EditorClassIdentifier: 
-  EnemyId: 2
+  EnemyID: 0
   EnemyName: NotName
   EnemyAttribute: 0
   EnemyDefensAttribute: 0
-  EnemySprite: {fileID: 21300000, guid: ae297123f091bbf4e8f1835eb98fb293, type: 3}
+  EnemySprite: {fileID: 1459035125, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
   EnemyDescription: 
   EnemyHP: 500
   EnemyAttackPower: 600
   EnemyDefensePower: 5
+  AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}
