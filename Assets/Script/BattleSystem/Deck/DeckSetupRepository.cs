@@ -29,7 +29,7 @@ public class PlayerDataLoader
     {
         playerFactory = new PlayerModelFactory();
         weaponFactory = new WeaponModelFactory();
-        cardFactory = new CardModelFactory();
+        cardFactory   = new CardModelFactory();
     }
 
     /// <summary>
@@ -63,14 +63,14 @@ public class PlayerDataLoader
             PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId);
             party.Add(playerRuntime);
 
-            // プレイヤーが直接持つカードをInnateWeaponにセット
+            // プレイヤーが直接持つカードをCharacterCardWeaponにセット
             if (charData.EquippedCards != null)
             {
                 foreach (var cardData in charData.EquippedCards)
                 {
-                    CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
+                    CardModel cardModel     = cardFactory.CreateFromID(cardData.CardId);
                     CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
-                    playerRuntime.InnateWeapon.AddCard(cardRuntime);
+                    playerRuntime.CaracterCardWeapon.AddCard(cardRuntime);
                     allCardsForBattle.Add(cardRuntime);
                 }
             }

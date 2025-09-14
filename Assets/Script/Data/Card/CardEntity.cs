@@ -19,7 +19,7 @@ public class CardEntity : ScriptableObject
 
     public int ID;                          // カード固有ID
     public string Name;                     // カード名
-    public int[] EquipableWeaponID;        // 武器ID
+    public int[] EquipableWeaponID;         // 武器ID
     public Sprite Icon;                     // アイコン画像
     public string Description;              // 説明文
 

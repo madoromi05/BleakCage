@@ -81,7 +81,7 @@ public class EnemyEntityTableEditor : EditorWindow
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
 
-            enemy.EnemyId = EditorGUILayout.IntField(enemy.EnemyId, GUILayout.Width(30));
+            enemy.EnemyID = EditorGUILayout.IntField(enemy.EnemyID, GUILayout.Width(30));
             enemy.EnemyName = EditorGUILayout.TextField(enemy.EnemyName, GUILayout.Width(120));
             enemy.EnemyHP = EditorGUILayout.FloatField(enemy.EnemyHP, GUILayout.Width(80));
             enemy.EnemyAttackPower = EditorGUILayout.FloatField(enemy.EnemyAttackPower, GUILayout.Width(80));
@@ -144,7 +144,7 @@ public class EnemyEntityTableEditor : EditorWindow
 
         EnemyEntity newEnemy = ScriptableObject.CreateInstance<EnemyEntity>();
 
-        newEnemy.EnemyId = GetNextAvailableId();
+        newEnemy.EnemyID = GetNextAvailableId();
         newEnemy.EnemyName = "New Enemy";
         newEnemy.EnemyHP = 100f;
         newEnemy.EnemyAttackPower = 10f;
@@ -152,12 +152,12 @@ public class EnemyEntityTableEditor : EditorWindow
         newEnemy.EnemyAttribute = AttributeType.Bullet;
         newEnemy.EnemyDescription = "新しい敵の説明文";
 
-        string fileName = $"{newEnemyName}_{newEnemy.EnemyId}.asset";
+        string fileName = $"{newEnemyName}_{newEnemy.EnemyID}.asset";
         string filePath = Path.Combine(savePath, fileName);
         int counter = 1;
         while (File.Exists(filePath))
         {
-            fileName = $"{newEnemyName}_{newEnemy.EnemyId}_{counter}.asset";
+            fileName = $"{newEnemyName}_{newEnemy.EnemyID}_{counter}.asset";
             filePath = Path.Combine(savePath, fileName);
             counter++;
         }
@@ -196,7 +196,7 @@ public class EnemyEntityTableEditor : EditorWindow
         if (enemyList == null || enemyList.Count == 0)
             return 1;
 
-        int maxId = enemyList.Where(e => e != null).Max(e => e.EnemyId);
+        int maxId = enemyList.Where(e => e != null).Max(e => e.EnemyID);
         return maxId + 1;
     }
 }

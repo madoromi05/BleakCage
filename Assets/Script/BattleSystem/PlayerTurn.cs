@@ -1,5 +1,5 @@
 /// <summary>
-/// プレイヤーターンの処理
+/// プレイヤーのカード、攻撃処理
 ///</summary>
 
 using System.Collections;
@@ -22,9 +22,8 @@ public class PlayerTurn : MonoBehaviour
     private CardModelFactory cardModelFactory;
     private CardRuntime cardRuntime;
 
-    private List<CardController> handCardControllers = new();   // 手札のカード表示
-    private List<CardRuntime> handCards = new();                // 手札のカードdata
-
+    private List<CardController> handCardControllers = new();                           // 手札のカード表示
+    private List<CardRuntime> handCards = new();                                        // 手札のカードdata
     private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();          // 選択されたカードのIDを保持
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>();  // 破棄されたカードのIDを保持
     private Queue<ICommand> commandQueue = new();
@@ -258,6 +257,7 @@ public class PlayerTurn : MonoBehaviour
                 continue;
             }
 
+            // 3. カードの属性に応じたコマンドをキューに追加
             if (selectedCardRuntime.attribute == AttributeType.Heal)
             {
                 // 回復値は仮に0.2f割合で回復

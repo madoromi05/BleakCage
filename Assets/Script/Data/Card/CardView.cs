@@ -32,7 +32,7 @@ public class CardView : MonoBehaviour
             Description.text = ReplacePlaceholders(cardModel.Description, cardModel);
 
         if (IconImage != null)
-            IconImage.sprite = cardModel.Icon;
+            IconImage.sprite = cardModel.CardSprite;
     }
 
     private string ReplacePlaceholders(string input, CardModel model)
