@@ -20,12 +20,13 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
 
+    private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
 
-    private bool isTutorialMode = false;
     private EnemyModel enemyModel;
     private float turnTime = 10f; // プレイヤーのターン時間（秒）
+    private bool isTutorialMode = false;
 
     void Start()
     {
@@ -33,40 +34,16 @@ public class BattleManager : MonoBehaviour
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         this.party = setupData.Party;
 
-        // パーティ人数分 PlayerView を生成
-        for (int i = 0; i < party.Count; i++)
-        {
-            PlayerRuntime runtime = party[i];
-
-            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
-
-            PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            playerController.Init(runtime.PlayerModel);
-            runtime.PlayerController = playerController;
-        }
+        // 2.パーティ人数分 PlayerView を生成
+        partyPlayerView();
 
         // 3. 敵を生成
-        var enemyFactory = new EnemyModelFactory();
-        for (int i = 0; i < 1; i++)
-        {
-            EnemyModel enemy = enemyFactory.CreateFromId(i);
-            predators.Add(enemy);
-
-            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
-            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
-            enemyController.Init(enemy);
-            Debug.Log($"敵(ID: {enemy.EnemyId})");
-        }
+        enemiesCreate();
 
         //最初の敵をターゲットとして設定する
         if (predators.Count > 0)
         {
             enemyModel = predators[0];
-        }
-        else
-        {
-            Debug.LogError("攻撃対象の敵が見つかりません！");
-            return;
         }
 
         List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
@@ -95,6 +72,40 @@ public class BattleManager : MonoBehaviour
         turnTime = 10f;
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
+    }
+
+    /// <summary>
+    /// PlayerViewを生成
+    /// </summary>
+    private void partyPlayerView()
+    {
+        for (int i = 0; i < party.Count; i++)
+        {
+            PlayerRuntime runtime = party[i];
+
+            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
+
+            PlayerController playerController = playerObject.GetComponent<PlayerController>();
+            playerController.Init(runtime.PlayerModel);
+            runtime.PlayerController = playerController;
+        }
+    }
+
+    /// <summary>
+    /// EnemyViewを生成
+    /// </summary>
+    private void enemiesCreate()
+    {
+        var enemyFactory = new EnemyModelFactory();
+        for (int i = 0; i < 3; i++)
+        {
+            EnemyModel enemy = enemyFactory.CreateFromId(i + 1);
+            predators.Add(enemy);
+
+            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
+            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+            enemyController.Init(enemy);
+        }
     }
 
     /// <summary>
