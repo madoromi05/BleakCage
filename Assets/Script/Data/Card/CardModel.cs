@@ -17,7 +17,7 @@ public class CardModel
     public float HitRate { get; private set; }                              // 命中率(1～0)
     public float OutputModifier { get; private set; }                       // 出力調整
     public float DefensePenetration { get; private set; }                   // 防御貫通率
-    public Sprite Icon { get; private set; }                                // CardのIcon
+    public Sprite CardSprite{ get; private set; }                           // CardのIcon
     public string Description { get; private set; }                         // Cardの説明文
 
     /// <summary>
@@ -35,7 +35,7 @@ public class CardModel
 
         ID = entity.ID;
         Name = entity.Name;
-        Icon = entity.Icon;
+        CardSprite = entity.Icon;
         EquipableWeaponIds = entity.EquipableWeaponID;
         Description = entity.Description;
         Type = entity.Type;

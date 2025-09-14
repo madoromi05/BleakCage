@@ -4,6 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// 動的または、UUIDで管理するためのクラス
+/// カードと武器、キャラとのつながり、パーティー編成を管理する
 /// </summary>
 
 public class PlayerRuntime : IAttackComponent
@@ -11,13 +12,14 @@ public class PlayerRuntime : IAttackComponent
     public int ID { get; private set; }
     public System.Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
-    public WeaponRuntime InnateWeapon { get; private set; }//Player装備のための武器
+    public WeaponRuntime CaracterCardWeapon { get; private set; }
     public PlayerModel PlayerModel { get; private set; }
     public PlayerController PlayerController { get; set; }
 
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private readonly float baseAttackPower;
     private readonly IAttackStrategy attackStrategy;
+    private const float PlayerAttackPower = 10f; 
 
     /// <summary>
     /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
@@ -31,9 +33,11 @@ public class PlayerRuntime : IAttackComponent
         attackStrategy = strategy;
         this.PlayerModel = model;
 
-        var innateWeaponModel = new WeaponModel(0, "Innate Skill", 10f, AttributeType.Bullet, 1.0f);
-        InnateWeapon = new WeaponRuntime(innateWeaponModel, System.Guid.NewGuid().ToString());
-        this.EquipWeapon(InnateWeapon);
+        // キャラクターカード用の専用武器
+        // AttackPowerは仮で10に設定
+        var CaracterCardWeaponModel = new WeaponModel(0, "CharacterPersonalSkill", PlayerAttackPower, AttributeType.Bullet, 1.0f);
+        CaracterCardWeapon = new WeaponRuntime(CaracterCardWeaponModel, System.Guid.NewGuid().ToString());
+        this.EquipWeapon(CaracterCardWeapon);
     }
 
     public float GetPower()
@@ -67,7 +71,6 @@ public class PlayerRuntime : IAttackComponent
     public void CheckInternalListForDebug()
     {
         Debug.Log($"--- Inside PlayerRuntime Check ---");
-        // あなたのコードに合わせて変数名を `equippedWeapons` にしています
         Debug.Log($"Checking equippedWeapons list: {(equippedWeapons == null ? "IS NULL!!! <- おそらくこれが原因です" : "is OK")}");
     }
 }

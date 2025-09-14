@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 
 /// <summary>
-/// Battleの流れを管理するクラス
+/// Battleのターン、順番とデータ管理
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
@@ -55,7 +55,7 @@ public class BattleManager : MonoBehaviour
             var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
-            Debug.Log($"敵(ID: {enemy.EnemyId})");
+            Debug.Log($"敵(ID: {enemy.EnemyID})");
         }
 
         //最初の敵をターゲットとして設定する
@@ -76,7 +76,7 @@ public class BattleManager : MonoBehaviour
         playerTurn.Setup(party[0], enemyModel, battleDeck);
 
         //敵のIDが0の場合tuterealを開始する
-        if (predators[0].EnemyId == 0)
+        if (predators[0].EnemyID == 0)
         {
             isTutorialMode = true;
             tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn,　tortrialInputReader);
@@ -142,7 +142,8 @@ public class BattleManager : MonoBehaviour
         StartPlayerTurn();
     }
 
-
+    /////////////////////////////////////////////////////////////////////////////////////////
+    ///チュートリアル用の処理
     /////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>
     /// チュートリアル用にタイマーを停止させる

@@ -35,7 +35,6 @@ public class PlayerController : MonoBehaviour
 
         if (model.PlayerAnimator != null)
         {
-            // 封筒があると分かったので、安全に中身(avatar)を確認できる
             if (model.PlayerAnimator.avatar != null)
             {
                 animator.avatar = model.PlayerAnimator.avatar;
@@ -49,7 +48,6 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // そもそも封筒がなかった場合の処理
             Debug.LogError("PlayerModel.PlayerAnimatorが設定されていません！", this.gameObject);
         }
 
@@ -87,7 +85,7 @@ public class PlayerController : MonoBehaviour
         if (cardAttackClip != null)
         {
             // 1. 攻撃アニメーションを、カード固有のものに上書き
-            overrideController["Dummy_Attack"] = cardAttackClip;
+            overrideController["DemoAttack"] = cardAttackClip;
 
             // 2. 攻撃トリガーを引いて、アニメーションを再生
             animator.SetTrigger(AttackTriggerName);

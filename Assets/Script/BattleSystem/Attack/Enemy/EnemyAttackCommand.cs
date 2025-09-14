@@ -17,7 +17,7 @@ public class EnemyAttackCommand : ICommand
 
     public bool Do()
     {
-        Debug.Log($"UŒ‚Às: Enemy='{enemy.EnemyId}' ‚ª " +
+        Debug.Log($"UŒ‚Às: Enemy='{enemy.EnemyID}' ‚ª " +
                  $"Player='{player.PlayerID}' ‚ÉUŒ‚I");
         float damage = damageStrategy.CalculateFinalDamage(enemy, player);
 
