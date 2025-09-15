@@ -11,7 +11,14 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private AnimatorOverrideController overrideController;
 
-    private const string AttackTriggerName = "AttackTrigger";
+    private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
+    private static readonly int IsDeadParamHash = Animator.StringToHash("IsDead");
+
+    // アニメーションクリップ名
+    private const string IdleClipName = "Idle";
+    private const string DeathClipName = "Death";
+    private const string DamagedClipName = "Damaged";
+    private const string AttackClipName = "DemoAttack";
 
     private void Awake()
     {
@@ -33,25 +40,14 @@ public class PlayerController : MonoBehaviour
         this.playerModel = model;
         view.Show(model);
 
-        if (model.PlayerAnimator != null)
-        {
-            if (model.PlayerAnimator.avatar != null)
-            {
-                animator.avatar = model.PlayerAnimator.avatar;
-            }
-            else
-            {
-                Debug.LogWarning($"AnimatorSet「{model.PlayerAnimator.name}」にAvatarが設定されていません。", this.gameObject);
-            }
-
-            overrideController["Idle"] = model.PlayerAnimator.Idle;
-        }
-        else
+        if(model.PlayerAnimator == null)
         {
             Debug.LogError("PlayerModel.PlayerAnimatorが設定されていません！", this.gameObject);
+            return;
         }
 
-        if (model.PlayerAnimator != null)
+        // Avatarのセット
+        if (model.PlayerAnimator.avatar != null)
         {
             animator.avatar = model.PlayerAnimator.avatar;
         }
@@ -60,21 +56,10 @@ public class PlayerController : MonoBehaviour
             Debug.LogWarning($"AnimatorSet「{model.PlayerAnimator.name}」にAvatarが設定されていません。", this.gameObject);
         }
 
-        if (model.PlayerAnimator.avatar != null)
-        {
-            animator.avatar = model.PlayerAnimator.avatar;
-        }
-
-        if (model.PlayerAnimator != null)
-        {
-            overrideController["Idle"] = model.PlayerAnimator.Idle;
-            overrideController["Death"] = model.PlayerAnimator.Death;
-            overrideController["Damaged"] = model.PlayerAnimator.Damaged;
-        }
-        else
-        {
-            Debug.LogError("PlayerModel.PlayerAnimatorが設定されていません！", this.gameObject);
-        }
+        // アニメーションクリップの上書き
+        overrideController[IdleClipName] = model.PlayerAnimator.Idle;
+        overrideController[DeathClipName] = model.PlayerAnimator.Death;
+        overrideController[DamagedClipName] = model.PlayerAnimator.Damaged;
     }
 
     /// <summary>
@@ -85,16 +70,16 @@ public class PlayerController : MonoBehaviour
         if (cardAttackClip != null)
         {
             // 1. 攻撃アニメーションを、カード固有のものに上書き
-            overrideController["DemoAttack"] = cardAttackClip;
+            overrideController[AttackClipName] = cardAttackClip;
 
-            // 2. 攻撃トリガーを引いて、アニメーションを再生
-            animator.SetTrigger(AttackTriggerName);
+            // 2. 攻撃トリガーをハッシュ値で引いて、アニメーションを再生
+            animator.SetTrigger(AttackTriggerHash);
         }
     }
 
-    // （PlayDeathAnimationなどのメソッドは、IsDeadパラメーターを操作する形で残します）
     public void PlayDeathAnimation()
     {
-        animator.SetBool("IsDead", true);
+        // パラメータをハッシュ値で操作する
+        animator.SetBool(IsDeadParamHash, true);
     }
 }
