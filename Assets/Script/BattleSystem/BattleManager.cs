@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor.Overlays;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Battleのターン、順番とデータ管理
@@ -29,10 +29,11 @@ public class BattleManager : MonoBehaviour
 
     private bool isTutorialMode = false;
     private EnemyModel enemyModel;
-    private float turnTime = 10f; // プレイヤーのターン時間（秒）
+    private float turnTime = 10f;
 
     void Start()
     {
+        // Playerデータのロード
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         this.party = setupData.Party;
@@ -49,16 +50,30 @@ public class BattleManager : MonoBehaviour
             runtime.PlayerController = playerController;
         }
 
-        // 3. 敵を生成
-        int currentStageID = StageManager.SelectedStageID; // 別途作成するクラスから選択されたステージIDを取得
+        // 挑戦する敵のデータをステージIDから取得
+        int currentStageID = StageManager.SelectedStageID;
+
+        if (currentStageID == -1)
+        {
+            Debug.LogError("ステージIDが設定されていません！StageManager.SelectedStageIDを確認してください。");
+#if UNITY_EDITOR
+            string sceneName = SceneManager.GetActiveScene().name;
+            // ※チュートリアルシーン名が "Tutorial" でない場合は、実際のシーン名に変更してください
+            if (sceneName == "Tutorial")
+            {
+                currentStageID = 0;
+                Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '0' (チュートリアル)に設定しました。");
+            }
+            else
+            {
+                currentStageID = 1;
+                Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '1' (通常戦闘)に設定しました。");
+            }
+#endif
+        }
         StageEnemyData currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
 
-        if (currentStage == null)
-        {
-            Debug.LogError($"ステージID {currentStageID} のデータが見つかりません！");
-            return;
-        }
-
+        // 敵の生成
         var enemyFactory = new EnemyModelFactory();
         foreach (int enemyId in currentStage.enemyIDs)
         {
@@ -94,10 +109,6 @@ public class BattleManager : MonoBehaviour
 #if TUTORIAL_ENABLED
             isTutorialMode = true;
             tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
-#else
-            // チュートリアルが無効化されている場合、代わりに通常のプレイヤーターンを開始する
-            Debug.LogWarning("敵IDが0ですが、チュートリアルは無効です。通常どおりゲームを開始します。");
-            StartPlayerTurn();
 #endif
         }
         else

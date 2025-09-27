@@ -21,4 +21,4 @@ MonoBehaviour:
   EnemyHP: 500
   EnemyAttackPower: 600
   EnemyDefensePower: 5
-  AnimationSet: {fileID: 0}
+  AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}

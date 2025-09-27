@@ -1,5 +1,9 @@
-#if TUTORIAL_ENABLED
+/// <summary>
+/// カード選択フェーズ時のチュートリアル管理クラス
+/// チュートリアル以外は、無効化される
+/// </summary>
 
+#if TUTORIAL_ENABLED
 
 using System.Collections;
 using System.Collections.Generic;

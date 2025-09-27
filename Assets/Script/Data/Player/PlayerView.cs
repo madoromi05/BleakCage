@@ -5,10 +5,16 @@ using UnityEngine;
 /// <summary>
 /// プレイヤーの見た目を管理するクラス（SpriteRenderer用）
 /// </summary>
+
+[RequireComponent(typeof(SpriteRenderer))]
 public class PlayerView : MonoBehaviour
 {
-    // Inspectorから設定するSpriteRenderer
-    [SerializeField] private SpriteRenderer playerSpriteRenderer;
+    private SpriteRenderer playerSpriteRenderer;
+
+    private void Awake()
+    {
+        playerSpriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     /// <summary>
     /// PlayerModelのデータを受け取り、見た目に反映させる
@@ -18,13 +24,13 @@ public class PlayerView : MonoBehaviour
         if (model == null) return;
 
         // SpriteRendererにモデルのSpriteを設定する
-        if (playerSpriteRenderer != null && model.PlayerSprite != null)
+        if (model.PlayerSprite != null)
         {
             playerSpriteRenderer.sprite = model.PlayerSprite;
         }
         else
         {
-            Debug.LogWarning("PlayerViewでSpriteRendererまたはPlayerSpriteが設定されていません。");
+            Debug.LogWarning($"PlayerModel '{model.PlayerName}' に表示するべきPlayerSpriteが設定されていません。");
         }
     }
 }
