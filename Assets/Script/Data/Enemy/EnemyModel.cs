@@ -15,6 +15,7 @@ public class EnemyModel
     public Sprite EnemySprite { get; private set; }                         // 表示アイコン
     public string EnemyDescription { get; private set; }                    // 説明文
     public AnimatorSet EnemyAnimator { get; private set; }                  // アニメーションセット
+    public Avatar EnemyAvatar { get; private set; }                 // 骨格(Avatar)
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
@@ -36,5 +37,10 @@ public class EnemyModel
         EnemySprite = Entity.EnemySprite;
         EnemyDescription = Entity.EnemyDescription;
         EnemyAnimator = Entity.AnimationSet;
+
+        if (Entity.AnimationSet != null)
+        {
+            EnemyAvatar = Entity.AnimationSet.avatar;
+        }
     }
 }

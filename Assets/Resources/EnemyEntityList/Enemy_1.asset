@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d3c018646e21a49aa77767cf36f2b1, type: 3}
   m_Name: Enemy_1
   m_EditorClassIdentifier: 
-  EnemyID: 0
+  EnemyID: 1
   EnemyName: "\u30A8\u30EC\u30CB\u30E4\u8A18"
   EnemyAttribute: 0
   EnemyDefensAttribute: 1
-  EnemySprite: {fileID: 1459035125, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
+  EnemySprite: {fileID: -2015333617, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
   EnemyDescription: 
   EnemyHP: 100
   EnemyAttackPower: 10

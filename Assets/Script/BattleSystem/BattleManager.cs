@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
-using System.Linq;
+using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Battleの流れを管理するクラス
+/// Battleのターン、順番とデータ管理
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
@@ -17,33 +18,83 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform partyTextureTransform;
     [SerializeField] private Transform enemyTextureTransform;
     [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private List<StageEnemyData> allStageEnemyData;
+
+#if TUTORIAL_ENABLED
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
-
-    private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
+#endif
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
 
-    private EnemyModel enemyModel;
-    private float turnTime = 10f; // プレイヤーのターン時間（秒）
     private bool isTutorialMode = false;
+    private EnemyModel enemyModel;
+    private float turnTime = 10f;
 
     void Start()
     {
+        // Playerデータのロード
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         this.party = setupData.Party;
 
-        // 2.パーティ人数分 PlayerView を生成
-        partyPlayerView();
+        // パーティ人数分 PlayerView を生成
+        for (int i = 0; i < party.Count; i++)
+        {
+            PlayerRuntime runtime = party[i];
 
-        // 3. 敵を生成
-        enemiesCreate();
+            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
+
+            PlayerController playerController = playerObject.GetComponent<PlayerController>();
+            playerController.Init(runtime.PlayerModel);
+            runtime.PlayerController = playerController;
+        }
+
+        // 挑戦する敵のデータをステージIDから取得
+        int currentStageID = StageManager.SelectedStageID;
+
+        if (currentStageID == -1)
+        {
+            Debug.LogError("ステージIDが設定されていません！StageManager.SelectedStageIDを確認してください。");
+#if UNITY_EDITOR
+            string sceneName = SceneManager.GetActiveScene().name;
+            // ※チュートリアルシーン名が "Tutorial" でない場合は、実際のシーン名に変更してください
+            if (sceneName == "Tutorial")
+            {
+                currentStageID = 0;
+                Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '0' (チュートリアル)に設定しました。");
+            }
+            else
+            {
+                currentStageID = 1;
+                Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '1' (通常戦闘)に設定しました。");
+            }
+#endif
+        }
+        StageEnemyData currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
+
+        // 敵の生成
+        var enemyFactory = new EnemyModelFactory();
+        foreach (int enemyId in currentStage.enemyIDs)
+        {
+            EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
+            predators.Add(enemy);
+
+            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
+            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+            enemyController.Init(enemy);
+            Debug.Log($"敵(ID: {enemy.EnemyID}) を生成しました。");
+        }
 
         //最初の敵をターゲットとして設定する
         if (predators.Count > 0)
         {
             enemyModel = predators[0];
+        }
+        else
+        {
+            Debug.LogError("攻撃対象の敵が見つかりません！");
+            return;
         }
 
         List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
@@ -55,8 +106,10 @@ public class BattleManager : MonoBehaviour
         //敵のIDが0の場合tuterealを開始する
         if (predators[0].EnemyID == 0)
         {
+#if TUTORIAL_ENABLED
             isTutorialMode = true;
-            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn,　tortrialInputReader);
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
+#endif
         }
         else
         {
@@ -72,40 +125,6 @@ public class BattleManager : MonoBehaviour
         turnTime = 10f;
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
-    }
-
-    /// <summary>
-    /// PlayerViewを生成
-    /// </summary>
-    private void partyPlayerView()
-    {
-        for (int i = 0; i < party.Count; i++)
-        {
-            PlayerRuntime runtime = party[i];
-
-            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
-
-            PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            playerController.Init(runtime.PlayerModel);
-            runtime.PlayerController = playerController;
-        }
-    }
-
-    /// <summary>
-    /// EnemyViewを生成
-    /// </summary>
-    private void enemiesCreate()
-    {
-        var enemyFactory = new EnemyModelFactory();
-        for (int i = 0; i < 3; i++)
-        {
-            EnemyModel enemy = enemyFactory.CreateFromId(i + 1);
-            predators.Add(enemy);
-
-            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
-            EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
-            enemyController.Init(enemy);
-        }
     }
 
     /// <summary>
@@ -153,7 +172,8 @@ public class BattleManager : MonoBehaviour
         StartPlayerTurn();
     }
 
-
+    /////////////////////////////////////////////////////////////////////////////////////////
+    ///チュートリアル用の処理
     /////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>
     /// チュートリアル用にタイマーを停止させる
