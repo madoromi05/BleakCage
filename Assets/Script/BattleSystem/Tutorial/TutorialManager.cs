@@ -1,3 +1,6 @@
+#if TUTORIAL_ENABLED
+
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -206,3 +209,5 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("チュートリアル完了");
     }
 }
+
+#endif

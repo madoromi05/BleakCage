@@ -159,6 +159,9 @@ MonoBehaviour:
   partyTextureTransform: {fileID: 1319829288}
   enemyTextureTransform: {fileID: 1359597877}
   timeText: {fileID: 1571710206}
+  allStageEnemyData:
+  - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
+  - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
   tutorialManager: {fileID: 1581703892}
   tortrialInputReader: {fileID: 1061743890}
 --- !u!4 &120127626
@@ -1553,7 +1556,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1372337603
 RectTransform:
   m_ObjectHideFlags: 0

@@ -46,20 +46,27 @@ public class EnemyController : MonoBehaviour
         this.model = enemyModel;
         view.Show(model);
 
+        if (model.EnemyAvatar != null)
+        {
+            animator.avatar = model.EnemyAvatar;
+        }
+        else
+        {
+            // Avatarが設定されていない場合、警告を出す
+            if (model.EnemyAnimator != null)
+            {
+                Debug.LogWarning($"AnimatorSet「{model.EnemyAnimator.name}」にAvatarが設定されていません。", this.gameObject);
+            }
+            else
+            {
+                Debug.LogError("EnemyModel.EnemyAnimatorが設定されていません！", this.gameObject);
+            }
+        }
+
         if (model.EnemyAnimator == null)
         {
             Debug.LogError("EnemyModel.EnemyAnimatorが設定されていません！", this.gameObject);
             return;
-        }
-
-        // Avatarを設定
-        if (model.EnemyAnimator.avatar != null)
-        {
-            animator.avatar = model.EnemyAnimator.avatar;
-        }
-        else
-        {
-            Debug.LogWarning($"AnimatorSet「{model.EnemyAnimator.name}」にAvatarが設定されていません。", this.gameObject);
         }
 
         // 定数を使ってアニメーションクリップを上書き設定

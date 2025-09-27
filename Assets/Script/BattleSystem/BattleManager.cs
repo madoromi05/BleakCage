@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 using System.Linq;
+using TMPro;
+using UnityEditor.Overlays;
+using UnityEngine;
 
 /// <summary>
 /// Battleのターン、順番とデータ管理
@@ -17,9 +18,12 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform partyTextureTransform;
     [SerializeField] private Transform enemyTextureTransform;
     [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private List<StageEnemyData> allStageEnemyData;
+
+#if TUTORIAL_ENABLED
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
-
+#endif
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
 
@@ -46,16 +50,25 @@ public class BattleManager : MonoBehaviour
         }
 
         // 3. 敵を生成
-        var enemyFactory = new EnemyModelFactory();
-        for (int i = 0; i < 1; i++)
+        int currentStageID = StageManager.SelectedStageID; // 別途作成するクラスから選択されたステージIDを取得
+        StageEnemyData currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
+
+        if (currentStage == null)
         {
-            EnemyModel enemy = enemyFactory.CreateFromId(i);
+            Debug.LogError($"ステージID {currentStageID} のデータが見つかりません！");
+            return;
+        }
+
+        var enemyFactory = new EnemyModelFactory();
+        foreach (int enemyId in currentStage.enemyIDs)
+        {
+            EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
             predators.Add(enemy);
 
             var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
-            Debug.Log($"敵(ID: {enemy.EnemyID})");
+            Debug.Log($"敵(ID: {enemy.EnemyID}) を生成しました。");
         }
 
         //最初の敵をターゲットとして設定する
@@ -78,8 +91,14 @@ public class BattleManager : MonoBehaviour
         //敵のIDが0の場合tuterealを開始する
         if (predators[0].EnemyID == 0)
         {
+#if TUTORIAL_ENABLED
             isTutorialMode = true;
-            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn,　tortrialInputReader);
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
+#else
+            // チュートリアルが無効化されている場合、代わりに通常のプレイヤーターンを開始する
+            Debug.LogWarning("敵IDが0ですが、チュートリアルは無効です。通常どおりゲームを開始します。");
+            StartPlayerTurn();
+#endif
         }
         else
         {
