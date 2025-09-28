@@ -8,6 +8,7 @@ public class CardRuntime : IAttackComponent
     public System.Guid InstanceID { get; private set; }
     public WeaponRuntime weaponRuntime { get; private set; }     // カードが装着されている武器への参照
     public AttributeType attribute { get; private set; }
+    public float DefensePenetration { get; private set; }
 
     private readonly float _outputModifier;
     public CardRuntime(CardModel model)
@@ -16,6 +17,7 @@ public class CardRuntime : IAttackComponent
         ID = model.ID;
         _outputModifier = model.OutputModifier;
         attribute = model.Attribute;
+        DefensePenetration = model.DefensePenetration;
     }
 
     /// <summary>
@@ -26,6 +28,7 @@ public class CardRuntime : IAttackComponent
         InstanceID = Guid.Parse(instanceID);
         ID = model.ID;
         _outputModifier = model.OutputModifier;
+        DefensePenetration = model.DefensePenetration;
     }
     public float GetOutput()
     {

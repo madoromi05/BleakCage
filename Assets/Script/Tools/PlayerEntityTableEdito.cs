@@ -84,7 +84,6 @@ public class PlayerEntityTableEditor : EditorWindow
             player.PlayerName = EditorGUILayout.TextField(player.PlayerName, GUILayout.Width(120));
             player.PlayerLevel = EditorGUILayout.IntField(player.PlayerLevel, GUILayout.Width(50));
             player.PlayerHP = EditorGUILayout.FloatField(player.PlayerHP, GUILayout.Width(60));
-            player.PlayerAttackPower = EditorGUILayout.FloatField(player.PlayerAttackPower, GUILayout.Width(60));
             player.PlayerDefensePower = EditorGUILayout.FloatField(player.PlayerDefensePower, GUILayout.Width(60));
             player.PlayerAttribute = (AttributeType)EditorGUILayout.EnumPopup(player.PlayerAttribute, GUILayout.Width(80));
             player.PlayerSprite = (Sprite)EditorGUILayout.ObjectField(player.PlayerSprite, typeof(Sprite), false, GUILayout.Width(60));
@@ -149,7 +148,6 @@ public class PlayerEntityTableEditor : EditorWindow
         newPlayer.PlayerName = "New Player";
         newPlayer.PlayerLevel = 1;
         newPlayer.PlayerHP = 100f;
-        newPlayer.PlayerAttackPower = 10f;
         newPlayer.PlayerDefensePower = 5f;
         newPlayer.PlayerAttribute = AttributeType.Slash;
         newPlayer.PlayerDescription = "新しいプレイヤーの説明文";

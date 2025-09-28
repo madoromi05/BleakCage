@@ -10,7 +10,6 @@ public class PlayerModel
     public string PlayerName { get; private set; }
     public int    PlayerLevel { get; private set; }
     public float  PlayerHP { get; set; }
-    public float  PlayerAttackPower { get; private set; }
     public float  PlayerDefensePower { get; private set; }
     public AttributeType PlayerAttribute { get; private set; }
     public Sprite PlayerSprite { get; private set; }
@@ -33,7 +32,6 @@ public class PlayerModel
         PlayerLevel = playerEntity.PlayerLevel;
 
         PlayerHP = playerEntity.PlayerHP;
-        PlayerAttackPower = playerEntity.PlayerAttackPower;
         PlayerDefensePower = playerEntity.PlayerDefensePower;
 
         PlayerAttribute = playerEntity.PlayerAttribute;

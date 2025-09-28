@@ -159,7 +159,7 @@ MonoBehaviour:
   partyTextureTransform: {fileID: 1319829288}
   enemyTextureTransform: {fileID: 1359597877}
   partyHPBarTransform: {fileID: 334436847}
-  enemyHPBarTransform: {fileID: 334436847}
+  enemyHPBarTransform: {fileID: 727143522}
   timeText: {fileID: 1571710206}
   allStageEnemyData:
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
@@ -369,7 +369,7 @@ GameObject:
   - component: {fileID: 334436847}
   - component: {fileID: 334436850}
   - component: {fileID: 334436849}
-  - component: {fileID: 334436848}
+  - component: {fileID: 334436851}
   m_Layer: 5
   m_Name: PlayerHpField
   m_TagString: Untagged
@@ -396,32 +396,6 @@ RectTransform:
   m_AnchoredPosition: {x: 762, y: 150}
   m_SizeDelta: {x: 321.00208, y: 680}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &334436848
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 334436846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 20
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 1
-  m_ChildScaleHeight: 1
-  m_ReverseArrangement: 0
 --- !u!114 &334436849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -460,6 +434,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 334436846}
   m_CullTransparentMesh: 1
+--- !u!114 &334436851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 334436846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -694,7 +694,7 @@ GameObject:
   - component: {fileID: 727143522}
   - component: {fileID: 727143525}
   - component: {fileID: 727143524}
-  - component: {fileID: 727143523}
+  - component: {fileID: 727143526}
   m_Layer: 5
   m_Name: EnemyHpField
   m_TagString: Untagged
@@ -721,32 +721,6 @@ RectTransform:
   m_AnchoredPosition: {x: -755, y: 150}
   m_SizeDelta: {x: 321.00208, y: 680}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &727143523
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 727143521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 20
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 1
-  m_ChildScaleHeight: 1
-  m_ReverseArrangement: 0
 --- !u!114 &727143524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -785,6 +759,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 727143521}
   m_CullTransparentMesh: 1
+--- !u!114 &727143526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 727143521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &782690698
 GameObject:
   m_ObjectHideFlags: 0
@@ -888,7 +888,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1162064292}
   m_Layer: 5
-  m_Name: HP
+  m_Name: HPBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1490,11 +1490,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.22834682
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 63.757023
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1533,7 +1533,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: -5009102419742236463, guid: 4a95963617f0555428a13035b41a18ad, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4a95963617f0555428a13035b41a18ad, type: 3}

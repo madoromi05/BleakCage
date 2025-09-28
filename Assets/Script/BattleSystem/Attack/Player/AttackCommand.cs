@@ -29,7 +29,7 @@ public class AttackCommand : ICommand
         enemy.EnemyHP -= damage;
 
         // 結果をログに出力
-        Debug.Log($"[AttackCardCommand] {enemy.EnemyID} に {player.ID}が{weapon.ID}と{card.ID}で{damage:F2} ダメージを与えた。残りHP: {enemy.EnemyHP:F2}");
+        Debug.Log($"[AttackCardCommand] {enemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {enemy.EnemyHP:F2}");
 
         return true;
     }

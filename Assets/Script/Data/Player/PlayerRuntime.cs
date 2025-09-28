@@ -15,34 +15,29 @@ public class PlayerRuntime : IAttackComponent
     public WeaponRuntime CaracterCardWeapon { get; private set; }
     public PlayerModel PlayerModel { get; private set; }
     public PlayerController PlayerController { get; set; }
+    public int Level { get; private set; }
 
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
-    private readonly float baseAttackPower;
     private readonly IAttackStrategy attackStrategy;
     private const float PlayerAttackPower = 10f; 
 
     /// <summary>
     /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
     /// </summary>
-    public PlayerRuntime(PlayerModel model, IAttackStrategy strategy, string instanceID)
+    public PlayerRuntime(PlayerModel model, IAttackStrategy strategy, string instanceID, int level)
     {
         ID = model.PlayerID;
         InstanceID = Guid.Parse(instanceID);
         CurrentHP = model.PlayerHP;
-        baseAttackPower = model.PlayerAttackPower;
         attackStrategy = strategy;
         this.PlayerModel = model;
+        this.Level = model.PlayerLevel;
 
         // キャラクターカード用の専用武器
         // AttackPowerは仮で10に設定
         var CaracterCardWeaponModel = new WeaponModel(0, "CharacterPersonalSkill", PlayerAttackPower, AttributeType.Bullet, 1.0f);
         CaracterCardWeapon = new WeaponRuntime(CaracterCardWeaponModel, System.Guid.NewGuid().ToString());
         this.EquipWeapon(CaracterCardWeapon);
-    }
-
-    public float GetPower()
-    {
-        return baseAttackPower;
     }
 
     /// <summary>

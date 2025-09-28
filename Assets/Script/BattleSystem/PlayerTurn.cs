@@ -126,8 +126,6 @@ public class PlayerTurn : MonoBehaviour
             OnCardSelectedForTutorial?.Invoke(inputNumber, isCardSelected[inputNumber]);
         }
         isInputLocked = false;
-
-        Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
     }
 
     /// <summary>
@@ -156,7 +154,6 @@ public class PlayerTurn : MonoBehaviour
 
             isCardSelected[inputNumber] = true;
         }
-        Debug.Log($"カード{inputNumber + 1}が{(isCardSelected[inputNumber] ? "選択" : "選択解除")}されました");
     }
 
     /// <summary>
@@ -220,9 +217,6 @@ public class PlayerTurn : MonoBehaviour
             }
         }
 
-        Debug.Log("実行するカード: " + string.Join(",", selectedCardsThisTurn.Select(c => c.ID)));
-        //Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
-
         //選択状態をリセット
         for (int i = 0; i < isCardSelected.Length; i++)
         {
@@ -237,6 +231,9 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteCardCommands()
     {
+        Debug.Log("実行するカード: " + string.Join(",", selectedCardsThisTurn.Select(c => c.ID)));
+        Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
+
         inputEnabled = false;
 
         foreach (var selectedCardRuntime in selectedCardsThisTurn)
@@ -277,7 +274,7 @@ public class PlayerTurn : MonoBehaviour
             command.Do();
             yield return new WaitForSeconds(0.3f);
         }
-
+;
         Debug.Log("カード効果の実行完了");
 
         OnTurnFinished?.Invoke();

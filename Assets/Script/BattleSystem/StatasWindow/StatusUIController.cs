@@ -23,7 +23,6 @@ public class StatusUIController : MonoBehaviour
 
         nameText.text = model.PlayerName;
         levelText.text = $"Lv.{model.PlayerLevel}";
-        attackText.text = model.PlayerAttackPower.ToString();
         defenseText.text = model.PlayerDefensePower.ToString();
         
         if (model.PlayerSprite != null)

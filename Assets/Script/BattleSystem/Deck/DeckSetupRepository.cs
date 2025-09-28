@@ -24,6 +24,7 @@ public class PlayerDataLoader
     private PlayerModelFactory playerFactory;
     private WeaponModelFactory weaponFactory;
     private CardModelFactory cardFactory;
+    private int level;
 
     public PlayerDataLoader()
     {
@@ -60,7 +61,7 @@ public class PlayerDataLoader
                 continue;
             }
 
-            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId);
+            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId,level);
             party.Add(playerRuntime);
 
             // プレイヤーが直接持つカードをCharacterCardWeaponにセット
