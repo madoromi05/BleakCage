@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
 {
     PlayerView view;
     private PlayerModel playerModel;
+    private StatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
 
@@ -40,7 +41,7 @@ public class PlayerController : MonoBehaviour
         this.playerModel = model;
         view.Show(model);
 
-        if(model.PlayerAnimator == null)
+        if (model.PlayerAnimator == null)
         {
             Debug.LogError("PlayerModel.PlayerAnimatorが設定されていません！", this.gameObject);
             return;
@@ -81,5 +82,18 @@ public class PlayerController : MonoBehaviour
     {
         // パラメータをハッシュ値で操作する
         animator.SetBool(IsDeadParamHash, true);
+    }
+
+    public void SetStatusUI(StatusUIController ui)
+    {
+        this.statusUI = ui;
+    }
+
+    public void UpdateHealthUI(float currentHP)
+    {
+        if (statusUI != null)
+        {
+            statusUI.UpdateHP(currentHP);
+        }
     }
 }

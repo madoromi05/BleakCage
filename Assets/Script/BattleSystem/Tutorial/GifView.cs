@@ -26,7 +26,6 @@ public class GifView : MonoBehaviour
         var path = Path.Combine(Application.streamingAssetsPath, gifFileName);
         if (!File.Exists(path))
         {
-            Debug.LogError($"GIF file not found at path: {path}");
             rawImage.gameObject.SetActive(false);
             yield break;
         }

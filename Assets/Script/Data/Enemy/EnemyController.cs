@@ -8,6 +8,7 @@ public class EnemyController : MonoBehaviour
 {
     EnemyView view;
     private EnemyModel model;
+    private StatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
 
@@ -108,5 +109,18 @@ public class EnemyController : MonoBehaviour
     public void PlayDeathAnimation()
     {
         animator.SetBool(IsDeadParamHash, true);
+    }
+
+    public void SetStatusUI(StatusUIController ui)
+    {
+        this.statusUI = ui;
+    }
+
+    public void UpdateHealthUI(float currentHP)
+    {
+        if (statusUI != null)
+        {
+            statusUI.UpdateHP(currentHP);
+        }
     }
 }

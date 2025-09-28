@@ -17,8 +17,11 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform partyTextureTransform;
     [SerializeField] private Transform enemyTextureTransform;
+    [SerializeField] private Transform partyHPBarTransform;
+    [SerializeField] private Transform enemyHPBarTransform;
     [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
+    [SerializeField] private GameObject statusUIPrefab;
 
 #if TUTORIAL_ENABLED
     [SerializeField] private TutorialManager tutorialManager;
@@ -44,10 +47,14 @@ public class BattleManager : MonoBehaviour
             PlayerRuntime runtime = party[i];
 
             var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
-
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
             playerController.Init(runtime.PlayerModel);
             runtime.PlayerController = playerController;
+
+            var statusUIObject = Instantiate(statusUIPrefab, partyHPBarTransform, false);
+            StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
+            uiController.SetPlayerStatus(runtime);
+            playerController.SetStatusUI(uiController);
         }
 
         // 挑戦する敵のデータをステージIDから取得
@@ -83,7 +90,11 @@ public class BattleManager : MonoBehaviour
             var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
-            Debug.Log($"敵(ID: {enemy.EnemyID}) を生成しました。");
+
+            var statusUIObject = Instantiate(statusUIPrefab, enemyHPBarTransform, false);
+            StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
+            uiController.SetEnemyStatus(enemy);
+            enemyController.SetStatusUI(uiController);
         }
 
         //最初の敵をターゲットとして設定する
@@ -132,7 +143,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public IEnumerator StartPlayerTurnWithTimer()
     {
-        Debug.Log("【プレイヤーターン開始】");
+        Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
         playerTurn.StartPlayerTurn();
 
@@ -150,7 +161,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void OnPlayerTurnFinished()
     {
-        Debug.Log("【プレイヤーターン終了】");
+        Debug.Log("【カード選択ターン終了】");
         if (!isTutorialMode)
         {
             StartCoroutine(EnemyTurn());

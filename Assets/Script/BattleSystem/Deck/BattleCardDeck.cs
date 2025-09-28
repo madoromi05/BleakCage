@@ -25,7 +25,6 @@ public class BattleCardDeck : MonoBehaviour
         battleCardDeck = new List<CardRuntime>(sourceDeck); // 新しいリストとしてコピー
         battleCardDeck = battleCardDeck.OrderBy(x => Random.value).ToList(); // シャッフル
         destructionCardInstanceIds.Clear(); // 破棄リストをリセット
-        Debug.Log("Battle deck reset. Cards: " + battleCardDeck.Count);
     }
 
     /// <summary>

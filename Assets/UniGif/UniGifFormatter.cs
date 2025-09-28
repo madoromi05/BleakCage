@@ -48,7 +48,6 @@ public static partial class UniGif
         if (debugLog)
         {
             gifData.Dump();
-            Debug.Log("SetGifData Finish.");
         }
         return true;
     }

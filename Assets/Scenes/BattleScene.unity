@@ -158,10 +158,13 @@ MonoBehaviour:
   enemyPrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
   partyTextureTransform: {fileID: 1319829288}
   enemyTextureTransform: {fileID: 1359597877}
+  partyHPBarTransform: {fileID: 334436847}
+  enemyHPBarTransform: {fileID: 334436847}
   timeText: {fileID: 1571710206}
   allStageEnemyData:
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
+  statusUIPrefab: {fileID: 3933237661722602022, guid: 09feef9547afbdd49bd4186f1276b30b, type: 3}
   tutorialManager: {fileID: 0}
   tortrialInputReader: {fileID: 0}
 --- !u!4 &120127626
@@ -390,7 +393,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -749.99994, y: 150}
+  m_AnchoredPosition: {x: 762, y: 150}
   m_SizeDelta: {x: 321.00208, y: 680}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &334436848
@@ -715,7 +718,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 749, y: 150}
+  m_AnchoredPosition: {x: -755, y: 150}
   m_SizeDelta: {x: 321.00208, y: 680}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &727143523
@@ -947,7 +950,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -372.47006, y: 150}
+  m_AnchoredPosition: {x: 359, y: 150}
   m_SizeDelta: {x: 215.05713, y: 529.104}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1319829289
@@ -1154,7 +1157,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 363, y: 131.55}
+  m_AnchoredPosition: {x: -357, y: 131.55}
   m_SizeDelta: {x: 215.05713, y: 529.104}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1359597878

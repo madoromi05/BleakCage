@@ -12,8 +12,6 @@ public static class TutorialDeckCreate
     /// </summary>
     public static PlayerProfile CreateAndSaveMockProfile()
     {
-        Debug.Log("プレイヤーデッキ（キャラクター1体）を作成・保存します...");
-
         PlayerProfile profile = new PlayerProfile
         {
             PlayerName = "FarstPlayer",

@@ -132,8 +132,7 @@ public class TutorialManager : MonoBehaviour
 
         // 3. まずはこのカード2つを選択してみてください。
         SetTutorialText(tutorialMessages.Dequeue());
-
-       yield return new WaitUntil(() => CardsSelectedProsess());
+        yield return new WaitUntil(() => CardsSelectedProsess());
 
         // 4. Enterキーで次に進みましょう
         SetTutorialText(tutorialMessages.Dequeue());

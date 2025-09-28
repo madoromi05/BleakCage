@@ -23,17 +23,13 @@ public class AttackCommand : ICommand
 
     public bool Do()
     {
-        Debug.Log($"攻撃実行: Player='{player.ID}' が " +
-                 $"Weapon='{weapon.ID}' と " +
-                 $"Card(ID)='{card.ID}' を使って " +
-                 $"Enemy='{enemy.EnemyID}' に攻撃！");
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card ,enemy);
 
         // ターゲットのHPを減算
         enemy.EnemyHP -= damage;
 
         // 結果をログに出力
-        Debug.Log($"[AttackCardCommand] {enemy.EnemyName} に {damage:F2} ダメージを与えた。残りHP: {enemy.EnemyHP:F2}");
+        Debug.Log($"[AttackCardCommand] {enemy.EnemyID} に {player.ID}が{weapon.ID}と{card.ID}で{damage:F2} ダメージを与えた。残りHP: {enemy.EnemyHP:F2}");
 
         return true;
     }
