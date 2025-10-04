@@ -35,6 +35,9 @@ public class PlayerTurn : MonoBehaviour
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
     private IAttackStrategy damageStrategy;
 
+
+
+    public event System.Action CheckDead;                    // 敵死亡時
     private void Awake()
     {
         inputReader = GetComponent<InputReader>();
@@ -43,6 +46,8 @@ public class PlayerTurn : MonoBehaviour
 
         damageStrategy = new AttributeWeakness();
         cardModelFactory = new CardModelFactory();
+
+
     }
 
     public void Setup(PlayerRuntime playerRuntime, EnemyModel enemyModel, BattleCardDeck battleDeck)
@@ -255,6 +260,11 @@ public class PlayerTurn : MonoBehaviour
             var command = commandQueue.Dequeue();
             command.Do();
             yield return new WaitForSeconds(0.3f); // 任意のウェイト
+
+            if(enemyModel == null)
+            {
+                CheckDead?.Invoke();
+            }
         }
 
         Debug.Log("カード効果の実行完了");

@@ -15,6 +15,8 @@ public class EnemyModel
     public Sprite EnemySprite { get; private set; }                           // 表示アイコン
     public string EnemyDescription { get; private set; }                    // 説明文
 
+    public EnemyDrop  EnemyDrop { get; private set; }
+
     /// <summary>
     /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
     /// </summary>
