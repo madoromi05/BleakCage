@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 /// <summary>
 /// UI、データをゲームにsetするクラス
@@ -12,11 +11,12 @@ public class EnemyController : MonoBehaviour
     private Animator animator;
     private AnimatorOverrideController overrideController;
 
+    // アニメーション名を定数化
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
     private static readonly int DamagedTriggerHash = Animator.StringToHash("DamagedTrigger");
     private static readonly int IsDeadParamHash = Animator.StringToHash("IsDead");
 
-    // アニメーションクリップ名も定数化しておくと管理が楽になる
+    // アニメーションクリップを定数化
     private const string IdleClipName = "Idle";
     private const string DeathClipName = "Death";
     private const string DamagedClipName = "Damaged";
@@ -62,12 +62,6 @@ public class EnemyController : MonoBehaviour
             {
                 Debug.LogError("EnemyModel.EnemyAnimatorが設定されていません！", this.gameObject);
             }
-        }
-
-        if (model.EnemyAnimator == null)
-        {
-            Debug.LogError("EnemyModel.EnemyAnimatorが設定されていません！", this.gameObject);
-            return;
         }
 
         // 定数を使ってアニメーションクリップを上書き設定

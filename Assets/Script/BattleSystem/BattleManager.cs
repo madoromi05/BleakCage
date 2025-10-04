@@ -29,6 +29,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
 #endif
+
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
 
@@ -46,14 +47,22 @@ public class BattleManager : MonoBehaviour
         // パーティ人数分 PlayerView を生成
         for (int i = 0; i < party.Count; i++)
         {
+            if (i >= playerPositions.Count)
+            {
+                Debug.LogError($"Player {i} のためのポジションが定義されていません。");
+                break;
+            }
+
             PlayerRuntime runtime = party[i];
 
+            // PlayerのModel生成
             Transform spawnPoint = playerPositions[i];
-            var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, playerParent);
+            var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
             playerController.Init(runtime.PlayerModel);
             runtime.PlayerController = playerController;
 
+            // PlayerのStatusUI生成
             var statusUIObject = Instantiate(statusUIPrefab, partyStatusBarTransform, false);
             StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
             uiController.SetPlayerStatus(runtime);
@@ -85,13 +94,22 @@ public class BattleManager : MonoBehaviour
 
         // 敵の生成
         var enemyFactory = new EnemyModelFactory();
-        foreach (int enemyId in currentStage.enemyIDs)
+        for (int i = 0; i < currentStage.enemyIDs.Count; i++)
         {
+            // 定義されたポジション数を超えないようにチェック
+            if (i >= enemyPositions.Count)
+            {
+                Debug.LogError($"敵 {i} のためのポジションが定義されていません。");
+                break;
+            }
+
+            int enemyId = currentStage.enemyIDs[i];
             EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
             predators.Add(enemy);
 
-            Transform spawnPoint = enemyPositions[enemyId];
-            var enemyObject = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, enemyParent);
+            // 指定された3D座標に敵を生成
+            Transform spawnPoint = enemyPositions[i];
+            var enemyObject = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
 
