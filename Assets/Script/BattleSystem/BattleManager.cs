@@ -15,10 +15,12 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private Transform partyTextureTransform;
-    [SerializeField] private Transform enemyTextureTransform;
-    [SerializeField] private Transform partyHPBarTransform;
-    [SerializeField] private Transform enemyHPBarTransform;
+    [SerializeField] private Transform playerParent;
+    [SerializeField] private Transform enemyParent;
+    [SerializeField] private List<Transform> playerPositions;
+    [SerializeField] private List<Transform> enemyPositions;
+    [SerializeField] private Transform partyStatusBarTransform;
+    [SerializeField] private Transform enemyStatusBarTransform;
     [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
     [SerializeField] private GameObject statusUIPrefab;
@@ -46,12 +48,13 @@ public class BattleManager : MonoBehaviour
         {
             PlayerRuntime runtime = party[i];
 
-            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
+            Transform spawnPoint = playerPositions[i];
+            var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, playerParent);
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
             playerController.Init(runtime.PlayerModel);
             runtime.PlayerController = playerController;
 
-            var statusUIObject = Instantiate(statusUIPrefab, partyHPBarTransform, false);
+            var statusUIObject = Instantiate(statusUIPrefab, partyStatusBarTransform, false);
             StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
             uiController.SetPlayerStatus(runtime);
             playerController.SetStatusUI(uiController);
@@ -87,11 +90,12 @@ public class BattleManager : MonoBehaviour
             EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
             predators.Add(enemy);
 
-            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
+            Transform spawnPoint = enemyPositions[enemyId];
+            var enemyObject = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, enemyParent);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
 
-            var statusUIObject = Instantiate(statusUIPrefab, enemyHPBarTransform, false);
+            var statusUIObject = Instantiate(statusUIPrefab, enemyStatusBarTransform, false);
             StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
             uiController.SetEnemyStatus(enemy);
             enemyController.SetStatusUI(uiController);
