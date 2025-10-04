@@ -14,7 +14,6 @@ public class EnemyModel
     public DefensAttributeType EnemyDefensAttribute { get; private set; }   // 防御属性
     public Sprite EnemySprite { get; private set; }                           // 表示アイコン
     public string EnemyDescription { get; private set; }                    // 説明文
-
     public EnemyDrop  EnemyDrop { get; private set; }
 
     /// <summary>

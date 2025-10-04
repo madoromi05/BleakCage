@@ -17,7 +17,7 @@ public class EnemyDrop : MonoBehaviour, IDropHandler
         var playerDrag = eventData.pointerDrag?.GetComponent<PlayerDrag>();
         if (playerDrag != null)
         {
-            Debug.Log("moe");
+            Debug.Log($"{playerDrag}{EnemyData.EnemyName}moe");
             OnEnemyDropped?.Invoke(playerDrag, EnemyData);
         }
     }

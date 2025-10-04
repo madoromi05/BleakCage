@@ -21,10 +21,6 @@ public class SelectTurn : MonoBehaviour
 
     public event System.Action SelectTurnFinished;
 
-    private void Awake()
-    {
-        
-    }
     private void OnEnable()
     {
         foreach (var drop in enemyDrops)
