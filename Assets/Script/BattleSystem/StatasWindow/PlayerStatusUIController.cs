@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using UnityEngine.UI;
 using TMPro;
 
@@ -13,6 +14,17 @@ public class PlayerStatusUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private Slider hpSlider;
+    [SerializeField] private Image flashOverlay; // 点滅させるためのUI画像
+    private Coroutine flashingCoroutine;
+
+    private void Awake()
+    {
+        // ゲーム開始時は点滅用の画像を非表示にしておく
+        if (flashOverlay != null)
+        {
+            flashOverlay.gameObject.SetActive(false);
+        }
+    }
 
     /// <summary>
     /// Playerのデータを使ってUIを初期設定する
@@ -24,7 +36,7 @@ public class PlayerStatusUIController : MonoBehaviour
         nameText.text = model.PlayerName;
         levelText.text = $"Lv.{model.PlayerLevel}";
         defenseText.text = model.PlayerDefensePower.ToString();
-        
+
         if (model.PlayerSprite != null)
         {
             characterIcon.sprite = model.PlayerSprite;
@@ -35,34 +47,54 @@ public class PlayerStatusUIController : MonoBehaviour
     }
 
     /// <summary>
-    /// Enemyのデータを使ってUIを初期設定する
-    /// </summary>
-    public void SetEnemyStatus(EnemyModel enemy)
-    {
-        nameText.text = enemy.EnemyName;
-        attackText.text = enemy.EnemyAttackPower.ToString();
-        defenseText.text = enemy.EnemyDefensePower.ToString();
-
-        // 敵にはレベルがないので、レベル表示を非表示にする
-        if (levelText != null)
-        {
-            levelText.gameObject.SetActive(false);
-        }
-
-        if (enemy.EnemySprite != null)
-        {
-            characterIcon.sprite = enemy.EnemySprite;
-        }
-
-        hpSlider.maxValue = enemy.EnemyHP;
-        hpSlider.value = enemy.EnemyHP;
-    }
-
-    /// <summary>
     /// HPバーの表示を更新する
     /// </summary>
     public void UpdateHP(float currentHP)
     {
         hpSlider.value = currentHP;
+    }
+
+    /// <summary>
+    /// 指定した色でUIの点滅を開始する
+    /// </summary>
+    public void StartFlashing(Color flashColor)
+    {
+        if (flashOverlay == null) return;
+
+        // 既に実行中のコルーチンがあれば停止
+        if (flashingCoroutine != null)
+        {
+            StopCoroutine(flashingCoroutine);
+        }
+        flashOverlay.color = flashColor;
+        flashingCoroutine = StartCoroutine(FlashCoroutine());
+    }
+
+    /// <summary>
+    /// UIの点滅を停止する
+    /// </summary>
+    public void StopFlashing()
+    {
+        if (flashOverlay == null) return;
+
+        if (flashingCoroutine != null)
+        {
+            StopCoroutine(flashingCoroutine);
+            flashingCoroutine = null;
+        }
+        flashOverlay.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 画像の表示/非表示を繰り返すコルーチン
+    /// </summary>
+    private IEnumerator FlashCoroutine()
+    {
+        flashOverlay.gameObject.SetActive(true);
+        while (true)
+        {
+            flashOverlay.enabled = !flashOverlay.enabled;
+            yield return new WaitForSeconds(0.25f);
+        }
     }
 }

@@ -24,9 +24,12 @@ public class BattleManager : MonoBehaviour
     private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
+    private List<PlayerStatusUIController> playerUIs = new List<PlayerStatusUIController>();
+    private List<EnemyStatusUIController> enemyUIs = new List<EnemyStatusUIController>();
 
     private EnemyModel enemyModel;
     private float turnTime = 10f; // プレイヤーのターン時間（秒）
+    private bool isSelectionPhase = false;
 
     private bool SelectTask = false;
     private int TurnCount;
@@ -34,7 +37,6 @@ public class BattleManager : MonoBehaviour
     private List<EnemyModel> Player2Select = new List<EnemyModel>();
     private List<EnemyModel> Player3Select = new List<EnemyModel>();
 
-   
     public event System.Action BattleFinished;                    // バトル終了イベント
     void Start()
     {
@@ -71,10 +73,7 @@ public class BattleManager : MonoBehaviour
         playerTurn.CheckDead += PredatorDeadOrDead;
         BattleFinished += DieEnemy;
         // 5. バトル開始
-        StartSelectTurn();
-        StartPlayerTurn();
-
-        PredatorDeadOrDead();
+        StartCoroutine(BattleFlow());
     }
 
     private void partyPlayerView()
@@ -101,6 +100,39 @@ public class BattleManager : MonoBehaviour
             var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
+        }
+    }
+
+    private IEnumerator BattleFlow()
+    {
+        while (true) // ゲーム終了までループ
+        {
+            // 1. 選択ターン
+            isSelectionPhase = true;
+            Debug.Log($"【ターン{TurnCount}: 攻撃優先順位選択 開始】");
+            yield return StartCoroutine(SelectionProcessCoroutine());
+            // OnSelectTurnFinishedで isSelectionPhase が false になるのを待つ
+            yield return new WaitUntil(() => !isSelectionPhase);
+            Debug.Log("【攻撃優先順位選択 終了】");
+
+            // 2. プレイヤーの攻撃ターン
+            Debug.Log("【プレイヤーターン開始】");
+            playerTurn.StartPlayerTurn();
+            turnTime = 10f;
+            while (turnTime > 0)
+            {
+                if (isSelectionPhase) yield break; // 選択フェーズに戻ったら中断
+                turnTime -= Time.deltaTime;
+                timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
+                yield return null;
+            }
+            playerTurn.FinishPlayerTurn(); // 時間切れでターン終了
+
+            // 3. 敵のターン
+            // OnPlayerTurnFinished -> EnemyTurn -> OnEnemyTurnFinished の流れは既存のイベントで処理される
+
+            // 4. 次のターンへ
+            TurnCount++;
         }
     }
 
@@ -167,7 +199,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator SelectTurnSkip()
     {
-        if(TurnCount > 1)
+        if (TurnCount > 1)
         {
             Debug.Log("選択をスキップしますか？Enterでスキップspaceで継続");
 
@@ -176,21 +208,54 @@ public class BattleManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Return))
             {
                 StartPlayerTurn();
-                yield break; 
+                yield break;
             }
             else if (Input.GetKeyDown(KeyCode.Space))
             {
                 selectTurn.StartSelectTurn(party, predators);
                 yield break;
             }
-
         }
-        else 
+        else
         {
             StartSelectTurn();
             yield break;
         }
     }
+
+    /// <summary>
+    /// 新しいキーボード入力による選択プロセス
+    /// </summary>
+    private IEnumerator SelectionProcessCoroutine()
+    {
+        selectTurn.StartSelectTurn(party, predators);
+
+        // プレイヤー3人分の選択ループ
+        for (int pIndex = 0; pIndex < party.Count; pIndex++)
+        {
+            if (pIndex >= playerUIs.Count) continue; // UIがない場合はスキップ
+            playerUIs[pIndex].StartFlashing(Color.blue);
+
+            // 優先順位3つ分の選択ループ
+            for (int eIndex = 0; eIndex < predators.Count; eIndex++)
+            {
+                if (eIndex >= enemyUIs.Count) continue; // UIがない場合はスキップ
+                enemyUIs[eIndex].StartFlashing(Color.red);
+
+                Debug.Log($"Player {pIndex + 1} の 優先順位{eIndex + 1} を選択してください。対象: {predators[eIndex].EnemyName} (Enterキーで決定)");
+
+                // Enterキーが押されるまで待機
+                yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Return));
+
+                enemyUIs[eIndex].StopFlashing();
+
+                // 選択を登録
+                // selectTurn.RegisterSelection(party[pIndex].PlayerModel, predators[eIndex]);
+            }
+            playerUIs[pIndex].StopFlashing();
+        }
+    }
+
     /// <summary>
     /// 選択開始
     /// </summary>
@@ -202,9 +267,8 @@ public class BattleManager : MonoBehaviour
     }
     private void OnSelectTurnFinished()
     {
-        Player1Select = selectTurn.SelectPlayer1;
-        Player2Select = selectTurn.SelectPlayer2;
-        Player3Select = selectTurn.SelectPlayer3;
+        var selections = selectTurn.PlayerSelections;
+
         //バトルデッキとプレイヤーのターンをセットアップ
         for (int i = 0; i < 3; i++)
         {
@@ -228,6 +292,21 @@ public class BattleManager : MonoBehaviour
             {
                 playerTurn.Setup(party[2], Player3Select[i], battleDeck);
                 break;
+            }
+        }
+
+        for (int i = 0; i < party.Count; i++)
+        {
+            List<EnemyModel> targetList = null;
+            if (i == 0) targetList = Player1Select;
+            if (i == 1) targetList = Player2Select;
+            if (i == 2) targetList = Player3Select;
+
+            // 死んでいない最初の敵をターゲットにする
+            EnemyModel firstAliveTarget = targetList.FirstOrDefault(e => e.EnemyHP > 0);
+            if (firstAliveTarget != null)
+            {
+                playerTurn.Setup(party[i], firstAliveTarget, battleDeck);
             }
         }
         Debug.Log("選択ターン終了");

@@ -43,7 +43,7 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void Choice()
     {
-        int choice = 5;
+        int choice;
         while(true)
         {
             choice = Random.Range(1, playercount + 1);

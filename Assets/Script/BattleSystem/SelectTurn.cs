@@ -7,57 +7,37 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class SelectTurn : MonoBehaviour
 {
-    [SerializeField] private EnemyDrop[] enemyDrops;
+    public Dictionary<int, List<EnemyModel>> PlayerSelections { get; private set; }
 
-    public List<EnemyModel> SelectPlayer1 = new List<EnemyModel>();
-    public List<EnemyModel> SelectPlayer2 = new List<EnemyModel>();
-    public List<EnemyModel> SelectPlayer3 = new List<EnemyModel>();
-
-    private int currentPlayerIndex = 0;   
-    private int currentPriority = 1;      
+    private int currentPlayerIndex;   
+    private int currentPriority;
+    private int totalPlayers;
+    private int totalEnemies;
 
     public event System.Action SelectTurnFinished;
 
-    private void OnEnable()
-    {
-        foreach (var drop in enemyDrops)
-        {
-            Debug.Log($"イベント購読: {drop.name}");
-            if (drop != null)
-                drop.OnEnemyDropped += SelectGet;
-        }
-    }
-
-    private void OnDisable()
-    {
-        foreach (var drop in enemyDrops)
-        {
-            if (drop != null)
-                drop.OnEnemyDropped -= SelectGet;
-        }
-    }
-    private void SelectGet(PlayerDrag playerDrag, EnemyModel enemy)
-    {
-        Debug.Log($"SelectGet受信: {playerDrag.PlayerData.PlayerName} -> {enemy.EnemyName}");
-        RegisterSelection(playerDrag.PlayerData, enemy);
-    }
+    /// <summary>
+    /// 選択ターンの初期化
+    /// </summary>
 
     public void StartSelectTurn(List<PlayerRuntime> players, List<EnemyModel> enemies)
     {
-        SelectPlayer1.Clear();
-        SelectPlayer2.Clear();
-        SelectPlayer3.Clear();
+        PlayerSelections = new Dictionary<int, List<EnemyModel>>();
+        totalPlayers = players.Count;
+        totalEnemies = enemies.Count;
+
+        // プレイヤーの人数分、空の選択リストを準備
+        for (int i = 0; i < totalPlayers; i++)
+        {
+            PlayerSelections[i] = new List<EnemyModel>();
+        }
         currentPlayerIndex = 0;
         currentPriority = 1;
-        enemyDrops = new EnemyDrop[enemies.Count];
-
-        for (int i = 0; i < enemies.Count; i++)
-        {
-            enemyDrops[i] = enemies[i].EnemyDrop;
-        }
+        Debug.Log("選択データの初期化完了");
     }
     private void FinishSelectTurn()
     {
@@ -66,11 +46,9 @@ public class SelectTurn : MonoBehaviour
 
     private void RegisterSelection(PlayerModel player, EnemyModel enemy)
     {
-        switch (currentPlayerIndex)
+        if (PlayerSelections.ContainsKey(currentPlayerIndex))
         {
-            case 0: SelectPlayer1.Add(enemy); break;
-            case 1: SelectPlayer2.Add(enemy); break;
-            case 2: SelectPlayer3.Add(enemy); break;
+            PlayerSelections[currentPlayerIndex].Add(enemy);
         }
 
         Debug.Log($"Player{player.PlayerName} が {enemy.EnemyName} を選択");

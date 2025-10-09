@@ -1,4 +1,5 @@
 using TMPro;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,16 @@ public class EnemyStatusUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private Slider hpSlider;
+    [SerializeField] private Image flashOverlay;
+    private Coroutine flashingCoroutine;
+
+    private void Awake()
+    {
+        if (flashOverlay != null)
+        {
+            flashOverlay.gameObject.SetActive(false);
+        }
+    }
 
     /// <summary>
     /// Enemyのデータを使ってUIを初期設定する
@@ -40,5 +51,45 @@ public class EnemyStatusUIController : MonoBehaviour
     public void UpdateHP(float currentHP)
     {
         hpSlider.value = currentHP;
+    }
+
+    /// <summary>
+    /// 指定した色で点滅を開始する
+    /// </summary>
+    public void StartFlashing(Color flashColor)
+    {
+        if (flashOverlay == null) return;
+
+        if (flashingCoroutine != null)
+        {
+            StopCoroutine(flashingCoroutine);
+        }
+        flashOverlay.color = flashColor;
+        flashingCoroutine = StartCoroutine(FlashCoroutine());
+    }
+
+    /// <summary>
+    /// 点滅を停止する
+    /// </summary>
+    public void StopFlashing()
+    {
+        if (flashOverlay == null) return;
+
+        if (flashingCoroutine != null)
+        {
+            StopCoroutine(flashingCoroutine);
+            flashingCoroutine = null;
+        }
+        flashOverlay.gameObject.SetActive(false);
+    }
+
+    private IEnumerator FlashCoroutine()
+    {
+        flashOverlay.gameObject.SetActive(true);
+        while (true)
+        {
+            flashOverlay.enabled = !flashOverlay.enabled;
+            yield return new WaitForSeconds(0.25f);
+        }
     }
 }
