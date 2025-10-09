@@ -11,17 +11,8 @@ public class WeaponRuntime : IAttackComponent
     public AttributeType Attribute { get; private set; }
     public float PeakyCoefficient { get; private set; }
     public PlayerRuntime ParentPlayer { get; private set; }
-
-    private readonly float attackPower;
+    public float attackPower;
     private readonly List<CardRuntime> slottedCards = new List<CardRuntime>();
-
-    public WeaponRuntime(WeaponModel weaponModel)
-    {
-        ID = weaponModel.ID;
-        attackPower = weaponModel.AttackPower;
-        Attribute = weaponModel.Attribute;
-        PeakyCoefficient = weaponModel.PeakyCoefficient;
-    }
 
     public WeaponRuntime(WeaponModel weaponModel, string instanceID)
     {
@@ -30,11 +21,6 @@ public class WeaponRuntime : IAttackComponent
         attackPower = weaponModel.AttackPower;
         Attribute = weaponModel.Attribute;
         PeakyCoefficient = weaponModel.PeakyCoefficient;
-    }
-
-    public float GetPower()
-    {
-        return attackPower;
     }
 
     /// <summary>

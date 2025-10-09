@@ -12,7 +12,7 @@ public class WeaponModel
     public AttributeType Attribute { get; set; }        // 属性
     public float PeakyCoefficient { get; set; }         // 特化係数（ピーキー度）
     public string Description { get; set; }             // 武器の説明文
-    public Sprite Icon { get; set; }                    // アイコン画像
+    public Sprite Icon { get; set; }                    // 武器画像
 
     /// <summary>
     /// コンストラクタ：指定IDに基づいてResourcesからWeaponEntityを読み込み、モデルに変換する

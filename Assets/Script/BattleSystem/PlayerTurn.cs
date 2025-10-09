@@ -1,5 +1,5 @@
 /// <summary>
-/// プレイヤーターンの処理
+/// プレイヤーのカード、攻撃処理
 ///</summary>
 
 using System.Collections;
@@ -12,42 +12,42 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private BattleCardDeck battleDeck;
 
-    public event System.Action TurnFinished;                    // ターン終了イベント
+    public event System.Action OnTurnFinished;
+    public event System.Action<int> OnCardSelected;
 
-    private InputReader inputReader;                            // 入力を管理するクラス
-    private PlayerRuntime playerRuntime;                        // プレイヤーRuntimeデータ
-    private EnemyModel enemyModel;                              // 敵モデル
-    private WeaponRuntime weaponRuntime;                        // 武器Runtimeデータ
-    private CardModelFactory cardModelFactory;                  // カードRuntimeデータ
+    private BattleInputReader inputReader;
+    private PlayerRuntime playerRuntime;
+    private EnemyModel enemyModel;
+    private WeaponRuntime weaponRuntime;
+    private CardModelFactory cardModelFactory;
     private CardRuntime cardRuntime;
 
-    private List<CardController> handCardControllers = new();   // 手札のカード表示
-    private List<CardRuntime> handCards = new();                // 手札のカードdata
-
+    private List<CardController> handCardControllers = new();                           // 手札のカード表示
+    private List<CardRuntime> handCards = new();                                        // 手札のカードdata
     private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();          // 選択されたカードのIDを保持
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>();  // 破棄されたカードのIDを保持
-    private Queue<ICommand> commandQueue = new();               // コマンドキュー
+    private Queue<ICommand> commandQueue = new();
 
     private bool[] isCardSelected = new bool[3];                // 各カード（3枚）が選択されているかどうか
     private bool inputEnabled = false;                          // ターン中全体の入力フラグ
     private bool isInputLocked = false;                         // 入力受付処理中に他の入力を受け取らない
+    private bool isTutorialMode = false;
     private float lastInputTime = 0f;                           // 前回入力時刻
     private float inputCooldown = 0.1f;                         // 入力クールダウン時間（秒）
     private IAttackStrategy damageStrategy;
 
+    // チュートリアル用のイベント
+    public event System.Action<int, bool> OnCardSelectedForTutorial;    // カード選択時
+    public event System.Action OnConfirmSelectionForTutorial;           // 選択確定時
 
-
-    public event System.Action CheckDead;                    // 敵死亡時
     private void Awake()
     {
-        inputReader = GetComponent<InputReader>();
+        inputReader = GetComponent<BattleInputReader>();
         inputReader.CardSelectEvent += OnCardSelect;
         inputReader.DisCardEvent += OnConfirmSelectionAndRedraw;
 
         damageStrategy = new AttributeWeakness();
         cardModelFactory = new CardModelFactory();
-
-
     }
 
     public void Setup(PlayerRuntime playerRuntime, EnemyModel enemyModel, BattleCardDeck battleDeck)
@@ -55,6 +55,11 @@ public class PlayerTurn : MonoBehaviour
         this.playerRuntime = playerRuntime;
         this.enemyModel = enemyModel;
         this.battleDeck = battleDeck;
+    }
+
+    public void SetTutorialMode(bool mode)
+    {
+        isTutorialMode = mode;
     }
 
     public void StartPlayerTurn()
@@ -68,16 +73,16 @@ public class PlayerTurn : MonoBehaviour
         DrawHandCards();
     }
 
+    // ターン終わりにCardの効果処理
     public void FinishPlayerTurn()
     {
-        // ターン終わりにCardの効果処理
         StartCoroutine(ExecuteCardCommands());
     }
 
     /// <summary>
     /// デッキから手札を3枚引き、表示する
     /// </summary>
-    private void DrawHandCards()
+    public void DrawHandCards()
     {
         // 既存のカードを消す
         foreach (var contCard in handCardControllers)
@@ -97,7 +102,7 @@ public class PlayerTurn : MonoBehaviour
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
                 CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
                 cardObject.Init(cardModel);
-                handCards.Add(drawnCard); // 実際のインスタンスを手札に追加
+                handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
             }
         }
@@ -109,16 +114,18 @@ public class PlayerTurn : MonoBehaviour
     private void OnCardSelect(int inputNumber)
     {
         if (!inputEnabled || isInputLocked) return;
-
-        // クールタイム処理
         if (Time.time - lastInputTime < inputCooldown) return;
+        
         lastInputTime = Time.time;
-
         isInputLocked = true;
         CardSelect(inputNumber);
-        isInputLocked = false;
+        OnCardSelected?.Invoke(inputNumber);
 
-        Debug.Log($"選択中カードID: {string.Join(",", GetCurrentlySelectedCardIds())}");
+        if (isTutorialMode)
+        {
+            OnCardSelectedForTutorial?.Invoke(inputNumber, isCardSelected[inputNumber]);
+        }
+        isInputLocked = false;
     }
 
     /// <summary>
@@ -132,7 +139,6 @@ public class PlayerTurn : MonoBehaviour
             return;
         }
 
-        // 選択がされたとき
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
@@ -148,7 +154,6 @@ public class PlayerTurn : MonoBehaviour
 
             isCardSelected[inputNumber] = true;
         }
-        Debug.Log($"カード{inputNumber + 1}が{(isCardSelected[inputNumber] ? "選択" : "選択解除")}されました");
     }
 
     /// <summary>
@@ -167,8 +172,15 @@ public class PlayerTurn : MonoBehaviour
     {
         if (!inputEnabled || isInputLocked) return;
 
-        if (Time.time - lastInputTime < inputCooldown) return;
-        lastInputTime = Time.time;
+        if (isTutorialMode)
+        {
+            OnConfirmSelectionForTutorial?.Invoke();
+        }
+        else
+        {
+            if (Time.time - lastInputTime < inputCooldown) return;
+            lastInputTime = Time.time;
+        }
 
         isInputLocked = true;
         ConfirmSelectionAndRedraw();
@@ -205,9 +217,6 @@ public class PlayerTurn : MonoBehaviour
             }
         }
 
-        Debug.Log("選択カード: " + string.Join(",", selectedCardsThisTurn));
-        //Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
-
         //選択状態をリセット
         for (int i = 0; i < isCardSelected.Length; i++)
         {
@@ -222,12 +231,15 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteCardCommands()
     {
+        Debug.Log("実行するカード: " + string.Join(",", selectedCardsThisTurn.Select(c => c.ID)));
+        Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
+
         inputEnabled = false;
 
         foreach (var selectedCardRuntime in selectedCardsThisTurn)
         {
             // 1. このカードがアタッチされている特定の武器を取得する
-            WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime; // CardRuntimeが親であるWeaponRuntimeへの参照を持っている
+            WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
             if (weaponRuntime == null)
             {
                 Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
@@ -235,13 +247,14 @@ public class PlayerTurn : MonoBehaviour
             }
 
             // 2. その武器を所持しているプレイヤーを取得する
-            PlayerRuntime playerRuntime = weaponRuntime.ParentPlayer; // WeaponRuntimeが親であるPlayerRuntimeへの参照を持っている
+            PlayerRuntime playerRuntime = weaponRuntime.ParentPlayer;
             if (playerRuntime == null)
             {
                 Debug.LogError($"武器 {weaponRuntime.ID} ({weaponRuntime.InstanceID}) はどのプレイヤーにも所持されていません！");
                 continue;
             }
 
+            // 3. カードの属性に応じたコマンドをキューに追加
             if (selectedCardRuntime.attribute == AttributeType.Heal)
             {
                 // 回復値は仮に0.2f割合で回復
@@ -259,18 +272,12 @@ public class PlayerTurn : MonoBehaviour
         {
             var command = commandQueue.Dequeue();
             command.Do();
-            yield return new WaitForSeconds(0.3f); // 任意のウェイト
-
-            if(enemyModel == null)
-            {
-                CheckDead?.Invoke();
-            }
+            yield return new WaitForSeconds(0.3f);
         }
-
+;
         Debug.Log("カード効果の実行完了");
 
-        // ターン終了イベントを発火
-        TurnFinished?.Invoke();
+        OnTurnFinished?.Invoke();
     }
 
     private List<int> GetCurrentlySelectedCardIds()

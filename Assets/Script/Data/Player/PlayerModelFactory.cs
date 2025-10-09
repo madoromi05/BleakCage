@@ -34,9 +34,8 @@ public class PlayerModelFactory
 
         if (playerEntity == null)
         {
-            Debug.LogWarning($"PlayerEntity not found at path: {path}");
+            Debug.LogError($"★★ ロード失敗: playerEntityオブジェクト自体がNULLです！ Path: {path}");
         }
-
         return playerEntity;
     }
 }

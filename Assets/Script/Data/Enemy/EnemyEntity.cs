@@ -8,7 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyEntity", menuName = "Create EnemyEntity")]
 public class EnemyEntity : ScriptableObject
 {
-    public int EnemyId;                              // Enemy固有ID
+    public int EnemyID;                              // Enemy固有ID
     public string EnemyName;                         // Enemy名
     public AttributeType EnemyAttribute;             // 攻撃属性
     public DefensAttributeType EnemyDefensAttribute; // 防御属性
@@ -18,4 +18,5 @@ public class EnemyEntity : ScriptableObject
     public float EnemyHP;                            // EnemyのHP
     public float EnemyAttackPower;                   // キャラ攻撃力
     public float EnemyDefensePower;                  // キャラ防御力
+    public AnimatorSet AnimationSet;                 // アニメーションセット
 }

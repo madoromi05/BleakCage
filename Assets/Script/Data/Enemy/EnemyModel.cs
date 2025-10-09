@@ -5,30 +5,29 @@ using UnityEngine;
 /// </summary>
 public class EnemyModel
 {
-    public int EnemyId { get; private set; }                                // 敵のID
+    public int EnemyID { get; private set; }                                // 敵のID
     public string EnemyName { get; private set; }                           // 敵の名前
     public float EnemyHP { get; set; }                                      // 敵のHP
     public float EnemyAttackPower { get; private set; }                     // 攻撃力
     public float EnemyDefensePower { get; private set; }                    // 防御力
     public AttributeType EnemyAttribute { get; private set; }               // 攻撃属性
     public DefensAttributeType EnemyDefensAttribute { get; private set; }   // 防御属性
-    public Sprite EnemySprite { get; private set; }                           // 表示アイコン
+    public Sprite EnemySprite { get; private set; }                         // 表示アイコン
     public string EnemyDescription { get; private set; }                    // 説明文
-    public EnemyDrop  EnemyDrop { get; private set; }
+    public AnimatorSet EnemyAnimator { get; private set; }                  // アニメーションセット
+    public Avatar EnemyAvatar { get; private set; }                 // 骨格(Avatar)
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
     /// </summary>
-    /// <param name="enemyId">敵のID</param>
     public EnemyModel(EnemyEntity Entity)
     {
-        //初期化
         if (Entity == null)
         {
             Debug.LogError("enemyEntity is null");
             return;
         }
-        EnemyId = Entity.EnemyId;
+        EnemyID = Entity.EnemyID;
         EnemyName = Entity.EnemyName;
         EnemyHP = Entity.EnemyHP;
         EnemyAttackPower = Entity.EnemyAttackPower;
@@ -37,5 +36,11 @@ public class EnemyModel
         EnemyDefensAttribute = Entity.EnemyDefensAttribute;
         EnemySprite = Entity.EnemySprite;
         EnemyDescription = Entity.EnemyDescription;
+        EnemyAnimator = Entity.AnimationSet;
+
+        if (Entity.AnimationSet != null)
+        {
+            EnemyAvatar = Entity.AnimationSet.avatar;
+        }
     }
 }
