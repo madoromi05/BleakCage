@@ -14,7 +14,7 @@ public class EnemyTurn : MonoBehaviour
     private IEnemyAttackStrategy damageStrategy;
     private Queue<ICommand> commandQueue = new();           // コマンドキュー
 
-    public event System.Action EnemyTurnFinished;           // ターン終了イベント
+    public event System.Action TurnFinished;           // ターン終了イベント
 
     private int enemycount;
     private int playercount = 1;
@@ -90,6 +90,6 @@ public class EnemyTurn : MonoBehaviour
             yield return new WaitForSeconds(0.3f); // 任意のウェイト
         }
         // ターン終了イベントを発火
-        EnemyTurnFinished?.Invoke();
+        TurnFinished?.Invoke();
     }
 }
