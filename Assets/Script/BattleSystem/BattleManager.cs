@@ -66,9 +66,9 @@ public class BattleManager : MonoBehaviour
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
         selectTurn.SelectTurnFinished += OnSelectTurnFinished;
         BattleFinished += OnBattleFinished;
+
         // 5. バトル開始
 #if TUTORIAL_ENABLED
-        // --- 追加：チュートリアルを開始 ---
         // チュートリアルマネージャーに参照を渡して、チュートリアルフローを開始
         tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tutorialInputReader);
 #else
@@ -98,11 +98,6 @@ public class BattleManager : MonoBehaviour
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
             playerController.Init(party[i].PlayerModel);
             PlayerStatusUIController uiController = playerObject.GetComponent<PlayerStatusUIController>();
-            if (uiController != null)
-            {
-                uiController.SetPlayerStatus(party[i]);
-                playerUIs.Add(uiController);
-            }
         }
     }
 
