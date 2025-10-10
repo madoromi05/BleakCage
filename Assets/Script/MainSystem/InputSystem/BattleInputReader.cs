@@ -17,11 +17,13 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
 
     private void OnEnable()
     {
+        controls?.BattleAction.Disable();
         controls.BattleAction.Enable();
     }
 
     private void OnDisable()
     {
+        controls?.BattleAction.Disable();
         controls.BattleAction.Disable();
     }
 

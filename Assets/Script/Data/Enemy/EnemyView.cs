@@ -5,23 +5,23 @@ using UnityEngine.UI;
 /// UI、データをゲームにsetするクラス
 /// </summary>
 
-[RequireComponent(typeof(Image))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class EnemyView : MonoBehaviour
 {
-    private Image image;
+    private SpriteRenderer enemySpriteRenderer;
     private EnemyModel model;
 
     private void Awake()
     {
-        image = GetComponent<Image>();
+        enemySpriteRenderer = GetComponent<SpriteRenderer>();
     }
     public void Show(EnemyModel enemyModel)
     {
         model = enemyModel;
 
-        if (image != null)
+        if (enemySpriteRenderer != null)
         {
-            image.sprite = model.EnemySprite;
+            enemySpriteRenderer.sprite = model.EnemySprite;
         }
     }
 }

@@ -6,103 +6,70 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Battleの流れを管理するクラス
+/// Battleのターン、順番とデータ管理
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
-    public TextMeshProUGUI timeText;
-    public bool isTurnFinished;
-
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
-    [SerializeField] private SelectTurn selectTurn;
-    [SerializeField] public BattleCardDeck battleDeck;
+    [SerializeField] private BattleCardDeck battleDeck;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private Transform partyTextureTransform;
-    [SerializeField] private Transform enemyTextureTransform;
+    [SerializeField] private Transform playerParent;
+    [SerializeField] private Transform enemyParent;
+    [SerializeField] private List<Transform> playerPositions;
+    [SerializeField] private List<Transform> enemyPositions;
+    [SerializeField] private Transform partyStatusBarTransform;
+    [SerializeField] private Transform enemyStatusBarTransform;
+    [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
+    [SerializeField] private GameObject statusUIPrefab;
 
 #if TUTORIAL_ENABLED
     [SerializeField] private TutorialManager tutorialManager;
-    [SerializeField] private TortrialInputReader tutorialInputReader; // TutorialManagerで使用
+    [SerializeField] private TortrialInputReader tortrialInputReader;
 #endif
 
-    private PlayerModelFactory playerModelFactory = new PlayerModelFactory();
     private List<PlayerRuntime> party = new List<PlayerRuntime>();
     private List<EnemyModel> predators = new List<EnemyModel>();
-    private List<PlayerStatusUIController> playerUIs = new List<PlayerStatusUIController>();
-    private List<EnemyStatusUIController> enemyUIs = new List<EnemyStatusUIController>();
 
-    private float turnTime = 10f; // プレイヤーのターン時間（秒）
-    private int turnCount;
-    private StageEnemyData currentStage;
+    private bool isTutorialMode = false;
+    private EnemyModel enemyModel;
+    private float turnTime = 10f;
 
-    private List<EnemyModel> player1Select = new List<EnemyModel>();
-    private List<EnemyModel> player2Select = new List<EnemyModel>();
-    private List<EnemyModel> player3Select = new List<EnemyModel>();
-
-    public event System.Action BattleFinished;                    // バトル終了イベント
     void Start()
     {
-        // 1. パーティーとカードデータを読み込み
-        turnCount = 1;
+        // Playerデータのロード
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         this.party = setupData.Party;
 
-        // 2.PlayerViewとEnemyViewを生成
-        partyPlayerView();
-        getStageID();
-
-        enemiesCreate();
-
-        List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, predators);
-
-        // 4. バトルデッキとプレイヤーのターンをセットアップ
-        battleDeck.InitFromCardList(setupData.AllCards);
-        playerTurn.OnTurnFinished += OnPlayerTurnFinished;
-        enemyTurn.TurnFinished += OnEnemyTurnFinished;
-        selectTurn.SelectTurnFinished += OnSelectTurnFinished;
-        BattleFinished += OnBattleFinished;
-
-        // 5. バトル開始
-#if TUTORIAL_ENABLED
-        // チュートリアルマネージャーに参照を渡して、チュートリアルフローを開始
-        tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tutorialInputReader);
-#else
-        // チュートリアルが無効な場合は、直接バトルを開始
-        StartCoroutine(BattleFlow());
-#endif
-    }
-
-    public void StartBattleAfterTutorial()
-    {
-        StartCoroutine(BattleFlow());
-    }
-
-    private void OnDisable()
-    {
-        // --- 追加：オブジェクトが無効になった際にイベントの購読を解除 ---
-        playerTurn.OnTurnFinished -= OnPlayerTurnFinished;
-        enemyTurn.TurnFinished -= OnEnemyTurnFinished;
-        selectTurn.SelectTurnFinished -= OnSelectTurnFinished;
-        BattleFinished -= OnBattleFinished;
-    }
-    private void partyPlayerView()
-    {
+        // パーティ人数分 PlayerView を生成
         for (int i = 0; i < party.Count; i++)
         {
-            var playerObject = Instantiate(playerPrefab, partyTextureTransform, false);
-            PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            playerController.Init(party[i].PlayerModel);
-            PlayerStatusUIController uiController = playerObject.GetComponent<PlayerStatusUIController>();
-        }
-    }
+            if (i >= playerPositions.Count)
+            {
+                Debug.LogError($"Player {i} のためのポジションが定義されていません。");
+                break;
+            }
 
-    void getStageID()
-    {
+            PlayerRuntime runtime = party[i];
+
+            // PlayerのModel生成
+            Transform spawnPoint = playerPositions[i];
+            var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+            PlayerController playerController = playerObject.GetComponent<PlayerController>();
+            playerController.Init(runtime.PlayerModel);
+            runtime.PlayerController = playerController;
+
+            // PlayerのStatusUI生成
+            var statusUIObject = Instantiate(statusUIPrefab, partyStatusBarTransform, false);
+            StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
+            uiController.SetPlayerStatus(runtime);
+            playerController.SetStatusUI(uiController);
+        }
+
+        // 挑戦する敵のデータをステージIDから取得
         int currentStageID = StageManager.SelectedStageID;
 
         if (currentStageID == -1)
@@ -123,119 +90,74 @@ public class BattleManager : MonoBehaviour
             }
 #endif
         }
-        currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
-    }
-    private void enemiesCreate()
-    {
-        // ステージデータがnullの場合はエラーを出し、処理を中断
-        if (currentStage == null || currentStage.enemyIDs == null)
-        {
-            Debug.LogError("敵の生成に失敗しました。ステージデータが正しく設定されていません。");
-            return;
-        }
+        StageEnemyData currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
 
+        // 敵の生成
         var enemyFactory = new EnemyModelFactory();
-        foreach (int enemyId in currentStage.enemyIDs)
+        for (int i = 0; i < currentStage.enemyIDs.Count; i++)
         {
+            // 定義されたポジション数を超えないようにチェック
+            if (i >= enemyPositions.Count)
+            {
+                Debug.LogError($"敵 {i} のためのポジションが定義されていません。");
+                break;
+            }
+
+            int enemyId = currentStage.enemyIDs[i];
             EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
             predators.Add(enemy);
 
-            var enemyObject = Instantiate(enemyPrefab, enemyTextureTransform, false);
+            // 指定された3D座標に敵を生成
+            Transform spawnPoint = enemyPositions[i];
+            var enemyObject = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
 
-            EnemyStatusUIController uiController = enemyObject.GetComponent<EnemyStatusUIController>();
-            if (uiController != null)
-            {
-                uiController.SetEnemyStatus(enemy);
-                enemyUIs.Add(uiController);
-            }
+            var statusUIObject = Instantiate(statusUIPrefab, enemyStatusBarTransform, false);
+            StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
+            uiController.SetEnemyStatus(enemy);
+            enemyController.SetStatusUI(uiController);
         }
-    }
 
-    private IEnumerator BattleFlow()
-    {
-        while (true) // ゲーム終了までループ
+        //最初の敵をターゲットとして設定する
+        if (predators.Count > 0)
         {
-            // 1. 選択ターン
-            Debug.Log($"【ターン{turnCount}: 攻撃優先順位選択 開始】");
-            isTurnFinished = false;
-            selectTurn.StartSelectTurn(party, predators, playerUIs, enemyUIs);
-            yield return new WaitUntil(() => isTurnFinished);
-            Debug.Log("【攻撃優先順位選択 終了】");
-
-            playerTurn.Setup(selectTurn.PlayerSelections, battleDeck);
-
-            // 2. プレイヤーの攻撃ターン
-            Debug.Log("【プレイヤーターン開始】");
-            isTurnFinished = false;
-            playerTurn.StartPlayerTurn();
-
-            float currentTurnTime = turnTime;
-            while (currentTurnTime > 0 && !isTurnFinished)
-            {
-                currentTurnTime -= Time.deltaTime;
-                timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
-                yield return null;
-            }
-            // 終了タイミングが異なるときのために表記を0にする
-            timeText.text = "0.00 <size=70%>SECOND</size>";
-
-            // 時間切れか、ターンが外部から終了された
-            if (!isTurnFinished)
-            {
-                playerTurn.FinishPlayerTurn(); // 時間切れでターン終了
-            }
-            yield return new WaitUntil(() => isTurnFinished); // ターン終了処理の完了を待つ
-
-            // --- 3. 敵のターン ---
-            Debug.Log("【敵ターン開始】");
-            isTurnFinished = false;
-            enemyTurn.StartEnemyTurn();
-            yield return new WaitUntil(() => isTurnFinished);
-
-            // バトル終了条件をチェック
-            if (CheckBattleEndCondition()) yield break;
-
-            // --- 4. 次のターンへ ---
-            turnCount++;
+            enemyModel = predators[0];
         }
-    }
-
-    private void OnSelectTurnFinished()
-    {
-        Debug.Log("選択ターン終了処理 完了");
-        isTurnFinished = true; // BattleFlowに完了を通知
-    }
-
-    private void OnPlayerTurnFinished()
-    {
-        Debug.Log("【プレイヤーターン終了】");
-        isTurnFinished = true; // BattleFlowに完了を通知
-    }
-
-    private void OnEnemyTurnFinished()
-    {
-        Debug.Log("【敵ターン終了】");
-        isTurnFinished = true; // BattleFlowに完了を通知
-    }
-
-    private bool CheckBattleEndCondition()
-    {
-        if (party.All(p => p.CurrentHP <= 0) || predators.All(e => e.EnemyHP <= 0))
+        else
         {
-            BattleFinished?.Invoke();
-            return true;
+            Debug.LogError("攻撃対象の敵が見つかりません！");
+            return;
         }
-        return false;
+
+        List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
+        enemyTurn.EnemySetup(playerModels, predators);
+
+        battleDeck.InitFromCardList(setupData.AllCards);
+        playerTurn.Setup(party[0], enemyModel, battleDeck);
+
+        //敵のIDが0の場合tuterealを開始する
+        if (predators[0].EnemyID == 0)
+        {
+#if TUTORIAL_ENABLED
+            isTutorialMode = true;
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
+#endif
+        }
+        else
+        {
+            StartPlayerTurn();
+        }
     }
 
-    private void OnBattleFinished()
+    /// <summary>
+    /// Playerターン開始時の処理
+    /// </summary>
+    private void StartPlayerTurn()
     {
-        Debug.Log("戦闘終了！");
-        timeText.text = "";
-        // ここにリザルト画面への遷移などの処理を記述
-        StopAllCoroutines(); // 全てのコルーチンを停止
+        turnTime = 10f;
+        playerTurn.OnTurnFinished += OnPlayerTurnFinished;
+        StartCoroutine(StartPlayerTurnWithTimer());
     }
 
     /// <summary>
@@ -243,22 +165,63 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public IEnumerator StartPlayerTurnWithTimer()
     {
-        Debug.Log("【プレイヤーターン開始】");
-        isTurnFinished = false;
-        playerTurn.StartPlayerTurn(); // タイマーなしでカード選択を開始
+        Debug.Log("【カード選択ターン開始】");
+        timeText.enabled = true;
+        playerTurn.StartPlayerTurn();
 
-        float currentTurnTime = turnTime;
-        while (currentTurnTime > 0 && !isTurnFinished)
+        while (turnTime >= 0)
         {
-            currentTurnTime -= Time.deltaTime;
-            timeText.text = currentTurnTime.ToString("f2") + " <size=70%>SECOND</size>";
+            turnTime -= Time.deltaTime;
+            timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
+        playerTurn.FinishPlayerTurn();
+    }
 
-        if (!isTurnFinished)
+    /// <summary>
+    /// プレイヤーターン終了 → 敵ターン → プレイヤーターン再開
+    /// </summary>
+    private void OnPlayerTurnFinished()
+    {
+        Debug.Log("【カード選択ターン終了】");
+        if (!isTutorialMode)
         {
-            playerTurn.FinishPlayerTurn();
+            StartCoroutine(EnemyTurn());
         }
-        yield return new WaitUntil(() => isTurnFinished);
+    }
+
+    /// <summary>
+    /// 敵のターン（仮実装）→ すぐにプレイヤーターン再開
+    /// </summary>
+    private IEnumerator EnemyTurn()
+    {
+        Debug.Log("【敵ターン開始】");
+        enemyTurn.StartEnemyTurn();
+
+        yield return new WaitForSeconds(1.0f);
+
+        Debug.Log("【敵ターン終了】");
+
+        StartPlayerTurn();
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    ///チュートリアル用の処理
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>
+    /// チュートリアル用にタイマーを停止させる
+    /// </summary>
+    public void StopTurnTimer()
+    {
+        StopCoroutine("StartPlayerTurnWithTimer"); // Coroutineを停止
+    }
+
+    /// <summary>
+    /// チュートリアル用にプレイヤーのターンを開始する（タイマーなし）
+    /// </summary>
+    public void StartPlayerTurnForTutorial()
+    {
+        Debug.Log("【プレイヤーターン開始 (チュートリアル)】");
+        playerTurn.StartPlayerTurn();
     }
 }
