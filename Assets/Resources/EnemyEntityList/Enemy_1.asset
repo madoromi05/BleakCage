@@ -18,7 +18,7 @@ MonoBehaviour:
   EnemyDefensAttribute: 1
   EnemySprite: {fileID: -2015333617, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
   EnemyDescription: 
-  EnemyHP: 100
+  EnemyHP: 1000
   EnemyAttackPower: 10
   EnemyDefensePower: 1
   AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}

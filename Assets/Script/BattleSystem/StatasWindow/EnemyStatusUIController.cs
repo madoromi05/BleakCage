@@ -16,6 +16,7 @@ public class EnemyStatusUIController : MonoBehaviour
     private Color originalBackgroundColor;
     private Coroutine hpAnimationCoroutine;
     private EnemyModel enemyModel;
+    private float maxHP;
 
     private void Awake()
     {
@@ -47,6 +48,7 @@ public class EnemyStatusUIController : MonoBehaviour
             characterIcon.sprite = enemy.EnemySprite;
         }
 
+        this.maxHP = enemy.EnemyHP;
         hpSlider.maxValue = enemy.EnemyHP;
         hpSlider.value = enemy.EnemyHP;
     }
@@ -70,8 +72,9 @@ public class EnemyStatusUIController : MonoBehaviour
         {
             StopCoroutine(hpAnimationCoroutine);
         }
-        // 新しいHPへのアニメーションを開始する
-        hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(currentHP));
+
+        float hpPercentage = (maxHP > 0) ? (currentHP / maxHP) * 100f : 0f;
+        hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(hpPercentage));
     }
 
     /// <summary>

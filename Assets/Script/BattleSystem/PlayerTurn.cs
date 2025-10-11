@@ -26,6 +26,7 @@ public class PlayerTurn : MonoBehaviour
     private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();          // 選択されたカードのIDを保持
     private Dictionary<PlayerRuntime, List<EnemyModel>> playerTargetSelections;
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>();  // 破棄されたカードのIDを保持
+    private List<EnemyStatusUIController> enemyStatusUIControllers;
     private Queue<ICommand> commandQueue = new();
 
     private bool[] isCardSelected = new bool[3];                // 各カード（3枚）が選択されているかどうか
@@ -50,12 +51,12 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
-    public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections, 
-                    BattleCardDeck battleDeck, EnemyStatusUIController enemyUIControllers)
+    public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections,
+                  BattleCardDeck battleDeck, List<EnemyStatusUIController> enemyUIControllers)
     {
         this.playerTargetSelections = playerSelections;
         this.battleDeck = battleDeck;
-        this.enemyStatusUIController = enemyUIControllers;
+        this.enemyStatusUIControllers = enemyUIControllers; // リストを保持する
     }
 
     public void SetTutorialMode(bool mode)
@@ -273,8 +274,12 @@ public class PlayerTurn : MonoBehaviour
                     {
                         if (enemy.EnemyHP > 0) // 既に倒された敵は攻撃しない
                         {
-                            commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime ,selectedCardRuntime,
-                                                                    enemyStatusUIController, enemy, damageStrategy));
+                            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == enemy);
+                            if (targetEnemyUI != null)
+                            {
+                                commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime, selectedCardRuntime,
+                                                                    targetEnemyUI, enemy, damageStrategy));
+                            }
                         }
                     }
                 }
@@ -296,18 +301,5 @@ public class PlayerTurn : MonoBehaviour
         Debug.Log("カード効果の実行完了");
 
         OnTurnFinished?.Invoke();
-    }
-
-    private List<int> GetCurrentlySelectedCardIds()
-    {
-        List<int> selectedIDs = new();
-        for (int i = 0; i < isCardSelected.Length; i++)
-        {
-            if (isCardSelected[i] && i < handCards.Count)
-            {
-                selectedIDs.Add(handCards[i].ID);
-            }
-        }
-        return selectedIDs;
     }
 }

@@ -30,6 +30,7 @@ public class TutorialManager : MonoBehaviour
     private Queue<string> tutorialMessages;
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
     private List<int> currentlySelectedCards = new List<int>();
+    private List<EnemyStatusUIController> enemyStatusUIControllers;
     private bool hasTurnFinished = false;
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
@@ -119,7 +120,7 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator PlayerTurnExplanationFlow()
     {
         playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleCardDeck,enemyUIController);
+        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleCardDeck, enemyStatusUIControllers);
 
         // 1. 最初のメッセージを表示
         SetTutorialText(tutorialMessages.Dequeue());

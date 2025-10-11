@@ -19,5 +19,5 @@ MonoBehaviour:
   PlayerDescription: 
   PlayerLevel: 1
   PlayerHP: 100
-  PlayerDefensePower: 10
+  PlayerDefensePower: 2
   AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}

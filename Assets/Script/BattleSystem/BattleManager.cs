@@ -198,7 +198,7 @@ public class BattleManager : MonoBehaviour
 
         // PlayerTurnを選択されたターゲット情報でセットアップ
         var targetEnemyUI = enemyStatusUIs.FirstOrDefault();
-        playerTurn.Setup(playerSelections, battleCardDeck, targetEnemyUI);
+         playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
 
         // プレイヤーのカード選択ターンを開始
         StartPlayerTurn();
