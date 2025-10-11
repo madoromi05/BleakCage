@@ -55,13 +55,12 @@ public class PlayerStatusUIController : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定した色でUIの点滅を開始する
+    /// 指定した色で点滅を開始する
     /// </summary>
     public void StartFlashing(Color flashColor)
     {
         if (flashOverlay == null) return;
 
-        // 既に実行中のコルーチンがあれば停止
         if (flashingCoroutine != null)
         {
             StopCoroutine(flashingCoroutine);
@@ -71,7 +70,7 @@ public class PlayerStatusUIController : MonoBehaviour
     }
 
     /// <summary>
-    /// UIの点滅を停止する
+    /// 点滅を停止する
     /// </summary>
     public void StopFlashing()
     {
@@ -85,16 +84,13 @@ public class PlayerStatusUIController : MonoBehaviour
         flashOverlay.gameObject.SetActive(false);
     }
 
-    /// <summary>
-    /// 画像の表示/非表示を繰り返すコルーチン
-    /// </summary>
     private IEnumerator FlashCoroutine()
     {
         flashOverlay.gameObject.SetActive(true);
         while (true)
         {
             flashOverlay.enabled = !flashOverlay.enabled;
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(1.0f);
         }
     }
 }

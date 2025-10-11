@@ -7,7 +7,7 @@ public class EnemyController : MonoBehaviour
 {
     EnemyView view;
     private EnemyModel model;
-    private StatusUIController statusUI;
+    private EnemyStatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
 
@@ -105,7 +105,7 @@ public class EnemyController : MonoBehaviour
         animator.SetBool(IsDeadParamHash, true);
     }
 
-    public void SetStatusUI(StatusUIController ui)
+    public void SetStatusUI(EnemyStatusUIController ui)
     {
         this.statusUI = ui;
     }

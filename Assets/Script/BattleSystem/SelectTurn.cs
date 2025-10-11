@@ -46,63 +46,77 @@ public class SelectTurn : MonoBehaviour
     /// </summary>
     private IEnumerator SelectionProcessCoroutine()
     {
-        // プレイヤー3人分の選択ループ
+        Debug.Log($"選択ターンのプレイヤー数: {currentParty.Count}");
+        // プレイヤー人数分の選択ループ
         for (int pIndex = 0; pIndex < currentParty.Count; pIndex++)
         {
+            Debug.Log($"選択ターン");
             PlayerRuntime currentPlayer = currentParty[pIndex];
-            // UIが存在しない場合はスキップ
             if (pIndex >= playerUIs.Count) continue;
 
-            playerUIs[pIndex].StartFlashing(Color.blue);
+            playerUIs[pIndex].StartFlashing(Color.blue); // 誰のターンか分かりやすくする
 
             // 優先順位3つ分の選択ループ
-            // --- 修正: 敵の数ではなく、優先順位の数（3回）ループするようにする ---
-            for (int priority = 1; priority <= 3; priority++)
+            for (int priority = 1; priority <= currentParty.Count; priority++)
             {
-                // 選択対象の敵を決める (ここでは単純にインデックスでループ)
-                // TODO: ここに矢印キーなどで敵を選択するロジックを追加するとより良くなります
+                Debug.Log($"Player {pIndex + 1} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
 
-                // 生きている敵の中から選択対象を探す必要がある
-                // このループは、プレイヤーがどの敵を何番目の優先度で攻撃するかを決めるためのものです
-                // ここでは仮実装として、キー入力で敵を選択するロジックを簡略化します。
-
-                Debug.Log($"Player {pIndex + 1} の 優先順位 {priority} を選択してください。(Enterキーで決定)");
-
-                // UI点滅などの処理
-                // (例: 選択可能な敵を点滅させる)
-                for (int i = 0; i < enemyUIs.Count; i++)
-                {
-                    if (currentEnemies[i].EnemyHP > 0) // 生きている敵のみ点滅
-                    {
-                        enemyUIs[i].StartFlashing(Color.red);
-                    }
-                }
-
-                // Enterキーが押されるまで待機
-                yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Return));
-
-                // 全ての敵UIの点滅を停止
-                foreach (var eUI in enemyUIs) eUI.StopFlashing();
-
-                // 選択を登録
-                // ここでは仮に0番目の敵を選択したものとして登録します
-                EnemyModel selectedEnemy = currentEnemies.FirstOrDefault(e => e.EnemyHP > 0);
-                if (selectedEnemy != null)
-                {
-                    // PlayerRuntime をキーとして選択した敵を追加
-                    PlayerSelections[currentPlayer].Add(selectedEnemy);
-                    Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {selectedEnemy.EnemyName} を選択");
-                }
-                else
+                // 生きている敵のリストを毎回取得する
+                var livingEnemies = currentEnemies.Where(e => e.EnemyHP > 0).ToList();
+                if (livingEnemies.Count == 0)
                 {
                     Debug.LogWarning("選択可能な敵がいません。");
                     break; // このプレイヤーの選択を中断
+                }
+
+                int currentTargetIndex = 0; // 現在選択している敵のインデックス
+
+                // 選択が確定するまで無限ループ
+                while (true)
+                {
+                    // 全ての敵UIの点滅を一旦停止
+                    foreach (var eUI in enemyUIs) eUI.StopFlashing();
+
+                    // 現在選択中の敵のUIだけを点滅させる
+                    // EnemyModelから対応するUIを見つける必要がある
+                    EnemyModel selectedEnemyModel = livingEnemies[currentTargetIndex];
+                    EnemyStatusUIController targetUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == selectedEnemyModel);
+                    if (targetUI != null)
+                    {
+                        targetUI.StartFlashing(Color.red);
+                    }
+
+                    // 1フレーム待機して、次の入力を受け付ける
+                    yield return null;
+
+                    // 右矢印キーでターゲットを次に
+                    if (Input.GetKeyDown(KeyCode.RightArrow))
+                    {
+                        currentTargetIndex = (currentTargetIndex + 1) % livingEnemies.Count;
+                    }
+                    // 左矢印キーでターゲットを前に
+                    else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                    {
+                        currentTargetIndex = (currentTargetIndex - 1 + livingEnemies.Count) % livingEnemies.Count;
+                    }
+                    // Enterキーで決定
+                    else if (Input.GetKeyDown(KeyCode.Return))
+                    {
+                        // 選択を登録
+                        EnemyModel finalSelectedEnemy = livingEnemies[currentTargetIndex];
+                        PlayerSelections[currentPlayer].Add(finalSelectedEnemy);
+                        Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {finalSelectedEnemy.EnemyName} を選択");
+
+                        // 全ての敵UIの点滅を停止
+                        foreach (var eUI in enemyUIs) eUI.StopFlashing();
+
+                        break; // whileループを抜けて次の優先順位の選択へ
+                    }
                 }
             }
             playerUIs[pIndex].StopFlashing();
         }
 
-        // 全員の選択が終わったら終了処理
         FinishSelectTurn();
     }
 

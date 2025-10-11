@@ -46,11 +46,14 @@ public class EnemyTurn : MonoBehaviour
         int choice;
         while(true)
         {
-            choice = Random.Range(1, playercount + 1);
+            choice = Random.Range(0, playercount);
             if(players[choice] == null) continue;
-            break;
+            if (players[choice] != null && players[choice].PlayerHP > 0)
+            {
+                playerModel = players[choice];
+                break; // 有効なターゲットが見つかったらループを抜けます。
+            }
         }
-        playerModel = players[choice];
     }
 
     /// <summary>
@@ -58,23 +61,16 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void Battle()
     {
-        for(int enemyattacker = 1; enemyattacker < enemycount; enemyattacker++)
+        for(int enemyattacker = 0; enemyattacker < enemycount; enemyattacker++)
         {
             enemyModel = enemys[enemyattacker];
-            if (enemyModel == null)
+            if (enemyModel == null || enemyModel.EnemyHP <= 0)
             {
-                Debug.LogError($"敵はいません");
+                Debug.LogError($"敵のHPは0です");
                 continue;
             }
-            while (true)
-            {
-                Choice();
-                if (playerModel != null)
-                {
-                    break;
-                }
-                Debug.LogError($"相手はいません");
-            }
+            Choice();
+
             commandQueue.Enqueue(new EnemyAttackCommand(playerModel, enemyModel, damageStrategy));
         }
     }

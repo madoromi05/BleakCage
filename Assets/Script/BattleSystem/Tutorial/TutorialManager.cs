@@ -25,6 +25,7 @@ public class TutorialManager : MonoBehaviour
     private PlayerTurn playerTurn;
     private EnemyTurn enemyTurn;
     private SelectTurn selectTurn;
+    private EnemyStatusUIController enemyUIController;
 
     private Queue<string> tutorialMessages;
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
@@ -118,7 +119,7 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator PlayerTurnExplanationFlow()
     {
         playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleDeck);
+        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleCardDeck,enemyUIController);
 
         // 1. 最初のメッセージを表示
         SetTutorialText(tutorialMessages.Dequeue());

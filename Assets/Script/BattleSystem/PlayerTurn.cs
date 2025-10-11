@@ -10,18 +10,16 @@ public class PlayerTurn : MonoBehaviour
 {
     [SerializeField] private CardController cardPrefab;
     [SerializeField] private Transform playerHandTransform;
-    [SerializeField] private BattleCardDeck battleDeck;
 
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
     public bool isTurnFinished;
 
     private BattleInputReader inputReader;
-    private PlayerRuntime playerRuntime;
-    private EnemyModel enemyModel;
-    private WeaponRuntime weaponRuntime;
+    private BattleCardDeck battleDeck;
     private CardModelFactory cardModelFactory;
     private CardRuntime cardRuntime;
+    private EnemyStatusUIController enemyStatusUIController;
 
     private List<CardController> handCardControllers = new();                           // 手札のカード表示
     private List<CardRuntime> handCards = new();                                        // 手札のカードdata
@@ -52,10 +50,12 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
     }
 
-    public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections, BattleCardDeck battleDeck)
+    public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections, 
+                    BattleCardDeck battleDeck, EnemyStatusUIController enemyUIControllers)
     {
         this.playerTargetSelections = playerSelections;
         this.battleDeck = battleDeck;
+        this.enemyStatusUIController = enemyUIControllers;
     }
 
     public void SetTutorialMode(bool mode)
@@ -237,7 +237,6 @@ public class PlayerTurn : MonoBehaviour
     private IEnumerator ExecuteCardCommands()
     {
         Debug.Log("実行するカード: " + string.Join(",", selectedCardsThisTurn.Select(c => c.ID)));
-        Debug.Log("除外カード: " + string.Join(",", excludedCardInstancesThisTurn));
 
         inputEnabled = false;
 
@@ -245,41 +244,25 @@ public class PlayerTurn : MonoBehaviour
         {
             // 1. このカードがアタッチされている特定の武器を取得する
             WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
-            if (weaponRuntime == null)
-            {
-                Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
-                continue;
-            }
 
             // 2. その武器を所持しているプレイヤーを取得する
-            PlayerRuntime playerRuntime = weaponRuntime.ParentPlayer;
-            if (playerRuntime == null)
+            PlayerRuntime attackPlayer = weaponRuntime.ParentPlayer;
+            if (attackPlayer == null || weaponRuntime == null)
             {
+                Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
                 Debug.LogError($"武器 {weaponRuntime.ID} ({weaponRuntime.InstanceID}) はどのプレイヤーにも所持されていません！");
                 continue;
             }
 
-            // 3. カードの属性に応じたコマンドをキューに追加
-            foreach (var cardRuntime in selectedCardsThisTurn)
-            {
-            // 1. このカードを持つプレイヤーを取得
-            PlayerRuntime attackingPlayer = selectedCardRuntime.weaponRuntime.ParentPlayer;
-            if (attackingPlayer == null)
-            {
-                Debug.LogError($"カード {selectedCardRuntime.ID} の持ち主プレイヤーが見つかりません。");
-                continue;
-            }
-
             // 2. そのプレイヤーが選択した攻撃対象リストを取得
-            if (playerTargetSelections.TryGetValue(attackingPlayer, out List<EnemyModel> targets))
+            if (playerTargetSelections.TryGetValue(attackPlayer, out List<EnemyModel> targets))
             {
                 // 3. 将来的な実装を考慮し、カードの属性をチェック
                 if (selectedCardRuntime.attribute == AttributeType.Heal)
                 {
                     // --- 回復コマンドの処理 ---
                     // 現状では自分自身を回復する想定
-                    // TODO: 将来的に、SelectTurnで味方を選択できるように改修が必要
-                    Debug.Log($"{attackingPlayer.PlayerModel.PlayerName} が回復カードを使用。");
+                    Debug.Log($"{attackPlayer.PlayerModel.PlayerName} が回復カードを使用。");
                     // commandQueue.Enqueue(new HealCommand(attackingPlayer, 0.2f)); // 例：最大HPの20%回復
                 }
                 else
@@ -290,16 +273,16 @@ public class PlayerTurn : MonoBehaviour
                     {
                         if (enemy.EnemyHP > 0) // 既に倒された敵は攻撃しない
                         {
-                            commandQueue.Enqueue(new AttackCommand(attackingPlayer, weaponRuntime ,selectedCardRuntime, enemy, damageStrategy));
+                            commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime ,selectedCardRuntime,
+                                                                    enemyStatusUIController, enemy, damageStrategy));
                         }
                     }
                 }
             }
             else
             {
-                Debug.LogWarning($"プレイヤー {attackingPlayer.PlayerModel.PlayerName} の攻撃対象が設定されていません。");
+                Debug.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象が設定されていません。");
             }
-        }
         }
 
         // 順に実行

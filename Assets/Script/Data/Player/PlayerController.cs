@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
 {
     PlayerView view;
     private PlayerModel playerModel;
-    private StatusUIController statusUI;
+    private PlayerStatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
 
@@ -84,7 +84,7 @@ public class PlayerController : MonoBehaviour
         animator.SetBool(IsDeadParamHash, true);
     }
 
-    public void SetStatusUI(StatusUIController ui)
+    public void SetStatusUI(PlayerStatusUIController ui)
     {
         this.statusUI = ui;
     }

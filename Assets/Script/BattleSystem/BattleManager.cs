@@ -10,42 +10,78 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
+    [SerializeField] public BattleCardDeck battleCardDeck;
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
-    [SerializeField] private BattleCardDeck battleDeck;
+    [SerializeField] private SelectTurn selectTurn;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform playerParent;
     [SerializeField] private Transform enemyParent;
     [SerializeField] private List<Transform> playerPositions;
     [SerializeField] private List<Transform> enemyPositions;
-    [SerializeField] private Transform partyStatusBarTransform;
+    [SerializeField] private Transform playerStatusBarTransform;
     [SerializeField] private Transform enemyStatusBarTransform;
     [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
-    [SerializeField] private GameObject statusUIPrefab;
+    [SerializeField] private GameObject playerStatusUIPrefab;
+    [SerializeField] private GameObject enemyStatusUIPrefab;
 
 #if TUTORIAL_ENABLED
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
 #endif
 
-    private List<PlayerRuntime> party = new List<PlayerRuntime>();
+    private List<PlayerRuntime> playerParty;
     private List<EnemyModel> predators = new List<EnemyModel>();
 
-    private bool isTutorialMode = false;
+    private List<PlayerStatusUIController> playerStatusUIs = new List<PlayerStatusUIController>();
+    private List<EnemyStatusUIController> enemyStatusUIs = new List<EnemyStatusUIController>();
+
     private EnemyModel enemyModel;
+    private StageEnemyData currentStage;
+    private EnemyStatusUIController enemyUIController;
     private float turnTime = 10f;
+    private bool isTutorialMode = false;
 
     void Start()
     {
         // Playerデータのロード
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-        this.party = setupData.Party;
+        playerParty = setupData.Party;
+        List<CardRuntime> allCardsForDeck = setupData.AllCards;
+        // 読み込んだカードがない場合はエラーログを出して停止
+        if (allCardsForDeck == null || allCardsForDeck.Count == 0)
+        {
+            Debug.LogError("デッキにセットするカードが1枚もありません！ PlayerDataLoader の処理を確認してください。");
+            return;
+        }
+        battleCardDeck.InitFromCardList(allCardsForDeck);
 
+        playerView();
+        stageSet();
+        enemyView();
+
+        List<PlayerModel> playerModels = playerParty.Select(p => p.PlayerModel).ToList();
+        enemyTurn.EnemySetup(playerModels, predators);
+        enemyTurn.TurnFinished += OnEnemyTurnFinished;
+
+        //敵のIDが0の場合tuterealを開始する
+        if (predators[0].EnemyID == 0)
+        {
+#if TUTORIAL_ENABLED
+            isTutorialMode = true;
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
+#endif
+        }
+            StartSelectionPhase();
+    }
+
+    private void playerView()
+    {
         // パーティ人数分 PlayerView を生成
-        for (int i = 0; i < party.Count; i++)
+        for (int i = 0; i < playerParty.Count; i++)
         {
             if (i >= playerPositions.Count)
             {
@@ -53,7 +89,7 @@ public class BattleManager : MonoBehaviour
                 break;
             }
 
-            PlayerRuntime runtime = party[i];
+            PlayerRuntime runtime = playerParty[i];
 
             // PlayerのModel生成
             Transform spawnPoint = playerPositions[i];
@@ -63,12 +99,16 @@ public class BattleManager : MonoBehaviour
             runtime.PlayerController = playerController;
 
             // PlayerのStatusUI生成
-            var statusUIObject = Instantiate(statusUIPrefab, partyStatusBarTransform, false);
-            StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
-            uiController.SetPlayerStatus(runtime);
-            playerController.SetStatusUI(uiController);
+            var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);
+            PlayerStatusUIController playerUiController = statusUIObject.GetComponent<PlayerStatusUIController>();
+            playerUiController.SetPlayerStatus(runtime);
+            playerController.SetStatusUI(playerUiController);
+            playerStatusUIs.Add(playerUiController);
         }
+    }
 
+    private void stageSet()
+    {
         // 挑戦する敵のデータをステージIDから取得
         int currentStageID = StageManager.SelectedStageID;
 
@@ -90,8 +130,12 @@ public class BattleManager : MonoBehaviour
             }
 #endif
         }
-        StageEnemyData currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
+        currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
+    }
 
+
+    private void enemyView()
+    {
         // 敵の生成
         var enemyFactory = new EnemyModelFactory();
         for (int i = 0; i < currentStage.enemyIDs.Count; i++)
@@ -113,41 +157,51 @@ public class BattleManager : MonoBehaviour
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
             enemyController.Init(enemy);
 
-            var statusUIObject = Instantiate(statusUIPrefab, enemyStatusBarTransform, false);
-            StatusUIController uiController = statusUIObject.GetComponent<StatusUIController>();
+            // 敵のStatusUI生成
+            var statusUIObject = Instantiate(enemyStatusUIPrefab, enemyStatusBarTransform, false);
+            EnemyStatusUIController uiController = statusUIObject.GetComponent<EnemyStatusUIController>();
             uiController.SetEnemyStatus(enemy);
             enemyController.SetStatusUI(uiController);
+            enemyStatusUIs.Add(uiController);
         }
+    }
 
-        //最初の敵をターゲットとして設定する
-        if (predators.Count > 0)
-        {
-            enemyModel = predators[0];
-        }
-        else
-        {
-            Debug.LogError("攻撃対象の敵が見つかりません！");
-            return;
-        }
+    /// <summary>
+    /// 敵のターンが終了したときに呼び出される
+    /// </summary>
+    private void OnEnemyTurnFinished()
+    {
+        Debug.Log("【敵ターン終了】");
+        StartSelectionPhase(); // ここで次の選択フェーズを開始する
+    }
 
-        List<PlayerModel> playerModels = party.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, predators);
+    /// <summary>
+    /// 攻撃対象を選択するフェーズを開始
+    /// </summary>
+    private void StartSelectionPhase()
+    {
+        Debug.Log("【攻撃対象選択ターン開始】");
+        selectTurn.SelectTurnFinished += OnSelectionPhaseFinished;
+        selectTurn.StartSelectTurn(playerParty, predators, playerStatusUIs, enemyStatusUIs);
+    }
 
-        battleDeck.InitFromCardList(setupData.AllCards);
-        playerTurn.Setup(party[0], enemyModel, battleDeck);
+    /// <summary>
+    /// 攻撃対象の選択が完了した時に呼び出される
+    /// </summary>
+    private void OnSelectionPhaseFinished()
+    {
+        selectTurn.SelectTurnFinished -= OnSelectionPhaseFinished;
+        Debug.Log("【攻撃対象選択ターン終了】");
 
-        //敵のIDが0の場合tuterealを開始する
-        if (predators[0].EnemyID == 0)
-        {
-#if TUTORIAL_ENABLED
-            isTutorialMode = true;
-            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
-#endif
-        }
-        else
-        {
-            StartPlayerTurn();
-        }
+        // SelectTurnから選択結果を取得
+        var playerSelections = selectTurn.PlayerSelections;
+
+        // PlayerTurnを選択されたターゲット情報でセットアップ
+        var targetEnemyUI = enemyStatusUIs.FirstOrDefault();
+        playerTurn.Setup(playerSelections, battleCardDeck, targetEnemyUI);
+
+        // プレイヤーのカード選択ターンを開始
+        StartPlayerTurn();
     }
 
     /// <summary>
@@ -197,12 +251,7 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log("【敵ターン開始】");
         enemyTurn.StartEnemyTurn();
-
-        yield return new WaitForSeconds(1.0f);
-
-        Debug.Log("【敵ターン終了】");
-
-        StartPlayerTurn();
+        yield return null;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////

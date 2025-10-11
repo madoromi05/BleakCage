@@ -11,14 +11,17 @@ public class AttackCommand : ICommand
     private CardRuntime card;
     private WeaponRuntime weapon;
     private IAttackStrategy damageStrategy;
+    private EnemyStatusUIController enemyStatusUIController;
 
-    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyModel enemy, IAttackStrategy attackStrategy)
+    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card,EnemyStatusUIController enemyStatusUIController,
+                            EnemyModel enemy, IAttackStrategy strategy)
     {
-        this.player = player;
+        this.damageStrategy = strategy;
         this.targetEnemy = enemy;
+        this.player = player;
         this.card = card;
         this.weapon = weapon;
-        this.damageStrategy = attackStrategy;
+        this.enemyStatusUIController = enemyStatusUIController;
     }
 
     public bool Do()
@@ -27,9 +30,10 @@ public class AttackCommand : ICommand
 
         // ターゲットのHPを減算
         targetEnemy.EnemyHP -= damage;
+        enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
 
         // 結果をログに出力
-        Debug.Log($"[AttackCardCommand] {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
+        Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
 
         return true;
     }

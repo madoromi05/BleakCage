@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 120127627}
   - component: {fileID: 120127628}
   - component: {fileID: 120127629}
+  - component: {fileID: 120127630}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -151,9 +152,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f4f9bac9e4b25439af32db63acbc3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  battleCardDeck: {fileID: 782690699}
   playerTurn: {fileID: 120127628}
   enemyTurn: {fileID: 120127629}
-  battleDeck: {fileID: 782690699}
+  selectTurn: {fileID: 120127630}
   playerPrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
   enemyPrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
   playerParent: {fileID: 965649585}
@@ -166,13 +168,14 @@ MonoBehaviour:
   - {fileID: 965275995}
   - {fileID: 576768628}
   - {fileID: 972443081}
-  partyStatusBarTransform: {fileID: 334436847}
+  playerStatusBarTransform: {fileID: 334436847}
   enemyStatusBarTransform: {fileID: 727143522}
   timeText: {fileID: 1571710206}
   allStageEnemyData:
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
-  statusUIPrefab: {fileID: 3933237661722602022, guid: 09feef9547afbdd49bd4186f1276b30b, type: 3}
+  playerStatusUIPrefab: {fileID: 697082470631173054, guid: e32bc81b25be0eb4ab50c3b30de11835, type: 3}
+  enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
   tutorialManager: {fileID: 0}
   tortrialInputReader: {fileID: 0}
 --- !u!4 &120127626
@@ -216,7 +219,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 7699136889019067178, guid: 9db2d9eed3b92c54db8b383069db691c, type: 3}
   playerHandTransform: {fileID: 457889571}
-  battleDeck: {fileID: 782690699}
+  isTurnFinished: 0
 --- !u!114 &120127629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,6 +230,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb2f594b209b9ff4f98f4eb80b5b3593, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &120127630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 120127624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29e7980a1c5223d44a939028abbaa375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &171416488
