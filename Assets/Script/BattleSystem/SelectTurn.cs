@@ -54,7 +54,7 @@ public class SelectTurn : MonoBehaviour
             PlayerRuntime currentPlayer = currentParty[pIndex];
             if (pIndex >= playerUIs.Count) continue;
 
-            playerUIs[pIndex].StartFlashing(Color.blue); // 誰のターンか分かりやすくする
+            playerUIs[pIndex].SetHighlight(new Color(0.5f, 0.8f, 1f));  // 誰のターンか分かりやすくする
 
             // 優先順位3つ分の選択ループ
             for (int priority = 1; priority <= currentParty.Count; priority++)
@@ -69,52 +69,66 @@ public class SelectTurn : MonoBehaviour
                     break; // このプレイヤーの選択を中断
                 }
 
-                int currentTargetIndex = 0; // 現在選択している敵のインデックス
+                int currentTargetIndex = 0;
+                int previousTargetIndex = 0;
+
+                EnemyStatusUIController targetUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == livingEnemies[currentTargetIndex]);
+                if (targetUI != null)
+                {
+                    targetUI.SetHighlight(new Color(1f, 0.5f, 0.5f)); // 赤色
+                }
 
                 // 選択が確定するまで無限ループ
                 while (true)
                 {
-                    // 全ての敵UIの点滅を一旦停止
-                    foreach (var eUI in enemyUIs) eUI.StopFlashing();
-
-                    // 現在選択中の敵のUIだけを点滅させる
-                    // EnemyModelから対応するUIを見つける必要がある
-                    EnemyModel selectedEnemyModel = livingEnemies[currentTargetIndex];
-                    EnemyStatusUIController targetUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == selectedEnemyModel);
-                    if (targetUI != null)
-                    {
-                        targetUI.StartFlashing(Color.red);
-                    }
-
-                    // 1フレーム待機して、次の入力を受け付ける
                     yield return null;
 
-                    // 右矢印キーでターゲットを次に
+                    bool selectionChanged = false;
                     if (Input.GetKeyDown(KeyCode.RightArrow))
                     {
                         currentTargetIndex = (currentTargetIndex + 1) % livingEnemies.Count;
+                        selectionChanged = true;
                     }
-                    // 左矢印キーでターゲットを前に
                     else if (Input.GetKeyDown(KeyCode.LeftArrow))
                     {
                         currentTargetIndex = (currentTargetIndex - 1 + livingEnemies.Count) % livingEnemies.Count;
+                        selectionChanged = true;
                     }
-                    // Enterキーで決定
-                    else if (Input.GetKeyDown(KeyCode.Return))
+
+                    if (selectionChanged)
                     {
-                        // 選択を登録
-                        EnemyModel finalSelectedEnemy = livingEnemies[currentTargetIndex];
-                        PlayerSelections[currentPlayer].Add(finalSelectedEnemy);
-                        Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {finalSelectedEnemy.EnemyName} を選択");
+                        // 前のターゲットのハイライトをリセット
+                        EnemyModel prevModel = livingEnemies[previousTargetIndex];
+                        EnemyStatusUIController prevUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == prevModel);
+                        if (prevUI != null)
+                        {
+                            prevUI.ResetHighlight();
+                        }
 
-                        // 全ての敵UIの点滅を停止
-                        foreach (var eUI in enemyUIs) eUI.StopFlashing();
+                        // 新しいターゲットをハイライト
+                        EnemyModel currentModel = livingEnemies[currentTargetIndex];
+                        EnemyStatusUIController currentUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == currentModel);
+                        if (currentUI != null)
+                        {
+                            currentUI.SetHighlight(new Color(1f, 0.5f, 0.5f)); // 赤色
+                        }
+                        previousTargetIndex = currentTargetIndex;
+                    }
 
-                        break; // whileループを抜けて次の優先順位の選択へ
+                    if (Input.GetKeyDown(KeyCode.Return))
+                    {
+                        PlayerSelections[currentPlayer].Add(livingEnemies[currentTargetIndex]);
+
+                        // 決定したら全敵のハイライトをリセット
+                        foreach (var eUI in enemyUIs)
+                        {
+                            eUI.ResetHighlight();
+                        }
+                        break;
                     }
                 }
             }
-            playerUIs[pIndex].StopFlashing();
+            playerUIs[pIndex].ResetHighlight();
         }
 
         FinishSelectTurn();

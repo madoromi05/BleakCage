@@ -11,17 +11,18 @@ public class EnemyStatusUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private Slider hpSlider;
-    [SerializeField] private Image flashOverlay;
     [SerializeField] private float hpAnimationDuration = 0.5f;
-    private Coroutine flashingCoroutine;
+    [SerializeField] private Image background;
+    private Color originalBackgroundColor;
     private Coroutine hpAnimationCoroutine;
     private EnemyModel enemyModel;
 
     private void Awake()
     {
-        if (flashOverlay != null)
+        // 起動時に元の背景色を記憶しておく
+        if (background != null)
         {
-            flashOverlay.gameObject.SetActive(false);
+            originalBackgroundColor = background.color;
         }
     }
 
@@ -96,42 +97,24 @@ public class EnemyStatusUIController : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定した色で点滅を開始する
+    /// 指定した色で背景をハイライトする
     /// </summary>
-    public void StartFlashing(Color flashColor)
+    public void SetHighlight(Color highlightColor)
     {
-        if (flashOverlay == null) return;
-
-        if (flashingCoroutine != null)
+        if (background != null)
         {
-            StopCoroutine(flashingCoroutine);
+            background.color = highlightColor;
         }
-        flashOverlay.color = flashColor;
-        flashingCoroutine = StartCoroutine(FlashCoroutine());
     }
 
     /// <summary>
-    /// 点滅を停止する
+    /// 背景色を元の色に戻す
     /// </summary>
-    public void StopFlashing()
+    public void ResetHighlight()
     {
-        if (flashOverlay == null) return;
-
-        if (flashingCoroutine != null)
+        if (background != null)
         {
-            StopCoroutine(flashingCoroutine);
-            flashingCoroutine = null;
-        }
-        flashOverlay.gameObject.SetActive(false);
-    }
-
-    private IEnumerator FlashCoroutine()
-    {
-        flashOverlay.gameObject.SetActive(true);
-        while (true)
-        {
-            flashOverlay.enabled = !flashOverlay.enabled;
-            yield return new WaitForSeconds(1.0f);
+            background.color = originalBackgroundColor;
         }
     }
 }
