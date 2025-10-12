@@ -117,13 +117,22 @@ public class SelectTurn : MonoBehaviour
 
                     if (Input.GetKeyDown(KeyCode.Return))
                     {
+                            EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
+
+                        if (PlayerSelections[currentPlayer].Contains(selectedEnemy))
+                        {
+                            Debug.Log("その敵は既に選択済みです。別の敵を選択してください。");
+                            // ループを継続して再選択を促す
+                            continue;
+                        }
+
                         PlayerSelections[currentPlayer].Add(livingEnemies[currentTargetIndex]);
 
-                        // 決定したら全敵のハイライトをリセット
                         foreach (var eUI in enemyUIs)
                         {
                             eUI.ResetHighlight();
                         }
+
                         break;
                     }
                 }
