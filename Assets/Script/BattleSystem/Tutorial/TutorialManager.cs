@@ -18,13 +18,13 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private RawImage tutorialGifImage;
     [SerializeField] private GifView gifView;
+    [SerializeField] private SelectTurn selectTurn;
 
     private TortrialInputReader inputReader;
 
     private BattleManager battleManager;
     private PlayerTurn playerTurn;
     private EnemyTurn enemyTurn;
-    private SelectTurn selectTurn;
     private EnemyStatusUIController enemyUIController;
 
     private Queue<string> tutorialMessages;
@@ -215,5 +215,4 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("チュートリアル完了");
     }
 }
-
 #endif

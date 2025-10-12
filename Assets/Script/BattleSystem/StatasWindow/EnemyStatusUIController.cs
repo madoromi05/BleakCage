@@ -56,7 +56,6 @@ public class EnemyStatusUIController : MonoBehaviour
     /// <summary>
     /// ‚±‚ÌUI‚ª’S“–‚µ‚Ä‚¢‚éEnemyModel‚ð•Ô‚·
     /// </summary>
-    /// <returns>‘Î‰ž‚·‚éEnemyModel</returns>
     public EnemyModel GetEnemyModel()
     {
         return this.enemyModel;

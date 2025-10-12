@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a3419504e939a84f91f3af252ecca86, type: 3}
   m_Name: TestAnimattor
   m_EditorClassIdentifier: 
-  Idle: {fileID: 7400000, guid: ee0a7ebd79d7b30459cd6f8d1f4e946a, type: 2}
+  avatar: {fileID: 0}
+  Idle: {fileID: -3343171555601338862, guid: 25c64ea2bff7c1242bba41ca17c78502, type: 3}
   Death: {fileID: 7400000, guid: 82f5c6585dd7fd448b3e5fdc99db7bff, type: 2}
   Damaged: {fileID: 7400000, guid: ba20e24f05ffc5e4ea978734f2b75c5e, type: 2}

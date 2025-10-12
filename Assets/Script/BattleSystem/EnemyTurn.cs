@@ -4,17 +4,17 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 public class EnemyTurn : MonoBehaviour
 {
-    private PlayerModel playerModel;                        // プレイヤーModelデータ
-    private EnemyModel enemyModel;                          // 敵Modelデータ
     private List<PlayerModel> players;                      // プレイヤー配列
-    private List<EnemyModel> enemys;                        // 敵配列
+    private List<EnemyModel> enemies;                       // 敵配列
     private IEnemyAttackStrategy damageStrategy;
     private Queue<ICommand> commandQueue = new();           // コマンドキュー
+    private List<PlayerStatusUIController> playerStatusUIControllers;
 
-    public event System.Action TurnFinished;           // ターン終了イベント
+    public event System.Action TurnFinished;                // ターン終了イベント
 
     private int enemycount;
     private int playercount = 1;
@@ -24,67 +24,98 @@ public class EnemyTurn : MonoBehaviour
         damageStrategy = new EnemyAttackDamage();
     }
     
-    public void EnemySetup(List<PlayerModel> players, List<EnemyModel> enemys)
+    public void EnemySetup(List<PlayerModel> players, List<EnemyModel> enemys, 
+                        List<PlayerStatusUIController>playerStatusUIControllers )
     {
         this.players = players;
-        this.enemys = enemys;
+        this.enemies = enemys;
+        this.playerStatusUIControllers = playerStatusUIControllers;
     }
 
     public void StartEnemyTurn()
     {
-        enemycount = enemys.Count;
-        playercount = players.Count;
         commandQueue.Clear();
-        StartCoroutine(Attack());
-    }
-    
-    /// <summary>
-    /// 攻撃先選択
-    /// </summary>
-    private void Choice()
-    {
-        int choice;
-        while(true)
-        {
-            choice = Random.Range(0, playercount);
-            if(players[choice] == null) continue;
-            if (players[choice] != null && players[choice].PlayerHP > 0)
-            {
-                playerModel = players[choice];
-                break; // 有効なターゲットが見つかったらループを抜けます。
-            }
-        }
+        StartCoroutine(ProcessEnemyActions());
     }
 
     /// <summary>
-    /// コマンドパターン呼び出し
+    /// 攻撃対象となる生存プレイヤーをランダムに選択する
     /// </summary>
-    private void Battle()
+    /// <returns>生存しているプレイヤーモデル。いなければnull。</returns>
+    private PlayerModel GetRandomLivingPlayer()
     {
-        for(int enemyattacker = 0; enemyattacker < enemycount; enemyattacker++)
+        // HPが0より大きいプレイヤーのリストを作成
+        var livingPlayers = players.Where(p => p != null && p.PlayerHP > 0).ToList();
+
+        // 生存プレイヤーがいれば、その中からランダムに1人を選択して返す
+        if (livingPlayers.Any())
         {
-            enemyModel = enemys[enemyattacker];
-            if (enemyModel == null || enemyModel.EnemyHP <= 0)
+            int choice = Random.Range(0, livingPlayers.Count);
+            return livingPlayers[choice];
+        }
+
+        // 生存プレイヤーがいない場合はnullを返す
+        return null;
+    }
+
+    /// <summary>
+    /// 敵の攻撃コマンドを準備する
+    /// </summary>
+    private void PrepareAttackCommands()
+    {
+        // 生存している敵キャラクターがそれぞれ攻撃を行う
+        foreach (var attacker in enemies)
+        {
+            // HPが0以下の敵は行動しない
+            if (attacker == null || attacker.EnemyHP <= 0)
             {
-                Debug.LogError($"敵のHPは0です");
                 continue;
             }
-            Choice();
 
-            commandQueue.Enqueue(new EnemyAttackCommand(playerModel, enemyModel, damageStrategy));
+            // 攻撃対象となるプレイヤーをランダムに選択
+            PlayerModel target = GetRandomLivingPlayer();
+
+            // 攻撃対象が見つかった場合、攻撃コマンドをキューに追加
+            if (target != null)
+            {
+                int targetIndex = players.FindIndex(p => p == target);
+
+                // インデックスが見つかった場合（通常は見つかるはず）、対応するUIコントローラーを取得
+                if (targetIndex != -1)
+                {
+                    PlayerStatusUIController targetUIController = playerStatusUIControllers[targetIndex];
+                    commandQueue.Enqueue(new EnemyAttackCommand(target, attacker, damageStrategy, targetUIController));
+                }
+                else
+                {
+                    Debug.LogError("ターゲットプレイヤーに対応するUIコントローラーが見つかりませんでした。");
+                }
+            }
+            else
+            {
+                // 攻撃対象がいない場合（全滅した場合など）は処理を中断
+                Debug.LogWarning("攻撃対象となる生存プレイヤーがいません。");
+                break;
+            }
         }
     }
-    
-    private IEnumerator Attack()
+
+    /// <summary>
+    /// 敵の行動を順次実行するコルーチン
+    /// </summary>
+    private IEnumerator ProcessEnemyActions()
     {
-        Battle();
-        // 順に実行
+        // 実行する攻撃コマンドを準備
+        PrepareAttackCommands();
+
+        // キューにたまったコマンドを順に実行
         while (commandQueue.Count > 0)
         {
             var command = commandQueue.Dequeue();
             command.Do();
-            yield return new WaitForSeconds(0.3f); // 任意のウェイト
+            yield return new WaitForSeconds(0.3f); // 攻撃ごとのウェイト
         }
+
         // ターン終了イベントを発火
         TurnFinished?.Invoke();
     }

@@ -14,8 +14,14 @@ public class PlayerStatusUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI attackText;
     [SerializeField] private TextMeshProUGUI defenseText;
     [SerializeField] private Slider hpSlider;
+    [SerializeField] private float hpAnimationDuration = 0.5f;
     [SerializeField] private Image background;
     private Color originalBackgroundColor;
+    private Coroutine hpAnimationCoroutine;
+    private PlayerRuntime layerRuntime;
+    private float maxHP;
+
+    public int PlayerID { get; private set; }
 
     private void Awake()
     {
@@ -33,6 +39,7 @@ public class PlayerStatusUIController : MonoBehaviour
     {
         PlayerModel model = playerRuntime.PlayerModel;
 
+        this.PlayerID = model.PlayerID;
         nameText.text = model.PlayerName;
         levelText.text = model.PlayerLevel.ToString();
         attackText.text = (model.PlayerLevel * 10).ToString();
@@ -43,6 +50,7 @@ public class PlayerStatusUIController : MonoBehaviour
             characterIcon.sprite = model.PlayerSprite;
         }
 
+        this.maxHP = model.PlayerHP;
         hpSlider.maxValue = model.PlayerHP;
         hpSlider.value = playerRuntime.CurrentHP;
     }
@@ -52,7 +60,36 @@ public class PlayerStatusUIController : MonoBehaviour
     /// </summary>
     public void UpdateHP(float currentHP)
     {
-        hpSlider.value = currentHP;
+        // 既にHP減少アニメーションが実行中なら、それを停止する
+        if (hpAnimationCoroutine != null)
+        {
+            StopCoroutine(hpAnimationCoroutine);
+        }
+
+        float hpPercentage = (maxHP > 0) ? (currentHP / maxHP) * 100f : 0f;
+        hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(hpPercentage));
+    }
+
+    /// <summary>
+    /// HPバーをアニメーションさせるコルーチン
+    /// </summary>
+    private IEnumerator AnimateHPBarCoroutine(float targetHP)
+    {
+        float startHP = hpSlider.value; // アニメーション開始時のHP
+        float elapsedTime = 0f;         // 経過時間
+
+        while (elapsedTime < hpAnimationDuration)
+        {
+            // 経過時間に応じて、開始時のHPと目標のHPの間を線形補間する
+            elapsedTime += Time.deltaTime;
+            float newHP = Mathf.Lerp(startHP, targetHP, elapsedTime / hpAnimationDuration);
+            hpSlider.value = newHP;
+            yield return null;
+        }
+
+        hpSlider.value = targetHP;
+        hpAnimationCoroutine = null;
+        Debug.Log($"Animating HP from {hpSlider.value} to {targetHP}");
     }
 
     /// <summary>

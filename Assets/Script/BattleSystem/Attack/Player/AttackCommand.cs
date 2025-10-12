@@ -1,6 +1,5 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+
 /// <summary>
 /// 選択したカードが敵に攻撃するコマンド
 ///</summary>

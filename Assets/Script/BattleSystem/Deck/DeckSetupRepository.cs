@@ -26,6 +26,16 @@ public class PlayerDataLoader
     private CardModelFactory cardFactory;
     private int level;
 
+    [Header("ヘルパー関数用変数")]
+    private const string ProfileFileName = "player_profile.json";
+    private const int MockCharacterCount = 3;
+    private const int MockWeaponsPerCharacter = 3;
+    private const int MockDirectlyEquippedCardsPerCharacter = 3;
+    private const int MockWeaponsWithMinCards = 3; // 最小枚数のカードを持つ武器の数
+    private const int MockMinCardsPerWeapon = 3;   // 武器にスロットする最小カード数
+    private const int MockMaxCardsPerWeapon = 4;   // 武器にスロットする最大カード数
+    private const int MaxMockCardId = 42;
+
     public PlayerDataLoader()
     {
         playerFactory = new PlayerModelFactory();
@@ -39,7 +49,7 @@ public class PlayerDataLoader
     /// <returns>生成されたパーティーとカードのデータ</returns>
     public DeckSetupRepository LoadPlayerPartyAndCards()
     {
-        PlayerProfile playerProfile = DataManager.LoadData<PlayerProfile>("player_profile.json");
+        PlayerProfile playerProfile = DataManager.LoadData<PlayerProfile>(ProfileFileName);
 
         // ファイルが存在しない場合、モックデータを作成して次回のために保存する
         if (playerProfile.BattleCharacters == null || playerProfile.BattleCharacters.Count == 0)
@@ -109,10 +119,9 @@ public class PlayerDataLoader
         };
 
         int cardIdCounter = 1;
-        int weaponsWith3Cards = 3; // 3枚のカードを持つ武器の数
         int totalWeaponCount = 0;
 
-        for (int i = 1; i <= 3; i++)
+        for (int i = 1; i <= MockCharacterCount; i++)
         {
             var character = new CharacterData
             {
@@ -122,25 +131,25 @@ public class PlayerDataLoader
                 EquippedWeapons = new List<WeaponData>()
             };
 
-            for (int c = 0; c < 3; c++)
+            for (int c = 0; c < MockDirectlyEquippedCardsPerCharacter; c++)
             {
                 character.EquippedCards.Add(new CardData { InstanceId = System.Guid.NewGuid().ToString(), CardId = cardIdCounter++ });
             }
 
-            for (int j = 1; j <= 3; j++)
+            for (int j = 1; j <= MockWeaponsPerCharacter; j++)
             {
                 var weapon = new WeaponData
                 {
                     InstanceId = System.Guid.NewGuid().ToString(),
-                    WeaponId = (i - 1) * 3 + j,
+                    WeaponId = (i - 1) * MockWeaponsPerCharacter + j,
                     SlottedCards = new List<CardData>()
                 };
 
-                int numCardsToSlot = (totalWeaponCount < weaponsWith3Cards) ? 3 : 4;
+                int numCardsToSlot = (totalWeaponCount < MockWeaponsWithMinCards) ? MockMinCardsPerWeapon : MockMaxCardsPerWeapon;
 
                 for (int k = 0; k < numCardsToSlot; k++)
                 {
-                    if (cardIdCounter > 42) break;
+                    if (cardIdCounter > MaxMockCardId) break;
                     weapon.SlottedCards.Add(new CardData { InstanceId = System.Guid.NewGuid().ToString(), CardId = cardIdCounter++ });
                 }
                 character.EquippedWeapons.Add(weapon);
@@ -149,7 +158,7 @@ public class PlayerDataLoader
             profile.BattleCharacters.Add(character);
         }
 
-        DataManager.SaveData(profile, "player_profile.json");
+        DataManager.SaveData(profile, ProfileFileName);
         return profile;
     }
 }

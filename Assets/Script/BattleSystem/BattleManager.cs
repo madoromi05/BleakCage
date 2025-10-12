@@ -10,31 +10,38 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
+    [Header("コンポーネント参照")]
     [SerializeField] public BattleCardDeck battleCardDeck;
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
     [SerializeField] private SelectTurn selectTurn;
+
+    [Header("プレファブ と キャラ出現地点")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private Transform playerParent;
-    [SerializeField] private Transform enemyParent;
     [SerializeField] private List<Transform> playerPositions;
     [SerializeField] private List<Transform> enemyPositions;
-    [SerializeField] private Transform playerStatusBarTransform;
-    [SerializeField] private Transform enemyStatusBarTransform;
-    [SerializeField] private TextMeshProUGUI timeText;
-    [SerializeField] private List<StageEnemyData> allStageEnemyData;
     [SerializeField] private GameObject playerStatusUIPrefab;
     [SerializeField] private GameObject enemyStatusUIPrefab;
 
+    [Header("UI関連")]
+    [SerializeField] private Transform playerStatusBarTransform;
+    [SerializeField] private Transform enemyStatusBarTransform;
+    [SerializeField] private TextMeshProUGUI timeText;
+
+    [Header("ゲーム内データ")]
+    [SerializeField] private List<StageEnemyData> allStageEnemyData;
+
 #if TUTORIAL_ENABLED
+    [Header("チュートリアル用コンポーネント")]
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
 #endif
-
+    //=================================================================================
+    // Private Variables
+    //=================================================================================
     private List<PlayerRuntime> playerParty;
     private List<EnemyModel> predators = new List<EnemyModel>();
-
     private List<PlayerStatusUIController> playerStatusUIs = new List<PlayerStatusUIController>();
     private List<EnemyStatusUIController> enemyStatusUIs = new List<EnemyStatusUIController>();
 
@@ -64,7 +71,7 @@ public class BattleManager : MonoBehaviour
         enemyView();
 
         List<PlayerModel> playerModels = playerParty.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, predators);
+        enemyTurn.EnemySetup(playerModels, predators, playerStatusUIs);
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
 
         //敵のIDが0の場合tuterealを開始する
