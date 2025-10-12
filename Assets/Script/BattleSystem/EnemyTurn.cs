@@ -16,9 +16,6 @@ public class EnemyTurn : MonoBehaviour
 
     public event System.Action TurnFinished;                // ターン終了イベント
 
-    private int enemycount;
-    private int playercount = 1;
-
     private void Awake()
     {
         damageStrategy = new EnemyAttackDamage();

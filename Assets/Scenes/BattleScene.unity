@@ -158,8 +158,6 @@ MonoBehaviour:
   selectTurn: {fileID: 120127630}
   playerPrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
   enemyPrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
-  playerParent: {fileID: 965649585}
-  enemyParent: {fileID: 1978628608}
   playerPositions:
   - {fileID: 265458746}
   - {fileID: 895864073}
@@ -168,14 +166,14 @@ MonoBehaviour:
   - {fileID: 965275995}
   - {fileID: 576768628}
   - {fileID: 972443081}
+  playerStatusUIPrefab: {fileID: 697082470631173054, guid: e32bc81b25be0eb4ab50c3b30de11835, type: 3}
+  enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
   playerStatusBarTransform: {fileID: 334436847}
   enemyStatusBarTransform: {fileID: 727143522}
   timeText: {fileID: 1571710206}
   allStageEnemyData:
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
-  playerStatusUIPrefab: {fileID: 697082470631173054, guid: e32bc81b25be0eb4ab50c3b30de11835, type: 3}
-  enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
   tutorialManager: {fileID: 0}
   tortrialInputReader: {fileID: 0}
 --- !u!4 &120127626
