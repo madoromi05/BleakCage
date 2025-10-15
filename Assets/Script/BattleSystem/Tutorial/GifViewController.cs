@@ -4,7 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 
-public class GifView : MonoBehaviour
+/// <summary>
+/// gifの表示管理クラス
+/// </summary>
+public class　GifViewController : MonoBehaviour
 {
     private RawImage rawImage;
     private List<UniGif.GifTexture> gifTextures;

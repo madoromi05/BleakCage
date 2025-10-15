@@ -17,7 +17,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private RawImage tutorialGifImage;
-    [SerializeField] private GifView gifView;
+    [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
 
     private TortrialInputReader inputReader;
