@@ -2019,6 +2019,7 @@ MonoBehaviour:
   tutorialText: {fileID: 1863491278}
   tutorialGifImage: {fileID: 1854230110}
   gifView: {fileID: 47341938}
+  selectTurn: {fileID: 120127630}
 --- !u!114 &1655738822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2031,6 +2032,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d443f39f76d9c499efa6818ea6592d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerTurn: {fileID: 120127628}
+  battleManager: {fileID: 120127625}
   tutorialUIPanel: {fileID: 446119933}
   tutorialText: {fileID: 1863491278}
   tutorialGifImage: {fileID: 1854230110}

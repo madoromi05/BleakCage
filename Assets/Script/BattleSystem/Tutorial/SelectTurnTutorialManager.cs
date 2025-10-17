@@ -8,14 +8,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
-public class SelectTurnTutorialManager : MonoBehaviour
+public class SelectTurnTutorialManager : MonoBehaviour ,IPhase
 {
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private RawImage tutorialGifImage;
     [SerializeField] private GifViewController gifView;
+    [SerializeField] private SelectTurn selectTurn;
 
     private TortrialInputReader _inputReader;
     private SelectTurn _selectTurn;
@@ -31,39 +31,21 @@ public class SelectTurnTutorialManager : MonoBehaviour
     private int currentSelections = 0;
 
     public event System.Action OnSelectTurnTutorialFinished;
+    public event System.Action OnPhaseFinished;
 
-    public void StartTutorialFlow(SelectTurn st, TortrialInputReader ir, List<PlayerRuntime> players, List<EnemyModel> enemies, List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
+    public void Initialize(TortrialInputReader ir, List<PlayerRuntime> players, List<EnemyModel> enemies, List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
     {
-        _selectTurn = st;
         _inputReader = ir;
-        _currentParty = players;
-        _currentEnemies = enemies;
-        _playerUIs = pUIs;
-        _enemyUIs = eUIs;
+        selectTurn.Initialize(players, enemies, pUIs, eUIs);
+    }
 
-        if (_inputReader != null)
-        {
-            _inputReader.OnProceed += HandleProceedInput;
-        }
-
-        _selectTurn.OnTargetSelectedForTutorial += HandleTargetSelectedForTutorial;
-        _selectTurn.StartSelectTurn(players, enemies, pUIs, eUIs);
+    public void StartPhase()
+    {
+        if (_inputReader != null) _inputReader.OnProceed += HandleProceedInput;
 
         gifView.Initialize(tutorialGifImage);
         tutorialUIPanel.SetActive(true);
         StartCoroutine(TutorialCoroutine());
-    }
-
-    private void OnDisable()
-    {
-        if (_inputReader != null)
-        {
-            _inputReader.OnProceed -= HandleProceedInput;
-        }
-        if (_selectTurn != null)
-        {
-            _selectTurn.OnTargetSelectedForTutorial -= HandleTargetSelectedForTutorial;
-        }
     }
 
     private void HandleProceedInput()
@@ -84,8 +66,6 @@ public class SelectTurnTutorialManager : MonoBehaviour
     private IEnumerator TutorialCoroutine()
     {
         InitializeMessages();
-        _selectTurn.SetTutorialMode(true); // SelectTurnをチュートリアルモードに設定
-        _selectTurn.InitializeForTutorial(_currentParty, _currentEnemies, _playerUIs, _enemyUIs);
 
         // 1. 最初のメッセージ
         SetTutorialText(tutorialMessages.Dequeue());
@@ -106,8 +86,7 @@ public class SelectTurnTutorialManager : MonoBehaviour
         currentSelections = 0;
         hasSelectionConfirmed = false;
         // チュートリアルモードで選択プロセスを開始（プレイヤー1人分だけ実行）
-        StartCoroutine(_selectTurn.SelectionProcessCoroutineForTutorial(1));
-
+        SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => hasSelectionConfirmed);
 
         // 4. 完了メッセージ
@@ -115,15 +94,9 @@ public class SelectTurnTutorialManager : MonoBehaviour
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
-        // チュートリアル終了処理
-        tutorialUIPanel.SetActive(false);
-        _selectTurn.SetTutorialMode(false);
-
-        // チュートリアルで選択されなかったデータを補完
-        _selectTurn.FinalizeSelectionsForTutorial();
-
         // BattleManagerにチュートリアル完了を通知
-        OnSelectTurnTutorialFinished?.Invoke();
+        selectTurn.FinalizeSelectionsForTutorial();
+        OnPhaseFinished?.Invoke();
     }
 
     private void InitializeMessages()

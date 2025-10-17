@@ -12,8 +12,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TutorialManager : MonoBehaviour
+public class TutorialManager : MonoBehaviour , IPhase
 {
+    public event System.Action OnPhaseFinished;
+
+    [SerializeField] private PlayerTurn playerTurn;
+    [SerializeField] private BattleManager battleManager;
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private RawImage tutorialGifImage;
@@ -21,12 +25,8 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private SelectTurn selectTurn;
 
     private TortrialInputReader inputReader;
-
-    private BattleManager battleManager;
-    private PlayerTurn playerTurn;
     private EnemyTurn enemyTurn;
     private EnemyStatusUIController enemyUIController;
-
     private Queue<string> tutorialMessages;
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
     private List<int> currentlySelectedCards = new List<int>();
@@ -67,6 +67,11 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    public void StartPhase()
+    {
+        StartCoroutine(TutorialCoroutine());
+    }
+
     private void HandleProceedInput()
     {
         canProceed = true;
@@ -101,6 +106,7 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(FutureFeatureExplanation());
         yield return StartCoroutine(EnemyTurnFlow());
         yield return StartCoroutine(EndTutorial());
+        OnPhaseFinished?.Invoke();
     }
 
     private void InitializeMessages()

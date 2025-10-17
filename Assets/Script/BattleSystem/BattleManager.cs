@@ -34,7 +34,7 @@ public class BattleManager : MonoBehaviour
 
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
-    [SerializeField] private GameObject tutorialObjectsParent; // チュートリアルオブジェクト有効化用
+    [SerializeField] private GameObject tutorialObjectsParent;
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
     [SerializeField] private TortrialInputReader tortrialInputReader;
@@ -42,8 +42,8 @@ public class BattleManager : MonoBehaviour
     //=================================================================================
     // Private Variables
     //=================================================================================
-    private List<PlayerRuntime> playerParty;
-    private List<EnemyModel> predators = new List<EnemyModel>();
+    private List<PlayerRuntime> players;
+    private List<EnemyModel> enemies = new List<EnemyModel>();
     private List<PlayerStatusUIController> playerStatusUIs = new List<PlayerStatusUIController>();
     private List<EnemyStatusUIController> enemyStatusUIs = new List<EnemyStatusUIController>();
 
@@ -52,13 +52,14 @@ public class BattleManager : MonoBehaviour
     private EnemyStatusUIController enemyUIController;
     private float turnTime = 10f;
     private bool isTutorialMode = false;
+    private IPhase currentPhase;
 
     void Start()
     {
         // Playerデータのロード
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-        playerParty = setupData.Party;
+        players = setupData.Party;
         List<CardRuntime> allCardsForDeck = setupData.AllCards;
         if (allCardsForDeck == null || allCardsForDeck.Count == 0)
         {
@@ -72,23 +73,36 @@ public class BattleManager : MonoBehaviour
         enemyView();
 
         //チュートリアルモードの判定
-        isTutorialMode = predators.Count > 0 && predators[0].EnemyID == 0;
-
-        // 判定結果に基づき、チュートリアル関連オブジェクトの有効/無効を切り替える
-        // nullチェックで、インスペクターに設定されていない場合のエラーを回避
-        if (tutorialObjectsParent != null) tutorialObjectsParent.SetActive(isTutorialMode); // <<< ここを追記
-        if (tutorialManager != null) tutorialManager.gameObject.SetActive(isTutorialMode);
-        if (selectTurnTutorialManager != null) selectTurnTutorialManager.gameObject.SetActive(isTutorialMode);
-        if (tortrialInputReader != null) tortrialInputReader.gameObject.SetActive(isTutorialMode);
+        isTutorialMode = enemies.Count > 0 && enemies[0].EnemyID == 0;
 
         // チュートリアルモードの場合、関連イベントを購読
         if (isTutorialMode)
         {
-            selectTurnTutorialManager.OnSelectTurnTutorialFinished += OnSelectionPhaseFinished;
+            if (selectTurnTutorialManager == null)
+            {
+                Debug.LogError("SelectTurnTutorialManagerがBattleManagerの子オブジェクトに見つかりません！ヒエラルキーを確認してください。");
+                return;
+            }
+            selectTurnTutorialManager.gameObject.SetActive(true);
+            selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
+            currentPhase = selectTurnTutorialManager;
+        }
+        else
+        {
+            // 通常用のSelectTurnを取得 (selectTurnは[SerializeField]で既に関連付けられている想定)
+            if (selectTurn == null)
+            {
+                Debug.LogError("SelectTurnがインスペクターで設定されていません！");
+                return;
+            }
+            selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
+            currentPhase = selectTurn;
         }
 
-        List<PlayerModel> playerModels = playerParty.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, predators, playerStatusUIs);
+        currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
+
+        List<PlayerModel> playerModels = players.Select(p => p.PlayerModel).ToList();
+        enemyTurn.EnemySetup(playerModels, enemies, playerStatusUIs);
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
 
         StartSelectionPhase();
@@ -97,7 +111,7 @@ public class BattleManager : MonoBehaviour
     private void playerView()
     {
         // パーティ人数分 PlayerView を生成
-        for (int i = 0; i < playerParty.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
             if (i >= playerPositions.Count)
             {
@@ -105,7 +119,7 @@ public class BattleManager : MonoBehaviour
                 break;
             }
 
-            PlayerRuntime runtime = playerParty[i];
+            PlayerRuntime runtime = players[i];
 
             // PlayerのModel生成
             Transform spawnPoint = playerPositions[i];
@@ -165,7 +179,7 @@ public class BattleManager : MonoBehaviour
 
             int enemyId = currentStage.enemyIDs[i];
             EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
-            predators.Add(enemy);
+            enemies.Add(enemy);
 
             // 指定された3D座標に敵を生成
             Transform spawnPoint = enemyPositions[i];
@@ -201,13 +215,13 @@ public class BattleManager : MonoBehaviour
         if (isTutorialMode)
         {
             // SelectTurnのチュートリアルフローを開始
-            selectTurnTutorialManager.StartTutorialFlow(selectTurn, tortrialInputReader, playerParty, predators, playerStatusUIs, enemyStatusUIs);
+            selectTurnTutorialManager.Initialize(tortrialInputReader, players , enemies, playerStatusUIs, enemyStatusUIs);
         }
         else
         {
             // 通常のフロー
             selectTurn.SelectTurnFinished += OnSelectionPhaseFinished;
-            selectTurn.StartSelectTurn(playerParty, predators, playerStatusUIs, enemyStatusUIs);
+            selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
         }
     }
 
@@ -216,7 +230,10 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void OnSelectionPhaseFinished()
     {
-        selectTurn.SelectTurnFinished -= OnSelectionPhaseFinished;
+        if (currentPhase != null)
+        {
+            currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
+        }
         Debug.Log("【攻撃対象選択ターン終了】");
 
         // SelectTurnから選択結果を取得
@@ -278,25 +295,5 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【敵ターン開始】");
         enemyTurn.StartEnemyTurn();
         yield return null;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    ///チュートリアル用の処理
-    /////////////////////////////////////////////////////////////////////////////////////////
-    /// <summary>
-    /// チュートリアル用にタイマーを停止させる
-    /// </summary>
-    public void StopTurnTimer()
-    {
-        StopCoroutine("StartPlayerTurnWithTimer"); // Coroutineを停止
-    }
-
-    /// <summary>
-    /// チュートリアル用にプレイヤーのターンを開始する（タイマーなし）
-    /// </summary>
-    public void StartPlayerTurnForTutorial()
-    {
-        Debug.Log("【プレイヤーターン開始 (チュートリアル)】");
-        playerTurn.StartPlayerTurn();
     }
 }
