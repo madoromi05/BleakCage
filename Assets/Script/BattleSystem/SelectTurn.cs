@@ -18,6 +18,8 @@ public class SelectTurn : MonoBehaviour
 
     public event System.Action SelectTurnFinished;
 
+    private AudioSource audioSource;
+    public AudioClip check;
     /// <summary>
     /// ‘I‘ğƒ^[ƒ“‚Ì‰Šú‰»
     /// </summary>
@@ -39,6 +41,7 @@ public class SelectTurn : MonoBehaviour
         Debug.Log("‘I‘ğƒf[ƒ^‚Ì‰Šú‰»Š®—¹");
         // ‘I‘ğƒvƒƒZƒX‚ğŠJn
         StartCoroutine(SelectionProcessCoroutine());
+        audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -117,6 +120,7 @@ public class SelectTurn : MonoBehaviour
 
                     if (Input.GetKeyDown(KeyCode.Return))
                     {
+<<<<<<< HEAD
                             EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
 
                         if (PlayerSelections[currentPlayer].Contains(selectedEnemy))
@@ -125,6 +129,9 @@ public class SelectTurn : MonoBehaviour
                             // ƒ‹[ƒv‚ğŒp‘±‚µ‚ÄÄ‘I‘ğ‚ğ‘£‚·
                             continue;
                         }
+=======
+                        audioSource.PlayOneShot(check);
+>>>>>>> abd4672 (åŠ¹æœéŸ³è¨­å®šã¨ã¡ã‚‡ã„æ”¹å¤‰)
 
                         PlayerSelections[currentPlayer].Add(livingEnemies[currentTargetIndex]);
 

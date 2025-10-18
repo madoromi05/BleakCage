@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 public class PlayerTurn : MonoBehaviour
 {
     [SerializeField] private CardController cardPrefab;
@@ -41,6 +42,9 @@ public class PlayerTurn : MonoBehaviour
     public event System.Action<int, bool> OnCardSelectedForTutorial;    // カード選択時
     public event System.Action OnConfirmSelectionForTutorial;           // 選択確定時
 
+    private AudioSource audioSource;
+    public AudioClip disposecard;
+    public AudioClip check;
     private void Awake()
     {
         inputReader = GetComponent<BattleInputReader>();
@@ -49,6 +53,7 @@ public class PlayerTurn : MonoBehaviour
 
         damageStrategy = new AttributeWeakness();
         cardModelFactory = new CardModelFactory();
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections,
@@ -127,6 +132,7 @@ public class PlayerTurn : MonoBehaviour
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
 
+        audioSource.PlayOneShot(check);
         if (isTutorialMode)
         {
             OnCardSelectedForTutorial?.Invoke(inputNumber, isCardSelected[inputNumber]);
@@ -148,6 +154,7 @@ public class PlayerTurn : MonoBehaviour
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
+            audioSource.PlayOneShot(disposecard);
         }
         else
         {

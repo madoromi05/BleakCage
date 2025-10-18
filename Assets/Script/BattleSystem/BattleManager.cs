@@ -51,6 +51,11 @@ public class BattleManager : MonoBehaviour
     private float turnTime = 10f;
     private bool isTutorialMode = false;
 
+    private AudioSource audioSource;
+    public AudioClip startselectturn;
+    public AudioClip changephase;
+    public AudioClip countdown;
+
     void Start()
     {
         // Playerデータのロード
@@ -111,7 +116,9 @@ public class BattleManager : MonoBehaviour
             playerUiController.SetPlayerStatus(runtime);
             playerController.SetStatusUI(playerUiController);
             playerStatusUIs.Add(playerUiController);
+
         }
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void stageSet()
@@ -187,6 +194,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void StartSelectionPhase()
     {
+        audioSource.PlayOneShot(startselectturn);
         Debug.Log("【攻撃対象選択ターン開始】");
         selectTurn.SelectTurnFinished += OnSelectionPhaseFinished;
         selectTurn.StartSelectTurn(playerParty, predators, playerStatusUIs, enemyStatusUIs);
@@ -206,6 +214,8 @@ public class BattleManager : MonoBehaviour
         // PlayerTurnを選択されたターゲット情報でセットアップ
         var targetEnemyUI = enemyStatusUIs.FirstOrDefault();
          playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
+
+        audioSource.PlayOneShot(changephase);
 
         // プレイヤーのカード選択ターンを開始
         StartPlayerTurn();
@@ -229,10 +239,16 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
         playerTurn.StartPlayerTurn();
-
+        float soundTime = 1f;
         while (turnTime >= 0)
         {
+            if (soundTime <= 0f)
+            {
+                audioSource.PlayOneShot(countdown);
+                soundTime = 1f;
+            }
             turnTime -= Time.deltaTime;
+            soundTime -= Time.deltaTime;
             timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
@@ -256,6 +272,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator EnemyTurn()
     {
+        audioSource.PlayOneShot(changephase);
         Debug.Log("【敵ターン開始】");
         enemyTurn.StartEnemyTurn();
         yield return null;
@@ -277,6 +294,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void StartPlayerTurnForTutorial()
     {
+        audioSource.PlayOneShot(changephase);
         Debug.Log("【プレイヤーターン開始 (チュートリアル)】");
         playerTurn.StartPlayerTurn();
     }
