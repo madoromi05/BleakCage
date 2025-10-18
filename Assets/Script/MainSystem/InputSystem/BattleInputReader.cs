@@ -9,22 +9,19 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
 
     private InputControls controls;
 
-    private void Awake()
-    {
-        controls = new InputControls();
-        controls.BattleAction.SetCallbacks(this);
-    }
-
     private void OnEnable()
     {
-        controls?.BattleAction.Disable();
+        if (controls == null)
+        {
+            controls = new InputControls();
+            controls.BattleAction.SetCallbacks(this);
+        }
         controls.BattleAction.Enable();
     }
 
     private void OnDisable()
     {
         controls?.BattleAction.Disable();
-        controls.BattleAction.Disable();
     }
 
     /// <summary>

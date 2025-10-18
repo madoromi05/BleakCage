@@ -37,7 +37,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject tutorialObjectsParent;
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
-    [SerializeField] private TortrialInputReader tortrialInputReader;
+    [SerializeField] private TutorialInputReader tortrialInputReader;
 #endif
     //=================================================================================
     // Private Variables
@@ -78,23 +78,12 @@ public class BattleManager : MonoBehaviour
         // チュートリアルモードの場合、関連イベントを購読
         if (isTutorialMode)
         {
-            if (selectTurnTutorialManager == null)
-            {
-                Debug.LogError("SelectTurnTutorialManagerがBattleManagerの子オブジェクトに見つかりません！ヒエラルキーを確認してください。");
-                return;
-            }
             selectTurnTutorialManager.gameObject.SetActive(true);
             selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurnTutorialManager;
         }
         else
         {
-            // 通常用のSelectTurnを取得 (selectTurnは[SerializeField]で既に関連付けられている想定)
-            if (selectTurn == null)
-            {
-                Debug.LogError("SelectTurnがインスペクターで設定されていません！");
-                return;
-            }
             selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurn;
         }
@@ -212,16 +201,13 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log("【攻撃対象選択ターン開始】");
 
-        if (isTutorialMode)
+        if (currentPhase != null)
         {
-            // SelectTurnのチュートリアルフローを開始
-            selectTurnTutorialManager.Initialize(tortrialInputReader, players , enemies, playerStatusUIs, enemyStatusUIs);
+            currentPhase.StartPhase();
         }
         else
         {
-            // 通常のフロー
-            selectTurn.SelectTurnFinished += OnSelectionPhaseFinished;
-            selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
+            Debug.LogError("currentPhase が設定されていません！");
         }
     }
 

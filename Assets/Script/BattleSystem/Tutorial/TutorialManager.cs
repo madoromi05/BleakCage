@@ -24,7 +24,7 @@ public class TutorialManager : MonoBehaviour , IPhase
     [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
 
-    private TortrialInputReader inputReader;
+    private TutorialInputReader inputReader;
     private EnemyTurn enemyTurn;
     private EnemyStatusUIController enemyUIController;
     private Queue<string> tutorialMessages;
@@ -35,7 +35,7 @@ public class TutorialManager : MonoBehaviour , IPhase
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
 
-    public void StartTutorialFlow(BattleManager bm, PlayerTurn pt, EnemyTurn et, TortrialInputReader ir)
+    public void StartTutorialFlow(BattleManager bm, PlayerTurn pt, EnemyTurn et, TutorialInputReader ir)
     {
         this.battleManager = bm;
         this.playerTurn = pt;
