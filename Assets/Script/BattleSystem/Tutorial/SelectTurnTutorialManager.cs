@@ -10,7 +10,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private RawImage tutorialGifImage;
-    [SerializeField] private GifViewController gifView;
+    // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
 
     private TutorialInputReader _inputReader;
@@ -49,7 +49,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         }
         Debug.Log("InputReaderisOK");
 
-        gifView.Initialize(tutorialGifImage);
+        // gifView.Initialize(tutorialGifImage);
         tutorialUIPanel.SetActive(true);
         StartCoroutine(TutorialCoroutine());
     }
@@ -74,7 +74,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         SetTutorialTextAndGif(tutorialMessages.Dequeue(), "select_target.gif"); // "<gif>矢印キーで..."
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        gifView.StopGif();
+        // gifView.StopGif();
 
         // 3. 実際の選択を促す
         SetTutorialText(tutorialMessages.Dequeue()); // "まず、最初のキャラクターの..."
@@ -122,14 +122,14 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
     private void SetTutorialText(string text)
     {
         tutorialText.text = text;
-        tutorialGifImage.gameObject.SetActive(false);
+        // tutorialGifImage.gameObject.SetActive(false);
     }
 
     private void SetTutorialTextAndGif(string text, string gifFileName)
     {
         tutorialText.text = text;
         tutorialGifImage.gameObject.SetActive(true);
-        StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
+        // StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
     }
 }
 #endif

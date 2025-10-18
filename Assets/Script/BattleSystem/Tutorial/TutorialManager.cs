@@ -21,11 +21,11 @@ public class TutorialManager : MonoBehaviour , IPhase
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private RawImage tutorialGifImage;
-    [SerializeField] private GifViewController gifView;
+    // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
+    [SerializeField] private EnemyTurn enemyTurn;
 
     private TutorialInputReader inputReader;
-    private EnemyTurn enemyTurn;
     private EnemyStatusUIController enemyUIController;
     private Queue<string> tutorialMessages;
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
@@ -35,12 +35,10 @@ public class TutorialManager : MonoBehaviour , IPhase
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
 
-    public void StartTutorialFlow(BattleManager bm, PlayerTurn pt, EnemyTurn et, TutorialInputReader ir)
+    public void Initialize(TutorialInputReader ir, List<EnemyStatusUIController> eUIs)
     {
-        this.battleManager = bm;
-        this.playerTurn = pt;
-        this.enemyTurn = et;
         this.inputReader = ir;
+        this.enemyStatusUIControllers = eUIs;
 
         if (inputReader != null)
         {
@@ -49,9 +47,7 @@ public class TutorialManager : MonoBehaviour , IPhase
 
         playerTurn.OnCardSelectedForTutorial += HandleCardSelectedForTutorial;
         playerTurn.OnConfirmSelectionForTutorial += HandleConfirmSelectionTutorial;
-        gifView.Initialize(tutorialGifImage);
-        tutorialUIPanel.SetActive(true);
-        StartCoroutine(TutorialCoroutine());
+        // gifView.Initialize(tutorialGifImage);
     }
 
     private void OnDisable()
@@ -69,6 +65,7 @@ public class TutorialManager : MonoBehaviour , IPhase
 
     public void StartPhase()
     {
+        tutorialUIPanel.SetActive(true);
         StartCoroutine(TutorialCoroutine());
     }
 
@@ -137,7 +134,7 @@ public class TutorialManager : MonoBehaviour , IPhase
         SetTutorialTextAndGif(tutorialMessages.Dequeue(), "test.gif");
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        gifView.StopGif();
+        // gifView.StopGif();
 
         // 3. まずはこのカード2つを選択してみてください。
         SetTutorialText(tutorialMessages.Dequeue());
@@ -157,9 +154,6 @@ public class TutorialManager : MonoBehaviour , IPhase
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
-        tutorialUIPanel.SetActive(false);
-        playerTurn.SetTutorialMode(false);
-
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         battleManager.StartCoroutine(battleManager.StartPlayerTurnWithTimer());
         yield return new WaitUntil(() => hasTurnFinished);
@@ -170,14 +164,14 @@ public class TutorialManager : MonoBehaviour , IPhase
     private void SetTutorialText(string text)
     {
         tutorialText.text = text;
-        gifView.StopGif();
+        // gifView.StopGif();
     }
 
     // GIF付きメッセージ設定用の補助関数
     private void SetTutorialTextAndGif(string text, string gifFileName)
     {
         tutorialText.text = text;
-        StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
+        // StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
     }
     private void OnPlayerTurnFinished()
     {
