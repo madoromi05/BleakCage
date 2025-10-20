@@ -4,12 +4,9 @@ using UnityEngine;
 /// プレイヤーの基本的なアニメーションクリップをまとめるデータセット。
 /// ScriptableObjectとして、キャラクターごとにアセットファイルを作成して使用します。
 /// </summary>
-[CreateAssetMenu(fileName = "PlayerAnimationSet", menuName = "Player Animation Set")]
+[CreateAssetMenu(fileName = "AnimationSet", menuName = "Animation Set")]
 public class AnimatorSet : ScriptableObject
 {
-    [Header("アバター")]
-    public Avatar avatar;
-
     [Header("待機アニメーション")]
     public AnimationClip Idle;
 

@@ -86,7 +86,6 @@ public class PlayerEntityTableEditor : EditorWindow
             player.PlayerHP = EditorGUILayout.FloatField(player.PlayerHP, GUILayout.Width(60));
             player.PlayerDefensePower = EditorGUILayout.FloatField(player.PlayerDefensePower, GUILayout.Width(60));
             player.PlayerAttribute = (AttributeType)EditorGUILayout.EnumPopup(player.PlayerAttribute, GUILayout.Width(80));
-            player.PlayerSprite = (Sprite)EditorGUILayout.ObjectField(player.PlayerSprite, typeof(Sprite), false, GUILayout.Width(60));
             player.PlayerDescription = EditorGUILayout.TextArea(player.PlayerDescription, GUILayout.Width(500), GUILayout.Height(40));
 
             if (EditorGUI.EndChangeCheck())

@@ -12,9 +12,11 @@ public class PlayerModel
     public float  PlayerHP { get; set; }
     public float  PlayerDefensePower { get; private set; }
     public AttributeType PlayerAttribute { get; private set; }
-    public Sprite PlayerSprite { get; private set; }
+    public GameObject CharacterPrefab { get; private set; }
+    public Vector3 InitialRotation { get; private set; }
     public string PlayerDescription { get; private set; }
     public AnimatorSet PlayerAnimator { get; private set; }
+    public Sprite PlayerIcon { get; private set; }
 
     /// <summary>
     /// コンストラクタ：IDからScriptableObjectを読み込んでモデルを生成
@@ -30,14 +32,15 @@ public class PlayerModel
         PlayerID = playerEntity.PlayerId;
         PlayerName = playerEntity.PlayerName;
         PlayerLevel = playerEntity.PlayerLevel;
-
+        PlayerIcon = playerEntity.PlayerIcon;
         PlayerHP = playerEntity.PlayerHP;
         PlayerDefensePower = playerEntity.PlayerDefensePower;
 
         PlayerAttribute = playerEntity.PlayerAttribute;
 
-        PlayerSprite = playerEntity.PlayerSprite;
         PlayerDescription = playerEntity.PlayerDescription;
         PlayerAnimator = playerEntity.AnimationSet;
+        CharacterPrefab = playerEntity.CharacterPrefab;
+        InitialRotation = playerEntity.InitialRotation;
     }
 }

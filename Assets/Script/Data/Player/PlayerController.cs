@@ -6,7 +6,6 @@ using System.Collections;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
-    PlayerView view;
     private PlayerModel playerModel;
     private PlayerStatusUIController statusUI;
     private Animator animator;
@@ -23,7 +22,6 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        view = GetComponent<PlayerView>();
         animator = GetComponent<Animator>();
 
         if (animator.runtimeAnimatorController == null)
@@ -39,22 +37,22 @@ public class PlayerController : MonoBehaviour
     public void Init(PlayerModel model)
     {
         this.playerModel = model;
-        view.Show(model);
 
-        if (model.PlayerAnimator == null)
+        if (model.CharacterPrefab != null)
         {
-            Debug.LogError("PlayerModel.PlayerAnimatorが設定されていません！", this.gameObject);
-            return;
-        }
+            Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
 
-        // Avatarのセット
-        if (model.PlayerAnimator.avatar != null)
-        {
-            animator.avatar = model.PlayerAnimator.avatar;
+            // 2. 親(this.transform)のワールド回転と、子のローカル回転を掛け合わせ、
+            //    最終的なビジュアルモデルの「ワールド回転」を計算する
+            Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
+
+            // 3. 計算したワールド回転を使ってビジュアルモデルを生成する
+            //    (位置は親と同じ、回転は計算した値、親は this.transform)
+            Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
         }
         else
         {
-            Debug.LogWarning($"AnimatorSet「{model.PlayerAnimator.name}」にAvatarが設定されていません。", this.gameObject);
+            Debug.LogError($"PlayerModel.CharacterPrefabが設定されていません！ (PlayerID: {model.PlayerID})", this.gameObject);
         }
 
         // アニメーションクリップの上書き

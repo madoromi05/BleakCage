@@ -13,9 +13,10 @@ public class PlayerEntity : ScriptableObject
     public int PlayerId;                          // Player固有ID
     public string PlayerName;                     // Player名
     public AttributeType PlayerAttribute;         // 属性
-    public Sprite PlayerSprite;
+    public GameObject CharacterPrefab;
+    public Vector3 InitialRotation;
     public string PlayerDescription;              // プレイヤーの説明文
-
+    public Sprite PlayerIcon;
     public int PlayerLevel;                       // PlayerLevel
 
     public float PlayerHP;                        // PlayerHp

@@ -110,16 +110,31 @@ public class BattleManager : MonoBehaviour
 
             PlayerRuntime runtime = players[i];
 
+            if (playerPrefab == null)
+            {
+                Debug.LogError("BattleManagerのインスペクターで 'Player Prefab' が設定されていません！ (None)");
+                break; // ループ中断
+            }
             // PlayerのModel生成
             Transform spawnPoint = playerPositions[i];
             var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
+            if (playerController == null)
+            {
+                Debug.LogError($"プレハブ '{playerPrefab.name}' のルートに PlayerController スクリプトがアタッチされていません！", playerObject);
+                continue; // 次のプレイヤーの処理へ
+            }
             playerController.Init(runtime.PlayerModel);
             runtime.PlayerController = playerController;
 
             // PlayerのStatusUI生成
             var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);
             PlayerStatusUIController playerUiController = statusUIObject.GetComponent<PlayerStatusUIController>();
+            if (playerUiController == null)
+            {
+                Debug.LogError($"プレハブ '{playerStatusUIPrefab.name}' に PlayerStatusUIController スクリプトがアタッチされていません！", statusUIObject);
+                continue;
+            }
             playerUiController.SetPlayerStatus(runtime);
             playerController.SetStatusUI(playerUiController);
             playerStatusUIs.Add(playerUiController);

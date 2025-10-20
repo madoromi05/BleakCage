@@ -15,8 +15,10 @@ MonoBehaviour:
   PlayerId: 1
   PlayerName: "\u30AE\u30E5\u30B9\u30BF\u30FC\u30D6"
   PlayerAttribute: 3
-  PlayerSprite: {fileID: 1459035125, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
+  CharacterPrefab: {fileID: 1345631006696095944, guid: 62cc7110c37c4aa45ad50899395ae984, type: 3}
+  InitialRotation: {x: 0, y: 180, z: 0}
   PlayerDescription: 
+  PlayerIcon: {fileID: 0}
   PlayerLevel: 1
   PlayerHP: 100
   PlayerDefensePower: 2

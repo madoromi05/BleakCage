@@ -45,9 +45,13 @@ public class PlayerStatusUIController : MonoBehaviour
         attackText.text = (model.PlayerLevel * 10).ToString();
         defenseText.text = model.PlayerDefensePower.ToString();
 
-        if (model.PlayerSprite != null)
+        if (model.PlayerIcon != null)
         {
-            characterIcon.sprite = model.PlayerSprite;
+            characterIcon.sprite = model.PlayerIcon;
+        }
+        else
+        {
+            Debug.LogWarning($"PlayerModel '{model.PlayerName}' Ç…UIópÇÃPlayerIconÇ™ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒÅB", this.gameObject);
         }
 
         this.maxHP = model.PlayerHP;
