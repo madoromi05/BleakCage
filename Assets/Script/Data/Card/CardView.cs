@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,15 +13,31 @@ public class CardView : MonoBehaviour
     [SerializeField] TextMeshProUGUI attackAttribute;
     [SerializeField] TextMeshProUGUI Description;
     [SerializeField] Image IconImage;
+    [Header("Attribute Icons")]
+    [SerializeField] private List<AttributeSpriteMapping> attributeIconMappings;
+
+    private Dictionary<AttributeType, Sprite> attributeIcons = new Dictionary<AttributeType, Sprite>();
+
+    [System.Serializable]
+    public class AttributeSpriteMapping
+    {
+        public AttributeType attribute;
+        public Sprite sprite;
+    }
+    private void Awake()
+    {
+        // Inspectorで設定されたリストからDictionaryを初期化
+        foreach (var mapping in attributeIconMappings)
+        {
+            if (!attributeIcons.ContainsKey(mapping.attribute))
+            {
+                attributeIcons.Add(mapping.attribute, mapping.sprite);
+            }
+        }
+    }
 
     public void Show(CardModel cardModel)
     {
-        if (cardModel == null)
-        {
-            Debug.LogError("CardModel is null");
-            return;
-        }
-
         if (Name != null) Name.text = cardModel.Name;
 
         // 属性名（日本語）だけを表示
@@ -31,8 +48,20 @@ public class CardView : MonoBehaviour
         if (Description != null)
             Description.text = ReplacePlaceholders(cardModel.Description, cardModel);
 
+        // 属性に応じてアイコン画像を切り替える
         if (IconImage != null)
-            IconImage.sprite = cardModel.CardSprite;
+        {
+            if (attributeIcons.TryGetValue(cardModel.Attribute, out Sprite attributeSprite))
+            {
+                IconImage.sprite = attributeSprite;
+            }
+            else
+            {
+                // 属性に対応するアイコンがない場合は、CardEntityに設定されているデフォルトのアイコンを使用
+                IconImage.sprite = cardModel.CardSprite;
+                Debug.LogWarning($"No specific icon found for attribute: {cardModel.Attribute}. Using default icon for card ID: {cardModel.ID}");
+            }
+        }
     }
 
     private string ReplacePlaceholders(string input, CardModel model)

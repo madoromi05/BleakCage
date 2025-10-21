@@ -34,7 +34,7 @@ public class BattleManager : MonoBehaviour
 
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
-    [SerializeField] private GameObject tutorialObjectsParent;
+    [SerializeField] private GameObject tutorialObjectsParent; // [修正] チュートリアル関連オブジェクトの親
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
     [SerializeField] private TutorialInputReader tortrialInputReader;
@@ -78,12 +78,34 @@ public class BattleManager : MonoBehaviour
         // チュートリアルモードの場合、関連イベントを購読
         if (isTutorialMode)
         {
-            selectTurnTutorialManager.gameObject.SetActive(true);
+            // [修正] チュートリアル用の親オブジェクトを有効化 (すべての子を含む)
+            if (tutorialObjectsParent != null)
+            {
+                tutorialObjectsParent.SetActive(true);
+            }
+            else
+            {
+                // 親が設定されていない場合は、個別に有効化
+                selectTurnTutorialManager.gameObject.SetActive(true);
+                tutorialManager.gameObject.SetActive(true);
+            }
+
             selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurnTutorialManager;
         }
         else
         {
+            // [修正] チュートリアル用オブジェクトを非表示にする
+            if (tutorialObjectsParent != null)
+            {
+                tutorialObjectsParent.SetActive(false);
+            }
+            else
+            {
+                selectTurnTutorialManager.gameObject.SetActive(false);
+                tutorialManager.gameObject.SetActive(false);
+            }
+
             selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurn;
         }
@@ -152,7 +174,7 @@ public class BattleManager : MonoBehaviour
 #if UNITY_EDITOR
             string sceneName = SceneManager.GetActiveScene().name;
             // ※チュートリアルシーン名が "Tutorial" でない場合は、実際のシーン名に変更してください
-            if (sceneName == "Tutorial")
+            if (sceneName == "Tutorial" || sceneName == "Battle_Tutorial") // [修正] シーン名 "Battle_Tutorial" も考慮
             {
                 currentStageID = 0;
                 Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '0' (チュートリアル)に設定しました。");
@@ -237,15 +259,59 @@ public class BattleManager : MonoBehaviour
         }
         Debug.Log("【攻撃対象選択ターン終了】");
 
-        // SelectTurnから選択結果を取得
-        var playerSelections = selectTurn.PlayerSelections;
+        // [修正] チュートリアルモードかどうかで処理を分岐
+        if (isTutorialMode)
+        {
+            // チュートリアルモードの場合、次のチュートリアルフェーズ（カード選択）に移行
+            Debug.Log("チュートリアル：カード選択フェーズに移行します。");
 
-        // PlayerTurnを選択されたターゲット情報でセットアップ
-        var targetEnemyUI = enemyStatusUIs.FirstOrDefault();
-        playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
+#if TUTORIAL_ENABLED
+            // TutorialManager を初期化
+            tutorialManager.Initialize(tortrialInputReader, enemyStatusUIs);
 
-        // プレイヤーのカード選択ターンを開始
-        StartPlayerTurn();
+            // currentPhase を TutorialManager に切り替え
+            currentPhase = tutorialManager;
+
+            // TutorialManager の終了イベントを購読
+            currentPhase.OnPhaseFinished += OnCardTutorialPhaseFinished;
+
+            // 新しいフェーズを開始
+            currentPhase.StartPhase();
+#endif
+        }
+        else
+        {
+            // 通常モードの場合、プレイヤーのカード選択ターンを開始
+            var playerSelections = selectTurn.PlayerSelections;
+            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
+            StartPlayerTurn();
+        }
+    }
+
+    // [追加] カード選択チュートリアル (TutorialManager) が終了したときに呼び出される
+    private void OnCardTutorialPhaseFinished()
+    {
+        if (currentPhase != null)
+        {
+            currentPhase.OnPhaseFinished -= OnCardTutorialPhaseFinished;
+        }
+
+        Debug.Log("【チュートリアルバトル完了】");
+
+        // チュートリアルオブジェクトを非表示にする
+        if (tutorialObjectsParent != null)
+        {
+            tutorialObjectsParent.SetActive(false);
+        }
+#if TUTORIAL_ENABLED
+        else
+        {
+            selectTurnTutorialManager.gameObject.SetActive(false);
+            tutorialManager.gameObject.SetActive(false);
+        }
+#endif
+        // TODO: ここでリザルト画面に遷移したり、メインメニューに戻る処理を呼び出す
+        // 例: SceneManager.LoadScene("MainMenu");
     }
 
     /// <summary>

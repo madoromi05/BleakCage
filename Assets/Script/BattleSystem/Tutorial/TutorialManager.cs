@@ -131,13 +131,15 @@ public class TutorialManager : MonoBehaviour , IPhase
         canProceed = false;
 
         // 2. GIF付きのメッセージを表示
-        SetTutorialTextAndGif(tutorialMessages.Dequeue(), "test.gif");
+        // SetTutorialTextAndGif(tutorialMessages.Dequeue(), "test.gif");
+        SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
         // gifView.StopGif();
 
         // 3. まずはこのカード2つを選択してみてください。
         SetTutorialText(tutorialMessages.Dequeue());
+        playerTurn.StartPlayerTurn();
         yield return new WaitUntil(() => CardsSelectedProsess());
 
         // 4. Enterキーで次に進みましょう
@@ -171,7 +173,6 @@ public class TutorialManager : MonoBehaviour , IPhase
     private void SetTutorialTextAndGif(string text, string gifFileName)
     {
         tutorialText.text = text;
-        // StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
     }
     private void OnPlayerTurnFinished()
     {
