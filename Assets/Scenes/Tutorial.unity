@@ -2029,7 +2029,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialUIPanel: {fileID: 1049437799}
   tutorialText: {fileID: 1863491278}
-  tutorialGifImage: {fileID: 1854230110}
   selectTurn: {fileID: 120127630}
 --- !u!114 &1655738822
 MonoBehaviour:
@@ -2047,7 +2046,6 @@ MonoBehaviour:
   battleManager: {fileID: 120127625}
   tutorialUIPanel: {fileID: 446119933}
   tutorialText: {fileID: 1863491278}
-  tutorialGifImage: {fileID: 1854230110}
   selectTurn: {fileID: 120127630}
   enemyTurn: {fileID: 120127629}
 --- !u!1 &1852178928
@@ -2150,7 +2148,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1854230107
 RectTransform:
   m_ObjectHideFlags: 0

@@ -9,7 +9,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
 {
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
-    [SerializeField] private RawImage tutorialGifImage;
+    // [SerializeField] private RawImage tutorialGifImage;
     // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
 
@@ -71,7 +71,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         canProceed = false;
 
         // 2. GIF付きの説明
-        SetTutorialTextAndGif(tutorialMessages.Dequeue(), "select_target.gif"); // "<gif>矢印キーで..."
+        SetTutorialText(tutorialMessages.Dequeue()); // "<gif>矢印キーで..."
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
         // gifView.StopGif();
@@ -125,11 +125,11 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         // tutorialGifImage.gameObject.SetActive(false);
     }
 
-    private void SetTutorialTextAndGif(string text, string gifFileName)
-    {
-        tutorialText.text = text;
-        tutorialGifImage.gameObject.SetActive(true);
-        // StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
-    }
+    //private void SetTutorialTextAndGif(string text, string gifFileName)
+    //{
+    //    tutorialText.text = text;
+    //    tutorialGifImage.gameObject.SetActive(true);
+    //    // StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
+    //}
 }
 #endif

@@ -20,7 +20,7 @@ public class TutorialManager : MonoBehaviour , IPhase
     [SerializeField] private BattleManager battleManager;
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TextMeshProUGUI tutorialText;
-    [SerializeField] private RawImage tutorialGifImage;
+    // [SerializeField] private RawImage tutorialGifImage;
     // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
     [SerializeField] private EnemyTurn enemyTurn;
@@ -110,10 +110,9 @@ public class TutorialManager : MonoBehaviour , IPhase
     {
         tutorialMessages = new Queue<string>();
         tutorialMessages.Enqueue("このフェーズでは、制限時間内に可能な限り多くのスキルカードを選択します。");
-        tutorialMessages.Enqueue("");
-        //tutorialMessages.Enqueue("<gif：説明動画>\r\n文章：配られた3枚のスキルカードのうち、最低1枚、最大2枚を選択します。選択はテンキーで行うことができ、" +
-        //    "選択が終わったらEnterキーで残ったカードを破棄します。\r\n選んだカードはスタックされていき、破棄されたカードは\"修復\"するまでデッキに戻りません。" +
-        //    "\r\n破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
+        tutorialMessages.Enqueue("<gif：説明動画>\r\n文章：配られた3枚のスキルカードのうち、最低1枚、最大2枚を選択します。選択はテンキーで行うことができ、" +
+            "選択が終わったらEnterキーで残ったカードを破棄します。\r\n選んだカードはスタックされていき、破棄されたカードは\"修復\"するまでデッキに戻りません。" +
+            "\r\n破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
         tutorialMessages.Enqueue("まずはこのカード2つを選択してみてください。");
         tutorialMessages.Enqueue("Enterキーで次に進みましょう");
         tutorialMessages.Enqueue("ここからは好きなカードを選択してください。選択したらEnterキーで次に進み、可能な限り多くのスキルカードを選択し、多くのダメージが与えられるように頑張りましょう！");
