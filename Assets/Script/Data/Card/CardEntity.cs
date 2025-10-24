@@ -10,16 +10,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardEntity", menuName = "Create CardEntity")]
 public class CardEntity : ScriptableObject
 {
-    public enum CardTypeData
-    {
-        Character,  // キャラ付き
-        Weapon,     // 武器付き
-        Universal   // 汎用
-    }
-
     public int ID;                          // カード固有ID
     public string Name;                     // カード名
-    public int[] EquipableWeaponID;         // 武器ID
+    public int CharacterID;                 // このカードを装備するキャラID
+    public int EquipableWeaponID;           // このカードを装備する武器ID
     public Sprite Icon;                     // アイコン画像
     public string Description;              // 説明文
 

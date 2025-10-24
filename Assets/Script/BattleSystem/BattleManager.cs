@@ -74,36 +74,22 @@ public class BattleManager : MonoBehaviour
 
         //チュートリアルモードの判定
         isTutorialMode = enemies.Count > 0 && enemies[0].EnemyID == 0;
-
-        // チュートリアルモードの場合、関連イベントを購読
         if (isTutorialMode)
         {
-            // [修正] チュートリアル用の親オブジェクトを有効化 (すべての子を含む)
             if (tutorialObjectsParent != null)
             {
                 tutorialObjectsParent.SetActive(true);
-            }
-            else
-            {
-                // 親が設定されていない場合は、個別に有効化
-                selectTurnTutorialManager.gameObject.SetActive(true);
-                tutorialManager.gameObject.SetActive(true);
             }
 
             selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurnTutorialManager;
         }
+        // チュートリアル用オブジェクトを非表示にする
         else
         {
-            // [修正] チュートリアル用オブジェクトを非表示にする
             if (tutorialObjectsParent != null)
             {
                 tutorialObjectsParent.SetActive(false);
-            }
-            else
-            {
-                selectTurnTutorialManager.gameObject.SetActive(false);
-                tutorialManager.gameObject.SetActive(false);
             }
 
             selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);

@@ -8,8 +8,9 @@ public class CardModel
 {
     public int ID { get; private set; }
     public string Name { get; private set; }
-    public int[] EquipableWeaponIds { get; private set; } 
-    public CardEntity.CardTypeData Type { get; private set; }
+    public int EquipableWeaponID { get; private set; }
+    public int CharacterID { get; private set; }
+    public CardTypeData Type { get; private set; }
     public AttributeType Attribute { get; private set; }
     public int AttackCount { get; private set; }                            // 攻撃回数
     public int TargetCount { get; private set; }                            // 攻撃対象数
@@ -36,7 +37,8 @@ public class CardModel
         ID = entity.ID;
         Name = entity.Name;
         CardSprite = entity.Icon;
-        EquipableWeaponIds = entity.EquipableWeaponID;
+        EquipableWeaponID = entity.EquipableWeaponID;
+        CharacterID = entity.CharacterID;
         Description = entity.Description;
         Type = entity.Type;
         Attribute = entity.Attribute;
