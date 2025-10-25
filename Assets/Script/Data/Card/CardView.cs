@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,9 +8,9 @@ using UnityEngine.UI;
 /// </summary>
 public class CardView : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI Name;
-    [SerializeField] TextMeshProUGUI attackAttribute;
-    [SerializeField] TextMeshProUGUI Description;
+    [SerializeField] Text Name;
+    [SerializeField] Text attackAttribute;
+    [SerializeField] Text Description;
     [SerializeField] Image IconImage;
     [Header("Attribute Icons")]
     [SerializeField] private List<AttributeSpriteMapping> attributeIconMappings;

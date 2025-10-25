@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using TMPro;
+
 
 /// <summary>
 /// キャラクターのステータス表示UI全体を管理する
@@ -9,10 +9,10 @@ using TMPro;
 public class PlayerStatusUIController : MonoBehaviour
 {
     [SerializeField] private Image characterIcon;
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private TextMeshProUGUI levelText;
-    [SerializeField] private TextMeshProUGUI attackText;
-    [SerializeField] private TextMeshProUGUI defenseText;
+    [SerializeField] private Text nameText;
+    [SerializeField] private Text levelText;
+    [SerializeField] private Text attackText;
+    [SerializeField] private Text defenseText;
     [SerializeField] private Slider hpSlider;
     [SerializeField] private float hpAnimationDuration = 0.5f;
     [SerializeField] private Image background;

@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 /// <summary>
 /// テキストのスクロール
@@ -56,7 +55,7 @@ public class CardTextScroller : MonoBehaviour
     /// </summary>
     private void Initialize()
     {
-        if (!TryGetComponent<TMP_Text>(out var textComponent))
+        if (!TryGetComponent<Text>(out var textComponent))
         {
             Debug.LogWarning("TMP_Textがアタッチされていないのでスクロールは機能しません");
             return;

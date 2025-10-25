@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 /// <summary>
@@ -27,7 +27,7 @@ public class BattleManager : MonoBehaviour
     [Header("UI関連")]
     [SerializeField] private Transform playerStatusBarTransform;
     [SerializeField] private Transform enemyStatusBarTransform;
-    [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private Text timeText;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;

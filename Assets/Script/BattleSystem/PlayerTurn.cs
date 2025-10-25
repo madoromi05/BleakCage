@@ -219,6 +219,7 @@ public class PlayerTurn : MonoBehaviour
             }
             else
             {
+                Debug.Log($"”jŠü‚·‚éƒJ[ƒh”Ô†: {i} (ID: {cardInstance.ID})");
                 excludedCardInstancesThisTurn.Add(cardInstance.InstanceID);
             }
         }

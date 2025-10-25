@@ -1,14 +1,13 @@
 #if TUTORIAL_ENABLED
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SelectTurnTutorialManager : MonoBehaviour, IPhase
 {
     [SerializeField] private GameObject tutorialUIPanel;
-    [SerializeField] private TextMeshProUGUI tutorialText;
+    [SerializeField] private Text tutorialText;
     // [SerializeField] private RawImage tutorialGifImage;
     // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
@@ -114,7 +113,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
     {
         tutorialMessages = new Queue<string>();
         tutorialMessages.Enqueue("このフェーズでは、各キャラクターが攻撃する敵の優先順位を決めます。");
-        tutorialMessages.Enqueue("<gif>矢印キーで攻撃したい敵を選択し、Enterキーで決定します。\nこれをキャラクターの人数分、優先順位の数だけ繰り返します。");
+        tutorialMessages.Enqueue("攻撃したい敵を選択し、Enterキーで決定します。\nこれをキャラクターの人数分、優先順位の数だけ繰り返します。");
         tutorialMessages.Enqueue("まず、最初のキャラクターの第1優先ターゲットを選択してみましょう。\n矢印キーで敵を選び、Enterキーで決定してください。");
         tutorialMessages.Enqueue("うまく選択できましたね！\n実際のゲームでは、これを全キャラクター分行います。");
     }
