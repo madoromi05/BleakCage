@@ -120,7 +120,6 @@ public class SelectTurn : MonoBehaviour
 
                     if (Input.GetKeyDown(KeyCode.Return))
                     {
-<<<<<<< HEAD
                             EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
 
                         if (PlayerSelections[currentPlayer].Contains(selectedEnemy))
@@ -129,10 +128,7 @@ public class SelectTurn : MonoBehaviour
                             // ƒ‹[ƒv‚ğŒp‘±‚µ‚ÄÄ‘I‘ğ‚ğ‘£‚·
                             continue;
                         }
-=======
                         audioSource.PlayOneShot(check);
->>>>>>> abd4672 (åŠ¹æœéŸ³è¨­å®šã¨ã¡ã‚‡ã„æ”¹å¤‰)
-
                         PlayerSelections[currentPlayer].Add(livingEnemies[currentTargetIndex]);
 
                         foreach (var eUI in enemyUIs)
