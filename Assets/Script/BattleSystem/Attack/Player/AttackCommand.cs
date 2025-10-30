@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ‘I‘ğ‚µ‚½ƒJ[ƒh‚ª“G‚ÉUŒ‚‚·‚éƒRƒ}ƒ“ƒh
+/// é¸æŠã—ãŸã‚«ãƒ¼ãƒ‰ãŒæ•µã«æ”»æ’ƒã™ã‚‹ã‚³ãƒãƒ³ãƒ‰
 ///</summary>
 public class AttackCommand : ICommand
 {
@@ -25,14 +25,20 @@ public class AttackCommand : ICommand
 
     public bool Do()
     {
+        if (targetEnemy.EnemyHP <= 0)
+        {
+            Debug.Log($" EnemyIDï¼š {targetEnemy.EnemyID} ã¯æ—¢ã«å€’ã•ã‚Œã¦ã„ã‚‹ãŸã‚ã€æ”»æ’ƒã‚’ã‚¹ã‚­ãƒƒãƒ—ã—ã¾ã—ãŸã€‚");
+            return false;
+Â  Â  Â  Â  }
+
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 
-        // ƒ^[ƒQƒbƒg‚ÌHP‚ğŒ¸Z
+        // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®HPã‚’æ¸›ç®—
         targetEnemy.EnemyHP -= damage;
         enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
 
-        // Œ‹‰Ê‚ğƒƒO‚Éo—Í
-        Debug.Log($" EnemyIDF {targetEnemy.EnemyID} ‚É player;{player.ID}‚ªweapon:{weapon.ID}‚Æcard:{card.ID}‚Å{damage:F2} ƒ_ƒ[ƒW‚ğ—^‚¦‚½Bc‚èHP: {targetEnemy.EnemyHP:F2}");
+        // çµæœã‚’ãƒ­ã‚°ã«å‡ºåŠ›
+        Debug.Log($" EnemyIDï¼š {targetEnemy.EnemyID} ã« player;{player.ID}ãŒweapon:{weapon.ID}ã¨card:{card.ID}ã§{damage:F2} ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’ä¸ãˆãŸã€‚æ®‹ã‚ŠHP: {targetEnemy.EnemyHP:F2}");
 
         return true;
     }

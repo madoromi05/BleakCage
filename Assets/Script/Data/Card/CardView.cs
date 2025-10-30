@@ -75,13 +75,13 @@ public class CardView : MonoBehaviour
             .Replace("{OutputMod}", model.OutputModifier.ToString("F2"));
     }
 
-    private string GetCardTypeName(CardEntity.CardTypeData type)
+    private string GetCardTypeName(CardTypeData type)
     {
         switch (type)
         {
-            case CardEntity.CardTypeData.Character: return "キャラ";
-            case CardEntity.CardTypeData.Weapon:    return "武器";
-            case CardEntity.CardTypeData.Universal: return "汎用";
+            case CardTypeData.Character: return "キャラ";
+            case CardTypeData.Weapon:    return "武器";
+            case CardTypeData.Universal: return "汎用";
             default:                                return type.ToString();
         }
     }

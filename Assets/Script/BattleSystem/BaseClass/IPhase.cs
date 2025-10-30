@@ -1,4 +1,3 @@
-// IPhase.cs
 public interface IPhase
 {
     // フェーズを開始する

@@ -93,7 +93,6 @@ public class PlayerStatusUIController : MonoBehaviour
 
         hpSlider.value = targetHP;
         hpAnimationCoroutine = null;
-        Debug.Log($"Animating HP from {hpSlider.value} to {targetHP}");
     }
 
     /// <summary>

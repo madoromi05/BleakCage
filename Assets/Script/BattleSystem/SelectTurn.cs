@@ -1,20 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
-public class SelectTurn : MonoBehaviour , IPhase
+public class SelectTurn : MonoBehaviour, IPhase
 {
+    [SerializeField] private SelectInputReader selectInputReader;
     public Dictionary<PlayerRuntime, List<EnemyModel>> PlayerSelections { get; private set; }
 
     public event System.Action SelectTurnFinished;
     public event System.Action OnPhaseFinished;
 
+    private void OnUpPressed() { upPressed = true; }
+    private void OnDownPressed() { downPressed = true; }
+    private void OnConfirmPressed() { confirmPressed = true; }
+
+    private int livingEnemyCount;
+    private int currentTargetIndex;
+    private int previousTargetIndex;
+
     private List<PlayerRuntime> _currentPlayers;
     private List<EnemyModel> _currentEnemies;
     private List<PlayerStatusUIController> _playerUIs;
     private List<EnemyStatusUIController> _enemyUIs;
+    private bool upPressed = false;
+    private bool downPressed = false;
+    private bool confirmPressed = false;
+    private bool isKeepingSelections = false;
 
     public void Initialize(List<PlayerRuntime> players, List<EnemyModel> enemies, List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
     {
@@ -30,15 +42,55 @@ public class SelectTurn : MonoBehaviour , IPhase
         }
     }
 
+    /// <summary>
+    /// 保持している全てのプレイヤーの選択リストをクリアする
+    /// </summary>
+    public void ClearSelections()
+    {
+        if (PlayerSelections == null)
+        {
+            // 念のため初期化
+            PlayerSelections = new Dictionary<PlayerRuntime, List<EnemyModel>>();
+            foreach (var player in _currentPlayers)
+            {
+                PlayerSelections[player] = new List<EnemyModel>();
+            }
+            return;
+        }
+
+        // 既存のリストをクリアする
+        foreach (var player in _currentPlayers)
+        {
+            if (PlayerSelections.ContainsKey(player))
+            {
+                PlayerSelections[player].Clear();
+            }
+            else
+            {
+                PlayerSelections[player] = new List<EnemyModel>();
+            }
+        }
+        Debug.Log("全プレイヤーのターゲット選択がクリアされました。");
+    }
+
     public void StartPhase()
     {
-        StartCoroutine(SelectionProcessCoroutine());
+        StartCoroutine(SelectionProcessCoroutine(isKeepingSelections));
+        isKeepingSelections = false;
     }
 
     /// <summary>
+    /// 継続モードを指定してフェーズを開始するための公開メソッド
+    /// </summary>
+    public void StartPhase(bool keepSelections)
+    {
+        isKeepingSelections = keepSelections;
+        StartPhase(); // IPhase の StartPhase を呼び出す
+    }
+    /// <summary>
     /// 通常の選択処理を行うコルーチン
     /// </summary>
-    private IEnumerator SelectionProcessCoroutine()
+    private IEnumerator SelectionProcessCoroutine(bool keepSelections)
     {
         Debug.Log($"選択ターンのプレイヤー数: {_currentPlayers.Count}");
         // プレイヤー人数分の選択ループ
@@ -47,28 +99,47 @@ public class SelectTurn : MonoBehaviour , IPhase
             PlayerRuntime currentPlayer = _currentPlayers[pIndex];
             if (pIndex >= _playerUIs.Count) continue;
 
-            _playerUIs[pIndex].SetHighlight(new Color(0.5f, 0.8f, 1f));
+            if (!keepSelections)
+            {
+                _playerUIs[pIndex].SetHighlight(new Color(0.5f, 0.8f, 1f));
+            }
+
+            int currentLivingEnemies = _currentEnemies.Count(e => e.EnemyHP > 0);
+            if (currentLivingEnemies == 0)
+            {
+                Debug.LogWarning("選択可能な敵がいないため、次のプレイヤーに進みます。");
+                _playerUIs[pIndex].ResetHighlight();
+                continue;
+            }
 
             // 優先順位分の選択ループ
             for (int priority = 1; priority <= _currentPlayers.Count; priority++)
             {
                 Debug.Log($"Player {pIndex + 1} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
-                // 生きている敵がいなければ、このプレイヤーの選択は終了
-                if (_currentEnemies.All(e => e.EnemyHP <= 0))
+                // 敵の生存数をチェックする変数
+                livingEnemyCount = _currentEnemies.Count(e => e.EnemyHP > 0);
+                if (livingEnemyCount == 0)
                 {
                     Debug.LogWarning("選択可能な敵がいないため、選択をスキップします。");
                     break;
                 }
 
-                // ★修正点：ロジックを別コルーチンに分離し、それを呼び出す
-                yield return StartCoroutine(SelectOneTargetCoroutine(currentPlayer, priority, (selectedEnemy) => {
+                int alreadySelectedCount = PlayerSelections[currentPlayer].Count;
+                if (alreadySelectedCount >= livingEnemyCount)
+                {
+                    Debug.LogWarning($"Player {currentPlayer.PlayerModel.PlayerName} は全ての生存している敵を選択済みです。");
+                    break;
+                }
+
+                yield return StartCoroutine(SelectOneTargetCoroutine(currentPlayer, priority, (selectedEnemy) =>
+                {
                     Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {selectedEnemy.EnemyName} を選択");
-                }));
+                }, keepSelections));
             }
             _playerUIs[pIndex].ResetHighlight();
 
             // 全ての敵が倒されたら、選択フェーズを即時終了
-            if (_currentEnemies.All(e => e.EnemyHP <= 0))
+            if (livingEnemyCount == 0)
             {
                 Debug.Log("全ての敵が倒されました。");
                 break;
@@ -83,75 +154,94 @@ public class SelectTurn : MonoBehaviour , IPhase
     /// プレイヤー1人が敵1体を選択するためのコルーチン
     /// チュートリアルからも呼び出せるように public にする
     /// </summary>
-    public IEnumerator SelectOneTargetCoroutine(PlayerRuntime player, int priority, System.Action<EnemyModel> onSelected)
+    public IEnumerator SelectOneTargetCoroutine(PlayerRuntime player, int priority, System.Action<EnemyModel> onSelected, bool keepSelections = false)
     {
         Debug.Log($"Player {player.PlayerModel.PlayerName} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
 
         var livingEnemies = _currentEnemies.Where(e => e.EnemyHP > 0).ToList();
+        int livingEnemyCount = livingEnemies.Count;
+
         if (livingEnemies.Count == 0)
         {
             Debug.LogWarning("選択可能な敵がいません。");
-            yield break; // コルーチンを終了
+            yield break;
         }
 
-        int currentTargetIndex = 0;
-        int previousTargetIndex = 0;
+        currentTargetIndex = 0;
+        previousTargetIndex = 0;
 
         // 最初のターゲットUIをハイライト
         EnemyStatusUIController targetUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == livingEnemies[currentTargetIndex]);
-        if (targetUI != null)
+        if (targetUI != null && !keepSelections)
         {
             targetUI.SetHighlight(new Color(1f, 0.5f, 0.5f));
         }
 
-        while (true)
+        selectInputReader.UpStatusEvent   += OnUpPressed;
+        selectInputReader.DownStatusEvent += OnDownPressed;
+        selectInputReader.ConfirmEvent    += OnConfirmPressed;
+
+        upPressed = false;
+        downPressed = false;
+        confirmPressed = false;
+
+        bool selectionMade = false;
+        while (!selectionMade)
         {
             yield return null;
 
             bool selectionChanged = false;
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (downPressed)
             {
                 currentTargetIndex = (currentTargetIndex + 1) % livingEnemies.Count;
                 selectionChanged = true;
+                downPressed = false;
             }
-            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            else if (upPressed)
             {
                 currentTargetIndex = (currentTargetIndex - 1 + livingEnemies.Count) % livingEnemies.Count;
                 selectionChanged = true;
+                upPressed = false;
             }
 
             if (selectionChanged)
             {
-                EnemyModel prevModel = livingEnemies[previousTargetIndex];
-                EnemyStatusUIController prevUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == prevModel);
-                if (prevUI != null) prevUI.ResetHighlight();
+                if (!keepSelections)
+                {
+                    EnemyModel prevModel = livingEnemies[previousTargetIndex];
+                    EnemyStatusUIController prevUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == prevModel);
+                    if (prevUI != null) prevUI.ResetHighlight();
 
-                EnemyModel currentModel = livingEnemies[currentTargetIndex];
-                EnemyStatusUIController currentUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == currentModel);
-                if (currentUI != null) currentUI.SetHighlight(new Color(1f, 0.5f, 0.5f));
+                    EnemyModel currentModel = livingEnemies[currentTargetIndex];
+                    EnemyStatusUIController currentUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == currentModel);
+                    if (currentUI != null) currentUI.SetHighlight(new Color(1f, 0.5f, 0.5f));
+                }
 
                 previousTargetIndex = currentTargetIndex;
             }
 
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (confirmPressed)
             {
+                confirmPressed = false;
                 EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
 
                 if (PlayerSelections[player].Contains(selectedEnemy))
                 {
                     Debug.Log("その敵は既に選択済みです。別の敵を選択してください。");
-                    continue; // 別の敵を選択するまでループを続ける
+                    continue;
                 }
 
                 PlayerSelections[player].Add(selectedEnemy);
-                onSelected?.Invoke(selectedEnemy); // 選択完了を通知
+                onSelected?.Invoke(selectedEnemy);
 
-                // 全ての敵UIのハイライトを解除
                 foreach (var eUI in _enemyUIs) eUI.ResetHighlight();
 
-                break; // 選択が完了したので while ループを抜ける
+                selectionMade = true; // whileループを抜ける
             }
         }
+        selectInputReader.UpStatusEvent -= OnUpPressed;
+        selectInputReader.DownStatusEvent -= OnDownPressed;
+        selectInputReader.ConfirmEvent -= OnConfirmPressed;
     }
     /// <summary>
     /// チュートリアル完了後、残りの選択データを自動で設定する
@@ -160,7 +250,8 @@ public class SelectTurn : MonoBehaviour , IPhase
     {
         // チュートリアルで選択されなかったプレイヤーの選択データを自動で（ダミーで）設定する
         var livingEnemies = _currentEnemies.Where(e => e.EnemyHP > 0).ToList();
-        if (livingEnemies.Count == 0) return;
+        int livingEnemyCount = livingEnemies.Count;
+        if (livingEnemyCount == 0) return;
 
         foreach (var player in _currentPlayers)
         {
