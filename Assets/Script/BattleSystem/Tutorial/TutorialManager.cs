@@ -187,7 +187,6 @@ public class TutorialManager : MonoBehaviour , IPhase
 
     private IEnumerator FutureFeatureExplanation()
     {
-        SetTutorialText("（将来的にはここで、攻撃するキャラクターの優先順位を決めます）");
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
     }
