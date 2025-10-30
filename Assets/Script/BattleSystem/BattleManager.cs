@@ -28,6 +28,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform playerStatusBarTransform;
     [SerializeField] private Transform enemyStatusBarTransform;
     [SerializeField] private Text timeText;
+    [SerializeField] private GameObject selectionChoicePanel; // 継続/変更 を尋ねるUIパネル
+    [SerializeField] private Button keepSelectionsButton;   // 「継続」ボタン
+    [SerializeField] private Button changeSelectionsButton; // 「変更」ボタン
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
@@ -53,7 +56,8 @@ public class BattleManager : MonoBehaviour
     private float turnTime = 10f;
     private bool isTutorialMode = false;
     private IPhase currentPhase;
-
+    private bool isFirstSelectionPhase = true; // 最初の選択フェーズかどうかを判定するフラグ
+    private Coroutine selectionChoiceCoroutine; // 選択待機コルーチンを保持する変数
     void Start()
     {
         // Playerデータのロード
@@ -96,7 +100,22 @@ public class BattleManager : MonoBehaviour
             currentPhase = selectTurn;
         }
 
-        currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
+        //if (keepSelectionsButton != null)
+        //{
+        //    keepSelectionsButton.onClick.RemoveAllListeners();
+        //    keepSelectionsButton.onClick.AddListener(OnKeepSelections);
+        //}
+
+        //if (changeSelectionsButton != null)
+        //{
+        //    changeSelectionsButton.onClick.RemoveAllListeners();
+        //    changeSelectionsButton.onClick.AddListener(OnChangeSelections);
+        //}
+
+        if (selectionChoicePanel != null)
+        {
+            selectionChoicePanel.SetActive(false);
+        }
 
         List<PlayerModel> playerModels = players.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, enemies, playerStatusUIs);
@@ -224,13 +243,21 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log("【攻撃対象選択ターン開始】");
 
-        if (currentPhase != null)
+        if (isFirstSelectionPhase)
         {
-            currentPhase.StartPhase();
+            // 最初のターンは必ず選択する
+            isFirstSelectionPhase = false;
+            StartCoroutine(ProcessSelectionPhase(keepSelections: false));
         }
         else
         {
-            Debug.LogError("currentPhase が設定されていません！");
+            // 2ターン目以降（チュートリアル含む）：選択肢UIを表示する
+            if (selectionChoicePanel != null)
+            {
+                selectionChoicePanel.SetActive(true);
+                // 待機コルーチンを開始（ボタンが押されるのを待つ）
+                selectionChoiceCoroutine = StartCoroutine(WaitForSelectionChoice());
+            }
         }
     }
 
@@ -244,8 +271,6 @@ public class BattleManager : MonoBehaviour
             currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
         }
         Debug.Log("【攻撃対象選択ターン終了】");
-
-        // [修正] チュートリアルモードかどうかで処理を分岐
         if (isTutorialMode)
         {
             // チュートリアルモードの場合、次のチュートリアルフェーズ（カード選択）に移行
@@ -274,8 +299,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // [追加] カード選択チュートリアル (TutorialManager) が終了したときに呼び出される
-    private void OnCardTutorialPhaseFinished()
+   private void OnCardTutorialPhaseFinished()
     {
         if (currentPhase != null)
         {
@@ -348,5 +372,151 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【敵ターン開始】");
         enemyTurn.StartEnemyTurn();
         yield return null;
+    }
+
+    /// <summary>
+    /// 「優先順位を継続」ボタンが押されたときの処理
+    /// </summary>
+    public void OnKeepSelections()
+    {
+        Debug.Log("--- OnKeepSelections() が呼ばれました ---");
+        if (selectionChoicePanel != null)
+        {
+            selectionChoicePanel.SetActive(false);
+        }
+
+        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        // 待機コルーチンを停止し、選択処理（継続）を開始
+        if (selectionChoiceCoroutine != null)
+        {
+            StopCoroutine(selectionChoiceCoroutine);
+            selectionChoiceCoroutine = null;
+        }
+        StartCoroutine(ProcessSelectionPhase(keepSelections: true));
+    }
+
+    /// <summary>
+    /// 「優先順位を変更」ボタンが押されたときの処理
+    /// </summary>
+   public void OnChangeSelections()
+    {
+        Debug.Log("--- OnChangeSelections() が呼ばれました ---");
+        if (selectionChoicePanel != null)
+        {
+            selectionChoicePanel.SetActive(false);
+        }
+        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        // 待機コルーチンを停止し、選択処理（変更）を開始
+        if (selectionChoiceCoroutine != null)
+        {
+            StopCoroutine(selectionChoiceCoroutine);
+            selectionChoiceCoroutine = null;
+        }
+        StartCoroutine(ProcessSelectionPhase(keepSelections: false));
+    }
+
+    /// <summary>
+    /// 以前の選択がまだ有効か（選択した敵が生きているか）を検証する
+    /// </summary>
+    private bool ValidateKeptSelections(Dictionary<PlayerRuntime, List<EnemyModel>> selections)
+    {
+        Debug.Log("--- ValidateKeptSelections: 開始 ---");
+
+        if (selections == null || selections.Count == 0)
+        {
+            Debug.LogWarning("ValidateKeptSelections: FAILED (selections 辞書が null または 0件です).");
+            Debug.Log("--- ValidateKeptSelections: 終了 (false) ---");
+            return false;
+        }
+
+        var livingEnemies = new HashSet<EnemyModel>(enemies.Where(e => e != null && e.EnemyHP > 0));
+        if (livingEnemies.Count == 0)
+        {
+            Debug.LogWarning("ValidateKeptSelections: FAILED (生存している敵 (HP > 0) が 0 体です).");
+            Debug.Log("--- ValidateKeptSelections: 終了 (false) ---");
+            return false;
+        }
+
+        foreach (var playerSelectionList in selections.Values)
+        {
+            if (playerSelectionList == null || playerSelectionList.Count == 0)
+            {
+                // このプレイヤーは何も選択していない（これは「無効」ではない）
+                continue;
+            }
+
+            // ★修正: 選択した敵が1体でも死んでいる（livingEnemiesセットにいない）かチェック
+            foreach (var selectedEnemy in playerSelectionList)
+            {
+                if (selectedEnemy == null || !livingEnemies.Contains(selectedEnemy))
+                {
+                    // 選択した敵が null か、または livingEnemies に含まれていない（HPが0以下）
+                    Debug.LogWarning($"ValidateKeptSelections: FAILED (プレイヤーが選択した敵 '{selectedEnemy?.EnemyName ?? "NULL"}' が生存していません).");
+                    Debug.Log("--- ValidateKeptSelections: 終了 (false) ---");
+                    return false; // 1体でも死んでいたら無効
+                }
+            }
+        }
+
+        Debug.Log("ValidateKeptSelections: PASSED (全ての選択が有効です。'継続'を許可します).");
+        return true;
+    }
+
+    /// <summary>
+    /// 継続/変更 の選択を待機するコルーチン
+    /// </summary>
+    private IEnumerator WaitForSelectionChoice()
+    {
+        // ボタンが押されるまで（OnKeep/OnChangeが呼ばれるまで）待機する
+        Debug.Log("優先順位の選択（継続/変更）を待機中...");
+        yield return null;
+    }
+
+    /// <summary>
+    /// 選択フェーズの実行（継続/変更のロジックを含む）
+    /// </summary>
+    private IEnumerator ProcessSelectionPhase(bool keepSelections)
+    {
+        if (currentPhase == null)
+        {
+            Debug.LogError("currentPhase が設定されていません！");
+            yield break;
+        }
+
+        bool isKeeping = false;
+
+        if (keepSelections)
+        {
+            Debug.Log("優先順位を '継続' しました。");
+            if (ValidateKeptSelections(selectTurn.PlayerSelections))
+            {
+                Debug.Log("選択は有効です。選択フェーズをスキップします。");
+                isKeeping = true;
+            }
+            else
+            {
+                Debug.LogWarning("古い選択は無効です (倒された敵が含まれています)。選択をやり直してください。");
+                selectTurn.ClearSelections(); // 選択をリセット
+            }
+        }
+        else
+        {
+            Debug.Log("優先順位を '変更' しました。");
+            selectTurn.ClearSelections();
+        }
+
+        currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
+
+        // currentPhase が SelectTurn かどうかを判定
+        if (currentPhase is SelectTurn concreteSelectTurn)
+        {
+            // SelectTurn であれば、新しく作った StartPhase(bool) を呼ぶ
+            concreteSelectTurn.StartPhase(isKeeping);
+        }
+        else
+        {
+            // チュートリアルなど、SelectTurn 以外の場合は、通常の StartPhase() を呼ぶ
+            currentPhase.StartPhase();
+        }
     }
 }

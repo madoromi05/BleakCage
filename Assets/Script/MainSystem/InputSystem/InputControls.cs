@@ -202,6 +202,74 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""SelectAction"",
+            ""id"": ""8f64fc13-cd9e-4da8-9e9a-cb1cf0fdef44"",
+            ""actions"": [
+                {
+                    ""name"": ""UpStatus"",
+                    ""type"": ""Button"",
+                    ""id"": ""203d752b-9c90-47dd-8543-977cea8dd9ec"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DownStatus"",
+                    ""type"": ""Button"",
+                    ""id"": ""e26c1f3b-19a3-44b2-8658-3e423f6c93ad"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Confirm"",
+                    ""type"": ""Button"",
+                    ""id"": ""e7ace22d-729f-4107-81bd-939e5e464ce2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""17fc834e-99e3-4005-a203-1d30d724e6fa"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""UpStatus"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3dee1bdf-ddbe-4be4-ad10-e712cbdac83f"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""DownStatus"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""567b00a4-9f52-4874-b48a-dea503fb8b91"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Confirm"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -276,12 +344,18 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         // TutorialAction
         m_TutorialAction = asset.FindActionMap("TutorialAction", throwIfNotFound: true);
         m_TutorialAction_Proceed = m_TutorialAction.FindAction("Proceed", throwIfNotFound: true);
+        // SelectAction
+        m_SelectAction = asset.FindActionMap("SelectAction", throwIfNotFound: true);
+        m_SelectAction_UpStatus = m_SelectAction.FindAction("UpStatus", throwIfNotFound: true);
+        m_SelectAction_DownStatus = m_SelectAction.FindAction("DownStatus", throwIfNotFound: true);
+        m_SelectAction_Confirm = m_SelectAction.FindAction("Confirm", throwIfNotFound: true);
     }
 
     ~@InputControls()
     {
         UnityEngine.Debug.Assert(!m_BattleAction.enabled, "This will cause a leak and performance issues, InputControls.BattleAction.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_TutorialAction.enabled, "This will cause a leak and performance issues, InputControls.TutorialAction.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_SelectAction.enabled, "This will cause a leak and performance issues, InputControls.SelectAction.Disable() has not been called.");
     }
 
     /// <summary>
@@ -578,6 +652,124 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="TutorialActionActions" /> instance referencing this action map.
     /// </summary>
     public TutorialActionActions @TutorialAction => new TutorialActionActions(this);
+
+    // SelectAction
+    private readonly InputActionMap m_SelectAction;
+    private List<ISelectActionActions> m_SelectActionActionsCallbackInterfaces = new List<ISelectActionActions>();
+    private readonly InputAction m_SelectAction_UpStatus;
+    private readonly InputAction m_SelectAction_DownStatus;
+    private readonly InputAction m_SelectAction_Confirm;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "SelectAction".
+    /// </summary>
+    public struct SelectActionActions
+    {
+        private @InputControls m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public SelectActionActions(@InputControls wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "SelectAction/UpStatus".
+        /// </summary>
+        public InputAction @UpStatus => m_Wrapper.m_SelectAction_UpStatus;
+        /// <summary>
+        /// Provides access to the underlying input action "SelectAction/DownStatus".
+        /// </summary>
+        public InputAction @DownStatus => m_Wrapper.m_SelectAction_DownStatus;
+        /// <summary>
+        /// Provides access to the underlying input action "SelectAction/Confirm".
+        /// </summary>
+        public InputAction @Confirm => m_Wrapper.m_SelectAction_Confirm;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_SelectAction; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="SelectActionActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(SelectActionActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="SelectActionActions" />
+        public void AddCallbacks(ISelectActionActions instance)
+        {
+            if (instance == null || m_Wrapper.m_SelectActionActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_SelectActionActionsCallbackInterfaces.Add(instance);
+            @UpStatus.started += instance.OnUpStatus;
+            @UpStatus.performed += instance.OnUpStatus;
+            @UpStatus.canceled += instance.OnUpStatus;
+            @DownStatus.started += instance.OnDownStatus;
+            @DownStatus.performed += instance.OnDownStatus;
+            @DownStatus.canceled += instance.OnDownStatus;
+            @Confirm.started += instance.OnConfirm;
+            @Confirm.performed += instance.OnConfirm;
+            @Confirm.canceled += instance.OnConfirm;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="SelectActionActions" />
+        private void UnregisterCallbacks(ISelectActionActions instance)
+        {
+            @UpStatus.started -= instance.OnUpStatus;
+            @UpStatus.performed -= instance.OnUpStatus;
+            @UpStatus.canceled -= instance.OnUpStatus;
+            @DownStatus.started -= instance.OnDownStatus;
+            @DownStatus.performed -= instance.OnDownStatus;
+            @DownStatus.canceled -= instance.OnDownStatus;
+            @Confirm.started -= instance.OnConfirm;
+            @Confirm.performed -= instance.OnConfirm;
+            @Confirm.canceled -= instance.OnConfirm;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SelectActionActions.UnregisterCallbacks(ISelectActionActions)" />.
+        /// </summary>
+        /// <seealso cref="SelectActionActions.UnregisterCallbacks(ISelectActionActions)" />
+        public void RemoveCallbacks(ISelectActionActions instance)
+        {
+            if (m_Wrapper.m_SelectActionActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="SelectActionActions.AddCallbacks(ISelectActionActions)" />
+        /// <seealso cref="SelectActionActions.RemoveCallbacks(ISelectActionActions)" />
+        /// <seealso cref="SelectActionActions.UnregisterCallbacks(ISelectActionActions)" />
+        public void SetCallbacks(ISelectActionActions instance)
+        {
+            foreach (var item in m_Wrapper.m_SelectActionActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_SelectActionActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="SelectActionActions" /> instance referencing this action map.
+    /// </summary>
+    public SelectActionActions @SelectAction => new SelectActionActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     /// <summary>
     /// Provides access to the input control scheme.
@@ -693,5 +885,34 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnProceed(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "SelectAction" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="SelectActionActions.AddCallbacks(ISelectActionActions)" />
+    /// <seealso cref="SelectActionActions.RemoveCallbacks(ISelectActionActions)" />
+    public interface ISelectActionActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "UpStatus" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUpStatus(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DownStatus" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDownStatus(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Confirm" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnConfirm(InputAction.CallbackContext context);
     }
 }

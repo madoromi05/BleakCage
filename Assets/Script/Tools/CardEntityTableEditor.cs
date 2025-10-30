@@ -117,9 +117,7 @@ public class CardEntityTableEditor : EditorWindow
 
         if (GUILayout.Button("新規作成 (汎用)", GUILayout.Width(150)))
         {
-            // ▼▼▼【変更】CreateNewCardの引数を(type, charID, weaponID)に ▼▼▼
             CreateNewCard(CardTypeData.Universal, 0, 0);
-            // ▲▲▲【変更】▲▲▲
         }
 
         EditorGUILayout.EndVertical();
@@ -150,7 +148,6 @@ public class CardEntityTableEditor : EditorWindow
         var universalCards = allCardList.Where(c => c.Type == CardTypeData.Universal).ToList();
         DrawCategoryFoldout("Universal", universalCards, toDelete, () => CreateNewCard(CardTypeData.Universal, 0, 0));
 
-        // ▼▼▼【変更】Weapon カテゴリの階層化 ▼▼▼
         // --- 階層1: Weapon ---
         var weaponCards = allCardList.Where(c => c.Type == CardTypeData.Weapon).ToList();
         string weaponKey = "Weapon";
@@ -181,7 +178,6 @@ public class CardEntityTableEditor : EditorWindow
             }
             EditorGUI.indentLevel--;
         }
-        // ▲▲▲【変更】▲▲▲
 
         // --- 階層1: Character ---
         var characterCards = allCardList.Where(c => c.Type == CardTypeData.Character).ToList();
@@ -192,7 +188,7 @@ public class CardEntityTableEditor : EditorWindow
         categoryFoldouts[charKey] = EditorGUILayout.Foldout(categoryFoldouts[charKey], $"Character ({characterCards.Count})", true, EditorStyles.foldoutHeader);
         if (GUILayout.Button("+", GUILayout.Width(30)))
         {
-            CreateNewCard(CardTypeData.Character, 1, 0); // デフォルトCharID 1
+            CreateNewCard(CardTypeData.Character, 1, 0);
         }
         EditorGUILayout.EndHorizontal();
 
@@ -275,8 +271,8 @@ public class CardEntityTableEditor : EditorWindow
         GUILayout.Label("ID", GUILayout.Width(40));
         GUILayout.Label("名前", GUILayout.Width(120));
         GUILayout.Label("Type", GUILayout.Width(80));
-        GUILayout.Label("武器ID", GUILayout.Width(100)); // (Weapon専用)
-        GUILayout.Label("キャラID", GUILayout.Width(60)); // (Character専用)
+        GUILayout.Label("武器ID", GUILayout.Width(100));
+        GUILayout.Label("キャラID", GUILayout.Width(60));
         GUILayout.Label("攻撃属性", GUILayout.Width(80));
         GUILayout.Label("出力調整", GUILayout.Width(80));
         GUILayout.Label("命中率", GUILayout.Width(80));
@@ -285,7 +281,7 @@ public class CardEntityTableEditor : EditorWindow
         GUILayout.Label("攻撃対数", GUILayout.Width(80));
         GUILayout.Label("Passive", GUILayout.Width(60));
         GUILayout.Label("Icon", GUILayout.Width(60));
-        GUILayout.Label("説明文", GUILayout.ExpandWidth(true));
+        GUILayout.Label("効果・詳細", GUILayout.ExpandWidth(true));
         GUILayout.Label("Actions", GUILayout.Width(100));
         EditorGUILayout.EndHorizontal();
     }
@@ -343,13 +339,28 @@ public class CardEntityTableEditor : EditorWindow
         card.TargetCount = EditorGUILayout.IntField(card.TargetCount, GUILayout.Width(80));
         card.Passive = EditorGUILayout.Toggle(card.Passive, GUILayout.Width(60));
         card.Icon = (Sprite)EditorGUILayout.ObjectField(card.Icon, typeof(Sprite), false, GUILayout.Width(60));
-        card.Description = EditorGUILayout.TextArea(card.Description, GUILayout.ExpandWidth(true), GUILayout.Height(40));
+        
+        //　説明文UI
+        EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+        string newDescription = EditorGUILayout.TextField(card.Description);
+        if (newDescription != card.Description)
+        {
+            card.Description = newDescription;
+        }
+        string stats = $"出力: {card.OutputModifier:P0} | " +
+                       $"命中: {card.HitRate:P0} | " +
+                       $"貫通: {card.DefensePenetration:P0} | " +
+                       $"回数: {card.AttackCount} | " +
+                       $"体数: {card.TargetCount}";
+
+        EditorGUILayout.LabelField(stats, EditorStyles.miniLabel);
+        EditorGUILayout.EndVertical();
 
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(card, "Modify CardEntity");
             EditorUtility.SetDirty(card);
-            // タイプやID変更でツリーの所属が変わる可能性があるため、Repaint
             Repaint();
         }
 
@@ -391,7 +402,7 @@ public class CardEntityTableEditor : EditorWindow
         EditorGUILayout.EndVertical();
     }
 
-    // ▼▼▼【変更】CreateNewCard のシグネチャとロジック ▼▼▼
+    // CreateNewCard のシグネチャとロジック
     private void CreateNewCard(CardTypeData type, int characterID, int weaponID)
     {
         string baseCreatePath = "Assets/Resources/CardEntityList";
@@ -479,7 +490,6 @@ public class CardEntityTableEditor : EditorWindow
 
         Debug.Log($"新しいCardEntity '{newCard.Name}' を作成しました: {fullPath}");
     }
-    // ▲▲▲【変更】▲▲▲
 
     private void DeleteCardAsset(CardEntity card)
     {

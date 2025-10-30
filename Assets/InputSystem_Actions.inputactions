@@ -116,6 +116,74 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "SelectAction",
+            "id": "8f64fc13-cd9e-4da8-9e9a-cb1cf0fdef44",
+            "actions": [
+                {
+                    "name": "UpStatus",
+                    "type": "Button",
+                    "id": "203d752b-9c90-47dd-8543-977cea8dd9ec",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DownStatus",
+                    "type": "Button",
+                    "id": "e26c1f3b-19a3-44b2-8658-3e423f6c93ad",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "e7ace22d-729f-4107-81bd-939e5e464ce2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "17fc834e-99e3-4005-a203-1d30d724e6fa",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "UpStatus",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3dee1bdf-ddbe-4be4-ad10-e712cbdac83f",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "DownStatus",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "567b00a4-9f52-4874-b48a-dea503fb8b91",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

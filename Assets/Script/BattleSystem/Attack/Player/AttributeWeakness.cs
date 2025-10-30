@@ -11,7 +11,7 @@ public class AttributeWeakness : IAttackStrategy
     private float attributeMultiplier = 1.5f;                   // 属性倍率 (デフォルト値)
     private float damageScale = 1.0f;                           // 減衰調整 (デフォルト値)
 
-    private const float ATTACK_COEFFICIENT_X = 10f;             // ダメージにかける変数
+    private const float ATTACK_COEFFICIENT_X = 10f;             // レベルにかける変数
     /// <summary>
     /// ダメージ計算を実行
     /// これを基本的に呼び出す
