@@ -11,9 +11,17 @@ public class SelectTurn : MonoBehaviour, IPhase
     public event System.Action SelectTurnFinished;
     public event System.Action OnPhaseFinished;
 
+<<<<<<< HEAD
     private void OnUpPressed() { upPressed = true; }
     private void OnDownPressed() { downPressed = true; }
     private void OnConfirmPressed() { confirmPressed = true; }
+=======
+    private AudioSource audioSource;
+    public AudioClip check;
+    /// <summary>
+    /// 選択ターンの初期化
+    /// </summary>
+>>>>>>> battle/enemyAttack
 
     private int livingEnemyCount;
     private int currentTargetIndex;
@@ -40,6 +48,14 @@ public class SelectTurn : MonoBehaviour, IPhase
         {
             PlayerSelections[player] = new List<EnemyModel>();
         }
+<<<<<<< HEAD
+=======
+
+        Debug.Log("選択データの初期化完了");
+        // 選択プロセスを開始
+        StartCoroutine(SelectionProcessCoroutine());
+        audioSource = GetComponent<AudioSource>();
+>>>>>>> battle/enemyAttack
     }
 
     /// <summary>
@@ -133,6 +149,7 @@ public class SelectTurn : MonoBehaviour, IPhase
 
                 yield return StartCoroutine(SelectOneTargetCoroutine(currentPlayer, priority, (selectedEnemy) =>
                 {
+<<<<<<< HEAD
                     Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {selectedEnemy.EnemyName} を選択");
                 }, keepSelections));
             }
@@ -143,6 +160,63 @@ public class SelectTurn : MonoBehaviour, IPhase
             {
                 Debug.Log("全ての敵が倒されました。");
                 break;
+=======
+                    yield return null;
+
+                    bool selectionChanged = false;
+                    if (Input.GetKeyDown(KeyCode.RightArrow))
+                    {
+                        currentTargetIndex = (currentTargetIndex + 1) % livingEnemies.Count;
+                        selectionChanged = true;
+                    }
+                    else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                    {
+                        currentTargetIndex = (currentTargetIndex - 1 + livingEnemies.Count) % livingEnemies.Count;
+                        selectionChanged = true;
+                    }
+
+                    if (selectionChanged)
+                    {
+                        // 前のターゲットのハイライトをリセット
+                        EnemyModel prevModel = livingEnemies[previousTargetIndex];
+                        EnemyStatusUIController prevUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == prevModel);
+                        if (prevUI != null)
+                        {
+                            prevUI.ResetHighlight();
+                        }
+
+                        // 新しいターゲットをハイライト
+                        EnemyModel currentModel = livingEnemies[currentTargetIndex];
+                        EnemyStatusUIController currentUI = enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == currentModel);
+                        if (currentUI != null)
+                        {
+                            currentUI.SetHighlight(new Color(1f, 0.5f, 0.5f)); // 赤色
+                        }
+                        previousTargetIndex = currentTargetIndex;
+                    }
+
+                    if (Input.GetKeyDown(KeyCode.Return))
+                    {
+                            EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
+
+                        if (PlayerSelections[currentPlayer].Contains(selectedEnemy))
+                        {
+                            Debug.Log("その敵は既に選択済みです。別の敵を選択してください。");
+                            // ループを継続して再選択を促す
+                            continue;
+                        }
+                        audioSource.PlayOneShot(check);
+                        PlayerSelections[currentPlayer].Add(livingEnemies[currentTargetIndex]);
+
+                        foreach (var eUI in enemyUIs)
+                        {
+                            eUI.ResetHighlight();
+                        }
+
+                        break;
+                    }
+                }
+>>>>>>> battle/enemyAttack
             }
         }
 

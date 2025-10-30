@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 /// <summary>
@@ -27,26 +27,21 @@ public class BattleManager : MonoBehaviour
     [Header("UI関連")]
     [SerializeField] private Transform playerStatusBarTransform;
     [SerializeField] private Transform enemyStatusBarTransform;
-    [SerializeField] private Text timeText;
-    [SerializeField] private GameObject selectionChoicePanel; // 継続/変更 を尋ねるUIパネル
-    [SerializeField] private Button keepSelectionsButton;   // 「継続」ボタン
-    [SerializeField] private Button changeSelectionsButton; // 「変更」ボタン
+    [SerializeField] private TextMeshProUGUI timeText;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
 
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
-    [SerializeField] private GameObject tutorialObjectsParent; // [修正] チュートリアル関連オブジェクトの親
     [SerializeField] private TutorialManager tutorialManager;
-    [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
-    [SerializeField] private TutorialInputReader tortrialInputReader;
+    [SerializeField] private TortrialInputReader tortrialInputReader;
 #endif
     //=================================================================================
     // Private Variables
     //=================================================================================
-    private List<PlayerRuntime> players;
-    private List<EnemyModel> enemies = new List<EnemyModel>();
+    private List<PlayerRuntime> playerParty;
+    private List<EnemyModel> predators = new List<EnemyModel>();
     private List<PlayerStatusUIController> playerStatusUIs = new List<PlayerStatusUIController>();
     private List<EnemyStatusUIController> enemyStatusUIs = new List<EnemyStatusUIController>();
 
@@ -55,16 +50,20 @@ public class BattleManager : MonoBehaviour
     private EnemyStatusUIController enemyUIController;
     private float turnTime = 10f;
     private bool isTutorialMode = false;
-    private IPhase currentPhase;
-    private bool isFirstSelectionPhase = true; // 最初の選択フェーズかどうかを判定するフラグ
-    private Coroutine selectionChoiceCoroutine; // 選択待機コルーチンを保持する変数
+
+    private AudioSource audioSource;
+    public AudioClip startselectturn;
+    public AudioClip changephase;
+    public AudioClip countdown;
+
     void Start()
     {
         // Playerデータのロード
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-        players = setupData.Party;
+        playerParty = setupData.Party;
         List<CardRuntime> allCardsForDeck = setupData.AllCards;
+        // 読み込んだカードがない場合はエラーログを出して停止
         if (allCardsForDeck == null || allCardsForDeck.Count == 0)
         {
             Debug.LogError("デッキにセットするカードが1枚もありません！ PlayerDataLoader の処理を確認してください。");
@@ -76,58 +75,25 @@ public class BattleManager : MonoBehaviour
         stageSet();
         enemyView();
 
-        //チュートリアルモードの判定
-        isTutorialMode = enemies.Count > 0 && enemies[0].EnemyID == 0;
-        if (isTutorialMode)
-        {
-            if (tutorialObjectsParent != null)
-            {
-                tutorialObjectsParent.SetActive(true);
-            }
-
-            selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
-            currentPhase = selectTurnTutorialManager;
-        }
-        // チュートリアル用オブジェクトを非表示にする
-        else
-        {
-            if (tutorialObjectsParent != null)
-            {
-                tutorialObjectsParent.SetActive(false);
-            }
-
-            selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
-            currentPhase = selectTurn;
-        }
-
-        //if (keepSelectionsButton != null)
-        //{
-        //    keepSelectionsButton.onClick.RemoveAllListeners();
-        //    keepSelectionsButton.onClick.AddListener(OnKeepSelections);
-        //}
-
-        //if (changeSelectionsButton != null)
-        //{
-        //    changeSelectionsButton.onClick.RemoveAllListeners();
-        //    changeSelectionsButton.onClick.AddListener(OnChangeSelections);
-        //}
-
-        if (selectionChoicePanel != null)
-        {
-            selectionChoicePanel.SetActive(false);
-        }
-
-        List<PlayerModel> playerModels = players.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, enemies, playerStatusUIs);
+        List<PlayerModel> playerModels = playerParty.Select(p => p.PlayerModel).ToList();
+        enemyTurn.EnemySetup(playerModels, predators, playerStatusUIs);
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
 
-        StartSelectionPhase();
+        //敵のIDが0の場合tuterealを開始する
+        if (predators[0].EnemyID == 0)
+        {
+#if TUTORIAL_ENABLED
+            isTutorialMode = true;
+            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
+#endif
+        }
+            StartSelectionPhase();
     }
 
     private void playerView()
     {
         // パーティ人数分 PlayerView を生成
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < playerParty.Count; i++)
         {
             if (i >= playerPositions.Count)
             {
@@ -135,37 +101,24 @@ public class BattleManager : MonoBehaviour
                 break;
             }
 
-            PlayerRuntime runtime = players[i];
+            PlayerRuntime runtime = playerParty[i];
 
-            if (playerPrefab == null)
-            {
-                Debug.LogError("BattleManagerのインスペクターで 'Player Prefab' が設定されていません！ (None)");
-                break; // ループ中断
-            }
             // PlayerのModel生成
             Transform spawnPoint = playerPositions[i];
             var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            if (playerController == null)
-            {
-                Debug.LogError($"プレハブ '{playerPrefab.name}' のルートに PlayerController スクリプトがアタッチされていません！", playerObject);
-                continue; // 次のプレイヤーの処理へ
-            }
             playerController.Init(runtime.PlayerModel);
             runtime.PlayerController = playerController;
 
             // PlayerのStatusUI生成
             var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);
             PlayerStatusUIController playerUiController = statusUIObject.GetComponent<PlayerStatusUIController>();
-            if (playerUiController == null)
-            {
-                Debug.LogError($"プレハブ '{playerStatusUIPrefab.name}' に PlayerStatusUIController スクリプトがアタッチされていません！", statusUIObject);
-                continue;
-            }
             playerUiController.SetPlayerStatus(runtime);
             playerController.SetStatusUI(playerUiController);
             playerStatusUIs.Add(playerUiController);
+
         }
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void stageSet()
@@ -179,7 +132,7 @@ public class BattleManager : MonoBehaviour
 #if UNITY_EDITOR
             string sceneName = SceneManager.GetActiveScene().name;
             // ※チュートリアルシーン名が "Tutorial" でない場合は、実際のシーン名に変更してください
-            if (sceneName == "Tutorial" || sceneName == "Battle_Tutorial") // [修正] シーン名 "Battle_Tutorial" も考慮
+            if (sceneName == "Tutorial")
             {
                 currentStageID = 0;
                 Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '0' (チュートリアル)に設定しました。");
@@ -210,7 +163,7 @@ public class BattleManager : MonoBehaviour
 
             int enemyId = currentStage.enemyIDs[i];
             EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
-            enemies.Add(enemy);
+            predators.Add(enemy);
 
             // 指定された3D座標に敵を生成
             Transform spawnPoint = enemyPositions[i];
@@ -241,24 +194,10 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void StartSelectionPhase()
     {
+        audioSource.PlayOneShot(startselectturn);
         Debug.Log("【攻撃対象選択ターン開始】");
-
-        if (isFirstSelectionPhase)
-        {
-            // 最初のターンは必ず選択する
-            isFirstSelectionPhase = false;
-            StartCoroutine(ProcessSelectionPhase(keepSelections: false));
-        }
-        else
-        {
-            // 2ターン目以降（チュートリアル含む）：選択肢UIを表示する
-            if (selectionChoicePanel != null)
-            {
-                selectionChoicePanel.SetActive(true);
-                // 待機コルーチンを開始（ボタンが押されるのを待つ）
-                selectionChoiceCoroutine = StartCoroutine(WaitForSelectionChoice());
-            }
-        }
+        selectTurn.SelectTurnFinished += OnSelectionPhaseFinished;
+        selectTurn.StartSelectTurn(playerParty, predators, playerStatusUIs, enemyStatusUIs);
     }
 
     /// <summary>
@@ -266,62 +205,20 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void OnSelectionPhaseFinished()
     {
-        if (currentPhase != null)
-        {
-            currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
-        }
+        selectTurn.SelectTurnFinished -= OnSelectionPhaseFinished;
         Debug.Log("【攻撃対象選択ターン終了】");
-        if (isTutorialMode)
-        {
-            // チュートリアルモードの場合、次のチュートリアルフェーズ（カード選択）に移行
-            Debug.Log("チュートリアル：カード選択フェーズに移行します。");
 
-#if TUTORIAL_ENABLED
-            // TutorialManager を初期化
-            tutorialManager.Initialize(tortrialInputReader, enemyStatusUIs);
+        // SelectTurnから選択結果を取得
+        var playerSelections = selectTurn.PlayerSelections;
 
-            // currentPhase を TutorialManager に切り替え
-            currentPhase = tutorialManager;
+        // PlayerTurnを選択されたターゲット情報でセットアップ
+        var targetEnemyUI = enemyStatusUIs.FirstOrDefault();
+         playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
 
-            // TutorialManager の終了イベントを購読
-            currentPhase.OnPhaseFinished += OnCardTutorialPhaseFinished;
+        audioSource.PlayOneShot(changephase);
 
-            // 新しいフェーズを開始
-            currentPhase.StartPhase();
-#endif
-        }
-        else
-        {
-            // 通常モードの場合、プレイヤーのカード選択ターンを開始
-            var playerSelections = selectTurn.PlayerSelections;
-            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
-            StartPlayerTurn();
-        }
-    }
-
-   private void OnCardTutorialPhaseFinished()
-    {
-        if (currentPhase != null)
-        {
-            currentPhase.OnPhaseFinished -= OnCardTutorialPhaseFinished;
-        }
-
-        Debug.Log("【チュートリアルバトル完了】");
-
-        // チュートリアルオブジェクトを非表示にする
-        if (tutorialObjectsParent != null)
-        {
-            tutorialObjectsParent.SetActive(false);
-        }
-#if TUTORIAL_ENABLED
-        else
-        {
-            selectTurnTutorialManager.gameObject.SetActive(false);
-            tutorialManager.gameObject.SetActive(false);
-        }
-#endif
-        // TODO: ここでリザルト画面に遷移したり、メインメニューに戻る処理を呼び出す
-        // 例: SceneManager.LoadScene("MainMenu");
+        // プレイヤーのカード選択ターンを開始
+        StartPlayerTurn();
     }
 
     /// <summary>
@@ -342,10 +239,16 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
         playerTurn.StartPlayerTurn();
-
+        float soundTime = 1f;
         while (turnTime >= 0)
         {
+            if (soundTime <= 0f)
+            {
+                audioSource.PlayOneShot(countdown);
+                soundTime = 1f;
+            }
             turnTime -= Time.deltaTime;
+            soundTime -= Time.deltaTime;
             timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
@@ -369,154 +272,30 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator EnemyTurn()
     {
+        audioSource.PlayOneShot(changephase);
         Debug.Log("【敵ターン開始】");
         enemyTurn.StartEnemyTurn();
         yield return null;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////
+    ///チュートリアル用の処理
+    /////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>
-    /// 「優先順位を継続」ボタンが押されたときの処理
+    /// チュートリアル用にタイマーを停止させる
     /// </summary>
-    public void OnKeepSelections()
+    public void StopTurnTimer()
     {
-        Debug.Log("--- OnKeepSelections() が呼ばれました ---");
-        if (selectionChoicePanel != null)
-        {
-            selectionChoicePanel.SetActive(false);
-        }
-
-        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-        // 待機コルーチンを停止し、選択処理（継続）を開始
-        if (selectionChoiceCoroutine != null)
-        {
-            StopCoroutine(selectionChoiceCoroutine);
-            selectionChoiceCoroutine = null;
-        }
-        StartCoroutine(ProcessSelectionPhase(keepSelections: true));
+        StopCoroutine("StartPlayerTurnWithTimer"); // Coroutineを停止
     }
 
     /// <summary>
-    /// 「優先順位を変更」ボタンが押されたときの処理
+    /// チュートリアル用にプレイヤーのターンを開始する（タイマーなし）
     /// </summary>
-   public void OnChangeSelections()
+    public void StartPlayerTurnForTutorial()
     {
-        Debug.Log("--- OnChangeSelections() が呼ばれました ---");
-        if (selectionChoicePanel != null)
-        {
-            selectionChoicePanel.SetActive(false);
-        }
-        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-        // 待機コルーチンを停止し、選択処理（変更）を開始
-        if (selectionChoiceCoroutine != null)
-        {
-            StopCoroutine(selectionChoiceCoroutine);
-            selectionChoiceCoroutine = null;
-        }
-        StartCoroutine(ProcessSelectionPhase(keepSelections: false));
-    }
-
-    /// <summary>
-    /// 以前の選択がまだ有効か（選択した敵が生きているか）を検証する
-    /// </summary>
-    private bool ValidateKeptSelections(Dictionary<PlayerRuntime, List<EnemyModel>> selections)
-    {
-        Debug.Log("--- ValidateKeptSelections: 開始 ---");
-
-        if (selections == null || selections.Count == 0)
-        {
-            Debug.LogWarning("ValidateKeptSelections: FAILED (selections 辞書が null または 0件です).");
-            Debug.Log("--- ValidateKeptSelections: 終了 (false) ---");
-            return false;
-        }
-
-        var livingEnemies = new HashSet<EnemyModel>(enemies.Where(e => e != null && e.EnemyHP > 0));
-        if (livingEnemies.Count == 0)
-        {
-            Debug.LogWarning("ValidateKeptSelections: FAILED (生存している敵 (HP > 0) が 0 体です).");
-            Debug.Log("--- ValidateKeptSelections: 終了 (false) ---");
-            return false;
-        }
-
-        foreach (var playerSelectionList in selections.Values)
-        {
-            if (playerSelectionList == null || playerSelectionList.Count == 0)
-            {
-                // このプレイヤーは何も選択していない（これは「無効」ではない）
-                continue;
-            }
-
-            // ★修正: 選択した敵が1体でも死んでいる（livingEnemiesセットにいない）かチェック
-            foreach (var selectedEnemy in playerSelectionList)
-            {
-                if (selectedEnemy == null || !livingEnemies.Contains(selectedEnemy))
-                {
-                    // 選択した敵が null か、または livingEnemies に含まれていない（HPが0以下）
-                    Debug.LogWarning($"ValidateKeptSelections: FAILED (プレイヤーが選択した敵 '{selectedEnemy?.EnemyName ?? "NULL"}' が生存していません).");
-                    Debug.Log("--- ValidateKeptSelections: 終了 (false) ---");
-                    return false; // 1体でも死んでいたら無効
-                }
-            }
-        }
-
-        Debug.Log("ValidateKeptSelections: PASSED (全ての選択が有効です。'継続'を許可します).");
-        return true;
-    }
-
-    /// <summary>
-    /// 継続/変更 の選択を待機するコルーチン
-    /// </summary>
-    private IEnumerator WaitForSelectionChoice()
-    {
-        // ボタンが押されるまで（OnKeep/OnChangeが呼ばれるまで）待機する
-        Debug.Log("優先順位の選択（継続/変更）を待機中...");
-        yield return null;
-    }
-
-    /// <summary>
-    /// 選択フェーズの実行（継続/変更のロジックを含む）
-    /// </summary>
-    private IEnumerator ProcessSelectionPhase(bool keepSelections)
-    {
-        if (currentPhase == null)
-        {
-            Debug.LogError("currentPhase が設定されていません！");
-            yield break;
-        }
-
-        bool isKeeping = false;
-
-        if (keepSelections)
-        {
-            Debug.Log("優先順位を '継続' しました。");
-            if (ValidateKeptSelections(selectTurn.PlayerSelections))
-            {
-                Debug.Log("選択は有効です。選択フェーズをスキップします。");
-                isKeeping = true;
-            }
-            else
-            {
-                Debug.LogWarning("古い選択は無効です (倒された敵が含まれています)。選択をやり直してください。");
-                selectTurn.ClearSelections(); // 選択をリセット
-            }
-        }
-        else
-        {
-            Debug.Log("優先順位を '変更' しました。");
-            selectTurn.ClearSelections();
-        }
-
-        currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
-
-        // currentPhase が SelectTurn かどうかを判定
-        if (currentPhase is SelectTurn concreteSelectTurn)
-        {
-            // SelectTurn であれば、新しく作った StartPhase(bool) を呼ぶ
-            concreteSelectTurn.StartPhase(isKeeping);
-        }
-        else
-        {
-            // チュートリアルなど、SelectTurn 以外の場合は、通常の StartPhase() を呼ぶ
-            currentPhase.StartPhase();
-        }
+        audioSource.PlayOneShot(changephase);
+        Debug.Log("【プレイヤーターン開始 (チュートリアル)】");
+        playerTurn.StartPlayerTurn();
     }
 }
