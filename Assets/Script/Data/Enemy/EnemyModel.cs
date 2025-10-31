@@ -5,17 +5,22 @@ using UnityEngine;
 /// </summary>
 public class EnemyModel
 {
-    public int EnemyID { get; private set; }                                // “G‚ÌID
-    public string EnemyName { get; private set; }                           // “G‚Ì–¼‘O
-    public float EnemyHP { get; set; }                                      // “G‚ÌHP
-    public float EnemyAttackPower { get; private set; }                     // UŒ‚—Í
-    public float EnemyDefensePower { get; private set; }                    // –hŒä—Í
-    public AttributeType EnemyAttribute { get; private set; }               // UŒ‚‘®«
-    public DefensAttributeType EnemyDefensAttribute { get; private set; }   // –hŒä‘®«
-    public Sprite EnemySprite { get; private set; }                         // •\¦ƒAƒCƒRƒ“
-    public string EnemyDescription { get; private set; }                    // à–¾•¶
-    public AnimatorSet EnemyAnimator { get; private set; }                  // ƒAƒjƒ[ƒVƒ‡ƒ“ƒZƒbƒg
-    public Avatar EnemyAvatar { get; private set; }                         // œŠi(Avatar)
+    public int EnemyID { get; private set; }                 // “G‚ÌID
+    public string EnemyName { get; private set; }             // “G‚Ì–¼‘O
+    public float EnemyHP { get; set; }                       // “G‚ÌHP
+    public float EnemyAttackPower { get; private set; }      // UŒ‚—Í
+    public float EnemyDefensePower { get; private set; }     // –hŒä—Í
+    public AttributeType EnemyAttribute { get; private set; } // UŒ‚‘®«
+    public DefensAttributeType EnemyDefensAttribute { get; private set; } // –hŒä‘®«
+    public Sprite EnemySprite { get; private set; }           // •\¦ƒAƒCƒRƒ“
+    public string EnemyDescription { get; private set; }      // à–¾•¶
+    public AnimatorSet EnemyAnimator { get; private set; }   // ƒAƒjƒ[ƒVƒ‡ƒ“ƒZƒbƒg
+    public Avatar EnemyAvatar { get; private set; }         // œŠi(Avatar)
+
+    // --- PlayerModel‚É‡‚í‚¹‚Ä’Ç‰Á ---
+    public GameObject CharacterPrefab { get; private set; } // ƒvƒŒƒnƒu
+    public Vector3 InitialRotation { get; private set; }   // ‰Šú‰ñ“]
+    // ---------------------------------
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)‚©‚çƒf[ƒ^‚ğ“Ç‚İ‚ñ‚Åƒ‚ƒfƒ‹‚É”½‰f
@@ -37,5 +42,8 @@ public class EnemyModel
         EnemySprite = Entity.EnemySprite;
         EnemyDescription = Entity.EnemyDescription;
         EnemyAnimator = Entity.AnimationSet;
+
+        CharacterPrefab = Entity.CharacterPrefab;
+        InitialRotation = Entity.InitialRotation;
     }
 }

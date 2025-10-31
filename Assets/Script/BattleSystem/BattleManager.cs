@@ -37,7 +37,7 @@ public class BattleManager : MonoBehaviour
 
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
-    [SerializeField] private GameObject tutorialObjectsParent; // [修正] チュートリアル関連オブジェクトの親
+    [SerializeField] private GameObject tutorialObjectsParent;//チュートリアル関連オブジェクトの親
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
     [SerializeField] private TutorialInputReader tortrialInputReader;
