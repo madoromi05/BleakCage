@@ -215,8 +215,8 @@ MonoBehaviour:
   enemyStatusBarTransform: {fileID: 727143522}
   timeText: {fileID: 691840769}
   selectionChoicePanel: {fileID: 1991256336}
-  keepSelectionsButton: {fileID: 1987222925}
-  changeSelectionsButton: {fileID: 1705824226}
+  keepSelectionsButton: {fileID: 1705824226}
+  changeSelectionsButton: {fileID: 1987222925}
   allStageEnemyData:
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
@@ -256,6 +256,8 @@ MonoBehaviour:
   playerHandTransform: {fileID: 457889571}
   inputReader: {fileID: 1817250752}
   isTurnFinished: 0
+  disposecard: {fileID: 8300000, guid: fa23dc9b8b9b6144784dd6643a3f7369, type: 3}
+  check: {fileID: 8300000, guid: cda2f1f079cd80745a5214fc21326082, type: 3}
 --- !u!114 &120127629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2270,12 +2272,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d443f39f76d9c499efa6818ea6592d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTurn: {fileID: 120127628}
-  battleManager: {fileID: 120127625}
+  playerTurn: {fileID: 0}
+  battleManager: {fileID: 0}
   tutorialUIPanel: {fileID: 446119933}
   tutorialText: {fileID: 0}
   selectTurn: {fileID: 120127630}
-  enemyTurn: {fileID: 120127629}
+  enemyTurn: {fileID: 0}
 --- !u!1 &1705824224
 GameObject:
   m_ObjectHideFlags: 0
