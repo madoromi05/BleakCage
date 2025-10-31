@@ -154,6 +154,11 @@ public class TutorialManager : MonoBehaviour , IPhase
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
+        if (tutorialUIPanel != null)
+        {
+            tutorialUIPanel.SetActive(false);
+        }
+
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         battleManager.StartCoroutine(battleManager.StartPlayerTurnWithTimer());
         yield return new WaitUntil(() => hasTurnFinished);

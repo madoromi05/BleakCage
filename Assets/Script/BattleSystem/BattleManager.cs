@@ -28,17 +28,17 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform playerStatusBarTransform;
     [SerializeField] private Transform enemyStatusBarTransform;
     [SerializeField] private Text timeText;
-    [SerializeField] private GameObject selectionChoicePanel; // 継続/変更 を尋ねるUIパネル
-    [SerializeField] private Button keepSelectionsButton;   // 「継続」ボタン
-    [SerializeField] private Button changeSelectionsButton; // 「変更」ボタン
-    [SerializeField] private float playerTurnDuration = 10f; // ターン時間を変数化
+    [SerializeField] private GameObject selectionChoicePanel;
+    [SerializeField] private Button keepSelectionsButton;
+    [SerializeField] private Button changeSelectionsButton;
+    [SerializeField] private float playerTurnDuration = 10f;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
 
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
-    [SerializeField] private GameObject tutorialObjectsParent; // [修正] チュートリアル関連オブジェクトの親
+    [SerializeField] private GameObject tutorialObjectsParent; // チュートリアル関連オブジェクトの親
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
     [SerializeField] private TutorialInputReader tortrialInputReader;
@@ -95,9 +95,10 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void SetupStageAndCharacters()
     {
-        playerView();
         stageSet();
         enemyView();
+        isTutorialMode = enemies.Count > 0 && enemies[0].EnemyID == 0;
+        playerView();
     }
 
     /// <summary>
@@ -105,8 +106,6 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void InitializeBattlePhases()
     {
-        //チュートリアルモードの判定
-        isTutorialMode = enemies.Count > 0 && enemies[0].EnemyID == 0;
         if (isTutorialMode)
         {
 #if TUTORIAL_ENABLED
@@ -158,45 +157,51 @@ public class BattleManager : MonoBehaviour
 
     private void playerView()
     {
-        // パーティ人数分 PlayerView を生成
-        for (int i = 0; i < players.Count; i++)
+        if (isTutorialMode)
         {
-            if (i >= playerPositions.Count)
-            {
-                Debug.LogError($"Player {i} のためのポジションが定義されていません。");
-                break;
-            }
+            // --- チュートリアルモードの処理 ---
+            Debug.Log("チュートリアルモード：Player ID 1 を検索・生成します...");
 
-            PlayerRuntime runtime = players[i];
+            // 1. パーティリスト (players) から PlayerID が 1 のキャラクターを探す
+            PlayerRuntime tutorialPlayer = players.FirstOrDefault(p => p.PlayerModel.PlayerID == 1); // [修正] 0 から 1 に変更
 
-            if (playerBasePrefab == null)
+            if (tutorialPlayer != null)
             {
-                Debug.LogError("BattleManagerに 'Player Base Prefab' が設定されていません！", this);
-                break;
+                // 2. プレイヤーが見つかった場合、ポジション[0] (最初の出現位置) に生成
+                if (playerPositions.Count > 0 && playerPositions[0] != null)
+                {
+                    Transform spawnPoint = playerPositions[0];
+                    // ヘルパーメソッドを呼び出し
+                    SpawnPlayerCharacter(tutorialPlayer, spawnPoint);
+                }
+                else
+                {
+                    Debug.LogError("チュートリアル用のプレイヤー(ID:1)は見つかりましたが、playerPositions[0]が設定されていません！"); // [修正] ログを ID:1 に
+                }
             }
+            else
+            {
+                Debug.LogError("チュートリアルモードですが、パーティ内に Player ID 1 のプレイヤーが見つかりませんでした！"); // [修正] ログを ID:1 に
+            }
+        }
+        else
+        {
+            // --- 通常モードの処理 (以前と同じ) ---
+            // パーティ全員を順番に生成
+            for (int i = 0; i < players.Count; i++)
+            {
+                if (i >= playerPositions.Count || playerPositions[i] == null)
+                {
+                    Debug.LogWarning($"Player {i} のためのポジションが定義されていないか、None(Transform)です。このプレイヤーの生成をスキップします。");
+                    continue; // 'break' ではなく 'continue' に変更
+                }
 
-            // PlayerのModel生成
-            Transform spawnPoint = playerPositions[i];
-            var playerObject = Instantiate(playerBasePrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
-            PlayerController playerController = playerObject.GetComponent<PlayerController>(); if (playerController == null)
-            {
-                Debug.LogError($"プレハブ '{playerObject.name}' のルートに PlayerController スクリプトがアタッチされていません！", playerObject);
-                continue; // 次のプレイヤーの処理へ
-            }
-            playerController.Init(runtime.PlayerModel);
-            runtime.PlayerController = playerController;
+                PlayerRuntime runtime = players[i];
+                Transform spawnPoint = playerPositions[i];
 
-            // PlayerのStatusUI生成
-            var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);
-            PlayerStatusUIController playerUiController = statusUIObject.GetComponent<PlayerStatusUIController>();
-            if (playerUiController == null)
-            {
-                Debug.LogError($"プレハブ '{playerStatusUIPrefab.name}' に PlayerStatusUIController スクリプトがアタッチされていません！", statusUIObject);
-                continue;
+                // ヘルパーメソッドを呼び出し
+                SpawnPlayerCharacter(runtime, spawnPoint);
             }
-            playerUiController.SetPlayerStatus(runtime);
-            playerController.SetStatusUI(playerUiController);
-            playerStatusUIs.Add(playerUiController);
         }
     }
 
@@ -209,9 +214,17 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogError("ステージIDが設定されていません！StageManager.SelectedStageIDを確認してください。");
 #if UNITY_EDITOR
-            // エディタ実行時、ステージ選択シーンを介していない場合のフォールバック
-            currentStageID = 1; // (または 0 for チュートリアル)
-            Debug.LogWarning($"ステージIDが未設定のため、エディタ専用フォールバックとしてID '{currentStageID}' を使用します。");
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName.Contains("Tutorial"))
+            {
+                currentStageID = 0; // チュートリアル
+                Debug.LogWarning($"シーン名'{sceneName}'のため、エディタ専用フォールバックとしてID '0' (チュートリアル) を使用します。");
+            }
+            else
+            {
+                currentStageID = 1; // 通常ステージ
+                Debug.LogWarning($"シーン名'{sceneName}'のため、エディタ専用フォールバックとしてID '1' (通常) を使用します。");
+            }
 #endif
         }
 
@@ -220,12 +233,10 @@ public class BattleManager : MonoBehaviour
         if (currentStage == null)
         {
             Debug.LogError($"ID {currentStageID} に一致する StageEnemyData が 'allStageEnemyData' に見つかりません！ BattleManager の Inspector を確認してください。", this);
-            // 処理を続行すると enemyView でNullReferenceExceptionが発生するため、ここで停止する
-            this.enabled = false; // BattleManagerを無効化
+            this.enabled = false;
             return;
         }
     }
-
 
     private void enemyView()
     {
@@ -573,5 +584,44 @@ public class BattleManager : MonoBehaviour
             // チュートリアルなど、SelectTurn 以外の場合は、通常の StartPhase() を呼ぶ
             currentPhase.StartPhase();
         }
+    }
+
+    /// <summary>
+    /// 渡されたPlayerRuntimeとTransformを基に、プレイヤーのプレハブとUIを生成・初期化する
+    /// </summary>
+    private void SpawnPlayerCharacter(PlayerRuntime runtime, Transform spawnPoint)
+    {
+        if (playerBasePrefab == null)
+        {
+            Debug.LogError("BattleManagerに 'Player Base Prefab' が設定されていません！", this);
+            return; // Prefabがなければ処理中断
+        }
+
+        // Playerの「土台」を生成
+        var playerObject = Instantiate(playerBasePrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+        PlayerController playerController = playerObject.GetComponent<PlayerController>();
+
+        if (playerController == null)
+        {
+            Debug.LogError($"プレハブ '{playerBasePrefab.name}' のルートに PlayerController スクリプトがアタッチされていません！", playerObject);
+            return;
+        }
+
+        playerController.Init(runtime.PlayerModel);
+        runtime.PlayerController = playerController;
+
+        // PlayerのStatusUI生成
+        var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);
+        PlayerStatusUIController playerUiController = statusUIObject.GetComponent<PlayerStatusUIController>();
+
+        if (playerUiController == null)
+        {
+            Debug.LogError($"プレハブ '{playerStatusUIPrefab.name}' に PlayerStatusUIController スクリプトがアタッチされていません！", statusUIObject);
+            return;
+        }
+
+        playerUiController.SetPlayerStatus(runtime);
+        playerController.SetStatusUI(playerUiController);
+        playerStatusUIs.Add(playerUiController);
     }
 }
