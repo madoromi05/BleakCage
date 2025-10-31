@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy_0
   m_EditorClassIdentifier: 
   EnemyID: 0
-  EnemyName: Tutorial
+  EnemyName: Enemy_0
   EnemyAttribute: 3
   EnemyDefensAttribute: 0
   EnemySprite: {fileID: 1459035125, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}

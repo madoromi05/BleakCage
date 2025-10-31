@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy_1
   m_EditorClassIdentifier: 
   EnemyID: 1
-  EnemyName: "\u30A8\u30EC\u30CB\u30E4\u8A18"
+  EnemyName: Enemy_1
   EnemyAttribute: 0
   EnemyDefensAttribute: 1
   EnemySprite: {fileID: -2015333617, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}

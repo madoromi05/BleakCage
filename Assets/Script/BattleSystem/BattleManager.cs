@@ -100,18 +100,6 @@ public class BattleManager : MonoBehaviour
             currentPhase = selectTurn;
         }
 
-        //if (keepSelectionsButton != null)
-        //{
-        //    keepSelectionsButton.onClick.RemoveAllListeners();
-        //    keepSelectionsButton.onClick.AddListener(OnKeepSelections);
-        //}
-
-        //if (changeSelectionsButton != null)
-        //{
-        //    changeSelectionsButton.onClick.RemoveAllListeners();
-        //    changeSelectionsButton.onClick.AddListener(OnChangeSelections);
-        //}
-
         if (selectionChoicePanel != null)
         {
             selectionChoicePanel.SetActive(false);

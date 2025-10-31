@@ -237,6 +237,15 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteCardCommands()
     {
+        // 手札のカード表示をdestory
+        foreach (var contCard in handCardControllers)
+        {
+            if (contCard != null)
+            {
+                Destroy(contCard.gameObject);
+            }
+        }
+
         Debug.Log("実行するカード: " + string.Join(",", selectedCardsThisTurn.Select(c => c.ID)));
 
         inputEnabled = false;
@@ -311,7 +320,7 @@ public class PlayerTurn : MonoBehaviour
             command.Do();
             yield return new WaitForSeconds(0.3f);
         }
-;
+
         Debug.Log("カード効果の実行完了");
 
         OnTurnFinished?.Invoke();

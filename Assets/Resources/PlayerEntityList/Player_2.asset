@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Player_2
   m_EditorClassIdentifier: 
   PlayerId: 2
-  PlayerName: "\u30AC\u30A4\u30E4\u30B9"
+  PlayerName: Player_2
   PlayerAttribute: 0
   CharacterPrefab: {fileID: 1345631006696095944, guid: 62cc7110c37c4aa45ad50899395ae984, type: 3}
   InitialRotation: {x: 0, y: 180, z: 0}
