@@ -5,7 +5,6 @@ using UnityEngine;
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
-    EnemyView view;
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
     private Animator animator;
@@ -24,7 +23,7 @@ public class EnemyController : MonoBehaviour
 
     private void Awake()
     {
-        view = GetComponent<EnemyView>();
+        // view = GetComponent<EnemyView>(); // [削除]
         animator = GetComponent<Animator>();
 
         // Animator Controllerが設定されているか確認
@@ -45,7 +44,26 @@ public class EnemyController : MonoBehaviour
     public void Init(EnemyModel enemyModel)
     {
         this.model = enemyModel;
-        view.Show(model);
+        // view.Show(model); // [削除]
+
+        // --- [ここから追加 PlayerControllerと同じロジック] ---
+        if (model.CharacterPrefab != null)
+        {
+            // 1. モデルに設定された初期回転（InitialRotation）を取得
+            Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
+
+            // 2. このEnemyControllerの（土台の）ワールド回転と、子のローカル回転を掛け合わせる
+            Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
+
+            // 3. 計算したワールド回転を使ってビジュアルモデル(CharacterPrefab)を子として生成
+            Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
+        }
+        else
+        {
+            Debug.LogError($"EnemyModel.CharacterPrefabが設定されていません！ (EnemyID: {model.EnemyID})", this.gameObject);
+        }
+        // --- [ここまで追加] ---
+
 
         if (model.EnemyAvatar != null)
         {

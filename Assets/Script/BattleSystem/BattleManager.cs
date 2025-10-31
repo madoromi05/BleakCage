@@ -17,8 +17,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private SelectTurn selectTurn;
 
     [Header("プレファブ と キャラ出現地点")]
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private GameObject enemyBasePrefab;
+    [SerializeField] private GameObject playerBasePrefab;
     [SerializeField] private List<Transform> playerPositions;
     [SerializeField] private List<Transform> enemyPositions;
     [SerializeField] private GameObject playerStatusUIPrefab;
@@ -31,13 +31,14 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject selectionChoicePanel; // 継続/変更 を尋ねるUIパネル
     [SerializeField] private Button keepSelectionsButton;   // 「継続」ボタン
     [SerializeField] private Button changeSelectionsButton; // 「変更」ボタン
+    [SerializeField] private float playerTurnDuration = 10f; // ターン時間を変数化
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
 
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
-    [SerializeField] private GameObject tutorialObjectsParent;//チュートリアル関連オブジェクトの親
+    [SerializeField] private GameObject tutorialObjectsParent; // [修正] チュートリアル関連オブジェクトの親
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
     [SerializeField] private TutorialInputReader tortrialInputReader;
@@ -58,35 +59,68 @@ public class BattleManager : MonoBehaviour
     private IPhase currentPhase;
     private bool isFirstSelectionPhase = true; // 最初の選択フェーズかどうかを判定するフラグ
     private Coroutine selectionChoiceCoroutine; // 選択待機コルーチンを保持する変数
+
+    //=================================================================================
+    // ライフサイクル (Startを分割)
+    //=================================================================================
+
     void Start()
     {
-        // Playerデータのロード
+        LoadGameData();
+        SetupStageAndCharacters();
+        InitializeBattlePhases();
+        StartSelectionPhase();
+    }
+
+    /// <summary>
+    /// プレイヤーデータとカードデッキをロード・初期化
+    /// </summary>
+    private void LoadGameData()
+    {
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         players = setupData.Party;
         List<CardRuntime> allCardsForDeck = setupData.AllCards;
+
         if (allCardsForDeck == null || allCardsForDeck.Count == 0)
         {
             Debug.LogError("デッキにセットするカードが1枚もありません！ PlayerDataLoader の処理を確認してください。");
             return;
         }
         battleCardDeck.InitFromCardList(allCardsForDeck);
+    }
 
+    /// <summary>
+    /// ステージデータをロードし、プレイヤーと敵を生成・配置
+    /// </summary>
+    private void SetupStageAndCharacters()
+    {
         playerView();
         stageSet();
         enemyView();
+    }
 
+    /// <summary>
+    /// 通常モードとチュートリアルモードの判定と、各ターンのセットアップ
+    /// </summary>
+    private void InitializeBattlePhases()
+    {
         //チュートリアルモードの判定
         isTutorialMode = enemies.Count > 0 && enemies[0].EnemyID == 0;
         if (isTutorialMode)
         {
+#if TUTORIAL_ENABLED
             if (tutorialObjectsParent != null)
             {
                 tutorialObjectsParent.SetActive(true);
             }
-
             selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurnTutorialManager;
+#else
+            Debug.LogWarning("チュートリアルモード（EnemyID 0）で戦闘が開始されましたが、TUTORIAL_ENABLED シンボルが定義されていません。");
+            isTutorialMode = false; // 通常モードとして続行
+            InitializeNonTutorialPhases(); // [修正] 通常モードの初期化を呼ぶ
+#endif
         }
         // チュートリアル用オブジェクトを非表示にする
         else
@@ -95,9 +129,7 @@ public class BattleManager : MonoBehaviour
             {
                 tutorialObjectsParent.SetActive(false);
             }
-
-            selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
-            currentPhase = selectTurn;
+            InitializeNonTutorialPhases(); // [修正] 通常モードの初期化を呼ぶ
         }
 
         if (selectionChoicePanel != null)
@@ -105,12 +137,24 @@ public class BattleManager : MonoBehaviour
             selectionChoicePanel.SetActive(false);
         }
 
+        // 敵ターンのセットアップ (チュートリアル/通常モード共通)
         List<PlayerModel> playerModels = players.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, enemies, playerStatusUIs);
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
-
-        StartSelectionPhase();
     }
+
+    /// <summary>
+    /// 通常モード（非チュートリアル）のフェーズ初期化
+    /// </summary>
+    private void InitializeNonTutorialPhases()
+    {
+        selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
+        currentPhase = selectTurn;
+    }
+
+    //=================================================================================
+    // キャラクターとステージのセットアップ
+    //=================================================================================
 
     private void playerView()
     {
@@ -125,18 +169,18 @@ public class BattleManager : MonoBehaviour
 
             PlayerRuntime runtime = players[i];
 
-            if (playerPrefab == null)
+            if (playerBasePrefab == null)
             {
-                Debug.LogError("BattleManagerのインスペクターで 'Player Prefab' が設定されていません！ (None)");
-                break; // ループ中断
+                Debug.LogError("BattleManagerに 'Player Base Prefab' が設定されていません！", this);
+                break;
             }
+
             // PlayerのModel生成
             Transform spawnPoint = playerPositions[i];
-            var playerObject = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
-            PlayerController playerController = playerObject.GetComponent<PlayerController>();
-            if (playerController == null)
+            var playerObject = Instantiate(playerBasePrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+            PlayerController playerController = playerObject.GetComponent<PlayerController>(); if (playerController == null)
             {
-                Debug.LogError($"プレハブ '{playerPrefab.name}' のルートに PlayerController スクリプトがアタッチされていません！", playerObject);
+                Debug.LogError($"プレハブ '{playerObject.name}' のルートに PlayerController スクリプトがアタッチされていません！", playerObject);
                 continue; // 次のプレイヤーの処理へ
             }
             playerController.Init(runtime.PlayerModel);
@@ -165,21 +209,21 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogError("ステージIDが設定されていません！StageManager.SelectedStageIDを確認してください。");
 #if UNITY_EDITOR
-            string sceneName = SceneManager.GetActiveScene().name;
-            // ※チュートリアルシーン名が "Tutorial" でない場合は、実際のシーン名に変更してください
-            if (sceneName == "Tutorial" || sceneName == "Battle_Tutorial") // [修正] シーン名 "Battle_Tutorial" も考慮
-            {
-                currentStageID = 0;
-                Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '0' (チュートリアル)に設定しました。");
-            }
-            else
-            {
-                currentStageID = 1;
-                Debug.Log($"シーン名'{sceneName}'のため、ステージIDを '1' (通常戦闘)に設定しました。");
-            }
+            // エディタ実行時、ステージ選択シーンを介していない場合のフォールバック
+            currentStageID = 1; // (または 0 for チュートリアル)
+            Debug.LogWarning($"ステージIDが未設定のため、エディタ専用フォールバックとしてID '{currentStageID}' を使用します。");
 #endif
         }
+
         currentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
+
+        if (currentStage == null)
+        {
+            Debug.LogError($"ID {currentStageID} に一致する StageEnemyData が 'allStageEnemyData' に見つかりません！ BattleManager の Inspector を確認してください。", this);
+            // 処理を続行すると enemyView でNullReferenceExceptionが発生するため、ここで停止する
+            this.enabled = false; // BattleManagerを無効化
+            return;
+        }
     }
 
 
@@ -200,10 +244,21 @@ public class BattleManager : MonoBehaviour
             EnemyModel enemy = enemyFactory.CreateFromId(enemyId);
             enemies.Add(enemy);
 
+            if (enemyBasePrefab == null)
+            {
+                Debug.LogError("BattleManagerに 'Enemy Base Prefab' が設定されていません！", this);
+                break;
+            }
+
             // 指定された3D座標に敵を生成
             Transform spawnPoint = enemyPositions[i];
-            var enemyObject = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+            var enemyObject = Instantiate(enemyBasePrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             EnemyController enemyController = enemyObject.GetComponent<EnemyController>();
+            if (enemyController == null)
+            {
+                Debug.LogError($"プレハブ '{enemyBasePrefab.name}' のルートに EnemyController スクリプトがアタッチされていません！", enemyObject);
+                continue;
+            }
             enemyController.Init(enemy);
 
             // 敵のStatusUI生成
@@ -214,6 +269,10 @@ public class BattleManager : MonoBehaviour
             enemyStatusUIs.Add(uiController);
         }
     }
+
+    //=================================================================================
+    // ターン進行とフェーズ管理
+    //=================================================================================
 
     /// <summary>
     /// 敵のターンが終了したときに呼び出される
@@ -287,7 +346,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-   private void OnCardTutorialPhaseFinished()
+    private void OnCardTutorialPhaseFinished()
     {
         if (currentPhase != null)
         {
@@ -317,13 +376,13 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void StartPlayerTurn()
     {
-        turnTime = 10f;
+        turnTime = playerTurnDuration; // [修正] Inspectorで設定した値を使用
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
 
     /// <summary>
-    /// プレイヤーのターンを10秒間開始
+    /// プレイヤーのターンをタイマー付きで開始
     /// </summary>
     public IEnumerator StartPlayerTurnWithTimer()
     {
@@ -341,7 +400,7 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// プレイヤーターン終了 → 敵ターン → プレイヤーターン再開
+    /// プレイヤーターン終了 → 敵ターン
     /// </summary>
     private void OnPlayerTurnFinished()
     {
@@ -353,7 +412,7 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 敵のターン（仮実装）→ すぐにプレイヤーターン再開
+    /// 敵のターン
     /// </summary>
     private IEnumerator EnemyTurn()
     {
@@ -361,6 +420,10 @@ public class BattleManager : MonoBehaviour
         enemyTurn.StartEnemyTurn();
         yield return null;
     }
+
+    //=================================================================================
+    // 選択フェーズのUIコールバック
+    //=================================================================================
 
     /// <summary>
     /// 「優先順位を継続」ボタンが押されたときの処理
@@ -386,7 +449,7 @@ public class BattleManager : MonoBehaviour
     /// <summary>
     /// 「優先順位を変更」ボタンが押されたときの処理
     /// </summary>
-   public void OnChangeSelections()
+    public void OnChangeSelections()
     {
         Debug.Log("--- OnChangeSelections() が呼ばれました ---");
         if (selectionChoicePanel != null)
@@ -402,6 +465,10 @@ public class BattleManager : MonoBehaviour
         }
         StartCoroutine(ProcessSelectionPhase(keepSelections: false));
     }
+
+    //=================================================================================
+    // 選択フェーズの内部ロジック
+    //=================================================================================
 
     /// <summary>
     /// 以前の選択がまだ有効か（選択した敵が生きているか）を検証する
