@@ -21,12 +21,6 @@ public class EnemyController : MonoBehaviour
     private const string AttackClipName002 = "Attack002";
     private const string AttackClipName003 = "Attack003";
 
-    private void Awake()
-    {
-        // ★ Awake() で Animator を取得するのをやめる
-        // animator = GetComponent<Animator>(); 
-    }
-
     /// <summary>
     /// 敵のデータを初期化し、表示とアニメーションを設定する
     /// </summary>
@@ -38,12 +32,9 @@ public class EnemyController : MonoBehaviour
         {
             Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
             Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
-
-            // --- [★ 修正 1] ---
             // プレハブを生成し、その参照(instance)を保持する
             GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
 
-            // --- [★ 修正 2] ---
             // 生成したインスタンスから "Animator" を取得する
             this.animator = instance.GetComponent<Animator>();
             if (this.animator == null)
@@ -58,7 +49,6 @@ public class EnemyController : MonoBehaviour
             return; // Animatorがないのでここで処理終了
         }
 
-        // --- [★ 修正 3] ---
         // "animator" が取得できたので、OverrideController の設定を "Init" で行う
         if (animator.runtimeAnimatorController == null)
         {
@@ -68,8 +58,7 @@ public class EnemyController : MonoBehaviour
         overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
         animator.runtimeAnimatorController = overrideController;
 
-        // --- [★ 修正 4] ---
-        // クリップの上書き
+        // クリップの上書き (model.EnemyAnimator は "EnemyAnimatorSet" 型)
         if (model.EnemyAnimator != null)
         {
             overrideController[IdleClipName] = model.EnemyAnimator.Idle;
@@ -107,10 +96,10 @@ public class EnemyController : MonoBehaviour
         int randomAttackID = Random.Range(0, 3);
 
         // --- [デバッグログ] ---
-        Debug.Log($"アニメーション再生: AttackID = {randomAttackID}");
+        Debug.Log($"[EnemyController] アニメーション再生: AttackID = {randomAttackID}");
         if (animator == null)
         {
-            Debug.LogError("Animatorがnullです！ Init()の処理が正しく完了していません。");
+            Debug.LogError("[EnemyController] Animatorがnullです！ Init()の処理が正しく完了していません。");
             return 0.5f;
         }
         // ---

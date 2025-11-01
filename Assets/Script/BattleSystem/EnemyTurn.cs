@@ -208,9 +208,7 @@ public class EnemyTurn : MonoBehaviour
 
             // 9. コマンドに結果をセットして実行
             attackCmd.SetDefenseResult(result);
-            command.Do(); // これで改造したDo()が実行される
-
-            yield return new WaitForSeconds(0.5f); // 攻撃ごとのウェイト
+            yield return StartCoroutine(command.Do());
         }
 
         // 10. ターン終了処理
