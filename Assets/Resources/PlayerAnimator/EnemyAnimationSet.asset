@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a70ad34df3a04654da3bd8bc7d0c0595, type: 3}
   m_Name: EnemyAnimationSet
   m_EditorClassIdentifier: 
-  Idle: {fileID: 0}
-  Attack001: {fileID: 0}
-  Attack002: {fileID: 0}
-  Attack003: {fileID: 0}
+  Idle: {fileID: 7400000, guid: 6bb61ecc586a9f249b0289392f38e9ca, type: 2}
+  Attack001: {fileID: 7400000, guid: 7152c634fc0a98247b7368020cf55e4a, type: 2}
+  Attack002: {fileID: 7400000, guid: 66f06246f312a144589b8533a03e20a1, type: 2}
+  Attack003: {fileID: 7400000, guid: 857cdba270a53dc4d8747218eb5c9eab, type: 2}
