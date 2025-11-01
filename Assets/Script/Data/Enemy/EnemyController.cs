@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -7,34 +8,23 @@ public class EnemyController : MonoBehaviour
 {
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
-    private Animator animator;
-    private AnimatorOverrideController overrideController;
+    private Animator animator; // ★ 変数だけ残す
+    private AnimatorOverrideController overrideController; // ★ 変数だけ残す
 
-    // アニメーション名を定数化
+    // AnimatorのParametersタブと一致させる
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
-    private static readonly int DamagedTriggerHash = Animator.StringToHash("DamagedTrigger");
-    private static readonly int IsDeadParamHash = Animator.StringToHash("IsDead");
+    private static readonly int AttackIDHash = Animator.StringToHash("AttackID");
 
-    // アニメーションクリップを定数化
+    // Animatorのステート名と一致させる
     private const string IdleClipName = "Idle";
-    private const string DeathClipName = "Death";
-    private const string DamagedClipName = "Damaged";
-    private const string AttackClipName = "attack will eilll3 arter";
+    private const string AttackClipName001 = "Attack001";
+    private const string AttackClipName002 = "Attack002";
+    private const string AttackClipName003 = "Attack003";
 
     private void Awake()
     {
-        animator = GetComponent<Animator>();
-
-        // Animator Controllerが設定されているか確認
-        if (animator.runtimeAnimatorController == null)
-        {
-            Debug.LogError("AnimatorにベースとなるAnimator Controllerが設定されていません！", this.gameObject);
-            return;
-        }
-
-        // Override Controllerを初期化
-        overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-        animator.runtimeAnimatorController = overrideController;
+        // ★ Awake() で Animator を取得するのをやめる
+        // animator = GetComponent<Animator>(); 
     }
 
     /// <summary>
@@ -43,83 +33,104 @@ public class EnemyController : MonoBehaviour
     public void Init(EnemyModel enemyModel)
     {
         this.model = enemyModel;
-        // view.Show(model); // [削除]
 
-        // --- [ここから追加 PlayerControllerと同じロジック] ---
         if (model.CharacterPrefab != null)
         {
-            // 1. モデルに設定された初期回転（InitialRotation）を取得
             Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
-
-            // 2. このEnemyControllerの（土台の）ワールド回転と、子のローカル回転を掛け合わせる
             Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
 
-            // 3. 計算したワールド回転を使ってビジュアルモデル(CharacterPrefab)を子として生成
-            Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
+            // --- [★ 修正 1] ---
+            // プレハブを生成し、その参照(instance)を保持する
+            GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
+
+            // --- [★ 修正 2] ---
+            // 生成したインスタンスから "Animator" を取得する
+            this.animator = instance.GetComponent<Animator>();
+            if (this.animator == null)
+            {
+                Debug.LogError("生成したキャラクタープレハブに Animator がありません！", instance);
+                return;
+            }
         }
         else
         {
             Debug.LogError($"EnemyModel.CharacterPrefabが設定されていません！ (EnemyID: {model.EnemyID})", this.gameObject);
+            return; // Animatorがないのでここで処理終了
         }
-        // --- [ここまで追加] ---
 
-
-        if (model.EnemyAvatar != null)
+        // --- [★ 修正 3] ---
+        // "animator" が取得できたので、OverrideController の設定を "Init" で行う
+        if (animator.runtimeAnimatorController == null)
         {
-            animator.avatar = model.EnemyAvatar;
+            Debug.LogError("キャラクターのAnimatorにベースとなるAnimator Controllerが設定されていません！", this.animator.gameObject);
+            return;
+        }
+        overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+        animator.runtimeAnimatorController = overrideController;
+
+        // --- [★ 修正 4] ---
+        // クリップの上書き
+        if (model.EnemyAnimator != null)
+        {
+            overrideController[IdleClipName] = model.EnemyAnimator.Idle;
+            overrideController[AttackClipName001] = model.EnemyAnimator.Attack001;
+            overrideController[AttackClipName002] = model.EnemyAnimator.Attack002;
+            overrideController[AttackClipName003] = model.EnemyAnimator.Attack003;
         }
         else
         {
-            // Avatarが設定されていない場合、警告を出す
-            if (model.EnemyAnimator != null)
-            {
-                Debug.LogWarning($"AnimatorSet「{model.EnemyAnimator.name}」にAvatarが設定されていません。", this.gameObject);
-            }
-            else
-            {
-                Debug.LogError("EnemyModel.EnemyAnimatorが設定されていません！", this.gameObject);
-            }
+            Debug.LogError($"EnemyModel (ID: {model.EnemyID}) に EnemyAnimator が設定されていません。");
         }
-
-        // 定数を使ってアニメーションクリップを上書き設定
-        overrideController[IdleClipName] = model.EnemyAnimator.Idle;
-        overrideController[DeathClipName] = model.EnemyAnimator.Death;
-        overrideController[DamagedClipName] = model.EnemyAnimator.Damaged;
     }
 
     /// <summary>
-    /// カードに応じた攻撃アニメーションを再生する
+    /// OverrideControllerに設定されたクリップの長さを取得する
     /// </summary>
-    public void PlayAttackAnimation(AnimationClip cardAttackClip)
+    private float GetAnimationClipLength(string clipNameKey)
     {
-        if (cardAttackClip != null)
+        if (overrideController != null && overrideController[clipNameKey] != null)
         {
-            // 1. 攻撃アニメーションを、カード固有のものに上書き
-            overrideController[AttackClipName] = cardAttackClip;
-
-            // 2. 攻撃トリガーを引いて、アニメーションを再生
-            animator.SetTrigger(AttackTriggerHash);
+            return overrideController[clipNameKey].length;
         }
-        else
+        Debug.LogWarning($"EnemyのOverrideControllerに '{clipNameKey}' のクリップが見つかりません。デフォルトの0.5秒を使用します。", this);
+        return 0.5f;
+    }
+
+    /// <summary>
+    /// ランダムな攻撃アニメーションを再生し、その長さを返す
+    /// (EnemyAttackCommand から呼ばれる)
+    /// </summary>
+    /// <returns>再生したアニメーションの長さ(秒)</returns>
+    public float PlayRandomAttackAnimation()
+    {
+        // 0, 1, 2 のいずれかをランダムに生成
+        int randomAttackID = Random.Range(0, 3);
+
+        // --- [デバッグログ] ---
+        Debug.Log($"アニメーション再生: AttackID = {randomAttackID}");
+        if (animator == null)
         {
-            Debug.LogWarning("再生する攻撃アニメーションクリップがありません。", this.gameObject);
+            Debug.LogError("Animatorがnullです！ Init()の処理が正しく完了していません。");
+            return 0.5f;
         }
-    }
+        // ---
 
-    /// <summary>
-    /// ダメージを受けた際のアニメーションを再生する
-    /// </summary>
-    public void PlayDamagedAnimation()
-    {
-        animator.SetTrigger(DamagedTriggerHash);
-    }
+        // Animatorにパラメータを設定
+        animator.SetInteger(AttackIDHash, randomAttackID);
+        animator.SetTrigger(AttackTriggerHash);
 
-    /// <summary>
-    /// 死亡時のアニメーションを再生する
-    /// </summary>
-    public void PlayDeathAnimation()
-    {
-        animator.SetBool(IsDeadParamHash, true);
+        // 再生したアニメーションの長さを返す
+        switch (randomAttackID)
+        {
+            case 0:
+                return GetAnimationClipLength(AttackClipName001);
+            case 1:
+                return GetAnimationClipLength(AttackClipName002);
+            case 2:
+                return GetAnimationClipLength(AttackClipName003);
+            default:
+                return 0.5f; // 安全なデフォルト値
+        }
     }
 
     public void SetStatusUI(EnemyStatusUIController ui)

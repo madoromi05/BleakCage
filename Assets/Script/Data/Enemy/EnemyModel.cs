@@ -14,8 +14,7 @@ public class EnemyModel
     public DefensAttributeType EnemyDefensAttribute { get; private set; } // 防御属性
     public Sprite EnemySprite { get; private set; }           // 表示アイコン
     public string EnemyDescription { get; private set; }      // 説明文
-    public AnimatorSet EnemyAnimator { get; private set; }   // アニメーションセット
-    public Avatar EnemyAvatar { get; private set; }         // 骨格(Avatar)
+    public EnemyAnimatorSet EnemyAnimator { get; private set; }   // アニメーションセット
 
     // --- PlayerModelに合わせて追加 ---
     public GameObject CharacterPrefab { get; private set; } // プレハブ

@@ -56,7 +56,8 @@ public class BattleManager : MonoBehaviour
     private List<EnemyModel> enemies = new List<EnemyModel>();
     private List<PlayerStatusUIController> playerStatusUIs = new List<PlayerStatusUIController>();
     private List<EnemyStatusUIController> enemyStatusUIs = new List<EnemyStatusUIController>();
-
+    private Dictionary<PlayerModel, PlayerController> playerControllers = new Dictionary<PlayerModel, PlayerController>();
+    private Dictionary<EnemyModel, EnemyController> enemyControllers = new Dictionary<EnemyModel, EnemyController>();
     private EnemyModel enemyModel;
     private StageEnemyData currentStage;
     private EnemyStatusUIController enemyUIController;
@@ -150,7 +151,7 @@ public class BattleManager : MonoBehaviour
 
         // 敵ターンのセットアップ (チュートリアル/通常モード共通)
         List<PlayerModel> playerModels = players.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, enemies, playerStatusUIs);
+        enemyTurn.EnemySetup(playerModels, enemies, enemyControllers, playerControllers, playerStatusUIs);
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
     }
 
@@ -283,7 +284,7 @@ public class BattleManager : MonoBehaviour
                 continue;
             }
             enemyController.Init(enemy);
-
+            enemyControllers.Add(enemy, enemyController);
             // 敵のStatusUI生成
             var statusUIObject = Instantiate(enemyStatusUIPrefab, enemyStatusBarTransform, false);
             EnemyStatusUIController uiController = statusUIObject.GetComponent<EnemyStatusUIController>();
@@ -621,6 +622,7 @@ public class BattleManager : MonoBehaviour
 
         playerController.Init(runtime.PlayerModel);
         runtime.PlayerController = playerController;
+        playerControllers.Add(runtime.PlayerModel, playerController);
 
         // PlayerのStatusUI生成
         var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);

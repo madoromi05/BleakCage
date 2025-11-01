@@ -18,7 +18,7 @@ public class EnemyEntity : ScriptableObject
     public float EnemyHP;                   // EnemyのHP
     public float EnemyAttackPower;          // キャラ攻撃力
     public float EnemyDefensePower;         // キャラ防御力
-    public AnimatorSet AnimationSet;        // アニメーションセット
+    public EnemyAnimatorSet AnimationSet;        // アニメーションセット
 
     // --- PlayerEntityに合わせて追加 ---
     public GameObject CharacterPrefab;      // キャラクタープレハブ

@@ -19,6 +19,8 @@ public class EnemyTurn : MonoBehaviour
     private IEnemyAttackStrategy damageStrategy;
     private Queue<ICommand> commandQueue = new();
     private List<PlayerStatusUIController> playerStatusUIControllers;
+    private Dictionary<EnemyModel, EnemyController> enemyControllers;
+    private Dictionary<PlayerModel, PlayerController> playerControllers;
 
     // --- ゲージと入力の定数 ---
     private const float GUARD_RECOVERY_SMALL = 10f;         //ガード成功回復
@@ -33,10 +35,14 @@ public class EnemyTurn : MonoBehaviour
     }
 
     public void EnemySetup(List<PlayerModel> players, List<EnemyModel> enemys,
-                         List<PlayerStatusUIController> playerStatusUIControllers)
+                           Dictionary<EnemyModel, EnemyController> enemyControllers,
+                           Dictionary<PlayerModel, PlayerController> playerControllers,
+                           List<PlayerStatusUIController> playerStatusUIControllers)
     {
         this.players = players;
         this.enemies = enemys;
+        this.enemyControllers = enemyControllers;
+        this.playerControllers = playerControllers;
         this.playerStatusUIControllers = playerStatusUIControllers;
     }
 
@@ -85,7 +91,17 @@ public class EnemyTurn : MonoBehaviour
                 if (targetIndex != -1)
                 {
                     PlayerStatusUIController targetUIController = playerStatusUIControllers[targetIndex];
-                    commandQueue.Enqueue(new EnemyAttackCommand(target, attacker, damageStrategy, targetUIController));
+                    if (!enemyControllers.TryGetValue(attacker, out EnemyController attackerController))
+                    {
+                        Debug.LogError($"EnemyModel (ID: {attacker.EnemyID}) に対応する EnemyController が見つかりません。", this);
+                        continue;
+                    }
+                    if (!playerControllers.TryGetValue(target, out PlayerController targetController))
+                    {
+                        Debug.LogError($"PlayerModel (ID: {target.PlayerID}) に対応する PlayerController が見つかりません。", this);
+                        continue;
+                    }
+                    commandQueue.Enqueue(new EnemyAttackCommand(target, attacker, attackerController, targetController, damageStrategy, targetUIController));
                 }
                 else
                 {
