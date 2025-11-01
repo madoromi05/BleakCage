@@ -6,7 +6,7 @@ public class EnemyAttackCommand : ICommand
     private PlayerModel player;
     private EnemyModel enemy;
     private EnemyController enemyController;
-    private PlayerController playerController;
+    private PlayerController playerController; // 参照は残しますが、アニメーション再生には使いません
     private IEnemyAttackStrategy damageStrategy;
     private PlayerStatusUIController playerStatusUIController;
 
@@ -58,43 +58,36 @@ public class EnemyAttackCommand : ICommand
 
         // 2. アニメーションを再生する
         float attackAnimTime = 0.5f; // デフォルト
-        float playerAnimTime = 0.0f; // デフォルト
+        // ★ 変更: プレイヤーアニメーションは常になし (0.0f)
+        float playerAnimTime = 0.0f;
 
         // 2a. 敵の攻撃アニメ
         if (enemyController != null)
         {
             attackAnimTime = enemyController.PlayRandomAttackAnimation();
         }
-        // --- [修正ここまで] ---
 
-        // 2b. プレイヤーの防御/被弾アニメ
+        // 2b. プレイヤーの防御/被弾アニメ (★ すべてアニメーションなしに変更)
         switch (defenseResult)
         {
             case DefenseResult.Counter:
-                Debug.Log("カウンター成功！");
-                if (playerController != null)
-                {
-                    playerController.PlayGuardAnimation();
-                    playerAnimTime = playerController.GetGuardAnimationLength();
-                }
+                Debug.Log("カウンター成功！ (エクストラターンへ)");
+                playerAnimTime = 0.0f; // アニメーションなし
                 break;
 
             case DefenseResult.Guard:
-                Debug.Log("ガード成功！");
-                if (playerController != null)
-                {
-                    playerController.PlayGuardAnimation();
-                    playerAnimTime = playerController.GetGuardAnimationLength();
-                }
+                Debug.Log("ガード成功！ (アニメーションなし)");
+                playerAnimTime = 0.0f; // アニメーションなし
                 break;
 
             default:
                 Debug.Log("被弾！ (アニメーションなし)");
-                playerAnimTime = 0.0f; // 被弾アニメがないため待機時間 0
+                playerAnimTime = 0.0f; // アニメーションなし
                 break;
         }
 
-        // 3. 2つのアニメーションのうち
+        // 3. 2つのアニメーションのうち、長い方（＝実質、敵のアニメ時間）待機する
+        // ★ 変更: playerAnimTime は 0.0f なので、実質 attackAnimTime だけ待つ
         float waitTime = Mathf.Max(attackAnimTime, playerAnimTime);
         yield return new WaitForSeconds(waitTime);
 

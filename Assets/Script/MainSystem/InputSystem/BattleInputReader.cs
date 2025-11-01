@@ -7,6 +7,7 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     public event Action<int> CardSelectEvent;
     public event Action DisCardEvent;
     public event Action<int> OnDefend;
+    public event Action<int> OnDefendCanceled;
 
     private InputControls controls;
 

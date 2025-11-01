@@ -8,23 +8,17 @@ public class PlayerController : MonoBehaviour
 {
     private PlayerModel playerModel;
     private PlayerStatusUIController statusUI;
-    private Animator animator; // ★ 変数だけ残す
-    private AnimatorOverrideController overrideController; // ★ 変数だけ残す
+    private Animator animator;
+    private AnimatorOverrideController overrideController;
 
     // アニメーターのパラメータハッシュ
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
-    private static readonly int GuardTriggerHash = Animator.StringToHash("GuardTrigger");
+    private static readonly int IsGuardingHash = Animator.StringToHash("IsGuarding");
 
-    // --- [重要] Animatorのステート名（画像のもの）に合わせる ---
+    // Animatorのステート名（画像のもの）に合わせる ---
     private const string IdleClipName = "Idle";
-    private const string GuardClipName = "guard arter"; // 画像の "guard arter"
-    private const string AttackClipName = "attack will eilll3 arter"; // 画像の "attack will eilll3 arter"
-
-    private void Awake()
-    {
-        // ★ Awake() で Animator を取得するのをやめる
-        // animator = GetComponent<Animator>();
-    }
+    private const string GuardClipName = "Guard";
+    private const string AttackClipName = "Attack";
 
     public void Init(PlayerModel model)
     {
@@ -36,12 +30,8 @@ public class PlayerController : MonoBehaviour
             Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
             Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
 
-            // --- [★ 修正 1] ---
-            // プレハブを生成し、その参照(instance)を保持する
             GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
 
-            // --- [★ 修正 2] ---
-            // 生成したインスタンスから "Animator" を取得する
             this.animator = instance.GetComponent<Animator>();
             if (this.animator == null)
             {
@@ -55,8 +45,6 @@ public class PlayerController : MonoBehaviour
             return; // Animatorがないのでここで処理終了
         }
 
-        // --- [★ 修正 3] ---
-        // "animator" が取得できたので、OverrideController の設定を "Init" で行う
         if (animator.runtimeAnimatorController == null)
         {
             Debug.LogError("キャラクターのAnimatorにベースとなるAnimator Controllerが設定されていません！", this.animator.gameObject);
@@ -65,8 +53,6 @@ public class PlayerController : MonoBehaviour
         overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
         animator.runtimeAnimatorController = overrideController;
 
-        // --- [★ 修正 4] ---
-        // 3. アニメーションクリップの上書き
         if (model.PlayerAnimator != null)
         {
             overrideController[IdleClipName] = model.PlayerAnimator.Idle;
@@ -98,16 +84,15 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// ガード（またはカウンター）のアニメーションを再生する
+    /// 防御アニメーションの再生状態を設定する
     /// </summary>
-    public void PlayGuardAnimation()
+    /// <param name="isGuarding">防御中なら true</param>
+    public void SetGuardAnimation(bool isGuarding)
     {
-        if (animator == null)
+        if (animator != null)
         {
-            Debug.LogError("Animatorがnullです！ Init()が完了していません。");
-            return;
+            animator.SetBool(IsGuardingHash, isGuarding);
         }
-        animator.SetTrigger(GuardTriggerHash);
     }
 
     /// <summary>

@@ -8,8 +8,8 @@ public class EnemyController : MonoBehaviour
 {
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
-    private Animator animator; // ★ 変数だけ残す
-    private AnimatorOverrideController overrideController; // ★ 変数だけ残す
+    private Animator animator;
+    private AnimatorOverrideController overrideController;
 
     // AnimatorのParametersタブと一致させる
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");

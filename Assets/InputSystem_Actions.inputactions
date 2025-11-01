@@ -126,7 +126,7 @@
                     "name": "",
                     "id": "0db5c84f-d9cb-47d0-a6be-66ff4d926668",
                     "path": "<Keyboard>/1",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "DefenseOne",

@@ -23,11 +23,13 @@ public class EnemyTurn : MonoBehaviour
     private Dictionary<PlayerModel, PlayerController> playerControllers;
 
     // --- ゲージと入力の定数 ---
-    private const float GUARD_RECOVERY_SMALL = 10f;         //ガード成功回復
-    private const float HIT_RECOVERY_MEDIUM = 20f;          //被弾回復
-    private const float COUNTER_RECOVERY_LARGE = 50f;       //カウンター成功回復
+    private const float GUARD_RECOVERY_SMALL = 10f;       // ガード成功回復
+    private const float HIT_RECOVERY_MEDIUM = 20f;        // 被弾回復
+    private const float COUNTER_RECOVERY_LARGE = 50f;     // カウンター成功回復
+    private const float GUARD_DRAIN_PER_SECOND = 10f;     // ★ 追加: ガード中のゲージ消費量(毎秒)
 
-    private int defenseInput = 0; // 押された防御キー (1, 2, 3)
+    private int defenseInput = 0; // 押された防御キー (1, 2, 3) - "押した瞬間" の判定用
+    private bool[] isDefending = new bool[3];
 
     private void Awake()
     {
@@ -50,6 +52,13 @@ public class EnemyTurn : MonoBehaviour
     {
         commandQueue.Clear();
         inputReader.OnDefend += HandleDefenseInput;
+        inputReader.OnDefendCanceled += HandleDefenseInputCanceled;
+
+        for (int i = 0; i < isDefending.Length; i++)
+        {
+            isDefending[i] = false;
+        }
+
         StartCoroutine(ProcessEnemyActions());
     }
 
@@ -58,7 +67,26 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void HandleDefenseInput(int playerIndex)
     {
+        // "押した瞬間" のキーを記録 (カウンター判定用)
         this.defenseInput = playerIndex;
+
+        // "ホールド状態" をONにする
+        if (playerIndex > 0 && playerIndex <= 3)
+        {
+            isDefending[playerIndex - 1] = true; // ★ 追加
+        }
+    }
+
+    /// <summary>
+    /// InputReaderから防御キーが "離された" ことを受け取る
+    /// </summary>
+    private void HandleDefenseInputCanceled(int playerIndex)
+    {
+        // "ホールド状態" をOFFにする
+        if (playerIndex > 0 && playerIndex <= 3)
+        {
+            isDefending[playerIndex - 1] = false;
+        }
     }
 
     /// <summary>
@@ -124,7 +152,7 @@ public class EnemyTurn : MonoBehaviour
         // 1. 実行する攻撃コマンドを準備
         PrepareAttackCommands();
 
-        // 2. 防御用の入力マップを有効にする (InputReader側の実装が必要)
+        // 2. 防御用の入力マップを有効にする
         inputReader.EnableDefenseActionMap();
 
         // 3. キューにたまったコマンドを順に実行
@@ -141,7 +169,7 @@ public class EnemyTurn : MonoBehaviour
                 continue;
             }
 
-            // --- ここからが攻撃コマンドの防御/カウンター処理 ---
+            // --- ★ ここから防御/カウンター処理を大幅に変更 ★ ---
 
             // 4. ターゲット情報を取得
             PlayerModel target = attackCmd.PlayerTarget;
@@ -156,57 +184,77 @@ public class EnemyTurn : MonoBehaviour
             float defenseWindow = 1.0f; // 1.0秒の受付時間
             float justWindowStart = 0.7f; // 0.7秒～1.0秒がジャスト
             float timer = 0f;
-            bool inputReceived = false;
-            defenseInput = 0; // 入力をリセット
+
+            defenseInput = 0; // "Press" event tracker for this attack
+            float pressTime = -1f; // "Press" event が発生した時間
+            bool isHoldingCorrectKey = false;
+            DefenseResult result = DefenseResult.None; // Default to hit
 
             while (timer < defenseWindow)
             {
                 timer += Time.deltaTime;
+
+                // 1. "Press" event check (for timing)
+                // HandleDefenseInput が defenseInput をセットする
                 if (defenseInput == targetPlayerNum)
                 {
-                    inputReceived = true;
-                    break; // 正しいキーが押された
+                    pressTime = timer; // "押した瞬間" の時間を記録
+                    defenseInput = 0; // イベントを消費
                 }
+
+                // 2. "Hold" state check
+                // HandleDefenseInput/Canceled が isDefending[] を更新する
+                isHoldingCorrectKey = isDefending[targetPlayerIndex];
+
+                // 3. Continuous Gauge Drain (ゲージ消費ロジック)
+                if (isHoldingCorrectKey)
+                {
+                    // 毎秒10のペースでゲージを消費
+                    float drainAmount = GUARD_DRAIN_PER_SECOND * Time.deltaTime;
+                    if (!battleManager.TrySpendGuardGauge(drainAmount))
+                    {
+                        // ゲージが尽きたら強制的にガード解除
+                        isHoldingCorrectKey = false;
+                        isDefending[targetPlayerIndex] = false; // "ホールド" 状態を強制解除
+                        Debug.Log("ガードゲージが尽きた！");
+                    }
+                }
+
                 yield return null;
             }
 
             // TODO: UIの「狙われている！」表示を消す
 
-            // 7. 防御結果を判定
-            DefenseResult result = DefenseResult.None;
-            if (inputReceived)
+            // 7. 防御結果を判定 (攻撃が "着弾" する瞬間の判定)
+
+            if (isHoldingCorrectKey) // ウィンドウ終了時にキーを押し続けていたか？
             {
-                // BattleManagerの共有ゲージを使おうと試みる
-                if (battleManager.TrySpendGuardGauge(BattleManager.GUARD_COST))
+                // 押し続けていた
+                if (pressTime >= justWindowStart)
                 {
-                    // ゲージ消費成功
-                    if (timer >= justWindowStart)
-                    {
-                        result = DefenseResult.Counter;
-                        battleManager.IncrementCounterCount(); // カウンターカウント+1
-                        battleManager.AddGuardGauge(COUNTER_RECOVERY_LARGE);
-                    }
-                    else
-                    {
-                        result = DefenseResult.Guard;
-                        battleManager.AddGuardGauge(GUARD_RECOVERY_SMALL);
-                    }
+                    // "Just" window 内で押し始めていた -> カウンター
+                    result = DefenseResult.Counter;
+                    battleManager.IncrementCounterCount();
+                    battleManager.AddGuardGauge(COUNTER_RECOVERY_LARGE);
+                    Debug.Log($"P{targetPlayerNum}: カウンター成功！ (+{COUNTER_RECOVERY_LARGE})");
                 }
                 else
                 {
-                    // ゲージ不足で防御失敗
-                    Debug.Log("ガードゲージ不足！ 防御失敗！");
-                    result = DefenseResult.None;
+                    // "Just" window 以前から押し始めていた (pressTime >= 0 or -1) -> ガード
+                    result = DefenseResult.Guard;
+                    battleManager.AddGuardGauge(GUARD_RECOVERY_SMALL);
+                    Debug.Log($"P{targetPlayerNum}: ガード成功 (+{GUARD_RECOVERY_SMALL})");
                 }
             }
-
-            // 8. 被弾した場合 (入力なし or ゲージ不足)
-            if (result == DefenseResult.None)
+            else
             {
+                // 攻撃着弾時、キーを押していなかった (or ゲージ切れ) -> 被弾
+                result = DefenseResult.None;
+                Debug.Log($"P{targetPlayerNum}: 被弾！ (+{HIT_RECOVERY_MEDIUM})");
                 battleManager.AddGuardGauge(HIT_RECOVERY_MEDIUM);
             }
 
-            // 9. コマンドに結果をセットして実行
+            // 8. コマンドに結果をセットして実行
             attackCmd.SetDefenseResult(result);
             yield return StartCoroutine(command.Do());
         }
@@ -214,6 +262,7 @@ public class EnemyTurn : MonoBehaviour
         // 10. ターン終了処理
         inputReader.EnableBattleActionMap();
         inputReader.OnDefend -= HandleDefenseInput;
+        inputReader.OnDefendCanceled -= HandleDefenseInputCanceled;
 
         TurnFinished?.Invoke();
     }

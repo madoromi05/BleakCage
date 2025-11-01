@@ -34,7 +34,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private float playerTurnDuration = 10f;
     [SerializeField] private Slider guardGaugeSlider;
-    [SerializeField] private Text guardCounterText;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
@@ -301,10 +300,25 @@ public class BattleManager : MonoBehaviour
     /// <summary>
     /// 敵のターンが終了したときに呼び出される
     /// </summary>
+    /// <summary>
+    /// 敵のターンが終了したときに呼び出される
+    /// </summary>
     private void OnEnemyTurnFinished()
     {
         Debug.Log("【敵ターン終了】");
-        StartSelectionPhase(); // ここで次の選択フェーズを開始する
+
+        // カウンターが1回以上成功しているかチェック
+        if (counterCount > 0)
+        {
+            Debug.Log($"カウンターが {counterCount} 回あります。エクストラターンに移行します。");
+            // エクストラターン処理のコルーチンを開始
+            StartCoroutine(HandleExtraTurnsAndContinue());
+        }
+        else
+        {
+            Debug.Log("カウンターはありません。通常の選択フェーズに移行します。");
+            StartSelectionPhase();
+        }
     }
 
     /// <summary>
@@ -662,14 +676,6 @@ public class BattleManager : MonoBehaviour
         if (guardGaugeSlider != null)
         {
             guardGaugeSlider.value = currentGuardGauge / MAX_GUARD_GAUGE;
-        }
-        if (guardCounterText != null)
-        {
-            // (現在のゲージ量 / 1回のコスト) の小数点以下を切り捨て
-            int possibleCounters = Mathf.FloorToInt(currentGuardGauge / GUARD_COST);
-
-            // Textコンポーネントに数字（"3", "2", "1", "0"など）を設定
-            guardCounterText.text = possibleCounters.ToString();
         }
     }
 

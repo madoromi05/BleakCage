@@ -32,6 +32,8 @@ public class PlayerTurn : MonoBehaviour
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>(); // 破棄されたカードのIDを保持
     private List<EnemyStatusUIController> enemyStatusUIControllers;
 
+    private bool isCounterTurn = false;
+    private System.Action onCounterActionFinishedCallback;
     private bool[] isCardSelected = new bool[3];      // 各カード（3枚）が選択されているかどうか
     private bool inputEnabled = false;                // ターン中全体の入力フラグ
     private bool isInputLocked = false;               // 入力受付処理中に他の入力を受け取らない
@@ -72,6 +74,8 @@ public class PlayerTurn : MonoBehaviour
 
     public void StartPlayerTurn()
     {
+        isCounterTurn = false;
+        isTurnFinished = false;
         isTurnFinished = false;
         selectedCardsThisTurn.Clear();
         excludedCardInstancesThisTurn.Clear();
@@ -235,6 +239,8 @@ public class PlayerTurn : MonoBehaviour
             return;
         }
 
+        List<CardRuntime> cardsToExecute = new List<CardRuntime>();
+
         for (int i = 0; i < isCardSelected.Length; i++)
         {
             if (i >= handCards.Count) continue;
@@ -242,7 +248,14 @@ public class PlayerTurn : MonoBehaviour
             CardRuntime cardInstance = handCards[i];
             if (isCardSelected[i])
             {
-                selectedCardsThisTurn.Add(cardInstance);
+                if (isCounterTurn)
+                {
+                    cardsToExecute.Add(cardInstance);
+                }
+                else
+                {
+                    selectedCardsThisTurn.Add(cardInstance);
+                }
             }
             else
             {
@@ -257,7 +270,37 @@ public class PlayerTurn : MonoBehaviour
             isCardSelected[i] = false;
         }
 
-        DrawHandCards();
+        if (isCounterTurn)
+        {
+            // === カウンターアクションの場合 ===
+            isCounterTurn = false; // アクション終了
+            inputEnabled = false;
+
+            // 手札のカード表示をdestory
+            foreach (var contCard in handCardControllers)
+            {
+                if (contCard != null) Destroy(contCard.gameObject);
+            }
+            handCardControllers.Clear();
+            handCards.Clear();
+
+            StartCoroutine(actionExecutor.ExecuteActions(
+                cardsToExecute,
+                playerTargetSelections,
+                enemyStatusUIControllers,
+                damageStrategy,
+                () => {
+                    onCounterActionFinishedCallback?.Invoke();
+                    onCounterActionFinishedCallback = null;
+                }
+            ));
+        }
+        else
+        {
+            // === 通常ターンの場合 (元のロジック) ===
+            // 手札を再抽選する
+            DrawHandCards();
+        }
     }
 
     /// <summary>
@@ -274,5 +317,24 @@ public class PlayerTurn : MonoBehaviour
                 player.BuffHandler.TickDownBuffDurations();
             }
         }
+    }
+
+    /// <summary>
+    ///  カウンター成功時のエクストラアクション（カード1回提示）を開始する
+    /// </summary>
+    /// <param name="onCounterActionFinished">このアクションが完了したときに呼ばれるコールバック</param>
+    public void StartCounterAction(System.Action onCounterActionFinished)
+    {
+        Debug.Log("カウンターアクションを開始します");
+        isCounterTurn = true;    // カウンターモードをON
+        isTurnFinished = false; // ターン実行中
+        inputEnabled = true;
+        isInputLocked = false;
+
+        // このコールバックを保存
+        this.onCounterActionFinishedCallback = onCounterActionFinished;
+
+        // 3枚引いて表示
+        DrawHandCards();
     }
 }
