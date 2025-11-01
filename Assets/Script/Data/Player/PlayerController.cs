@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     private const string IdleClipName = "Idle";
     private const string DeathClipName = "Death";
     private const string DamagedClipName = "Damaged";
-    private const string AttackClipName = "DemoAttack";
+    private const string AttackClipName = "attack will eilll3 arter";
 
     private void Awake()
     {
@@ -68,6 +68,7 @@ public class PlayerController : MonoBehaviour
     {
         if (cardAttackClip != null)
         {
+            Debug.Log($"Playing attack animation: {cardAttackClip.name} for PlayerID: {playerModel.PlayerID}");
             // 1. 攻撃アニメーションを、カード固有のものに上書き
             overrideController[AttackClipName] = cardAttackClip;
 

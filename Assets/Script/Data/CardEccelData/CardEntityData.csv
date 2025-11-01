@@ -1,29 +1,32 @@
-ID,Name,CharacterID,EquipableWeaponID,Icon,Description,Type,Attribute,AttackCount,TargetCount,Passive,HitRate,OutputModifier,DefensePenetration
-101,[処刑人の識],0,101,Assets/Sprites/Icons/temp.png,ステップから鋭く突き刺し、横に振って切り裂く→銃撃,Weapon,Slash,2,1,FALSE,1,0,0
-102,[デュアル・エクスキューション],0,101,Assets/Sprites/Icons/temp.png,敵を二回斬りつける\n[付与効果: 損傷],Weapon,Slash,2,1,FALSE,1,1.2,0
-103,[アグレッシブ・フロス],0,101,Assets/Sprites/Icons/temp.png,回転して斬りながら、弾も撃つ,Weapon,Slash,2,3,FALSE,1,0.9,0
-104,[ゼロ-三唱],0,101,Assets/Sprites/Icons/temp.png,近距離から3発打つ,Weapon,Bullet,3,1,FALSE,1,1,0
-105,[レン-五響],0,101,Assets/Sprites/Icons/temp.png,遠距離から3発打つ,Weapon,Bullet,5,1,FALSE,0.8,0.8,0
-106,[アサルト・ブレイク],0,101,Assets/Sprites/Icons/temp.png,大きく振りかぶって敵を攻撃する。当たるタイミングは少しゆくっり,Weapon,Slash,1,1,FALSE,0.9,1.3,1.25
-107,[刺],0,101,Assets/Sprites/Icons/temp.png,敵にガンスラを突き刺し、4回弾を撃つ,Weapon,Slash,5,3,FALSE,1,0.4,0
-108,[断罪の轍],0,102,Assets/Sprites/Icons/temp.png,目標まで雷のレールができ、そこを突き抜ける。突き抜けた後、地面が削れている,Weapon,Stab,1,1,FALSE,1,0,0
-109,[どきどき！？超電磁♡ストライクばきゅーん！ver.2.07],0,102,Assets/Sprites/Icons/temp.png,構え→槍の機構が展開→槍が電磁気を纏う→槍がバチクソ放電して光る→槍が手を離れてぶっ飛んでく→敵にぶっ刺さって超電磁大爆発\n[付与効果: 攻撃失敗時、攻撃目標だった対象に[目標]1スタックを付与],Weapon,Stab,1,1,FALSE,0.7,1.5,0
-110,[グングニル],0,102,Assets/Sprites/Icons/temp.png,「イグナイトパス・廻(黒子のバスケ)」的な感じで槍を螺旋回転させながら投擲する\n[付与効果: 攻撃失敗時、攻撃目標だった対象に[目標]1スタックを付与]\n[パッシブ: 〔ターンに1回：同名〕必ず最初に手札に加わる。],Weapon,Blunt,1,1,FALSE,0.7,1.5,0
-111,[三電「屠」],0,102,Assets/Sprites/Icons/temp.png,雷電を纏った槍で3段突きを行う。\n[付与効果: 攻撃失敗時、攻撃目標だった対象に[目標]3スタックを付与],Weapon,Blunt,3,1,FALSE,0.75,1,0
-112,[カラドボルグ],0,102,Assets/Sprites/Icons/temp.png,槍から放電し始め、放電した電気が槍になって一直線に飛んでく。\n[付与効果: 攻撃成功時、熔鉄1を付与, 目標*1],Weapon,Stab,1,1,FALSE,0.7,1.6,0
-113,[裂甲の一閃],0,102,Assets/Sprites/Icons/temp.png,低めに武器を構えて敵に攻撃する\n[付与効果: 破砕*1, 目標*1],Weapon,Stab,1,1,FALSE,1,1,1.5
-114,[猪突猛進],0,102,Assets/Sprites/Icons/temp.png,槍を脇に抱えて全速力で敵に突撃する\n[付与効果: 破砕*1, 目標*1],Weapon,Stab,1,1,FALSE,0.7,1.8,0
-115,[威打天「月輪」],0,103,Assets/Sprites/Icons/temp.png,槌ブーストで上昇→空中1回転→槌ブーストで急降して攻撃対象を叩く(1回目)→バフ1発揮→広範囲衝撃(2回目)\n[付与効果: 攻撃ヒット時、バフ1をただちに発揮する],Weapon,Blunt,1,1,FALSE,1,1.7,0
-116,[彼方からの災「天涙」],0,103,Assets/Sprites/Icons/temp.png,敵に当てるように下から振り上げ腰の高さ当たりでストップ→ブースト起動→敵と一緒にブーストで上昇→画面外→敵と一緒に急降下し地面に叩きつける\n[付与効果: 2段目のヒット時、バフ1を発揮する],Weapon,Blunt,2,1,FALSE,1,1.7,0
-117,[異端狩り「灼鎌」],0,103,Assets/Sprites/Icons/temp.png,上段でブースター側を前にしてハンマーを構える→ブースト点火(大き目)→構えたまま攻撃対象に歩いて近づく→ブーストで炙る\n[付与効果: 攻撃時、バフ1を発揮する。ヒット時、対象に【熔鉄】1stackを与える。],Weapon,Bullet,2,1,FALSE,1,1,0
-118,[撲ＳＡＴＵ★ぐるぐるホームラン！ver.3.02],0,103,Assets/Sprites/Icons/temp.png,構える→槌ブースト点火→槌ブーストでベイブレード→敵を打ち上げる\n[付与効果: 攻撃時、バフ2をただちに発揮する],Weapon,Blunt,1,1,FALSE,1,1.5,0
-119,[焔雷],0,103,Assets/Sprites/Icons/temp.png,武器を上段に構える(溜め)雷を纏う→振り下ろし,Weapon,Blunt,1,2,FALSE,0.5,2.5,0
-120,[シュトゥルム・ブリッツ],0,103,Assets/Sprites/Icons/temp.png,横？斜め？下段で構えてブースト機動→そのまま下段からの打撃で相手を吹っ飛ばす→下段から流れるように上段に構えてジャンプし、ブーストを起動して縦回転(ソニック)して相手にハンマーをぶつける,Weapon,Blunt,2,1,FALSE,1,0,0
-121,[責任ある指導],0,104,Assets/Sprites/Icons/temp.png,ステップ→鋭く二回振る→切り下がり\n[付与効果: 損傷１],Weapon,Slash,15,2,FALSE,1,0,0
-122,[回転方式],0,104,Assets/Sprites/Icons/temp.png,回転して攻撃,Weapon,Slash,1,1,FALSE,1,1,0
-123,[展針],0,104,Assets/Sprites/Icons/temp.png,ステップ突き刺し、連接剣が鋭く伸びる,Weapon,Stab,1,1,FALSE,1,2,0
-124,[ウルカヌス],0,104,Assets/Sprites/Icons/temp.png,連接剣を鞭のように振って締め斬る\n[付与効果: 損傷1],Weapon,Slash,1,1,FALSE,1,0,0
-125,[スネーク・バイト],0,104,Assets/Sprites/Icons/temp.png,ステップで相手に近づき連節剣の伸びを利用した突きによる2連撃→3連撃目で相手に突き刺さり連節剣の縮む力と後ろステップを利用して引き抜く\n[付与効果: 損傷1],Weapon,Stab,3,1,FALSE,1,0,0
-126,[雷嵐],0,104,Assets/Sprites/Icons/temp.png,連節剣を鞭のように全体に5回振り回すだけ,Weapon,Slash,5,3,FALSE,1,0,0
-127,[如呼延],0,104,Assets/Sprites/Icons/temp.png,連接剣を高速で動かし、まるで二つあるかのように見せ、二回斬りつける\n[付与効果: 損傷1],Weapon,Slash,4,2,FALSE,1,0,0
-128,[自由絞削],0,104,Assets/Sprites/Icons/temp.png,ウィップ状態の連接剣を敵に巻きつけ、剣状態に戻す要領で巻きつけたそれを引っ張って無数の刃で絡み取った\n[付与効果: 損傷1],Weapon,Slash,4,2,FALSE,1,0,0
+ID,Name,CharacterID,EquipableWeaponID,Icon,Description,Type,Attribute,AttackCount,TargetCount,Passive,HitRate,OutputModifier,DefensePenetration,AttackAnimation
+1,スキル1,1,0,Assets/Sprites/Icons/temp.png,,Character,Heal,1,1,FALSE,1,1,0,Assets/Animations/Player/P1/P1_Skill1.anim
+2,スキル2,1,0,Assets/Sprites/Icons/temp.png,,Character,Bullet,1,1,FALSE,0.7,1.8,0,Assets/Animations/Player/P1/P1_Skill2.anim
+3,スキル3,1,0,Assets/Sprites/Icons/temp.png,,Character,Bullet,3,3,FALSE,0.6,1.3,0,Assets/Animations/Player/P1/P1_Skill3.anim
+101,[処刑人の識],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Slash,2,1,FALSE,1,0,0,Assets/Animations/Weapons/Gunblade/W101_Attack.anim
+102,[デュアル・エクスキューション],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Slash,2,1,FALSE,1,1.2,0,Assets/Animations/Weapons/Gunblade/W102_Attack.anim
+103,[アグレッシブ・フロス],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Slash,2,3,FALSE,1,0.9,0,Assets/Animations/Weapons/Gunblade/W103_Attack.anim
+104,[ゼロ-三唱],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Bullet,3,1,FALSE,1,1,0,Assets/Animations/Weapons/Gunblade/W104_Attack.anim
+105,[レン-五響],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Bullet,5,1,FALSE,0.8,0.8,0,Assets/Animations/Weapons/Gunblade/W105_Attack.anim
+106,[アサルト・ブレイク],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Slash,1,1,FALSE,0.9,1.3,1.25,Assets/Animations/Weapons/Gunblade/W106_Attack.anim
+107,[刺],0,101,Assets/Sprites/Icons/temp.png,,Weapon,Slash,5,3,FALSE,1,0.4,0,Assets/Animations/Weapons/Gunblade/W107_Attack.anim
+108,[断罪の轍],0,102,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,1,1,FALSE,1,0,0,Assets/Animations/Weapons/Spear/W108_Attack.anim
+109,[どきどき！？超電磁♡ストライクばきゅーん！ver.2.07],0,102,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,1,1,FALSE,0.7,1.5,0,Assets/Animations/Weapons/Spear/W109_Attack.anim
+110,[グングニル],0,102,Assets/Sprites/Icons/temp.png,〔ターンに1回：同名〕必ず最初に手札に加わる。,Weapon,Blunt,1,1,FALSE,0.7,1.5,0,Assets/Animations/Weapons/Spear/W110_Attack.anim
+111,[三電「屠」],0,102,Assets/Sprites/Icons/temp.png,,Weapon,Blunt,3,1,FALSE,0.75,1,0,Assets/Animations/Weapons/Spear/W111_Attack.anim
+112,[カラドボルグ],0,102,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,1,1,FALSE,0.7,1.6,0,Assets/Animations/Weapons/Spear/W112_Attack.anim
+113,[裂甲の一閃],0,102,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,1,1,FALSE,1,1,1.5,Assets/Animations/Weapons/Spear/W113_Attack.anim
+114,[猪突猛進],0,102,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,1,1,FALSE,0.7,1.8,0,Assets/Animations/Weapons/Spear/W114_Attack.anim
+115,[威打天「月輪」],0,103,Assets/Sprites/Icons/temp.png,攻撃ヒット時、バフ1をただちに発揮する,Weapon,Blunt,1,1,FALSE,1,1.7,0,Assets/Animations/Weapons/Hammer/W115_Attack.anim
+116,[彼方からの災「天涙」],0,103,Assets/Sprites/Icons/temp.png,2段目のヒット時、バフ1を発揮する,Weapon,Blunt,2,1,FALSE,1,1.7,0,Assets/Animations/Weapons/Hammer/W116_Attack.anim
+117,[異端狩り「灼鎌」],0,103,Assets/Sprites/Icons/temp.png,攻撃時、バフ1を発揮する,Weapon,Bullet,2,1,FALSE,1,1,0,Assets/Animations/Weapons/Hammer/W117_Attack.anim
+1II8,[撲ＳＡＴＵ★ぐるぐるホームラン！ver.3.02],0,103,Assets/Sprites/Icons/temp.png,攻撃時、バフ2をただちに発揮する,Weapon,Blunt,1,1,FALSE,1,1.5,0,Assets/Animations/Weapons/Hammer/W118_Attack.anim
+119,[焔雷],0,103,Assets/Sprites/Icons/temp.png,,Weapon,Blunt,1,2,FALSE,0.5,2.5,0,Assets/Animations/Weapons/Hammer/W119_Attack.anim
+120,[シュトゥルム・ブリッツ],0,103,Assets/Sprites/Icons/temp.png,,Weapon,Blunt,2,1,FALSE,1,0,0,Assets/Animations/Weapons/Hammer/W120_Attack.anim
+121,[責任ある指導],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Slash,15,2,FALSE,1,0,0,Assets/Animations/Weapons/WhipSword/W121_Attack.anim
+122,[回転方式],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Slash,1,1,FALSE,1,1,0,Assets/Animations/Weapons/WhipSword/W122_Attack.anim
+123,[展針],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,1,1,FALSE,1,2,0,Assets/Animations/Weapons/WhipSword/W123_Attack.anim
+124,[ウルカヌス],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Slash,1,1,FALSE,1,0,0,Assets/Animations/Weapons/WhipSword/W124_Attack.anim
+125,[スネーク・バイト],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Pierce,3,1,FALSE,1,0,0,Assets/Animations/Weapons/WhipSword/W125_Attack.anim
+126,[雷嵐],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Slash,5,3,FALSE,1,0,0,Assets/Animations/Weapons/WhipSword/W126_Attack.anim
+127,[如呼延],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Slash,4,2,FALSE,1,0,0,Assets/Animations/Weapons/WhipSword/W127_Attack.anim
+128,[自由絞削],0,104,Assets/Sprites/Icons/temp.png,,Weapon,Slash,4,2,FALSE,1,0,0,Assets/Animations/Weapons/WhipSword/W128_Attack.anim

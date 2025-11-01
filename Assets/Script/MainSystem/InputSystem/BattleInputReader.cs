@@ -2,10 +2,11 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActions
+public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActions, InputControls.IDefenseActionActions
 {
-    public event Action DisCardEvent;
     public event Action<int> CardSelectEvent;
+    public event Action DisCardEvent;
+    public event Action<int> OnDefend;
 
     private InputControls controls;
 
@@ -15,25 +16,36 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
         {
             controls = new InputControls();
             controls.BattleAction.SetCallbacks(this);
+            controls.DefenseAction.SetCallbacks(this);
         }
-        controls.BattleAction.Enable();
+        EnableBattleActionMap();
     }
 
     private void OnDisable()
     {
         controls?.BattleAction.Disable();
+        controls?.DefenseAction.Disable();
     }
 
     /// <summary>
-    /// Input action methods
+    /// プレイヤーのカード選択など、通常のバトル入力だけを許可する
     /// </summary>
-    /// <param name="context"></param>
-    public void OnDisCard(InputAction.CallbackContext context)
+    public void EnableBattleActionMap()
     {
-        if (!context.performed) { return; }
-        DisCardEvent?.Invoke();
+        controls.DefenseAction.Disable();
+        controls.BattleAction.Enable();
     }
 
+    /// <summary>
+    /// 敵の攻撃に対する防御入力だけを許可する
+    /// </summary>
+    public void EnableDefenseActionMap()
+    {
+        controls.BattleAction.Disable();
+        controls.DefenseAction.Enable();
+    }
+
+    // --- BattleAction (カード選択) ---
     public void OnCardSelectOne(InputAction.CallbackContext context)
     {
         if (!context.performed) { return; }
@@ -50,5 +62,32 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     {
         if (!context.performed) { return; }
         CardSelectEvent?.Invoke(2);
+    }
+
+    public void OnCardSelect(InputAction.CallbackContext context) { /* 他のキー用 (もしあれば) */ }
+
+    public void OnDisCard(InputAction.CallbackContext context)
+    {
+        if (!context.performed) { return; }
+        DisCardEvent?.Invoke();
+    }
+
+    // DefenseAction (防御/カウンター)
+    public void OnDefenseOne(InputAction.CallbackContext context)
+    {
+        if (!context.performed) { return; }
+        OnDefend?.Invoke(1);
+    }
+
+    public void OnDefenseTwo(InputAction.CallbackContext context)
+    {
+        if (!context.performed) { return; }
+        OnDefend?.Invoke(2);
+    }
+
+    public void OnDefenseTree(InputAction.CallbackContext context)
+    {
+        if (!context.performed) { return; }
+        OnDefend?.Invoke(3);
     }
 }

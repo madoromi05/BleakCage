@@ -20,6 +20,7 @@ public class CardModel
     public float DefensePenetration { get; private set; }                   // 防御貫通率
     public Sprite CardSprite{ get; private set; }                           // CardのIcon
     public string Description { get; private set; }                         // Cardの説明文
+    public AnimationClip AttackAnimation { get; private set; }
 
     /// <summary>
     /// CardEntity からデータを読み取って CardModel を生成する
@@ -48,5 +49,6 @@ public class CardModel
         HitRate = entity.HitRate;
         OutputModifier = entity.OutputModifier;
         DefensePenetration = entity.DefensePenetration;
+        AttackAnimation = entity.AttackAnimation;
     }
 }

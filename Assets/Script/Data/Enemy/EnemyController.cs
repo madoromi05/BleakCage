@@ -19,11 +19,10 @@ public class EnemyController : MonoBehaviour
     private const string IdleClipName = "Idle";
     private const string DeathClipName = "Death";
     private const string DamagedClipName = "Damaged";
-    private const string AttackClipName = "DemoAttack";
+    private const string AttackClipName = "attack will eilll3 arter";
 
     private void Awake()
     {
-        // view = GetComponent<EnemyView>(); // [íœ]
         animator = GetComponent<Animator>();
 
         // Animator Controller‚ªİ’è‚³‚ê‚Ä‚¢‚é‚©Šm”F

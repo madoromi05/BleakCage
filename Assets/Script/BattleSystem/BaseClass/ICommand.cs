@@ -5,7 +5,7 @@ using System.Collections;
 /// </summary>
 public interface ICommand
 {
-    bool Do();
+   IEnumerator Do();
     bool Undo();
 }
 

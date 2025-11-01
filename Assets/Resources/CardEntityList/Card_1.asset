@@ -13,16 +13,17 @@ MonoBehaviour:
   m_Name: Card_1
   m_EditorClassIdentifier: 
   ID: 1
-  Name: New Card_1AAAAAAAAAAAA
+  Name: Card_1
   CharacterID: 0
   EquipableWeaponID: 0
   Icon: {fileID: 0}
   Description: "\u65B0\u3057\u3044\u30AB\u30FC\u30C9\u306E\u8AAC\u660E\u6587"
   Type: 1
-  Attribute: 3
+  Attribute: 1
   AttackCount: 1
   TargetCount: 1
   Passive: 0
   HitRate: 1
   OutputModifier: 1
   DefensePenetration: 0
+  AttackAnimation: {fileID: 7400000, guid: 6fd92ca4a8e12ca49adccc154c809987, type: 2}

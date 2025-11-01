@@ -94,7 +94,6 @@ public class EnemyStatusUIController : MonoBehaviour
 
         hpSlider.value = targetHP;
         hpAnimationCoroutine = null;
-        Debug.Log($"Animating HP from {hpSlider.value} to {targetHP}");
     }
 
     /// <summary>

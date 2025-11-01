@@ -27,4 +27,6 @@ public class CardEntity : ScriptableObject
     public float HitRate;                   // 命中率
     public float OutputModifier;            // 出力調整
     public float DefensePenetration;        // 防御貫通 
+    [Header("アニメーション")]
+    public AnimationClip AttackAnimation;
 }

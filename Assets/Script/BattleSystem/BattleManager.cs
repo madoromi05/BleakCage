@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// Battleのターン、順番とデータ管理
@@ -32,6 +33,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button keepSelectionsButton;
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private float playerTurnDuration = 10f;
+    [SerializeField] private Slider guardGaugeSlider;
+    [SerializeField] private Text guardCounterText;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
@@ -43,6 +46,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
     [SerializeField] private TutorialInputReader tortrialInputReader;
 #endif
+
+    public float GetCurrentGuardGauge() { return currentGuardGauge; }
+    public const float GUARD_COST = 25f;                   //消費コスト
     //=================================================================================
     // Private Variables
     //=================================================================================
@@ -60,12 +66,18 @@ public class BattleManager : MonoBehaviour
     private bool isFirstSelectionPhase = true; // 最初の選択フェーズかどうかを判定するフラグ
     private Coroutine selectionChoiceCoroutine; // 選択待機コルーチンを保持する変数
 
+    private float currentGuardGauge;
+    private int counterCount = 0;
+    private bool isExtraTurnSegmentFinished = false; // エクストラターン用フラグ
+    private const float MAX_GUARD_GAUGE = 100f;
     //=================================================================================
     // ライフサイクル (Startを分割)
     //=================================================================================
 
     void Start()
     {
+        currentGuardGauge = MAX_GUARD_GAUGE;
+        UpdateGuardGaugeUI();
         LoadGameData();
         SetupStageAndCharacters();
         InitializeBattlePhases();
@@ -118,7 +130,7 @@ public class BattleManager : MonoBehaviour
 #else
             Debug.LogWarning("チュートリアルモード（EnemyID 0）で戦闘が開始されましたが、TUTORIAL_ENABLED シンボルが定義されていません。");
             isTutorialMode = false; // 通常モードとして続行
-            InitializeNonTutorialPhases(); // [修正] 通常モードの初期化を呼ぶ
+            InitializeNonTutorialPhases(); //通常モードの初期化を呼ぶ
 #endif
         }
         // チュートリアル用オブジェクトを非表示にする
@@ -128,7 +140,7 @@ public class BattleManager : MonoBehaviour
             {
                 tutorialObjectsParent.SetActive(false);
             }
-            InitializeNonTutorialPhases(); // [修正] 通常モードの初期化を呼ぶ
+            InitializeNonTutorialPhases(); // 通常モードの初期化を呼ぶ
         }
 
         if (selectionChoicePanel != null)
@@ -163,7 +175,7 @@ public class BattleManager : MonoBehaviour
             Debug.Log("チュートリアルモード：Player ID 1 を検索・生成します...");
 
             // 1. パーティリスト (players) から PlayerID が 1 のキャラクターを探す
-            PlayerRuntime tutorialPlayer = players.FirstOrDefault(p => p.PlayerModel.PlayerID == 1); // [修正] 0 から 1 に変更
+            PlayerRuntime tutorialPlayer = players.FirstOrDefault(p => p.PlayerModel.PlayerID == 1); // 0 から 1 に変更
 
             if (tutorialPlayer != null)
             {
@@ -176,12 +188,12 @@ public class BattleManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError("チュートリアル用のプレイヤー(ID:1)は見つかりましたが、playerPositions[0]が設定されていません！"); // [修正] ログを ID:1 に
+                    Debug.LogError("チュートリアル用のプレイヤー(ID:1)は見つかりましたが、playerPositions[0]が設定されていません！"); // ログを ID:1 に
                 }
             }
             else
             {
-                Debug.LogError("チュートリアルモードですが、パーティ内に Player ID 1 のプレイヤーが見つかりませんでした！"); // [修正] ログを ID:1 に
+                Debug.LogError("チュートリアルモードですが、パーティ内に Player ID 1 のプレイヤーが見つかりませんでした！"); // ログを ID:1 に
             }
         }
         else
@@ -387,7 +399,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void StartPlayerTurn()
     {
-        turnTime = playerTurnDuration; // [修正] Inspectorで設定した値を使用
+        turnTime = playerTurnDuration; // Inspectorで設定した値を使用
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         StartCoroutine(StartPlayerTurnWithTimer());
     }
@@ -511,7 +523,7 @@ public class BattleManager : MonoBehaviour
                 continue;
             }
 
-            // ★修正: 選択した敵が1体でも死んでいる（livingEnemiesセットにいない）かチェック
+            //選択した敵が1体でも死んでいる（livingEnemiesセットにいない）かチェック
             foreach (var selectedEnemy in playerSelectionList)
             {
                 if (selectedEnemy == null || !livingEnemies.Contains(selectedEnemy))
@@ -623,5 +635,87 @@ public class BattleManager : MonoBehaviour
         playerUiController.SetPlayerStatus(runtime);
         playerController.SetStatusUI(playerUiController);
         playerStatusUIs.Add(playerUiController);
+    }
+
+    public bool TrySpendGuardGauge(float amount)
+    {
+        if (currentGuardGauge >= amount)
+        {
+            currentGuardGauge -= amount;
+            UpdateGuardGaugeUI();
+            return true;
+        }
+        return false; // ゲージ不足
+    }
+
+    public void AddGuardGauge(float amount)
+    {
+        currentGuardGauge += amount;
+        currentGuardGauge = Mathf.Clamp(currentGuardGauge, 0, MAX_GUARD_GAUGE);
+        UpdateGuardGaugeUI();
+    }
+
+    private void UpdateGuardGaugeUI()
+    {
+        if (guardGaugeSlider != null)
+        {
+            guardGaugeSlider.value = currentGuardGauge / MAX_GUARD_GAUGE;
+        }
+        if (guardCounterText != null)
+        {
+            // (現在のゲージ量 / 1回のコスト) の小数点以下を切り捨て
+            int possibleCounters = Mathf.FloorToInt(currentGuardGauge / GUARD_COST);
+
+            // Textコンポーネントに数字（"3", "2", "1", "0"など）を設定
+            guardCounterText.text = possibleCounters.ToString();
+        }
+    }
+
+    // ---エクストラターン関連 ---
+
+    public void IncrementCounterCount()
+    {
+        counterCount++;
+    }
+
+    private void OnExtraTurnFinished()
+    {
+        Debug.Log("【エクストラターン カード選択/攻撃 完了】");
+        isExtraTurnSegmentFinished = true;
+    }
+
+    /// <summary>
+    /// エクストラターンを実行し、その後通常の選択フェーズに移行する
+    /// </summary>
+    private IEnumerator HandleExtraTurnsAndContinue()
+    {
+        // 1. 通常の「プレイヤー⇒敵」の連携を一時的に解除
+        playerTurn.OnTurnFinished -= OnPlayerTurnFinished;
+        // 2. エクストラターン専用のハンドラを登録
+        playerTurn.OnTurnFinished += OnExtraTurnFinished;
+
+        // 3. カウンターカウント分だけループ
+        while (counterCount > 0)
+        {
+            counterCount--;
+            Debug.Log($"エクストラターン開始！ (残り: {counterCount})");
+
+            isExtraTurnSegmentFinished = false;
+            var playerSelections = selectTurn.PlayerSelections;
+            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
+
+            // プレイヤーのカード選択ターンを開始 (タイマー付き)
+            StartCoroutine(StartPlayerTurnWithTimer());
+
+            // エクストラターンが完了するまで待機
+            yield return new WaitUntil(() => isExtraTurnSegmentFinished == true);
+        }
+
+        // 7. 全てのエクストラターンが終了したら、イベントハンドラを元に戻す
+        playerTurn.OnTurnFinished -= OnExtraTurnFinished;
+        playerTurn.OnTurnFinished += OnPlayerTurnFinished;
+
+        // 8. 次の「通常の」選択フェーズを開始する
+        StartSelectionPhase();
     }
 }

@@ -176,6 +176,74 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             ]
         },
         {
+            ""name"": ""DefenseAction"",
+            ""id"": ""76f7ce69-30ce-44ec-a731-e29cf9e046b4"",
+            ""actions"": [
+                {
+                    ""name"": ""DefenseOne"",
+                    ""type"": ""Button"",
+                    ""id"": ""a4f448ce-5138-46d7-8355-460e8940f5f4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DefenseTwo"",
+                    ""type"": ""Button"",
+                    ""id"": ""7e897da4-82a2-47de-b611-a7e2554b4527"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DefenseTree"",
+                    ""type"": ""Button"",
+                    ""id"": ""c5c9bb89-f217-4a91-b7b5-7107c4d2481e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""0db5c84f-d9cb-47d0-a6be-66ff4d926668"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": ""Press"",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""DefenseOne"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7572d60a-4814-4489-89e1-d1be3a093ed5"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""DefenseTwo"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""47fd6970-e266-4a64-b80c-6d96477c5ed0"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""DefenseTree"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
             ""name"": ""TutorialAction"",
             ""id"": ""a073e853-2b82-49f6-ba0b-021a1c6758e2"",
             ""actions"": [
@@ -341,6 +409,11 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         m_BattleAction_CardSelectOne = m_BattleAction.FindAction("CardSelectOne", throwIfNotFound: true);
         m_BattleAction_CardSelectTwo = m_BattleAction.FindAction("CardSelectTwo", throwIfNotFound: true);
         m_BattleAction_CardSelectTree = m_BattleAction.FindAction("CardSelectTree", throwIfNotFound: true);
+        // DefenseAction
+        m_DefenseAction = asset.FindActionMap("DefenseAction", throwIfNotFound: true);
+        m_DefenseAction_DefenseOne = m_DefenseAction.FindAction("DefenseOne", throwIfNotFound: true);
+        m_DefenseAction_DefenseTwo = m_DefenseAction.FindAction("DefenseTwo", throwIfNotFound: true);
+        m_DefenseAction_DefenseTree = m_DefenseAction.FindAction("DefenseTree", throwIfNotFound: true);
         // TutorialAction
         m_TutorialAction = asset.FindActionMap("TutorialAction", throwIfNotFound: true);
         m_TutorialAction_Proceed = m_TutorialAction.FindAction("Proceed", throwIfNotFound: true);
@@ -354,6 +427,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     ~@InputControls()
     {
         UnityEngine.Debug.Assert(!m_BattleAction.enabled, "This will cause a leak and performance issues, InputControls.BattleAction.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_DefenseAction.enabled, "This will cause a leak and performance issues, InputControls.DefenseAction.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_TutorialAction.enabled, "This will cause a leak and performance issues, InputControls.TutorialAction.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_SelectAction.enabled, "This will cause a leak and performance issues, InputControls.SelectAction.Disable() has not been called.");
     }
@@ -556,6 +630,124 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="BattleActionActions" /> instance referencing this action map.
     /// </summary>
     public BattleActionActions @BattleAction => new BattleActionActions(this);
+
+    // DefenseAction
+    private readonly InputActionMap m_DefenseAction;
+    private List<IDefenseActionActions> m_DefenseActionActionsCallbackInterfaces = new List<IDefenseActionActions>();
+    private readonly InputAction m_DefenseAction_DefenseOne;
+    private readonly InputAction m_DefenseAction_DefenseTwo;
+    private readonly InputAction m_DefenseAction_DefenseTree;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "DefenseAction".
+    /// </summary>
+    public struct DefenseActionActions
+    {
+        private @InputControls m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public DefenseActionActions(@InputControls wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "DefenseAction/DefenseOne".
+        /// </summary>
+        public InputAction @DefenseOne => m_Wrapper.m_DefenseAction_DefenseOne;
+        /// <summary>
+        /// Provides access to the underlying input action "DefenseAction/DefenseTwo".
+        /// </summary>
+        public InputAction @DefenseTwo => m_Wrapper.m_DefenseAction_DefenseTwo;
+        /// <summary>
+        /// Provides access to the underlying input action "DefenseAction/DefenseTree".
+        /// </summary>
+        public InputAction @DefenseTree => m_Wrapper.m_DefenseAction_DefenseTree;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_DefenseAction; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="DefenseActionActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(DefenseActionActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="DefenseActionActions" />
+        public void AddCallbacks(IDefenseActionActions instance)
+        {
+            if (instance == null || m_Wrapper.m_DefenseActionActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_DefenseActionActionsCallbackInterfaces.Add(instance);
+            @DefenseOne.started += instance.OnDefenseOne;
+            @DefenseOne.performed += instance.OnDefenseOne;
+            @DefenseOne.canceled += instance.OnDefenseOne;
+            @DefenseTwo.started += instance.OnDefenseTwo;
+            @DefenseTwo.performed += instance.OnDefenseTwo;
+            @DefenseTwo.canceled += instance.OnDefenseTwo;
+            @DefenseTree.started += instance.OnDefenseTree;
+            @DefenseTree.performed += instance.OnDefenseTree;
+            @DefenseTree.canceled += instance.OnDefenseTree;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="DefenseActionActions" />
+        private void UnregisterCallbacks(IDefenseActionActions instance)
+        {
+            @DefenseOne.started -= instance.OnDefenseOne;
+            @DefenseOne.performed -= instance.OnDefenseOne;
+            @DefenseOne.canceled -= instance.OnDefenseOne;
+            @DefenseTwo.started -= instance.OnDefenseTwo;
+            @DefenseTwo.performed -= instance.OnDefenseTwo;
+            @DefenseTwo.canceled -= instance.OnDefenseTwo;
+            @DefenseTree.started -= instance.OnDefenseTree;
+            @DefenseTree.performed -= instance.OnDefenseTree;
+            @DefenseTree.canceled -= instance.OnDefenseTree;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="DefenseActionActions.UnregisterCallbacks(IDefenseActionActions)" />.
+        /// </summary>
+        /// <seealso cref="DefenseActionActions.UnregisterCallbacks(IDefenseActionActions)" />
+        public void RemoveCallbacks(IDefenseActionActions instance)
+        {
+            if (m_Wrapper.m_DefenseActionActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="DefenseActionActions.AddCallbacks(IDefenseActionActions)" />
+        /// <seealso cref="DefenseActionActions.RemoveCallbacks(IDefenseActionActions)" />
+        /// <seealso cref="DefenseActionActions.UnregisterCallbacks(IDefenseActionActions)" />
+        public void SetCallbacks(IDefenseActionActions instance)
+        {
+            foreach (var item in m_Wrapper.m_DefenseActionActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_DefenseActionActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="DefenseActionActions" /> instance referencing this action map.
+    /// </summary>
+    public DefenseActionActions @DefenseAction => new DefenseActionActions(this);
 
     // TutorialAction
     private readonly InputActionMap m_TutorialAction;
@@ -870,6 +1062,35 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCardSelectTree(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "DefenseAction" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="DefenseActionActions.AddCallbacks(IDefenseActionActions)" />
+    /// <seealso cref="DefenseActionActions.RemoveCallbacks(IDefenseActionActions)" />
+    public interface IDefenseActionActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "DefenseOne" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDefenseOne(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DefenseTwo" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDefenseTwo(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DefenseTree" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDefenseTree(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "TutorialAction" which allows adding and removing callbacks.

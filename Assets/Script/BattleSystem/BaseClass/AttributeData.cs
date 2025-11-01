@@ -8,6 +8,7 @@ public enum AttributeType
     Pierce,  // “Ë[—L—˜(Œ˜˜S), •s—˜(“î‘Ì), •’Ê(Ë—Í)]
     Bullet,  // ’e[‘Š«–³]
     Heal,    // ‰ñ•œ
+    Defence  // –hŒä
 }
 
 public enum DefensAttributeType
