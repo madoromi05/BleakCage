@@ -220,10 +220,14 @@ MonoBehaviour:
   playerTurnDuration: 10
   guardGaugeSlider: {fileID: 558441649}
   phaseUI: {fileID: 1717322608}
+  targetMarkerPrefab: {fileID: 7812197052377839266, guid: 5439037ea6d9baf4f99b7efc775794b0, type: 3}
+  defenseFeedbackText: {fileID: 695865649}
+  feedbackDisplayDuration: 1.5
   allStageEnemyData:
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
   tutorialObjectsParent: {fileID: 1365493820}
+  tutorialUIPanel: {fileID: 446119933}
   tutorialManager: {fileID: 1655738822}
   selectTurnTutorialManager: {fileID: 1655738821}
   tortrialInputReader: {fileID: 1853795529}
@@ -1053,7 +1057,7 @@ Transform:
   m_GameObject: {fileID: 655441559}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 4, y: 0.5, z: 30}
+  m_LocalPosition: {x: 3, y: 0.5, z: 30}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1137,6 +1141,85 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 691840767}
+  m_CullTransparentMesh: 1
+--- !u!1 &695865647
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 695865648}
+  - component: {fileID: 695865650}
+  - component: {fileID: 695865649}
+  m_Layer: 5
+  m_Name: DefenseRankText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &695865648
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695865647}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1355822115}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000030517578}
+  m_SizeDelta: {x: 500, y: 500}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &695865649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695865647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 80
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 0
+    m_MaxSize: 80
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: DefenseRankText
+--- !u!222 &695865650
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695865647}
   m_CullTransparentMesh: 1
 --- !u!1 &727143521
 GameObject:
@@ -1478,7 +1561,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 800}
+  m_SizeDelta: {x: 1000, y: 750}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &921693384
 MonoBehaviour:
@@ -1513,7 +1596,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: 
 --- !u!222 &921693385
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1695,7 +1778,7 @@ RectTransform:
   m_GameObject: {fileID: 1049437799}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.3, y: 0.8, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 921693383}
@@ -1704,7 +1787,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 200}
-  m_SizeDelta: {x: 800, y: 800}
+  m_SizeDelta: {x: 1000, y: 750}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1049437801
 MonoBehaviour:
@@ -1950,7 +2033,7 @@ Transform:
   m_GameObject: {fileID: 1346862379}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 6, y: 0.5, z: 28}
+  m_LocalPosition: {x: 5, y: 0.5, z: 28}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2057,6 +2140,7 @@ RectTransform:
   - {fileID: 1991256337}
   - {fileID: 1129958850}
   - {fileID: 1717322607}
+  - {fileID: 695865648}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2381,9 +2465,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d443f39f76d9c499efa6818ea6592d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tutorialUIPanel: {fileID: 446119933}
   playerTurn: {fileID: 0}
   battleManager: {fileID: 0}
-  tutorialUIPanel: {fileID: 446119933}
   tutorialText: {fileID: 0}
   selectTurn: {fileID: 120127630}
   enemyTurn: {fileID: 0}
@@ -3129,7 +3213,7 @@ Transform:
   m_GameObject: {fileID: 2020118548}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 2, y: 0.5, z: 32}
+  m_LocalPosition: {x: 1, y: 0.5, z: 32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

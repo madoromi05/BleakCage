@@ -17,5 +17,5 @@ MonoBehaviour:
   Attribute: 0
   Icon: {fileID: 0}
   Description: 
-  AttackPower: 100
+  AttackPower: 50
   PeakyCoefficient: 1

@@ -35,6 +35,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private float playerTurnDuration = 10f;
     [SerializeField] private Slider guardGaugeSlider;
     [SerializeField] private PhaseAnnouncementUIController phaseUI;
+    [SerializeField] private GameObject targetMarkerPrefab;
+    [SerializeField] private Text defenseFeedbackText;
+    [SerializeField] private float feedbackDisplayDuration = 1.5f;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
@@ -42,8 +45,10 @@ public class BattleManager : MonoBehaviour
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
     [SerializeField] private GameObject tutorialObjectsParent; // チュートリアル関連オブジェクトの親
+    [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
+    [SerializeField] private EnemyTurnTutorialManager enemyTurnTutorialManager;
     [SerializeField] private TutorialInputReader tortrialInputReader;
 #endif
 
@@ -66,18 +71,30 @@ public class BattleManager : MonoBehaviour
     private IPhase currentPhase;
     private bool isFirstSelectionPhase = true; // 最初の選択フェーズかどうかを判定するフラグ
     private Coroutine selectionChoiceCoroutine; // 選択待機コルーチンを保持する変数
+    private GameObject markerInstance;
 
     private float currentGuardGauge;
     private int counterCount = 0;
     private bool isExtraTurnSegmentFinished = false; // エクストラターン用フラグ
     private const float MAX_GUARD_GAUGE = 100f;
     private int currentTurn = 1;
+    private Coroutine feedbackCoroutine;
     //=================================================================================
     // ライフサイクル (Startを分割)
     //=================================================================================
 
     void Start()
     {
+        if (targetMarkerPrefab != null)
+        {
+            // BattleManagerの子として生成
+            markerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, Quaternion.identity, this.transform);
+            markerInstance.SetActive(false);
+        }
+        if (defenseFeedbackText != null)
+        {
+            defenseFeedbackText.gameObject.SetActive(false);
+        }
         currentGuardGauge = MAX_GUARD_GAUGE;
         UpdateGuardGaugeUI();
         LoadGameData();
@@ -127,8 +144,13 @@ public class BattleManager : MonoBehaviour
             {
                 tutorialObjectsParent.SetActive(true);
             }
+            if (enemyTurnTutorialManager != null)
+            {
+                enemyTurnTutorialManager.Initialize();
+            }
             selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
             currentPhase = selectTurnTutorialManager;
+            currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
 #else
             Debug.LogWarning("チュートリアルモード（EnemyID 0）で戦闘が開始されましたが、TUTORIAL_ENABLED シンボルが定義されていません。");
             isTutorialMode = false; // 通常モードとして続行
@@ -163,12 +185,12 @@ public class BattleManager : MonoBehaviour
     {
         selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
         currentPhase = selectTurn;
+        currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
     }
 
     //=================================================================================
     // キャラクターとステージのセットアップ
     //=================================================================================
-
     private void playerView()
     {
         if (isTutorialMode)
@@ -391,10 +413,12 @@ public class BattleManager : MonoBehaviour
             tutorialManager.Initialize(tortrialInputReader, enemyStatusUIs, enemyControllers);
             // currentPhase を TutorialManager に切り替え
             currentPhase = tutorialManager;
-
             // TutorialManager の終了イベントを購読
             currentPhase.OnPhaseFinished += OnCardTutorialPhaseFinished;
-
+            if (tutorialUIPanel != null)
+            {
+                tutorialUIPanel.SetActive(true);
+            }
             // 新しいフェーズを開始
             currentPhase.StartPhase();
 #endif
@@ -403,10 +427,14 @@ public class BattleManager : MonoBehaviour
         {
             // 通常モードの場合、プレイヤーのカード選択ターンを開始
             var playerSelections = selectTurn.PlayerSelections;
-            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs, enemyControllers); StartPlayerTurn();
+            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs, enemyControllers);
+            StartPlayerTurn();
         }
     }
 
+    /// <summary>
+    /// カード選択チュートリアル完了 → 敵ターンチュートリアルへ
+    /// </summary>WQ
     private void OnCardTutorialPhaseFinished()
     {
         if (currentPhase != null)
@@ -414,22 +442,55 @@ public class BattleManager : MonoBehaviour
             currentPhase.OnPhaseFinished -= OnCardTutorialPhaseFinished;
         }
 
-        Debug.Log("【チュートリアルバトル完了】");
+        Debug.Log("【カードチュートリアル完了】-> 敵ターンチュートリアルへ移行します");
 
-        // チュートリアルオブジェクトを非表示にする
+        // UIを一旦非表示にする (TutorialManager が非表示にしなかった場合に備える)
+        if (tutorialUIPanel != null)
+        {
+            tutorialUIPanel.SetActive(false);
+        }
+
+        currentPhase = enemyTurnTutorialManager;
+        currentPhase.OnPhaseFinished += OnEnemyTurnTutorialFinished;
+
+        // EnemyTurnTutorialManager のUIを表示する
+        if (tutorialUIPanel != null)
+        {
+            tutorialUIPanel.SetActive(true);
+        }
+
+        currentPhase.StartPhase();
+    }
+
+    /// <summary>
+    /// 敵ターンチュートリアル完了 → 通常の戦闘へ
+    /// </summary>
+    private void OnEnemyTurnTutorialFinished()
+    {
+        if (currentPhase != null)
+        {
+            currentPhase.OnPhaseFinished -= OnEnemyTurnTutorialFinished;
+        }
+
+        Debug.Log("【敵ターンチュートリアル完了】-> 通常戦闘へ移行します");
+
+        isTutorialMode = false;
+        playerTurn.SetTutorialMode(false);
+
         if (tutorialObjectsParent != null)
         {
             tutorialObjectsParent.SetActive(false);
         }
-#if TUTORIAL_ENABLED
-        else
+
+        // チュートリアル完了時にUIを非表示にする
+        if (tutorialUIPanel != null)
         {
-            selectTurnTutorialManager.gameObject.SetActive(false);
-            tutorialManager.gameObject.SetActive(false);
+            tutorialUIPanel.SetActive(false);
         }
-#endif
-        // TODO: ここでリザルト画面に遷移したり、メインメニューに戻る処理を呼び出す
-        // 例: SceneManager.LoadScene("MainMenu");
+
+        InitializeNonTutorialPhases();
+
+        StartSelectionPhase();
     }
 
     /// <summary>
@@ -756,5 +817,72 @@ public class BattleManager : MonoBehaviour
 
         // 8. 次の「通常の」選択フェーズを開始する
         StartSelectionPhase();
+    }
+
+    // <summary>
+    /// 指定したプレイヤー(インデックス 0, 1, 2)の頭上にマーカーを表示する
+    /// </summary>
+    public void ShowTargetMarkerOnPlayer(int playerIndex)
+    {
+        if (markerInstance == null)
+        {
+            Debug.LogWarning("ターゲットマーカーのプレハブが設定されていません！");
+            return;
+        }
+        if (playerIndex < 0 || playerIndex >= playerPositions.Count) return;
+
+        // プレイヤーの「地面」の位置を取得
+        Transform playerBase = playerPositions[playerIndex];
+
+        // 地面から2ユニット上の位置にマーカーを移動
+        markerInstance.transform.position = playerBase.position + new Vector3(0, 5, 0);
+        markerInstance.transform.rotation = Quaternion.Euler(0, 0, 180);
+        markerInstance.SetActive(true);
+    }
+
+    /// <summary>
+    /// ターゲットマーカーを非表示にする
+    /// </summary>
+    public void HideTargetMarker()
+    {
+        if (markerInstance != null)
+        {
+            markerInstance.SetActive(false);
+        }
+    }
+    /// <summary>
+    /// 防御結果のテキスト (GUARD, COUNTER, HIT) を表示する
+    /// </summary>
+    public void ShowDefenseFeedback(string message, Color color)
+    {
+        if (defenseFeedbackText == null) return;
+
+        // 既存の表示コルーチンが動いていたら停止 (連続で表示する場合)
+        if (feedbackCoroutine != null)
+        {
+            StopCoroutine(feedbackCoroutine);
+        }
+
+        // 新しいコルーチンを開始
+        feedbackCoroutine = StartCoroutine(ShowFeedbackCoroutine(message, color));
+    }
+
+    /// <summary>
+    /// テキストを指定時間表示して非表示にするコルーチン
+    /// </summary>
+    private IEnumerator ShowFeedbackCoroutine(string message, Color color)
+    {
+        defenseFeedbackText.text = message;
+        defenseFeedbackText.color = color;
+        defenseFeedbackText.gameObject.SetActive(true);
+
+        // (ここでフェードインなどのアニメーションを入れても良い)
+
+        yield return new WaitForSeconds(feedbackDisplayDuration);
+
+        // (ここでフェードアウトなどのアニメーションを入れても良い)
+
+        defenseFeedbackText.gameObject.SetActive(false);
+        feedbackCoroutine = null;
     }
 }

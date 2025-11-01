@@ -15,14 +15,13 @@ public class TutorialManager : MonoBehaviour , IPhase
 {
     public event System.Action OnPhaseFinished;
 
+    [SerializeField] public GameObject tutorialUIPanel;
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private BattleManager battleManager;
-    [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private Text tutorialText;
     // [SerializeField] private RawImage tutorialGifImage;
     // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
-    [SerializeField] private EnemyTurn enemyTurn;
 
     private TutorialInputReader inputReader;
     private EnemyStatusUIController enemyUIController;
@@ -34,6 +33,7 @@ public class TutorialManager : MonoBehaviour , IPhase
     private bool hasTurnFinished = false;
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
+    private Queue<string> enemyTurnMessages;
 
     public void Initialize(TutorialInputReader ir, List<EnemyStatusUIController> eUIs, Dictionary<EnemyModel, EnemyController> enemyControllers)
     {
@@ -97,7 +97,6 @@ public class TutorialManager : MonoBehaviour , IPhase
 
     private IEnumerator TutorialCoroutine()
     {
-        tutorialUIPanel.SetActive(true);
         InitializeMessages();
 
         yield return StartCoroutine(PlayerTurnExplanationFlow());
@@ -203,7 +202,6 @@ public class TutorialManager : MonoBehaviour , IPhase
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
-        enemyTurn.StartEnemyTurn();
         SetTutorialText("敵が攻撃してきます！防御の準備を！");
         yield return new WaitUntil(() => canProceed);
         canProceed = false;

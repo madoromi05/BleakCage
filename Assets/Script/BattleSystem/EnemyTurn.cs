@@ -89,7 +89,12 @@ public class EnemyTurn : MonoBehaviour
         // "ホールド状態" をONにする
         if (playerIndex > 0 && playerIndex <= 3)
         {
-            isDefending[playerIndex - 1] = true; // ★ 追加
+            isDefending[playerIndex - 1] = true;
+            // 対応するプレイヤーの防御アニメーションを開始する
+            if (playerControllers.TryGetValue(players[playerIndex - 1], out PlayerController pc))
+            {
+                pc.SetGuardAnimation(true);
+            }
         }
     }
 
@@ -102,6 +107,11 @@ public class EnemyTurn : MonoBehaviour
         if (playerIndex > 0 && playerIndex <= 3)
         {
             isDefending[playerIndex - 1] = false;
+            // 対応するプレイヤーの防御アニメーションを停止する
+            if (playerControllers.TryGetValue(players[playerIndex - 1], out PlayerController pc))
+            {
+                pc.SetGuardAnimation(false);
+            }
         }
     }
 
@@ -164,7 +174,7 @@ public class EnemyTurn : MonoBehaviour
                 Debug.Log($"P{targetPlayerNum}: カウンター成功！");
                 battleManager.IncrementCounterCount();
                 battleManager.AddGuardGauge(COUNTER_RECOVERY_LARGE);
-
+                battleManager.ShowDefenseFeedback("COUNTER!!", Color.yellow);
                 // 成功したので、この攻撃は処理済み
                 isJustGuardWindowOpen = false;
                 defenseInput = 0; // 入力イベントを消費
@@ -180,6 +190,7 @@ public class EnemyTurn : MonoBehaviour
                 {
                     Debug.Log($"P{targetPlayerNum}: ガード成功");
                     battleManager.AddGuardGauge(GUARD_RECOVERY_SMALL);
+                    battleManager.ShowDefenseFeedback("GUARD", Color.cyan);
                 }
                 else
                 {
@@ -189,6 +200,7 @@ public class EnemyTurn : MonoBehaviour
 
                     battleManager.AddGuardGauge(HIT_RECOVERY_MEDIUM);
                     HandleDamageToPlayer(); // ★ ダメージ処理を呼び出す
+                    battleManager.ShowDefenseFeedback("HIT", Color.red);
                 }
                 attackHasBeenResolved = true; // 処理済み
             }
@@ -205,7 +217,10 @@ public class EnemyTurn : MonoBehaviour
                     // ゲージ切れ
                     isDefending[i] = false;
                     Debug.Log($"P{i + 1} ゲージが尽きた！");
-                    playerControllers[players[i]].SetGuardAnimation(false); // アニメーション強制停止
+                    if (playerControllers.TryGetValue(players[i], out PlayerController pc))
+                    {
+                        pc.SetGuardAnimation(false);
+                    }
                 }
             }
         }
@@ -256,35 +271,32 @@ public class EnemyTurn : MonoBehaviour
 
             if (attackCmd == null)
             {
-                // (command.Do() がコルーチンでない場合)
-                // command.Do(); 
                 yield return new WaitForSeconds(0.3f);
                 continue;
             }
-
-            // --- ▼ REPLACED START: ここからが新しいロジック ▼ ---
 
             // 1. この攻撃のコンテキストをセット (Updateが参照するため)
             this.currentPlayerTarget = attackCmd.PlayerTarget;
             this.currentAttackCommand = attackCmd;
             this.attackHasBeenResolved = false; // 攻撃を「未処理」に設定
 
-            int targetPlayerNum = players.FindIndex(p => p == currentPlayerTarget) + 1;
-            Debug.Log($"！ Player {targetPlayerNum} ({currentPlayerTarget.PlayerName}) が狙われている！");
-            // TODO: UIに「狙われている！」表示
+            int targetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
 
-            // 2. 攻撃コマンドを実行 (アニメーション再生と待機)
-            // command.Do() は「アニメーションを再生し、その長さだけ待機する」コルーチンである必要があります
-            // (ステップ3で解説)
+            int targetPlayerNum = targetPlayerIndex + 1; // (1, 2, 3)
+            Debug.Log($"！ Player {targetPlayerNum} ({currentPlayerTarget.PlayerName}) が狙われている！");
+            if (targetPlayerIndex != -1)
+            {
+                battleManager.ShowTargetMarkerOnPlayer(targetPlayerIndex);
+            }
+            // ターゲットマーカー表示からアニメーション開始までのタメ
+            yield return new WaitForSeconds(0.5f);
+
+            // 4. 攻撃コマンドを実行 (アニメ再生 + 待機)
             yield return StartCoroutine(command.Do());
 
-            // 3. アニメーション再生が完了
-            // TODO: UIの「狙われている！」表示を消す
+            // 5. BattleManagerにマーカー非表示を依頼
+            battleManager.HideTargetMarker();
 
-            // 4. (保険)
-            // もしアニメーションイベントが発火しなかった場合、
-            // attackHasBeenResolved は false のままです。
-            // 攻撃が終了したのに未処理の場合、強制的に被弾させます。
             if (!attackHasBeenResolved)
             {
                 Debug.LogWarning($"P{targetPlayerNum}: アニメーションイベントが発火しなかったため、被弾処理を実行します。");

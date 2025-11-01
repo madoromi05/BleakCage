@@ -76,19 +76,43 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     // DefenseAction (防御/カウンター)
     public void OnDefenseOne(InputAction.CallbackContext context)
     {
-        if (!context.performed) { return; }
-        OnDefend?.Invoke(1);
+        // キーが押された瞬間に OnDefend を発行
+        if (context.performed)
+        {
+            OnDefend?.Invoke(1);
+        }
+        // キーが離された瞬間に OnDefendCanceled を発行
+        else if (context.canceled)
+        {
+            OnDefendCanceled?.Invoke(1);
+        }
     }
 
     public void OnDefenseTwo(InputAction.CallbackContext context)
     {
-        if (!context.performed) { return; }
-        OnDefend?.Invoke(2);
+        // キーが押された瞬間に OnDefend を発行
+        if (context.performed)
+        {
+            OnDefend?.Invoke(2);
+        }
+        // キーが離された瞬間に OnDefendCanceled を発行
+        else if (context.canceled)
+        {
+            OnDefendCanceled?.Invoke(2);
+        }
     }
 
     public void OnDefenseTree(InputAction.CallbackContext context)
     {
-        if (!context.performed) { return; }
-        OnDefend?.Invoke(3);
+        // キーが押された瞬間に OnDefend を発行
+        if (context.performed)
+        {
+            OnDefend?.Invoke(3);
+        }
+        // キーが離された瞬間に OnDefendCanceled を発行
+        else if (context.canceled)
+        {
+            OnDefendCanceled?.Invoke(3);
+        }
     }
 }
