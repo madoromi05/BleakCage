@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 
 /// <summary>
 /// UI、データをゲームにsetするクラス
@@ -10,6 +11,7 @@ public class PlayerController : MonoBehaviour
     private PlayerStatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
+    private Vector3 originalPosition;
 
     // アニメーターのパラメータハッシュ
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
@@ -23,6 +25,7 @@ public class PlayerController : MonoBehaviour
     public void Init(PlayerModel model)
     {
         this.playerModel = model;
+        this.originalPosition = transform.localPosition;
 
         // 1. 3Dモデルのプレハブを生成
         if (model.CharacterPrefab != null)
@@ -65,22 +68,49 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// カードに応じた攻撃アニメーションを再生する
+    /// 敵に接近し、攻撃アニメーションを再生して、元の位置に戻る
     /// </summary>
-    public void PlayAttackAnimation(AnimationClip cardAttackClip)
+    /// <param name="cardAttackClip">再生する攻撃アニメ</param>
+    /// <param name="targetEnemy">攻撃対象のTransform</param>
+    public IEnumerator AttackSequence(AnimationClip cardAttackClip, Transform targetEnemy)
     {
         if (animator == null)
         {
             Debug.LogError("Animatorがnullです！ Init()が完了していません。");
-            return;
+            yield break;
+        }
+        if (cardAttackClip == null)
+        {
+            Debug.LogError("AttackClipがnullです！");
+            yield break;
+        }
+        if (targetEnemy == null)
+        {
+            Debug.LogError("targetEnemyがnullです！");
+            yield break;
         }
 
-        if (cardAttackClip != null)
-        {
-            Debug.Log($"Playing attack animation: {cardAttackClip.name} for PlayerID: {playerModel.PlayerID}");
-            overrideController[AttackClipName] = cardAttackClip;
-            animator.SetTrigger(AttackTriggerHash);
-        }
+        // --- 5. 攻撃シーケンスのロジック ---
+        float moveDuration = 0.3f;   // 接近にかかる時間
+        float returnDuration = 0.5f; // 戻るにかかる時間
+
+        // 相手の 1.5 ユニット手前の位置を計算
+        Vector3 targetPosition = targetEnemy.position + (transform.position - targetEnemy.position).normalized * 1.5f;
+
+        // 5a. 敵に接近
+        transform.DOMove(targetPosition, moveDuration).SetEase(Ease.OutCubic);
+        yield return new WaitForSeconds(moveDuration);
+
+        // 5b. 攻撃アニメーション再生
+        Debug.Log($"Playing attack animation: {cardAttackClip.name} for PlayerID: {playerModel.PlayerID}");
+        overrideController[AttackClipName] = cardAttackClip;
+        animator.SetTrigger(AttackTriggerHash);
+
+        // 5c. アニメーションの長さだけ待機
+        yield return new WaitForSeconds(cardAttackClip.length);
+
+        // 5d. 元の位置に戻る
+        transform.DOLocalMove(originalPosition, returnDuration).SetEase(Ease.InOutQuad); yield return new WaitForSeconds(returnDuration);
     }
 
     /// <summary>

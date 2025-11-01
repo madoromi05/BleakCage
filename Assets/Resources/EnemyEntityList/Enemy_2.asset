@@ -18,8 +18,8 @@ MonoBehaviour:
   EnemyDefensAttribute: 0
   EnemySprite: {fileID: -1167249333, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
   EnemyDescription: 
-  EnemyHP: 5000
-  EnemyAttackPower: 600
+  EnemyHP: 500
+  EnemyAttackPower: 20
   EnemyDefensePower: 5
   AnimationSet: {fileID: 11400000, guid: 3f207724620337c4e928c5bf0f1e81ba, type: 2}
   CharacterPrefab: {fileID: 4652626639804307657, guid: 10f0e35c4c8a40947ab4a676936b43f1, type: 3}

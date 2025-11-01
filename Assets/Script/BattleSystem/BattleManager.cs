@@ -34,6 +34,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private float playerTurnDuration = 10f;
     [SerializeField] private Slider guardGaugeSlider;
+    [SerializeField] private PhaseAnnouncementUIController phaseUI;
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
@@ -70,6 +71,7 @@ public class BattleManager : MonoBehaviour
     private int counterCount = 0;
     private bool isExtraTurnSegmentFinished = false; // エクストラターン用フラグ
     private const float MAX_GUARD_GAUGE = 100f;
+    private int currentTurn = 1;
     //=================================================================================
     // ライフサイクル (Startを分割)
     //=================================================================================
@@ -282,7 +284,15 @@ public class BattleManager : MonoBehaviour
                 Debug.LogError($"プレハブ '{enemyBasePrefab.name}' のルートに EnemyController スクリプトがアタッチされていません！", enemyObject);
                 continue;
             }
-            enemyController.Init(enemy);
+            if (playerPositions.Count > 0 && playerPositions[0] != null)
+            {
+                enemyController.Init(enemy, playerPositions[0]);
+            }
+            else
+            {
+                Debug.LogError("playerPositions[0] が設定されていません！ EnemyController の Init に null を渡します。");
+                enemyController.Init(enemy, null);
+            }
             enemyControllers.Add(enemy, enemyController);
             // 敵のStatusUI生成
             var statusUIObject = Instantiate(enemyStatusUIPrefab, enemyStatusBarTransform, false);
@@ -296,16 +306,31 @@ public class BattleManager : MonoBehaviour
     //=================================================================================
     // ターン進行とフェーズ管理
     //=================================================================================
-
     /// <summary>
-    /// 敵のターンが終了したときに呼び出される
+    /// ターン数とフェーズ名をUIに表示する (前回の提案)
     /// </summary>
+    private IEnumerator ShowPhaseUI(string phaseName)
+    {
+        if (phaseUI != null)
+        {
+            // UI表示コルーチンを呼び出し、終わるまで待機
+            yield return StartCoroutine(phaseUI.ShowPhaseAnnouncement(currentTurn, phaseName));
+        }
+        else
+        {
+            // phaseUIが設定されていなくてもゲームが止まらないように
+            Debug.LogWarning("PhaseAnnouncementUIController が BattleManager に設定されていません。UI表示をスキップします。");
+            yield return null; // 1フレームだけ待機
+        }
+    }
+
     /// <summary>
     /// 敵のターンが終了したときに呼び出される
     /// </summary>
     private void OnEnemyTurnFinished()
     {
         Debug.Log("【敵ターン終了】");
+        currentTurn++;
 
         // カウンターが1回以上成功しているかチェック
         if (counterCount > 0)
@@ -363,8 +388,7 @@ public class BattleManager : MonoBehaviour
 
 #if TUTORIAL_ENABLED
             // TutorialManager を初期化
-            tutorialManager.Initialize(tortrialInputReader, enemyStatusUIs);
-
+            tutorialManager.Initialize(tortrialInputReader, enemyStatusUIs, enemyControllers);
             // currentPhase を TutorialManager に切り替え
             currentPhase = tutorialManager;
 
@@ -379,8 +403,7 @@ public class BattleManager : MonoBehaviour
         {
             // 通常モードの場合、プレイヤーのカード選択ターンを開始
             var playerSelections = selectTurn.PlayerSelections;
-            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
-            StartPlayerTurn();
+            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs, enemyControllers); StartPlayerTurn();
         }
     }
 
@@ -422,8 +445,9 @@ public class BattleManager : MonoBehaviour
     /// <summary>
     /// プレイヤーのターンをタイマー付きで開始
     /// </summary>
-    public IEnumerator StartPlayerTurnWithTimer()
+    public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")
     {
+        yield return StartCoroutine(ShowPhaseUI(phaseName));
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
         playerTurn.StartPlayerTurn();
@@ -454,6 +478,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator EnemyTurn()
     {
+        yield return StartCoroutine(ShowPhaseUI("Enemy Phase"));
         Debug.Log("【敵ターン開始】");
         enemyTurn.StartEnemyTurn();
         yield return null;
@@ -598,6 +623,13 @@ public class BattleManager : MonoBehaviour
             selectTurn.ClearSelections();
         }
 
+        if (!isKeeping || (isTutorialMode && isFirstSelectionPhase))
+        {
+            if (!isKeeping)
+            {
+                yield return StartCoroutine(ShowPhaseUI("Select Phase"));
+            }
+        }
         currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
 
         // currentPhase が SelectTurn かどうかを判定
@@ -710,8 +742,7 @@ public class BattleManager : MonoBehaviour
 
             isExtraTurnSegmentFinished = false;
             var playerSelections = selectTurn.PlayerSelections;
-            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs);
-
+            playerTurn.Setup(playerSelections, battleCardDeck, enemyStatusUIs, enemyControllers);
             // プレイヤーのカード選択ターンを開始 (タイマー付き)
             StartCoroutine(StartPlayerTurnWithTimer());
 

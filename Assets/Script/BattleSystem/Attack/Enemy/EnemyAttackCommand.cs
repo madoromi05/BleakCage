@@ -3,15 +3,13 @@ using UnityEngine;
 
 public class EnemyAttackCommand : ICommand
 {
-    private PlayerModel player;
-    private EnemyModel enemy;
+    public PlayerModel PlayerTarget { get; }
+    public EnemyModel Attacker { get; }
+    public IEnemyAttackStrategy DamageStrategy { get; }
     private EnemyController enemyController;
-    private PlayerController playerController; // 参照は残しますが、アニメーション再生には使いません
-    private IEnemyAttackStrategy damageStrategy;
     private PlayerStatusUIController playerStatusUIController;
 
     private DefenseResult defenseResult = DefenseResult.None;
-    public PlayerModel PlayerTarget => player;
 
     public EnemyAttackCommand(PlayerModel player, EnemyModel enemy,
                               EnemyController enemyController,
@@ -19,84 +17,51 @@ public class EnemyAttackCommand : ICommand
                               IEnemyAttackStrategy attackStrategy,
                               PlayerStatusUIController playerStatusUIController)
     {
-        this.player = player;
-        this.enemy = enemy;
+        this.PlayerTarget = player; // 外部(EnemyTurn)から参照できるように
+        this.Attacker = enemy;     // 外部(EnemyTurn)から参照できるように
         this.enemyController = enemyController;
-        this.playerController = playerController;
-        this.damageStrategy = attackStrategy;
+        this.DamageStrategy = attackStrategy; // 外部(EnemyTurn)から参照できるように
         this.playerStatusUIController = playerStatusUIController;
     }
 
     /// <summary>
-    /// EnemyTurnから防御結果を設定するメソッド
+    /// 敵の攻撃アニメーションを再生し、終わるまで待機する
+    /// (ダメージ処理はここでは行わない)
     /// </summary>
-    public void SetDefenseResult(DefenseResult result)
-    {
-        this.defenseResult = result;
-    }
-
     public IEnumerator Do()
     {
-        Debug.Log($"攻撃実行: Enemy='{enemy.EnemyID}' が Player='{player.PlayerID}' に攻撃！");
+        Debug.Log($"攻撃実行: Enemy='{Attacker.EnemyID}' が Player='{PlayerTarget.PlayerID}' に攻撃開始！");
 
-        // 1. ダメージを先に計算する
-        float baseDamage = damageStrategy.CalculateFinalDamage(enemy, player);
-        float finalDamage = 0f;
-
-        switch (defenseResult) // HP計算
-        {
-            case DefenseResult.Counter:
-                finalDamage = 0f;
-                break;
-            case DefenseResult.Guard:
-                finalDamage = baseDamage * 0.5f;
-                break;
-            default:
-                finalDamage = baseDamage;
-                break;
-        }
-
-        // 2. アニメーションを再生する
+        // 1. 敵の攻撃アニメーションを再生し、その長さを取得する
+        // (このアニメーションの途中で 'OnAttackHitMoment' イベントが発火する)
         float attackAnimTime = 0.5f; // デフォルト
-        // ★ 変更: プレイヤーアニメーションは常になし (0.0f)
-        float playerAnimTime = 0.0f;
-
-        // 2a. 敵の攻撃アニメ
         if (enemyController != null)
         {
             attackAnimTime = enemyController.PlayRandomAttackAnimation();
         }
 
-        // 2b. プレイヤーの防御/被弾アニメ (★ すべてアニメーションなしに変更)
-        switch (defenseResult)
-        {
-            case DefenseResult.Counter:
-                Debug.Log("カウンター成功！ (エクストラターンへ)");
-                playerAnimTime = 0.0f; // アニメーションなし
-                break;
+        // 2. アニメーションが終了するまで待機する
+        yield return new WaitForSeconds(attackAnimTime);
 
-            case DefenseResult.Guard:
-                Debug.Log("ガード成功！ (アニメーションなし)");
-                playerAnimTime = 0.0f; // アニメーションなし
-                break;
+        // 3. アニメーション再生後 (ダメージ処理は EnemyTurn が行う)
+        Debug.Log($"攻撃アニメ終了: Enemy='{Attacker.EnemyID}'");
+    }
 
-            default:
-                Debug.Log("被弾！ (アニメーションなし)");
-                playerAnimTime = 0.0f; // アニメーションなし
-                break;
-        }
+    /// <summary>
+    /// ★ EnemyTurn から呼び出される実際のダメージ処理
+    /// </summary>
+    public void ApplyDamageAfterJudgement()
+    {
+        // アニメーションイベントによる判定後、EnemyTurn がこの関数を呼び出す
 
-        // 3. 2つのアニメーションのうち、長い方（＝実質、敵のアニメ時間）待機する
-        // ★ 変更: playerAnimTime は 0.0f なので、実質 attackAnimTime だけ待つ
-        float waitTime = Mathf.Max(attackAnimTime, playerAnimTime);
-        yield return new WaitForSeconds(waitTime);
+        // 1. ダメージを計算する (ガード/カウンターは EnemyTurn が判定済み)
+        float baseDamage = DamageStrategy.CalculateFinalDamage(Attacker, PlayerTarget);
 
-        // 4. アニメーション再生後、HPを減算する
-        player.PlayerHP -= finalDamage;
-        playerStatusUIController.UpdateHP(player.PlayerHP);
+        // 2. HPを減算する
+        PlayerTarget.PlayerHP -= baseDamage;
+        playerStatusUIController.UpdateHP(PlayerTarget.PlayerHP);
 
-        Debug.Log($"[EnemyAttackCardCommand] {player.PlayerName} に {finalDamage:F2} ダメージを与えた。残りHP: {player.PlayerHP:F2}");
-        yield return new WaitForSeconds(0.1f);
+        Debug.Log($"[EnemyAttackCardCommand] {PlayerTarget.PlayerName} に {baseDamage:F2} ダメージを与えた。残りHP: {PlayerTarget.PlayerHP:F2}");
     }
 
     public bool Undo()

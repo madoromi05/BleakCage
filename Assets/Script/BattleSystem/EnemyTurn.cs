@@ -26,10 +26,17 @@ public class EnemyTurn : MonoBehaviour
     private const float GUARD_RECOVERY_SMALL = 10f;       // ガード成功回復
     private const float HIT_RECOVERY_MEDIUM = 20f;        // 被弾回復
     private const float COUNTER_RECOVERY_LARGE = 50f;     // カウンター成功回復
-    private const float GUARD_DRAIN_PER_SECOND = 10f;     // ★ 追加: ガード中のゲージ消費量(毎秒)
+    private const float GUARD_DRAIN_PER_SECOND = 10f;     // ガード中のゲージ消費量(毎秒)
+    private const float GUARD_COST_ON_SUCCESS = 5f;
 
     private int defenseInput = 0; // 押された防御キー (1, 2, 3) - "押した瞬間" の判定用
     private bool[] isDefending = new bool[3];
+    private bool isJustGuardWindowOpen = false;
+    private float justGuardTimer = 0f;
+    private const float JUST_GUARD_DURATION = 0.067f;/// 4フレームの秒数 (60FPSの場合: 4 * (1/60) = 約 0.067秒)
+    private PlayerModel currentPlayerTarget;
+    private EnemyAttackCommand currentAttackCommand;
+    private bool attackHasBeenResolved;
 
     private void Awake()
     {
@@ -46,6 +53,15 @@ public class EnemyTurn : MonoBehaviour
         this.enemyControllers = enemyControllers;
         this.playerControllers = playerControllers;
         this.playerStatusUIControllers = playerStatusUIControllers;
+        foreach (var enemyController in this.enemyControllers.Values)
+        {
+            if (enemyController != null)
+            {
+                // EnemyControllerのアニメーションイベント(OnAttackHitMoment)が
+                // このスクリプトの StartJustGuardWindow を呼び出すように設定
+                enemyController.OnAttackHitMoment += StartJustGuardWindow;
+            }
+        }
     }
 
     public void StartEnemyTurn()
@@ -103,9 +119,6 @@ public class EnemyTurn : MonoBehaviour
         return null;
     }
 
-    /// <summary>
-    /// 敵の攻撃コマンドを準備する (変更なし)
-    /// </summary>
     private void PrepareAttackCommands()
     {
         foreach (var attacker in enemies)
@@ -131,132 +144,158 @@ public class EnemyTurn : MonoBehaviour
                     }
                     commandQueue.Enqueue(new EnemyAttackCommand(target, attacker, attackerController, targetController, damageStrategy, targetUIController));
                 }
+            }
+        }
+    }
+
+    private void Update()
+    {
+        // 1. ジャストガードの受付窓が開いている時だけ処理
+        if (isJustGuardWindowOpen)
+        {
+            justGuardTimer -= Time.deltaTime;
+
+            int targetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
+            int targetPlayerNum = targetPlayerIndex + 1;
+
+            // 2. ジャストガード成功判定 (受付時間内に "押した" か？)
+            if (defenseInput == targetPlayerNum)
+            {
+                Debug.Log($"P{targetPlayerNum}: カウンター成功！");
+                battleManager.IncrementCounterCount();
+                battleManager.AddGuardGauge(COUNTER_RECOVERY_LARGE);
+
+                // 成功したので、この攻撃は処理済み
+                isJustGuardWindowOpen = false;
+                defenseInput = 0; // 入力イベントを消費
+                attackHasBeenResolved = true;
+            }
+            // 3. 猶予時間が過ぎた場合 (ジャストガード失敗)
+            else if (justGuardTimer <= 0f)
+            {
+                isJustGuardWindowOpen = false;
+
+                // 4. 通常ガード判定 (受付終了時に "押していた" か？)
+                if (isDefending[targetPlayerIndex] && battleManager.TrySpendGuardGauge(GUARD_COST_ON_SUCCESS))
+                {
+                    Debug.Log($"P{targetPlayerNum}: ガード成功");
+                    battleManager.AddGuardGauge(GUARD_RECOVERY_SMALL);
+                }
                 else
                 {
-                    Debug.LogError("ターゲットプレイヤーに対応するUIコントローラーが見つかりませんでした。");
+                    // 5. 被弾処理
+                    if (!isDefending[targetPlayerIndex]) Debug.Log($"P{targetPlayerNum}: 被弾！");
+                    else Debug.Log($"P{targetPlayerNum}: ゲージ不足で被弾！");
+
+                    battleManager.AddGuardGauge(HIT_RECOVERY_MEDIUM);
+                    HandleDamageToPlayer(); // ★ ダメージ処理を呼び出す
                 }
+                attackHasBeenResolved = true; // 処理済み
             }
-            else
+        }
+
+        // 2. ガード維持によるゲージ消費 (常時監視)
+        for (int i = 0; i < isDefending.Length; i++)
+        {
+            if (isDefending[i])
             {
-                Debug.LogWarning("攻撃対象となる生存プレイヤーがいません。");
-                break;
+                float drainAmount = GUARD_DRAIN_PER_SECOND * Time.deltaTime;
+                if (!battleManager.TrySpendGuardGauge(drainAmount))
+                {
+                    // ゲージ切れ
+                    isDefending[i] = false;
+                    Debug.Log($"P{i + 1} ゲージが尽きた！");
+                    playerControllers[players[i]].SetGuardAnimation(false); // アニメーション強制停止
+                }
             }
         }
     }
 
     /// <summary>
-    /// 敵の行動を順次実行するコルーチン
+    /// (EnemyControllerのアニメーションイベントから) 攻撃が当たる瞬間に呼ばれる
+    /// </summary>
+    private void StartJustGuardWindow()
+    {
+        // 既に処理済み (カウンター成功済みなど) なら何もしない
+        if (attackHasBeenResolved) return;
+
+        // ターゲットが設定されていなければ何もしない
+        if (currentPlayerTarget == null) return;
+
+        Debug.Log($"ジャストガード受付開始 (猶予: {JUST_GUARD_DURATION}秒)");
+        isJustGuardWindowOpen = true;
+        justGuardTimer = JUST_GUARD_DURATION;
+        defenseInput = 0; // 古い入力をクリア
+    }
+
+    /// <summary>
+    /// ガード失敗時に呼ばれるダメージ処理
+    /// </summary>
+    private void HandleDamageToPlayer()
+    {
+        if (currentAttackCommand != null && !attackHasBeenResolved)
+        {
+            Debug.LogWarning($"P{currentPlayerTarget.PlayerID} にダメージ！");
+            currentAttackCommand.ApplyDamageAfterJudgement();
+        }
+    }
+
+
+    /// <summary>
+    /// 敵の行動を順次実行するコルーチン (ロジック大幅変更)
     /// </summary>
     private IEnumerator ProcessEnemyActions()
     {
-        // 1. 実行する攻撃コマンドを準備
         PrepareAttackCommands();
-
-        // 2. 防御用の入力マップを有効にする
         inputReader.EnableDefenseActionMap();
 
-        // 3. キューにたまったコマンドを順に実行
         while (commandQueue.Count > 0)
         {
             var command = commandQueue.Dequeue();
             var attackCmd = command as EnemyAttackCommand;
 
-            // 攻撃コマンド以外は即時実行
             if (attackCmd == null)
             {
-                command.Do();
+                // (command.Do() がコルーチンでない場合)
+                // command.Do(); 
                 yield return new WaitForSeconds(0.3f);
                 continue;
             }
 
-            // --- ★ ここから防御/カウンター処理を大幅に変更 ★ ---
+            // --- ▼ REPLACED START: ここからが新しいロジック ▼ ---
 
-            // 4. ターゲット情報を取得
-            PlayerModel target = attackCmd.PlayerTarget;
-            int targetPlayerIndex = players.FindIndex(p => p == target); // (0, 1, 2)
-            int targetPlayerNum = targetPlayerIndex + 1; // (1, 2, 3)
+            // 1. この攻撃のコンテキストをセット (Updateが参照するため)
+            this.currentPlayerTarget = attackCmd.PlayerTarget;
+            this.currentAttackCommand = attackCmd;
+            this.attackHasBeenResolved = false; // 攻撃を「未処理」に設定
 
-            // 5. 防御ウィンドウ (UI表示など)
-            Debug.Log($"！ Player {targetPlayerNum} ({target.PlayerName}) が狙われている！");
-            // TODO: UIに「Player {targetPlayerNum} が狙われている！」と表示
+            int targetPlayerNum = players.FindIndex(p => p == currentPlayerTarget) + 1;
+            Debug.Log($"！ Player {targetPlayerNum} ({currentPlayerTarget.PlayerName}) が狙われている！");
+            // TODO: UIに「狙われている！」表示
 
-            // 6. 防御入力の受付
-            float defenseWindow = 1.0f; // 1.0秒の受付時間
-            float justWindowStart = 0.7f; // 0.7秒～1.0秒がジャスト
-            float timer = 0f;
+            // 2. 攻撃コマンドを実行 (アニメーション再生と待機)
+            // command.Do() は「アニメーションを再生し、その長さだけ待機する」コルーチンである必要があります
+            // (ステップ3で解説)
+            yield return StartCoroutine(command.Do());
 
-            defenseInput = 0; // "Press" event tracker for this attack
-            float pressTime = -1f; // "Press" event が発生した時間
-            bool isHoldingCorrectKey = false;
-            DefenseResult result = DefenseResult.None; // Default to hit
-
-            while (timer < defenseWindow)
-            {
-                timer += Time.deltaTime;
-
-                // 1. "Press" event check (for timing)
-                // HandleDefenseInput が defenseInput をセットする
-                if (defenseInput == targetPlayerNum)
-                {
-                    pressTime = timer; // "押した瞬間" の時間を記録
-                    defenseInput = 0; // イベントを消費
-                }
-
-                // 2. "Hold" state check
-                // HandleDefenseInput/Canceled が isDefending[] を更新する
-                isHoldingCorrectKey = isDefending[targetPlayerIndex];
-
-                // 3. Continuous Gauge Drain (ゲージ消費ロジック)
-                if (isHoldingCorrectKey)
-                {
-                    // 毎秒10のペースでゲージを消費
-                    float drainAmount = GUARD_DRAIN_PER_SECOND * Time.deltaTime;
-                    if (!battleManager.TrySpendGuardGauge(drainAmount))
-                    {
-                        // ゲージが尽きたら強制的にガード解除
-                        isHoldingCorrectKey = false;
-                        isDefending[targetPlayerIndex] = false; // "ホールド" 状態を強制解除
-                        Debug.Log("ガードゲージが尽きた！");
-                    }
-                }
-
-                yield return null;
-            }
-
+            // 3. アニメーション再生が完了
             // TODO: UIの「狙われている！」表示を消す
 
-            // 7. 防御結果を判定 (攻撃が "着弾" する瞬間の判定)
-
-            if (isHoldingCorrectKey) // ウィンドウ終了時にキーを押し続けていたか？
+            // 4. (保険)
+            // もしアニメーションイベントが発火しなかった場合、
+            // attackHasBeenResolved は false のままです。
+            // 攻撃が終了したのに未処理の場合、強制的に被弾させます。
+            if (!attackHasBeenResolved)
             {
-                // 押し続けていた
-                if (pressTime >= justWindowStart)
-                {
-                    // "Just" window 内で押し始めていた -> カウンター
-                    result = DefenseResult.Counter;
-                    battleManager.IncrementCounterCount();
-                    battleManager.AddGuardGauge(COUNTER_RECOVERY_LARGE);
-                    Debug.Log($"P{targetPlayerNum}: カウンター成功！ (+{COUNTER_RECOVERY_LARGE})");
-                }
-                else
-                {
-                    // "Just" window 以前から押し始めていた (pressTime >= 0 or -1) -> ガード
-                    result = DefenseResult.Guard;
-                    battleManager.AddGuardGauge(GUARD_RECOVERY_SMALL);
-                    Debug.Log($"P{targetPlayerNum}: ガード成功 (+{GUARD_RECOVERY_SMALL})");
-                }
-            }
-            else
-            {
-                // 攻撃着弾時、キーを押していなかった (or ゲージ切れ) -> 被弾
-                result = DefenseResult.None;
-                Debug.Log($"P{targetPlayerNum}: 被弾！ (+{HIT_RECOVERY_MEDIUM})");
+                Debug.LogWarning($"P{targetPlayerNum}: アニメーションイベントが発火しなかったため、被弾処理を実行します。");
                 battleManager.AddGuardGauge(HIT_RECOVERY_MEDIUM);
+                HandleDamageToPlayer();
+                attackHasBeenResolved = true; // 処理済みにする
             }
 
-            // 8. コマンドに結果をセットして実行
-            attackCmd.SetDefenseResult(result);
-            yield return StartCoroutine(command.Do());
+            // 次の攻撃の前に1フレーム待機
+            yield return null;
+
         }
 
         // 10. ターン終了処理
@@ -265,5 +304,25 @@ public class EnemyTurn : MonoBehaviour
         inputReader.OnDefendCanceled -= HandleDefenseInputCanceled;
 
         TurnFinished?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        if (inputReader != null)
+        {
+            inputReader.OnDefend -= HandleDefenseInput;
+            inputReader.OnDefendCanceled -= HandleDefenseInputCanceled;
+        }
+
+        if (enemyControllers != null)
+        {
+            foreach (var enemyController in this.enemyControllers.Values)
+            {
+                if (enemyController != null)
+                {
+                    enemyController.OnAttackHitMoment -= StartJustGuardWindow;
+                }
+            }
+        }
     }
 }

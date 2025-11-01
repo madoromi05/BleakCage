@@ -30,14 +30,16 @@ public class TutorialManager : MonoBehaviour , IPhase
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
     private List<int> currentlySelectedCards = new List<int>();
     private List<EnemyStatusUIController> enemyStatusUIControllers;
+    private Dictionary<EnemyModel, EnemyController> enemyControllers;
     private bool hasTurnFinished = false;
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
 
-    public void Initialize(TutorialInputReader ir, List<EnemyStatusUIController> eUIs)
+    public void Initialize(TutorialInputReader ir, List<EnemyStatusUIController> eUIs, Dictionary<EnemyModel, EnemyController> enemyControllers)
     {
         this.inputReader = ir;
         this.enemyStatusUIControllers = eUIs;
+        this.enemyControllers = enemyControllers;
 
         if (inputReader != null)
         {
@@ -121,8 +123,7 @@ public class TutorialManager : MonoBehaviour , IPhase
     private IEnumerator PlayerTurnExplanationFlow()
     {
         playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleCardDeck, enemyStatusUIControllers);
-
+        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleCardDeck, enemyStatusUIControllers, this.enemyControllers);
         // 1. 最初のメッセージを表示
         SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Stage1
   m_EditorClassIdentifier: 
   stageEnemyID: 1
-  enemyIDs: 010000000200000003000000
+  enemyIDs: 01000000

@@ -1,15 +1,19 @@
-using System.Collections;
 using UnityEngine;
+using DG.Tweening;
+using System.Collections;
 
 /// <summary>
 /// UI、データをゲームにsetするクラス
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
+    public event System.Action OnAttackHitMoment;
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
+    private Vector3 originalPosition; // 攻撃前の元の位置
+    private Transform playerTransform; // 攻撃対象（プレイヤー）のTransform
 
     // AnimatorのParametersタブと一致させる
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
@@ -24,9 +28,11 @@ public class EnemyController : MonoBehaviour
     /// <summary>
     /// 敵のデータを初期化し、表示とアニメーションを設定する
     /// </summary>
-    public void Init(EnemyModel enemyModel)
+    public void Init(EnemyModel enemyModel, Transform targetPlayer)
     {
         this.model = enemyModel;
+        this.playerTransform = targetPlayer;
+        this.originalPosition = transform.position;
 
         if (model.CharacterPrefab != null)
         {
@@ -70,6 +76,39 @@ public class EnemyController : MonoBehaviour
         {
             Debug.LogError($"EnemyModel (ID: {model.EnemyID}) に EnemyAnimator が設定されていません。");
         }
+    }
+
+    /// <summary>
+    /// 攻撃シーケンスを開始する
+    /// </summary>
+    public IEnumerator AttackSequence()
+    {
+        // 1. 相手の懐（例: 1.5ユニット手前）まで移動する
+        Vector3 targetPosition = playerTransform.position + (transform.position - playerTransform.position).normalized * 1.5f;
+        float moveDuration = 0.3f; // 0.3秒かけて移動
+
+        transform.DOMove(targetPosition, moveDuration).SetEase(Ease.OutCubic);
+
+        // 移動が終わるまで待機
+        yield return new WaitForSeconds(moveDuration);
+
+        // 2. 攻撃アニメーションを再生
+        animator.SetTrigger("Attack"); // 仮のアニメーショントリガー
+
+        // 3. アニメーション再生が完了するまで待機（ここは後述の「アニメーションイベント」で制御するのがベスト）
+        // とりあえず固定時間待機する場合
+        float attackAnimLength = 1.0f; // アニメの長さに合わせる
+        yield return new WaitForSeconds(attackAnimLength);
+
+        // 4. 元の位置に戻る
+        float returnDuration = 0.5f;
+        transform.DOMove(originalPosition, returnDuration).SetEase(Ease.InOutQuad);
+
+        // 戻るまで待機
+        yield return new WaitForSeconds(returnDuration);
+
+        // これで攻撃シーケンス完了
+        Debug.Log("攻撃完了、元の位置に戻りました");
     }
 
     /// <summary>
@@ -133,5 +172,14 @@ public class EnemyController : MonoBehaviour
         {
             statusUI.UpdateHP(currentHP);
         }
+    }
+
+    /// <summary>
+    /// アニメーションイベントから呼び出される関数
+    /// </summary>
+    public void TriggerAttackHit()
+    {
+        // 攻撃が当たる瞬間にイベントを発火させる
+        OnAttackHitMoment?.Invoke();
     }
 }

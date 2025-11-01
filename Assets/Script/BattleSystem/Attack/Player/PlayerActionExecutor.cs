@@ -24,8 +24,9 @@ public class PlayerActionExecutor
         List<CardRuntime> selectedCards,
         Dictionary<PlayerRuntime, List<EnemyModel>> playerTargetSelections,
         List<EnemyStatusUIController> enemyStatusUIControllers,
+        Dictionary<EnemyModel, EnemyController> enemyControllers,
         IAttackStrategy damageStrategy,
-        System.Action onExecutionComplete) // 完了時に呼び出すコールバック
+        System.Action onExecutionComplete)
     {
         Debug.Log("実行するカード: " + string.Join(",", selectedCards.Select(c => c.ID)));
         commandQueue.Clear();
@@ -52,7 +53,7 @@ public class PlayerActionExecutor
                 // 攻撃属性の場合
                 if (playerTargetSelections.TryGetValue(player, out List<EnemyModel> targets))
                 {
-                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, damageStrategy);
+                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageStrategy);
                 }
             }
             else
@@ -100,6 +101,7 @@ public class PlayerActionExecutor
         CardRuntime selectedCardRuntime,
         List<EnemyModel> targets,
         List<EnemyStatusUIController> enemyStatusUIControllers,
+        Dictionary<EnemyModel, EnemyController> enemyControllers,
         IAttackStrategy damageStrategy)
     {
         EnemyModel finalTarget = null;
@@ -115,10 +117,17 @@ public class PlayerActionExecutor
         if (finalTarget != null)
         {
             EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == finalTarget);
-            if (targetEnemyUI != null)
+            if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTarget, out EnemyController targetEnemyController))
             {
+                Transform targetTransform = targetEnemyController.transform; // 3DモデルのTransform
                 commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime, selectedCardRuntime,
-                                                     targetEnemyUI, finalTarget, damageStrategy, cardModelFactory));
+                                                      targetEnemyUI, finalTarget,
+                                                      targetTransform,
+                                                      damageStrategy, cardModelFactory));
+            }
+            else
+            {
+                Debug.LogError($"攻撃対象 (ID: {finalTarget.EnemyID}) の EnemyController または UI が見つかりません。");
             }
         }
         else

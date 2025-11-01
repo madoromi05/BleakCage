@@ -28,7 +28,7 @@ public class PlayerDataLoader
 
     [Header("ヘルパー関数用変数")]
     private const string ProfileFileName = "player_profile.json";
-    private const int MockCharacterCount = 3;
+    private const int MockCharacterCount = 1;
     private const int MockWeaponsPerCharacter = 3;
     private const int MockDirectlyEquippedCardsPerCharacter = 3;
     private const int MockWeaponsWithMinCards = 3; // 最小枚数のカードを持つ武器の数
@@ -40,7 +40,7 @@ public class PlayerDataLoader
     {
         playerFactory = new PlayerModelFactory();
         weaponFactory = new WeaponModelFactory();
-        cardFactory   = new CardModelFactory();
+        cardFactory = new CardModelFactory();
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class PlayerDataLoader
                 continue;
             }
 
-            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId,level);
+            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId, level);
             party.Add(playerRuntime);
 
             // プレイヤーが直接持つカードをCharacterCardWeaponにセット
@@ -79,7 +79,7 @@ public class PlayerDataLoader
             {
                 foreach (var cardData in charData.EquippedCards)
                 {
-                    CardModel cardModel     = cardFactory.CreateFromID(cardData.CardId);
+                    CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
                     CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
                     playerRuntime.CaracterCardWeapon.AddCard(cardRuntime);
                     allCardsForBattle.Add(cardRuntime);
@@ -121,6 +121,7 @@ public class PlayerDataLoader
         int cardIdCounter = 1;
         int totalWeaponCount = 0;
 
+        // ループは MockCharacterCount (1に設定) 回だけ実行される
         for (int i = 1; i <= MockCharacterCount; i++)
         {
             var character = new CharacterData

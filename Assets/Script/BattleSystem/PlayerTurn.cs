@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
+
 public class PlayerTurn : MonoBehaviour
 {
     [SerializeField] private CardController cardPrefab;
@@ -31,6 +32,7 @@ public class PlayerTurn : MonoBehaviour
     private Dictionary<PlayerRuntime, List<EnemyModel>> playerTargetSelections;
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>(); // 破棄されたカードのIDを保持
     private List<EnemyStatusUIController> enemyStatusUIControllers;
+    private Dictionary<EnemyModel, EnemyController> enemyControllers;
 
     private bool isCounterTurn = false;
     private System.Action onCounterActionFinishedCallback;
@@ -60,11 +62,14 @@ public class PlayerTurn : MonoBehaviour
     }
 
     public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections,
-                    BattleCardDeck battleDeck, List<EnemyStatusUIController> enemyUIControllers)
+                BattleCardDeck battleDeck,
+                List<EnemyStatusUIController> enemyUIControllers,
+                Dictionary<EnemyModel, EnemyController> enemyControllers) // <--- 追加
     {
         this.playerTargetSelections = playerSelections;
         this.battleDeck = battleDeck;
         this.enemyStatusUIControllers = enemyUIControllers;
+        this.enemyControllers = enemyControllers;
     }
 
     public void SetTutorialMode(bool mode)
@@ -107,6 +112,7 @@ public class PlayerTurn : MonoBehaviour
             selectedCardsThisTurn,
             playerTargetSelections,
             enemyStatusUIControllers,
+            enemyControllers,
             damageStrategy,
             () => OnTurnFinished?.Invoke() // 実行完了時にイベントを発火
         ));
@@ -288,6 +294,7 @@ public class PlayerTurn : MonoBehaviour
                 cardsToExecute,
                 playerTargetSelections,
                 enemyStatusUIControllers,
+                enemyControllers,
                 damageStrategy,
                 () => {
                     onCounterActionFinishedCallback?.Invoke();

@@ -13,9 +13,10 @@ public class AttackCommand : ICommand
     private IAttackStrategy damageStrategy;
     private EnemyStatusUIController enemyStatusUIController;
     private CardModelFactory cardModelFactory;
+    private Transform targetTransform;
 
     public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card,EnemyStatusUIController enemyStatusUIController,
-                            EnemyModel enemy, IAttackStrategy strategy, CardModelFactory cardModelFactory)
+                            EnemyModel enemy, Transform targetTransform, IAttackStrategy strategy, CardModelFactory cardModelFactory)
     {
         this.damageStrategy = strategy;
         this.targetEnemy = enemy;
@@ -24,6 +25,7 @@ public class AttackCommand : ICommand
         this.weapon = weapon;
         this.enemyStatusUIController = enemyStatusUIController;
         this.cardModelFactory = cardModelFactory;
+        this.targetTransform = targetTransform;
     }
 
     public IEnumerator Do()
@@ -41,19 +43,14 @@ public class AttackCommand : ICommand
             Debug.LogError($"Player (ID: {player.ID}) の PlayerController が null です！");
             yield break;
         }
-        // 2. CardRuntime の ID を使って、CardModel (マスターデータ) を取得
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
-
-        // 4. CardModel からアニメーションクリップを取得し、再生
-        controller.PlayAttackAnimation(cardModel.AttackAnimation);
-
-        float waitTime = 0.5f; // デフォルトの待機時間 (クリップが null だった場合)
-        if (cardModel.AttackAnimation != null)
+        if (cardModel.AttackAnimation == null)
         {
-            waitTime = cardModel.AttackAnimation.length;
+            Debug.LogError($"CardModel (ID: {card.ID}) に AttackAnimation が設定されていません！");
+            yield break;
         }
 
-        yield return new WaitForSeconds(waitTime);
+        yield return controller.AttackSequence(cardModel.AttackAnimation, targetTransform);
 
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 
@@ -64,7 +61,8 @@ public class AttackCommand : ICommand
         // 結果をログに出力
         Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
 
-        yield return new WaitForSeconds(waitTime);
+        // アニメーション後の硬直時間
+        yield return new WaitForSeconds(0.1f);
     }
 
     public bool Undo()
