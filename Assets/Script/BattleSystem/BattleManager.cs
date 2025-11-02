@@ -193,53 +193,39 @@ public class BattleManager : MonoBehaviour
     //=================================================================================
     private void playerView()
     {
-        if (isTutorialMode)
+        // --- 共通：プレイヤーを1体だけ生成する ---
+        Debug.Log("プレイヤー生成処理：最初の1体のみ生成します。");
+
+        // チュートリアル・通常モード共通で PlayerID=1 を優先的に探す
+        PlayerRuntime targetPlayer = players.FirstOrDefault(p => p.PlayerModel.PlayerID == 1);
+
+        // 見つからなければ先頭のプレイヤーを代用
+        if (targetPlayer == null && players.Count > 0)
         {
-            // --- チュートリアルモードの処理 ---
-            Debug.Log("チュートリアルモード：Player ID 1 を検索・生成します...");
-
-            // 1. パーティリスト (players) から PlayerID が 1 のキャラクターを探す
-            PlayerRuntime tutorialPlayer = players.FirstOrDefault(p => p.PlayerModel.PlayerID == 1); // 0 から 1 に変更
-
-            if (tutorialPlayer != null)
-            {
-                // 2. プレイヤーが見つかった場合、ポジション[0] (最初の出現位置) に生成
-                if (playerPositions.Count > 0 && playerPositions[0] != null)
-                {
-                    Transform spawnPoint = playerPositions[0];
-                    // ヘルパーメソッドを呼び出し
-                    SpawnPlayerCharacter(tutorialPlayer, spawnPoint);
-                }
-                else
-                {
-                    Debug.LogError("チュートリアル用のプレイヤー(ID:1)は見つかりましたが、playerPositions[0]が設定されていません！"); // ログを ID:1 に
-                }
-            }
-            else
-            {
-                Debug.LogError("チュートリアルモードですが、パーティ内に Player ID 1 のプレイヤーが見つかりませんでした！"); // ログを ID:1 に
-            }
+            targetPlayer = players[0];
+            Debug.LogWarning("PlayerID 1 が見つからなかったため、パーティ先頭のプレイヤーを使用します。");
         }
-        else
+
+        if (targetPlayer == null)
         {
-            // --- 通常モードの処理 (以前と同じ) ---
-            // パーティ全員を順番に生成
-            for (int i = 0; i < players.Count; i++)
-            {
-                if (i >= playerPositions.Count || playerPositions[i] == null)
-                {
-                    Debug.LogWarning($"Player {i} のためのポジションが定義されていないか、None(Transform)です。このプレイヤーの生成をスキップします。");
-                    continue; // 'break' ではなく 'continue' に変更
-                }
-
-                PlayerRuntime runtime = players[i];
-                Transform spawnPoint = playerPositions[i];
-
-                // ヘルパーメソッドを呼び出し
-                SpawnPlayerCharacter(runtime, spawnPoint);
-            }
+            Debug.LogError("プレイヤーデータが存在しません！ PlayerDataLoader の処理を確認してください。");
+            return;
         }
+
+        // 出現位置を確認
+        if (playerPositions.Count == 0 || playerPositions[0] == null)
+        {
+            Debug.LogError("プレイヤー出現位置が設定されていません！（playerPositions[0] が null）");
+            return;
+        }
+
+        // 実際に生成
+        Transform spawnPoint = playerPositions[0];
+        SpawnPlayerCharacter(targetPlayer, spawnPoint);
+
+        Debug.Log($"プレイヤー '{targetPlayer.PlayerModel.PlayerName}' を {spawnPoint.name} に生成しました。");
     }
+
 
     private void stageSet()
     {

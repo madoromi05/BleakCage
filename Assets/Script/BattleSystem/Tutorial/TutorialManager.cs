@@ -112,7 +112,7 @@ public class TutorialManager : MonoBehaviour , IPhase
         tutorialMessages.Enqueue("このフェーズでは、制限時間内に可能な限り多くのスキルカードを選択します。");
         tutorialMessages.Enqueue("配られた3枚のスキルカードのうち、最低1枚、最大2枚を選択します。選択はテンキーで行うことができ、" +
             "選択が終わったらEnterキーで残ったカードを破棄します。\r\n選んだカードはスタックされていき、破棄されたカードは\"修復\"するまでデッキに戻りません。" +
-            "\r\n破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
+            "破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
         tutorialMessages.Enqueue("まずはこのカード2つを選択してみてください。");
         tutorialMessages.Enqueue("Enterキーで次に進みましょう");
         tutorialMessages.Enqueue("ここからは好きなカードを選択してください。選択したらEnterキーで次に進み、可能な限り多くのスキルカードを選択し、多くのダメージが与えられるように頑張りましょう！");
@@ -179,6 +179,7 @@ public class TutorialManager : MonoBehaviour , IPhase
     }
     private void OnPlayerTurnFinished()
     {
+        Debug.Log("[OnPlayerTurnFinished] 発火");
         hasTurnFinished = true;
     }
 

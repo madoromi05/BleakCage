@@ -30,7 +30,7 @@ public class EnemyTurn : MonoBehaviour
     private const float GUARD_COST_ON_SUCCESS = 5f;
 
     private int defenseInput = 0; // ‰Ÿ‚³‚ê‚½–hŒäƒL[ (1, 2, 3) - "‰Ÿ‚µ‚½uŠÔ" ‚Ì”»’è—p
-    private bool[] isDefending = new bool[3];
+    private bool[] isDefending;
     private bool isJustGuardWindowOpen = false;
     private float justGuardTimer = 0f;
     private const float JUST_GUARD_DURATION = 0.067f;/// 4ƒtƒŒ[ƒ€‚Ì•b” (60FPS‚Ìê‡: 4 * (1/60) = –ñ 0.067•b)
@@ -48,6 +48,7 @@ public class EnemyTurn : MonoBehaviour
                            Dictionary<PlayerModel, PlayerController> playerControllers,
                            List<PlayerStatusUIController> playerStatusUIControllers)
     {
+        isDefending = new bool[players.Count];
         this.players = players;
         this.enemies = enemys;
         this.enemyControllers = enemyControllers;
@@ -207,7 +208,7 @@ public class EnemyTurn : MonoBehaviour
         }
 
         // 2. ƒK[ƒhˆÛ‚É‚æ‚éƒQ[ƒWÁ”ï (íŠÄ‹)
-        for (int i = 0; i < isDefending.Length; i++)
+        for (int i = 0; i < players.Count; i++)
         {
             if (isDefending[i])
             {
