@@ -29,7 +29,7 @@ public class CardModelFactory
     /// <returns>CardEntityBŒ©‚Â‚©‚ç‚È‚¢ê‡‚Ínull</returns>
     private CardEntity LoadCardEntity(int cardId)
     {
-        string path = $"CardEntityList/Card_{cardId}";
+        string path = $"EntityDataList/CardEntityList/Card_{cardId}";
         CardEntity cardEntity = Resources.Load<CardEntity>(path);
 
         if (cardEntity == null)

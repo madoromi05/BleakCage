@@ -16,17 +16,18 @@ public class EnemyTurnTutorialManager : MonoBehaviour, IPhase
     [SerializeField] public GameObject tutorialUIPanel;
     [SerializeField] private Text tutorialText;
     [SerializeField] private EnemyTurn enemyTurn;
-    [SerializeField] private TutorialInputReader inputReader;
 
+    private TutorialInputReader inputReader; // PhaseManager から渡される
     private Queue<string> enemyTurnMessages;
     private bool canProceed = false;
     private bool hasEnemyTurnFinished = false;
 
     /// <summary>
-    /// BattleManagerから呼び出される初期化
+    /// BattlePhaseManagerから呼び出される初期化
     /// </summary>
-    public void Initialize()
+    public void Initialize(TutorialInputReader ir)
     {
+        this.inputReader = ir;
         if (inputReader != null)
         {
             inputReader.OnProceed += HandleProceedInput;
@@ -74,25 +75,22 @@ public class EnemyTurnTutorialManager : MonoBehaviour, IPhase
         tutorialUIPanel.SetActive(true);
         hasEnemyTurnFinished = false;
         canProceed = false;
-        yield return null; // 入力食い込み防止
+        yield return null;
 
         // 1. メッセージ
         SetTutorialText(enemyTurnMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        yield return null;
 
         // 2. メッセージ
         SetTutorialText(enemyTurnMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        yield return null;
 
         // 3. メッセージ
         SetTutorialText(enemyTurnMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        yield return null;
 
         // 4. メッセージ (攻撃開始)
         SetTutorialText(enemyTurnMessages.Dequeue());
@@ -119,7 +117,7 @@ public class EnemyTurnTutorialManager : MonoBehaviour, IPhase
         enemyTurnMessages.Enqueue("次は敵のターンです。\n敵が攻撃対象を選択し、攻撃してきます。");
         enemyTurnMessages.Enqueue("敵の攻撃がヒットする瞬間（ジャストタイミング）で防御キーを押すと「COUNTER」となり、エクストラターンを獲得できます。");
         enemyTurnMessages.Enqueue("ジャストタイミングより早くても、キーを押し続けていれば「GUARD」となり、ダメージを軽減できます。");
-        enemyTurnMessages.Enqueue("敵が攻撃してきます！防御の準備を！\n（今回はジャストガードを狙ってみましょう）");
+        enemyTurnMessages.Enqueue("敵が攻撃してきます！防御の準備を！\n（クリックで次のステップへ）");
     }
 
     private IEnumerator EndTutorial()
@@ -132,7 +130,7 @@ public class EnemyTurnTutorialManager : MonoBehaviour, IPhase
         canProceed = false;
 
         tutorialUIPanel.SetActive(false);
-        Debug.Log("チュートリアル完了");
+        Debug.Log("敵ターンチュートリアル完了");
     }
 
     private void SetTutorialText(string text)

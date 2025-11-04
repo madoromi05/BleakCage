@@ -1,15 +1,19 @@
-#if TUTORIAL_ENABLED
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
+#if TUTORIAL_ENABLED
+
+/// <summary>
+/// 攻撃対象選択ターンのチュートリアルを担当するクラス
+/// </summary>
 public class SelectTurnTutorialManager : MonoBehaviour, IPhase
 {
+    [Header("Component References")]
     [SerializeField] private GameObject tutorialUIPanel;
     [SerializeField] private Text tutorialText;
-    // [SerializeField] private RawImage tutorialGifImage;
-    // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
 
     private TutorialInputReader _inputReader;
@@ -21,14 +25,11 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
     private Queue<string> tutorialMessages;
     private bool canProceed = false;
 
-    public event System.Action OnSelectTurnTutorialFinished;
     public event System.Action OnPhaseFinished;
 
     public void Initialize(TutorialInputReader ir, List<PlayerRuntime> players, List<EnemyModel> enemies, List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
     {
         _inputReader = ir;
-
-        // 自身のメンバ変数にリストを保存する
         _currentParty = players;
         _currentEnemies = enemies;
         _playerUIs = pUIs;
@@ -44,46 +45,49 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         if (_inputReader != null)
         {
             _inputReader.OnProceed += HandleProceedInput;
-            Debug.Log("InputReaderNOTNULL");
         }
-        Debug.Log("InputReaderisOK");
 
-        // gifView.Initialize(tutorialGifImage);
         tutorialUIPanel.SetActive(true);
         StartCoroutine(TutorialCoroutine());
     }
 
+    private void OnDisable()
+    {
+        if (_inputReader != null)
+        {
+            _inputReader.OnProceed -= HandleProceedInput;
+        }
+    }
+
+
     private void HandleProceedInput()
     {
         canProceed = true;
-        Debug.Log("HandleProceedInput is Call");
     }
-
 
     private IEnumerator TutorialCoroutine()
     {
         InitializeMessages();
 
         // 1. 最初のメッセージ
-        SetTutorialText(tutorialMessages.Dequeue()); // "このフェーズでは..."
+        SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
         // 2. GIF付きの説明
-        SetTutorialText(tutorialMessages.Dequeue()); // "<gif>矢印キーで..."
+        SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        // gifView.StopGif();
 
         // 3. 実際の選択を促す
-        SetTutorialText(tutorialMessages.Dequeue()); // "まず、最初のキャラクターの..."
+        SetTutorialText(tutorialMessages.Dequeue());
 
-        // チュートリアルで操作するプレイヤー（1人目）とそのUIを取得
         if (_currentParty == null || _currentParty.Count == 0 || _playerUIs == null || _playerUIs.Count == 0)
         {
             Debug.LogError("チュートリアルを実行するプレイヤーが見つかりません。");
             yield break;
         }
+
         PlayerRuntime tutorialPlayer = _currentParty[0];
         PlayerStatusUIController tutorialPlayerUI = _playerUIs[0];
 
@@ -98,13 +102,13 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         // プレイヤーUIのハイライトを戻す
         tutorialPlayerUI.ResetHighlight();
 
-
         // 4. 完了メッセージ
-        SetTutorialText(tutorialMessages.Dequeue()); // "うまく選択できましたね！..."
+        SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
-         // selectTurn.FinalizeSelectionsForTutorial();
+        // チュートリアルで選択されなかったプレイヤーの選択データを自動で設定
+        selectTurn.FinalizeSelectionsForTutorial();
 
         OnPhaseFinished?.Invoke();
     }
@@ -112,23 +116,15 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
     private void InitializeMessages()
     {
         tutorialMessages = new Queue<string>();
-        tutorialMessages.Enqueue("このフェーズでは、各キャラクターが攻撃する敵の優先順位を決めます。");
-        tutorialMessages.Enqueue("攻撃したい敵を選択し、Enterキーで決定します。\nこれをキャラクターの人数分、優先順位の数だけ繰り返します。");
+        tutorialMessages.Enqueue("このフェーズでは、各キャラクターが攻撃する敵の優先順位を決めます。（クリックで次へ）");
+        tutorialMessages.Enqueue("攻撃したい敵を選択し、Enterキーで決定します。\nこれをキャラクターの人数分、優先順位の数だけ繰り返します。（クリックで次へ）");
         tutorialMessages.Enqueue("まず、最初のキャラクターの第1優先ターゲットを選択してみましょう。\n矢印キーで敵を選び、Enterキーで決定してください。");
-        tutorialMessages.Enqueue("うまく選択できましたね！\n実際のゲームでは、これを全キャラクター分行います。");
+        tutorialMessages.Enqueue("うまく選択できましたね！\n実際のゲームでは、これを全キャラクター分行います。\n（クリックで次へ）");
     }
 
     private void SetTutorialText(string text)
     {
         tutorialText.text = text;
-        // tutorialGifImage.gameObject.SetActive(false);
     }
-
-    //private void SetTutorialTextAndGif(string text, string gifFileName)
-    //{
-    //    tutorialText.text = text;
-    //    tutorialGifImage.gameObject.SetActive(true);
-    //    // StartCoroutine(gifView.LoadAndPlayGif(gifFileName));
-    //}
 }
 #endif

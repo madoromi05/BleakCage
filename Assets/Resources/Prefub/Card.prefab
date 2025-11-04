@@ -87,9 +87,9 @@ GameObject:
   - component: {fileID: 4558286045207667196}
   - component: {fileID: 5892673124225979262}
   - component: {fileID: 4202574786127042114}
-  - component: {fileID: 832991588809223783}
   - component: {fileID: 1882400511065077096}
   - component: {fileID: 2012046768716652818}
+  - component: {fileID: 5815472571923101147}
   m_Layer: 5
   m_Name: name
   m_TagString: Untagged
@@ -170,24 +170,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &832991588809223783
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5688862835232141027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cde82037be237ab47a97c5b6c71398d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scrollSpeed: 100
-  scrollFinishLineAddValue: 50
-  waitTimeBeforeScroll: 2
-  waitTimeAfterScroll: 2
-  fadeDuration: 0.4
-  waitTimeFade: 0.2
 --- !u!114 &1882400511065077096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,6 +199,24 @@ MonoBehaviour:
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.5}
   m_EffectDistance: {x: 2, y: -2}
   m_UseGraphicAlpha: 0
+--- !u!114 &5815472571923101147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5688862835232141027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cde82037be237ab47a97c5b6c71398d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollSpeed: 100
+  scrollFinishLineAddValue: 50
+  waitTimeBeforeScroll: 2
+  waitTimeAfterScroll: 2
+  fadeDuration: 0.4
+  waitTimeFade: 0.2
 --- !u!1 &5759752369048186391
 GameObject:
   m_ObjectHideFlags: 0

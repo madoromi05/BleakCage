@@ -18,7 +18,7 @@ public class PlayerStatusUIController : MonoBehaviour
     [SerializeField] private Image background;
     private Color originalBackgroundColor;
     private Coroutine hpAnimationCoroutine;
-    private PlayerRuntime layerRuntime;
+    private PlayerRuntime playerRuntime;
     private float maxHP;
 
     public int PlayerID { get; private set; }
@@ -37,6 +37,7 @@ public class PlayerStatusUIController : MonoBehaviour
     /// </summary>
     public void SetPlayerStatus(PlayerRuntime playerRuntime)
     {
+        this.playerRuntime = playerRuntime;
         PlayerModel model = playerRuntime.PlayerModel;
 
         this.PlayerID = model.PlayerID;
@@ -115,5 +116,13 @@ public class PlayerStatusUIController : MonoBehaviour
         {
             background.color = originalBackgroundColor;
         }
+    }
+
+    /// <summary>
+    /// Ç±ÇÃUIÇ™ä«óùÇµÇƒÇ¢ÇÈ PlayerRuntime ÉfÅ[É^Çï‘Ç∑
+    /// </summary>
+    public PlayerRuntime GetPlayerRuntime()
+    {
+        return this.playerRuntime;
     }
 }

@@ -29,7 +29,7 @@ public class EnemyModelFactory
     /// <returns>EnemyEntityBŒ©‚Â‚©‚ç‚È‚¢ê‡‚Ínull</returns>
     private EnemyEntity LoadEnemyEntity(int enemyId)
     {
-        string path = $"EnemyEntityList/Enemy_{enemyId}";
+        string path = $"EntityDataList/EnemyEntityList/Enemy_{enemyId}";
         EnemyEntity enemyEntity = Resources.Load<EnemyEntity>(path);
 
         if (enemyEntity == null)

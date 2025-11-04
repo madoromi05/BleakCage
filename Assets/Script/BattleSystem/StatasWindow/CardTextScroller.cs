@@ -4,9 +4,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// テキストのスクロール
-/// TMP_Textにアタッチしてください
 /// </summary>
-[RequireComponent(typeof(CanvasGroup))]
 
 public class CardTextScroller : MonoBehaviour
 {

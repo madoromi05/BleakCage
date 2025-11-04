@@ -18,7 +18,7 @@ public class EnemyAttackCommand : ICommand
                               PlayerStatusUIController playerStatusUIController)
     {
         this.PlayerTarget = player; // 外部(EnemyTurn)から参照できるように
-        this.Attacker = enemy;     // 外部(EnemyTurn)から参照できるように
+        this.Attacker = enemy;      // 外部(EnemyTurn)から参照できるように
         this.enemyController = enemyController;
         this.DamageStrategy = attackStrategy; // 外部(EnemyTurn)から参照できるように
         this.playerStatusUIController = playerStatusUIController;

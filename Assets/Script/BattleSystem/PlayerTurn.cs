@@ -12,6 +12,7 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private CardController cardPrefab;
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private BattleInputReader inputReader;
+    [SerializeField] private GuardGaugeSystem guardGaugeSystem;
 
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
@@ -64,7 +65,7 @@ public class PlayerTurn : MonoBehaviour
     public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections,
                 BattleCardDeck battleDeck,
                 List<EnemyStatusUIController> enemyUIControllers,
-                Dictionary<EnemyModel, EnemyController> enemyControllers) // <--- 追加
+                Dictionary<EnemyModel, EnemyController> enemyControllers)
     {
         this.playerTargetSelections = playerSelections;
         this.battleDeck = battleDeck;
@@ -296,7 +297,8 @@ public class PlayerTurn : MonoBehaviour
                 enemyStatusUIControllers,
                 enemyControllers,
                 damageStrategy,
-                () => {
+                () =>
+                {
                     onCounterActionFinishedCallback?.Invoke();
                     onCounterActionFinishedCallback = null;
                 }
@@ -327,7 +329,7 @@ public class PlayerTurn : MonoBehaviour
     }
 
     /// <summary>
-    ///  カウンター成功時のエクストラアクション（カード1回提示）を開始する
+    /// カウンター成功時のエクストラアクション（カード1回提示）を開始する
     /// </summary>
     /// <param name="onCounterActionFinished">このアクションが完了したときに呼ばれるコールバック</param>
     public void StartCounterAction(System.Action onCounterActionFinished)
@@ -343,5 +345,6 @@ public class PlayerTurn : MonoBehaviour
 
         // 3枚引いて表示
         DrawHandCards();
+        // ここで PlayerTurn は ConfirmSelectionAndRedraw() が呼ばれるのを待つ
     }
 }

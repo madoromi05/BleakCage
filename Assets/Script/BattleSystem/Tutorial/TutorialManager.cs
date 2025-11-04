@@ -1,45 +1,44 @@
-﻿/// <summary>
-/// カード選択フェーズ時のチュートリアル管理クラス
-/// チュートリアル以外は、無効化される
-/// </summary>
-
-#if TUTORIAL_ENABLED
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TutorialManager : MonoBehaviour , IPhase
+#if TUTORIAL_ENABLED
+
+/// <summary>
+/// カード選択フェーズ時のチュートリアル管理クラス
+/// チュートリアル以外は、無効化される
+/// </summary>
+public class TutorialManager : MonoBehaviour, IPhase
 {
     public event System.Action OnPhaseFinished;
 
+    [Header("Component References")]
     [SerializeField] public GameObject tutorialUIPanel;
     [SerializeField] private PlayerTurn playerTurn;
-    [SerializeField] private BattleManager battleManager;
+    [SerializeField] private BattlePhaseManager phaseManager; // BattleManager から変更
     [SerializeField] private Text tutorialText;
-    // [SerializeField] private RawImage tutorialGifImage;
-    // [SerializeField] private GifViewController gifView;
     [SerializeField] private SelectTurn selectTurn;
 
     private TutorialInputReader inputReader;
-    private EnemyStatusUIController enemyUIController;
-    private Queue<string> tutorialMessages;
     private List<int> tutorialTargetCards = new List<int>() { 0, 1 };
     private List<int> currentlySelectedCards = new List<int>();
     private List<EnemyStatusUIController> enemyStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
+    private Queue<string> tutorialMessages;
     private bool hasTurnFinished = false;
     private bool canProceed = false;
     private bool hasConfirmedSelection = false;
-    private Queue<string> enemyTurnMessages;
 
-    public void Initialize(TutorialInputReader ir, List<EnemyStatusUIController> eUIs, Dictionary<EnemyModel, EnemyController> enemyControllers)
+    public void Initialize(TutorialInputReader ir, List<EnemyStatusUIController> eUIs, Dictionary<EnemyModel, EnemyController> enemyControllers, SelectTurn selectTurn)
     {
         this.inputReader = ir;
         this.enemyStatusUIControllers = eUIs;
         this.enemyControllers = enemyControllers;
+        this.selectTurn = selectTurn; // SelectTurn への参照を取得
+
+        // PlayerTurn の初期化に使うデータは PhaseManager 経由でセットアップ時に提供される前提
 
         if (inputReader != null)
         {
@@ -48,7 +47,6 @@ public class TutorialManager : MonoBehaviour , IPhase
 
         playerTurn.OnCardSelectedForTutorial += HandleCardSelectedForTutorial;
         playerTurn.OnConfirmSelectionForTutorial += HandleConfirmSelectionTutorial;
-        // gifView.Initialize(tutorialGifImage);
     }
 
     private void OnDisable()
@@ -67,6 +65,8 @@ public class TutorialManager : MonoBehaviour , IPhase
     public void StartPhase()
     {
         tutorialUIPanel.SetActive(true);
+        // PlayerTurn のセットアップとモード切り替えは PhaseManager の OnSelectionPhaseFinished で既に行われている
+
         StartCoroutine(TutorialCoroutine());
     }
 
@@ -82,6 +82,7 @@ public class TutorialManager : MonoBehaviour , IPhase
 
     private void HandleCardSelectedForTutorial(int inputNumber, bool isSelected)
     {
+        // 0, 1, 2 を受け取るため、ここでは index のチェックは不要
         if (isSelected)
         {
             if (!currentlySelectedCards.Contains(inputNumber))
@@ -100,9 +101,11 @@ public class TutorialManager : MonoBehaviour , IPhase
         InitializeMessages();
 
         yield return StartCoroutine(PlayerTurnExplanationFlow());
-        yield return StartCoroutine(FutureFeatureExplanation());
-        yield return StartCoroutine(EnemyTurnFlow());
-        yield return StartCoroutine(EndTutorial());
+
+        // カード選択フェーズ完了後、OnPhaseFinished を呼んで次のフェーズ(EnemyTurnTutorialManager)へ移行する
+        // ※ FutureFeatureExplanation() と EnemyTurnFlow() は EnemyTurnTutorialManager のロジックと重複するため削除します
+
+        yield return StartCoroutine(EndTutorial()); // 終了メッセージだけ表示
         OnPhaseFinished?.Invoke();
     }
 
@@ -113,31 +116,29 @@ public class TutorialManager : MonoBehaviour , IPhase
         tutorialMessages.Enqueue("配られた3枚のスキルカードのうち、最低1枚、最大2枚を選択します。選択はテンキーで行うことができ、" +
             "選択が終わったらEnterキーで残ったカードを破棄します。\r\n選んだカードはスタックされていき、破棄されたカードは\"修復\"するまでデッキに戻りません。" +
             "破棄が終わったら、再び3枚のスキルカードが提示されるので、制限時間が続く限りこれを繰り返します。");
-        tutorialMessages.Enqueue("まずはこのカード2つを選択してみてください。");
-        tutorialMessages.Enqueue("Enterキーで次に進みましょう");
+        tutorialMessages.Enqueue("まずはこのカード2つを選択してみてください。（カード番号0と1に対応）");
+        tutorialMessages.Enqueue("Enterキーでカードの選択を確定し、次に進みましょう");
         tutorialMessages.Enqueue("ここからは好きなカードを選択してください。選択したらEnterキーで次に進み、可能な限り多くのスキルカードを選択し、多くのダメージが与えられるように頑張りましょう！");
-        tutorialMessages.Enqueue("次の左クリック入力後、制限時間が開始します。");
+        tutorialMessages.Enqueue("次のクリック入力後、制限時間が開始します。");
     }
 
     private IEnumerator PlayerTurnExplanationFlow()
     {
-        playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(selectTurn.PlayerSelections, battleManager.battleCardDeck, enemyStatusUIControllers, this.enemyControllers);
+        // PlayerTurn の Setup は PhaseManager 側で事前に呼び出す
+
         // 1. 最初のメッセージを表示
         SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
         // 2. GIF付きのメッセージを表示
-        // SetTutorialTextAndGif(tutorialMessages.Dequeue(), "test.gif");
         SetTutorialText(tutorialMessages.Dequeue());
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
-        // gifView.StopGif();
 
         // 3. まずはこのカード2つを選択してみてください。
         SetTutorialText(tutorialMessages.Dequeue());
-        playerTurn.StartPlayerTurn();
+        playerTurn.StartPlayerTurn(); // カードを表示
         yield return new WaitUntil(() => CardsSelectedProsess());
 
         // 4. Enterキーで次に進みましょう
@@ -160,23 +161,17 @@ public class TutorialManager : MonoBehaviour , IPhase
         }
 
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
-        battleManager.StartCoroutine(battleManager.StartPlayerTurnWithTimer());
+        // PhaseManager 経由で BattleManager のコルーチンを開始
+        phaseManager.StartCoroutine(phaseManager.StartPlayerTurnCoroutine("Player Phase"));
         yield return new WaitUntil(() => hasTurnFinished);
         playerTurn.OnTurnFinished -= OnPlayerTurnFinished;
     }
 
-    // メッセージ設定用の補助関数
     private void SetTutorialText(string text)
     {
         tutorialText.text = text;
-        // gifView.StopGif();
     }
 
-    // GIF付きメッセージ設定用の補助関数
-    private void SetTutorialTextAndGif(string text, string gifFileName)
-    {
-        tutorialText.text = text;
-    }
     private void OnPlayerTurnFinished()
     {
         Debug.Log("[OnPlayerTurnFinished] 発火");
@@ -191,31 +186,16 @@ public class TutorialManager : MonoBehaviour , IPhase
         return currentlySelectedCards.Count == tutorialTargetCards.Count && currentlySelectedCards.All(tutorialTargetCards.Contains);
     }
 
-    private IEnumerator FutureFeatureExplanation()
-    {
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
-    }
-
-    private IEnumerator EnemyTurnFlow()
-    {
-        SetTutorialText("次は敵のターンです。");
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
-
-        SetTutorialText("敵が攻撃してきます！防御の準備を！");
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
-    }
-
     private IEnumerator EndTutorial()
     {
-        tutorialText.text = "敵のターンが終了しました。\nこれでチュートリアルは終わりです。";
+        // チュートリアル終了後のメッセージ
+        SetTutorialText("カード選択フェーズが終了しました。\nクリックで次のフェーズに移行します。");
+        tutorialUIPanel.SetActive(true);
         yield return new WaitUntil(() => canProceed);
         canProceed = false;
 
         tutorialUIPanel.SetActive(false);
-        Debug.Log("チュートリアル完了");
+        Debug.Log("カード選択チュートリアル完了");
     }
 }
 #endif
