@@ -9,8 +9,6 @@ public class EnemyAttackCommand : ICommand
     private EnemyController enemyController;
     private PlayerStatusUIController playerStatusUIController;
 
-    private DefenseResult defenseResult = DefenseResult.None;
-
     public EnemyAttackCommand(PlayerModel player, EnemyModel enemy,
                               EnemyController enemyController,
                               PlayerController playerController,

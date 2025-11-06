@@ -42,6 +42,7 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     /// </summary>
     public void EnableDefenseActionMap()
     {
+        Debug.Log("DefenseActionMap enabled.");
         controls.BattleAction.Disable();
         controls.DefenseAction.Enable();
     }
@@ -73,17 +74,22 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
         DisCardEvent?.Invoke();
     }
 
-    // DefenseAction (防御/カウンター)
+    /// <summary>
+    /// DefenseAction (防御/カウンター)
+    /// </summary>
+    /// <param name="context"></param>
     public void OnDefenseOne(InputAction.CallbackContext context)
     {
         // キーが押された瞬間に OnDefend を発行
         if (context.performed)
         {
+            Debug.Log("OnDefenseOne performed.");
             OnDefend?.Invoke(1);
         }
         // キーが離された瞬間に OnDefendCanceled を発行
         else if (context.canceled)
         {
+            Debug.Log("OnDefenseOne canceled.");
             OnDefendCanceled?.Invoke(1);
         }
     }
@@ -93,11 +99,13 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
         // キーが押された瞬間に OnDefend を発行
         if (context.performed)
         {
+            Debug.Log("OnDefenseOne performed.");
             OnDefend?.Invoke(2);
         }
         // キーが離された瞬間に OnDefendCanceled を発行
         else if (context.canceled)
         {
+            Debug.Log("OnDefenseOne canceled.");
             OnDefendCanceled?.Invoke(2);
         }
     }
@@ -107,11 +115,13 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
         // キーが押された瞬間に OnDefend を発行
         if (context.performed)
         {
+            Debug.Log("OnDefenseOne performed.");
             OnDefend?.Invoke(3);
         }
         // キーが離された瞬間に OnDefendCanceled を発行
         else if (context.canceled)
         {
+            Debug.Log("OnDefenseOne canceled.");
             OnDefendCanceled?.Invoke(3);
         }
     }

@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.UI;
 
 /// <summary>
 /// バトルのフェーズ（Select/Player/Enemy）の切り替えと、エクストラターンなどのフローロジックを管理する
@@ -26,22 +24,11 @@ public class BattlePhaseManager : MonoBehaviour
     private List<EnemyStatusUIController> enemyStatusUIs;
     private Coroutine selectionChoiceCoroutine;
     private bool isFirstSelectionPhase = true;
-    private bool isTutorialMode = false;
     private int currentTurn = 1;
     private bool isExtraTurnSegmentFinished = false; // エクストラターン用フラグ
     private GuardGaugeSystem guardGaugeSystem; // カウンター回数の取得とリセットのため
 
-#if TUTORIAL_ENABLED
-    [Header("チュートリアル関連")]
-    [SerializeField] private GameObject tutorialObjectsParent;
-    [SerializeField] private GameObject tutorialUIPanel;
-    [SerializeField] private TutorialManager tutorialManager;
-    [SerializeField] private SelectTurnTutorialManager selectTurnTutorialManager;
-    [SerializeField] private EnemyTurnTutorialManager enemyTurnTutorialManager;
-    [SerializeField] private TutorialInputReader tortrialInputReader;
-#endif
-
-    public void Init(bool isTutorialMode,
+    public void Init(
                      BattleEntitiesManager entitiesManager,
                      List<PlayerRuntime> players, List<EnemyModel> enemies,
                      List<PlayerStatusUIController> playerStatusUIs, List<EnemyStatusUIController> enemyStatusUIs,
@@ -49,7 +36,6 @@ public class BattlePhaseManager : MonoBehaviour
                      GameObject selectionChoicePanel, BattleManager battleManager,
                      BattleCardDeck battleCardDeck, GuardGaugeSystem guardGaugeSystem)
     {
-        this.isTutorialMode = isTutorialMode;
         this.entitiesManager = entitiesManager;
         this.players = players;
         this.enemies = enemies;
@@ -63,43 +49,7 @@ public class BattlePhaseManager : MonoBehaviour
         this.entitiesManager = entitiesManager;
         this.guardGaugeSystem = guardGaugeSystem;
 
-        // フェーズ初期化
-        if (isTutorialMode)
-        {
-#if TUTORIAL_ENABLED
-            if (tutorialObjectsParent != null)
-            {
-                tutorialObjectsParent.SetActive(true);
-            }
-
-            // 1. SelectTurnTutorialManager の初期化 (変更なし)
-            selectTurnTutorialManager.Initialize(tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
-            currentPhase = selectTurnTutorialManager;
-            currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
-
-            // 2. TutorialManager (カード) の初期化 (引数を修正
-            tutorialManager.Initialize(tortrialInputReader,
-                                       enemyStatusUIs,
-                                       this.entitiesManager.EnemyControllers,
-                                       selectTurn);
-
-            // 3. EnemyTurnTutorialManager の初期化 (引数を修正)
-            enemyTurnTutorialManager.Initialize(tortrialInputReader);
-
-            // 4. PlayerTurn のセットアップ (チュートリアル用にここで実行)
-            playerTurn.SetTutorialMode(true);
-            playerTurn.Setup(selectTurn.PlayerSelections, battleCardDeck, enemyStatusUIs, this.entitiesManager.EnemyControllers);
-#endif
-        }
-        else
-        {
-            // チュートリアル用オブジェクトを非表示にする
-            if (tutorialObjectsParent != null)
-            {
-                tutorialObjectsParent.SetActive(false);
-            }
-            InitializeNonTutorialPhases();
-        }
+        InitializeNonTutorialPhases();
 
         playerTurn.OnTurnFinished += OnPlayerTurnFinished;
         enemyTurn.TurnFinished += OnEnemyTurnFinished;
@@ -162,25 +112,7 @@ public class BattlePhaseManager : MonoBehaviour
         }
         Debug.Log("【攻撃対象選択ターン終了】");
 
-        if (isTutorialMode)
-        {
-#if TUTORIAL_ENABLED
-            Debug.Log("チュートリアル：カード選択フェーズに移行します。");
-
-            currentPhase = tutorialManager;
-            currentPhase.OnPhaseFinished += OnCardTutorialPhaseFinished;
-            if (tutorialUIPanel != null)
-            {
-                tutorialUIPanel.SetActive(true);
-            }
-            currentPhase.StartPhase();
-#endif
-        }
-        else
-        {
-            // 通常モードの場合、プレイヤーのカード選択ターンを開始
-            StartCoroutine(StartPlayerTurnCoroutine());
-        }
+        StartCoroutine(StartPlayerTurnCoroutine());
     }
 
     public IEnumerator StartPlayerTurnCoroutine(string phaseName = "Player Phase")
@@ -192,10 +124,7 @@ public class BattlePhaseManager : MonoBehaviour
     private void OnPlayerTurnFinished()
     {
         Debug.Log("【カード選択ターン終了】");
-        if (!isTutorialMode)
-        {
-            StartCoroutine(EnemyTurnCoroutine());
-        }
+        StartCoroutine(EnemyTurnCoroutine());
     }
 
     private IEnumerator EnemyTurnCoroutine()
@@ -263,7 +192,7 @@ public class BattlePhaseManager : MonoBehaviour
     private IEnumerator ProcessSelectionPhase(bool keepSelections)
     {
         // 継続処理が有効でない、または強制選択の場合
-        if (!keepSelections || (isTutorialMode && isFirstSelectionPhase))
+        if (!keepSelections)
         {
             if (!keepSelections)
             {
@@ -311,63 +240,4 @@ public class BattlePhaseManager : MonoBehaviour
         }
         StartCoroutine(ProcessSelectionPhase(keepSelections: false));
     }
-
-#if TUTORIAL_ENABLED
-    /// <summary>
-    /// カード選択チュートリアル完了 → 敵ターンチュートリアルへ
-    /// </summary>
-    private void OnCardTutorialPhaseFinished()
-    {
-        if (currentPhase != null)
-        {
-            currentPhase.OnPhaseFinished -= OnCardTutorialPhaseFinished;
-        }
-        Debug.Log("【カードチュートリアル完了】-> 敵ターンチュートリアルへ移行します");
-
-        if (tutorialUIPanel != null)
-        {
-            tutorialUIPanel.SetActive(false);
-        }
-
-        currentPhase = enemyTurnTutorialManager;
-        currentPhase.OnPhaseFinished += OnEnemyTurnTutorialFinished;
-
-        if (tutorialUIPanel != null)
-        {
-            tutorialUIPanel.SetActive(true);
-        }
-        currentPhase.StartPhase();
-    }
-
-    /// <summary>
-    /// 敵ターンチュートリアル完了 → 通常の戦闘へ
-    /// </summary>
-    private void OnEnemyTurnTutorialFinished()
-    {
-        if (currentPhase != null)
-        {
-            currentPhase.OnPhaseFinished -= OnEnemyTurnTutorialFinished;
-        }
-        Debug.Log("【敵ターンチュートリアル完了】-> 通常戦闘へ移行します");
-
-        isTutorialMode = false;
-        playerTurn.SetTutorialMode(false);
-
-        if (tutorialObjectsParent != null)
-        {
-            tutorialObjectsParent.SetActive(false);
-        }
-        if (tutorialUIPanel != null)
-        {
-            tutorialUIPanel.SetActive(false);
-        }
-
-        // 通常モードのフェーズ管理に切り替え
-        selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
-        currentPhase = selectTurn;
-
-        // 通常の選択フェーズを開始
-        StartSelectionPhase();
-    }
-#endif
 }

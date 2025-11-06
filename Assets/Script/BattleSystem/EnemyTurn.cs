@@ -192,7 +192,6 @@ public class EnemyTurn : MonoBehaviour
 
     private void OnDestroy()
     {
-        // (省略: DefenseHandler の DisableDefenseInput で購読解除されているため、ここでは主に敵コントローラーのイベント解除に注力)
         defenseHandler.OnDefenseResultFeedback -= battleManager.ShowDefenseFeedback;
         defenseHandler.OnDamageToPlayer -= HandleDamageToPlayer;
     }

@@ -12,9 +12,9 @@ using System.Linq;
 public class SelectTurnTutorialManager : MonoBehaviour, IPhase
 {
     [Header("Component References")]
-    [SerializeField] private GameObject tutorialUIPanel;
-    [SerializeField] private Text tutorialText;
-    [SerializeField] private SelectTurn selectTurn;
+    [SerializeField] private GameObject _tutorialUIPanel;
+    [SerializeField] private Text _tutorialText;
+    [SerializeField] private SelectTurn _selectTurn;
 
     private TutorialInputReader _inputReader;
     private List<PlayerRuntime> _currentParty;
@@ -22,8 +22,8 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
     private List<PlayerStatusUIController> _playerUIs;
     private List<EnemyStatusUIController> _enemyUIs;
 
-    private Queue<string> tutorialMessages;
-    private bool canProceed = false;
+    private Queue<string> _tutorialMessages;
+    private bool _canProceed = false;
 
     public event System.Action OnPhaseFinished;
 
@@ -36,7 +36,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         _enemyUIs = eUIs;
 
         // SelectTurn の Initialize を呼び出す
-        selectTurn.Initialize(players, enemies, pUIs, eUIs);
+        _selectTurn.Initialize(players, enemies, pUIs, eUIs);
     }
 
     public void StartPhase()
@@ -47,7 +47,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
             _inputReader.OnProceed += HandleProceedInput;
         }
 
-        tutorialUIPanel.SetActive(true);
+        _tutorialUIPanel.SetActive(true);
         StartCoroutine(TutorialCoroutine());
     }
 
@@ -62,7 +62,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
 
     private void HandleProceedInput()
     {
-        canProceed = true;
+        _canProceed = true;
     }
 
     private IEnumerator TutorialCoroutine()
@@ -70,17 +70,17 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         InitializeMessages();
 
         // 1. 最初のメッセージ
-        SetTutorialText(tutorialMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_tutorialMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
         // 2. GIF付きの説明
-        SetTutorialText(tutorialMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_tutorialMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
         // 3. 実際の選択を促す
-        SetTutorialText(tutorialMessages.Dequeue());
+        SetTutorialText(_tutorialMessages.Dequeue());
 
         if (_currentParty == null || _currentParty.Count == 0 || _playerUIs == null || _playerUIs.Count == 0)
         {
@@ -95,7 +95,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         tutorialPlayerUI.SetHighlight(new Color(0.5f, 0.8f, 1f));
 
         // SelectTurnクラスの「1体選択コルーチン」を呼び出し、終わるまで待機
-        yield return StartCoroutine(selectTurn.SelectOneTargetCoroutine(tutorialPlayer, 1, (selectedEnemy) => {
+        yield return StartCoroutine(_selectTurn.SelectOneTargetCoroutine(tutorialPlayer, 1, (selectedEnemy) => {
             Debug.Log($"Tutorial selection complete: {selectedEnemy.EnemyName}");
         }));
 
@@ -103,28 +103,28 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         tutorialPlayerUI.ResetHighlight();
 
         // 4. 完了メッセージ
-        SetTutorialText(tutorialMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_tutorialMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
         // チュートリアルで選択されなかったプレイヤーの選択データを自動で設定
-        selectTurn.FinalizeSelectionsForTutorial();
+        _selectTurn.FinalizeSelectionsForTutorial();
 
         OnPhaseFinished?.Invoke();
     }
 
     private void InitializeMessages()
     {
-        tutorialMessages = new Queue<string>();
-        tutorialMessages.Enqueue("このフェーズでは、各キャラクターが攻撃する敵の優先順位を決めます。（クリックで次へ）");
-        tutorialMessages.Enqueue("攻撃したい敵を選択し、Enterキーで決定します。\nこれをキャラクターの人数分、優先順位の数だけ繰り返します。（クリックで次へ）");
-        tutorialMessages.Enqueue("まず、最初のキャラクターの第1優先ターゲットを選択してみましょう。\n矢印キーで敵を選び、Enterキーで決定してください。");
-        tutorialMessages.Enqueue("うまく選択できましたね！\n実際のゲームでは、これを全キャラクター分行います。\n（クリックで次へ）");
+        _tutorialMessages = new Queue<string>();
+        _tutorialMessages.Enqueue("このフェーズでは、各キャラクターが攻撃する敵の優先順位を決めます。（クリックで次へ）");
+        _tutorialMessages.Enqueue("攻撃したい敵を選択し、Enterキーで決定します。\nこれをキャラクターの人数分、優先順位の数だけ繰り返します。（クリックで次へ）");
+        _tutorialMessages.Enqueue("まず、最初のキャラクターの第1優先ターゲットを選択してみましょう。\n矢印キーで敵を選び、Enterキーで決定してください。");
+        _tutorialMessages.Enqueue("うまく選択できましたね！\n実際のゲームでは、これを全キャラクター分行います。\n（クリックで次へ）");
     }
 
     private void SetTutorialText(string text)
     {
-        tutorialText.text = text;
+        _tutorialText.text = text;
     }
 }
 #endif

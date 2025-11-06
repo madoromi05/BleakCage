@@ -27,8 +27,8 @@ public class PlayerDefenseHandler : MonoBehaviour
     // --- 状態変数 ---
     private List<PlayerModel> players;
     private Dictionary<PlayerModel, PlayerController> playerControllers;
-    private int defenseInput = 0; // 押された防御キー (1, 2, 3) - "押した瞬間" の判定用
-    private bool[] isDefending; // "ホールド状態" の判定用
+    private int defenseInput = 0;
+    private bool[] isDefending;                         // ホールド状態の判定用
     private bool isJustGuardWindowOpen = false;
     private float justGuardTimer = 0f;
     private PlayerModel currentPlayerTarget;
@@ -44,12 +44,13 @@ public class PlayerDefenseHandler : MonoBehaviour
 
     public void EnableDefenseInput()
     {
+        Debug.Log("Defense input enabled.");
+        inputReader.EnableDefenseActionMap();
         inputReader.OnDefend += HandleDefenseInput;
         inputReader.OnDefendCanceled += HandleDefenseInputCanceled;
         for (int i = 0; i < isDefending.Length; i++)
         {
             isDefending[i] = false;
-            // アニメーションをリセットする処理は HandleDefenseInputCanceled で行う
         }
         if (defenseMonitoringCoroutine != null)
         {
@@ -60,6 +61,7 @@ public class PlayerDefenseHandler : MonoBehaviour
 
     public void DisableDefenseInput()
     {
+        inputReader.EnableBattleActionMap();
         inputReader.OnDefend -= HandleDefenseInput;
         inputReader.OnDefendCanceled -= HandleDefenseInputCanceled;
 
@@ -203,7 +205,7 @@ public class PlayerDefenseHandler : MonoBehaviour
             justGuardTimer -= Time.deltaTime;
 
             int targetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
-            if (targetPlayerIndex == -1) yield break; // ターゲット消失
+            if (targetPlayerIndex == -1) yield break;
 
             int targetPlayerNum = targetPlayerIndex + 1;
 
@@ -232,7 +234,7 @@ public class PlayerDefenseHandler : MonoBehaviour
         int failedTargetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
         if (failedTargetPlayerIndex != -1)
         {
-            ResolveAttackDamage(failedTargetPlayerIndex); // 通常ガード or 被弾 判定へ
+            ResolveAttackDamage(failedTargetPlayerIndex);
         }
         else
         {

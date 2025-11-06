@@ -198,7 +198,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battleCardDeck: {fileID: 782690699}
-  phaseManager: {fileID: 120127635}
+  normalPhaseManager: {fileID: 120127635}
+  tutorialFlowManager: {fileID: 1655738824}
   entitiesManager: {fileID: 120127634}
   guardGaugeSystem: {fileID: 147126858}
   defenseFeedbackUI: {fileID: 147126857}
@@ -294,7 +295,7 @@ MonoBehaviour:
   - {fileID: 1132369701}
   - {fileID: 2141864182}
   - {fileID: 1365322185}
-  playerStatusUIPrefab: {fileID: 697082470631173054, guid: e32bc81b25be0eb4ab50c3b30de11835, type: 3}
+  playerStatusUIPrefab: {fileID: 3674847010971381577, guid: 1f6773378f3553943b400135a3211d39, type: 3}
   enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
   playerStatusBarTransform: {fileID: 334436847}
   enemyStatusBarTransform: {fileID: 727143522}
@@ -314,12 +315,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phaseUI: {fileID: 1717322608}
-  tutorialObjectsParent: {fileID: 1716922254}
-  tutorialUIPanel: {fileID: 734451571}
-  tutorialManager: {fileID: 1655738822}
-  selectTurnTutorialManager: {fileID: 1655738821}
-  enemyTurnTutorialManager: {fileID: 1655738823}
-  tortrialInputReader: {fileID: 1853795529}
 --- !u!1 &147126855
 GameObject:
   m_ObjectHideFlags: 0
@@ -1411,7 +1406,7 @@ GameObject:
   - component: {fileID: 713554809}
   - component: {fileID: 713554808}
   m_Layer: 5
-  m_Name: TortorialText
+  m_Name: TutorialText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2367,7 +2362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1365493821}
   m_Layer: 0
-  m_Name: tutorial
+  m_Name: TutorialPearent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2482,7 +2477,7 @@ GameObject:
   - component: {fileID: 1466714718}
   - component: {fileID: 1466714717}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: PhaseText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2595,6 +2590,7 @@ GameObject:
   - component: {fileID: 1655738822}
   - component: {fileID: 1655738821}
   - component: {fileID: 1655738823}
+  - component: {fileID: 1655738824}
   m_Layer: 0
   m_Name: TutorialManager
   m_TagString: Untagged
@@ -2629,9 +2625,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04617bbd19ac2a84693a95f18e9b88a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialUIPanel: {fileID: 0}
-  tutorialText: {fileID: 0}
-  selectTurn: {fileID: 120127630}
+  _tutorialUIPanel: {fileID: 734451571}
+  _tutorialText: {fileID: 713554808}
+  _selectTurn: {fileID: 120127630}
 --- !u!114 &1655738822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2644,11 +2640,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d443f39f76d9c499efa6818ea6592d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialUIPanel: {fileID: 0}
-  playerTurn: {fileID: 0}
-  phaseManager: {fileID: 0}
-  tutorialText: {fileID: 0}
-  selectTurn: {fileID: 120127630}
+  TutorialUIPanel: {fileID: 734451571}
+  _playerTurn: {fileID: 120127628}
+  _battleManager: {fileID: 120127625}
+  _tutorialText: {fileID: 713554808}
+  _selectTurn: {fileID: 120127630}
 --- !u!114 &1655738823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2661,9 +2657,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d7523721a794b04d84c4ff2ec3ba363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialUIPanel: {fileID: 0}
-  tutorialText: {fileID: 0}
-  enemyTurn: {fileID: 0}
+  tutorialUIPanel: {fileID: 734451571}
+  tutorialText: {fileID: 713554808}
+  enemyTurn: {fileID: 120127629}
+--- !u!114 &1655738824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655738819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a9fe7fb794366409b7765ddf5275c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tutorialObjectsParent: {fileID: 1716922254}
+  tutorialUIPanel: {fileID: 734451571}
+  tutorialManager: {fileID: 1655738822}
+  selectTurnTutorialManager: {fileID: 1655738821}
+  enemyTurnTutorialManager: {fileID: 1655738823}
+  tortrialInputReader: {fileID: 1853795529}
 --- !u!1 &1705824224
 GameObject:
   m_ObjectHideFlags: 0
@@ -2812,7 +2826,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1716922255
 RectTransform:
   m_ObjectHideFlags: 0

@@ -26,14 +26,11 @@ public class DefenseFeedbackUI : MonoBehaviour
     public void ShowDefenseFeedback(string message, Color color)
     {
         if (defenseFeedbackText == null) return;
-
-        // 既存の表示コルーチンが動いていたら停止
         if (feedbackCoroutine != null)
         {
             StopCoroutine(feedbackCoroutine);
         }
 
-        // 新しいコルーチンを開始
         feedbackCoroutine = StartCoroutine(ShowFeedbackCoroutine(message, color));
     }
 
@@ -43,12 +40,9 @@ public class DefenseFeedbackUI : MonoBehaviour
         defenseFeedbackText.color = color;
         defenseFeedbackText.gameObject.SetActive(true);
 
-        // ここでアニメーションなどを実装可能
-
         yield return new WaitForSeconds(feedbackDisplayDuration);
 
         // フェードアウトなど
-
         defenseFeedbackText.gameObject.SetActive(false);
         feedbackCoroutine = null;
     }

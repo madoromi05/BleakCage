@@ -13,9 +13,10 @@ public class BattleManager : MonoBehaviour
 {
     [Header("コアコンポーネント参照")]
     [SerializeField] public BattleCardDeck battleCardDeck; // デッキはここに残す
-    [SerializeField] private BattlePhaseManager phaseManager; // ターン進行の核
+    [SerializeField] private BattlePhaseManager normalPhaseManager; // ターン進行の核
+    [SerializeField] private TutorialFlowManager tutorialFlowManager; // チュートリアルフロー管理
     [SerializeField] private BattleEntitiesManager entitiesManager; // エンティティ管理
-    [SerializeField] private GuardGaugeSystem guardGaugeSystem; // ゲージシステム
+    [SerializeField] public GuardGaugeSystem guardGaugeSystem; // ゲージシステム
     [SerializeField] private DefenseFeedbackUI defenseFeedbackUI; // フィードバックUI
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
@@ -23,7 +24,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("UI関連")]
     [SerializeField] private Text timeText;
-    [SerializeField] private GameObject selectionChoicePanel;
+    [SerializeField] public GameObject selectionChoicePanel;
     [SerializeField] private Button keepSelectionsButton;
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
@@ -39,8 +40,8 @@ public class BattleManager : MonoBehaviour
     public void HideTargetMarker() => entitiesManager.HideTargetMarker(MarkerInstance);
 
     // --- UIコールバック ---
-    public void OnKeepSelections() => phaseManager.OnKeepSelections();
-    public void OnChangeSelections() => phaseManager.OnChangeSelections();
+    public void OnKeepSelections() => normalPhaseManager.OnKeepSelections();
+    public void OnChangeSelections() => normalPhaseManager.OnChangeSelections();
 
     public GameObject MarkerInstance { get; private set; } // マーカーインスタンスを公開
     private float playerTurnDuration = 10f; // PhaseManager に移動しても良い
@@ -63,47 +64,77 @@ public class BattleManager : MonoBehaviour
         entitiesManager.Setup();
 
         // 3. コアロジックの初期化と委譲
-        InitializeBattlePhases();
-
-        // PhaseManagerにターン開始を依頼
-        phaseManager.StartSelectionPhase();
+        InitializeBattleFlow();
     }
 
     /// <summary>
-    /// 通常モードとチュートリアルモードの判定と、各ターンのセットアップ
+    /// 通常モードかチュートリアルモードに応じて、
+    /// 起動するフローマネージャーを切り替える
     /// </summary>
-    private void InitializeBattlePhases()
+    private void InitializeBattleFlow()
     {
-        // === PlayerTurn のセットアップ ===
+        // === 共通のセットアップ (PlayerTurn, EnemyTurn) ===
         List<CardRuntime> allCardsForDeck = new PlayerDataLoader().LoadPlayerPartyAndCards().AllCards;
         battleCardDeck.InitFromCardList(allCardsForDeck);
-        // === PhaseManager の初期化 ===
-        phaseManager.Init(
-            entitiesManager.IsTutorialMode,
-            entitiesManager,
-            entitiesManager.Players,
-            entitiesManager.Enemies,
-            entitiesManager.PlayerStatusUIs,
-            entitiesManager.EnemyStatusUIs,
-            selectTurn,
-            playerTurn,
-            enemyTurn,
-            selectionChoicePanel,
-            this,
-            battleCardDeck,
-            this.guardGaugeSystem
-        );
 
-        // === EnemyTurn のセットアップ ===
         List<PlayerModel> playerModels = entitiesManager.Players.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
-    }
 
+        // === フローの分岐 ===
+        bool isTutorial = entitiesManager.IsTutorialMode; // チュートリアル判定
+
+        if (isTutorial)
+        {
+            // --- チュートリアルフローを開始 ---
+            normalPhaseManager.gameObject.SetActive(false);
+            tutorialFlowManager.gameObject.SetActive(true);
+
+            // TutorialFlowManager に必要な依存関係をすべて渡して初期化
+            tutorialFlowManager.Init(
+                this,
+                normalPhaseManager,
+                entitiesManager,
+                entitiesManager.Players,
+                entitiesManager.Enemies,
+                entitiesManager.PlayerStatusUIs,
+                entitiesManager.EnemyStatusUIs,
+                selectTurn,
+                playerTurn,
+                battleCardDeck
+            );
+
+            tutorialFlowManager.StartTutorialFlow();
+        }
+        else
+        {
+            // --- 通常フローを開始 ---
+            normalPhaseManager.gameObject.SetActive(true);
+            tutorialFlowManager.gameObject.SetActive(false);
+
+            // NormalPhaseManager を初期化 (引数が少し変わる可能性あり)
+            normalPhaseManager.Init(
+                entitiesManager,
+                entitiesManager.Players,
+                entitiesManager.Enemies,
+                entitiesManager.PlayerStatusUIs,
+                entitiesManager.EnemyStatusUIs,
+                selectTurn,
+                playerTurn,
+                enemyTurn,
+                selectionChoicePanel,
+                this,
+                battleCardDeck,
+                this.guardGaugeSystem
+            );
+
+            normalPhaseManager.StartSelectionPhase();
+        }
+    }
     // --- PlayerTurnWithTimer (PhaseManagerから呼ばれるため残すか、PhaseManagerに移動) ---
     // PlayerTurnWithTimer は BattleManager に残し、PhaseManager から Coroutine の開始を依頼する
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")
     {
-        yield return StartCoroutine(phaseManager.ShowPhaseUI(phaseName));
+        yield return StartCoroutine(normalPhaseManager.ShowPhaseUI(phaseName));
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
 

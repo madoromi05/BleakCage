@@ -49,8 +49,6 @@ public class BattleEntitiesManager : MonoBehaviour
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         Players = setupData.Party;
-
-        // Note: battleCardDeck ‚Ì‰Šú‰»‚Í BattleManager (‚Ü‚½‚Í PhaseManager) ‚Éc‚·‚©A•Ê‚Ì DeckManager ‚É•ª—£‰Â”\
     }
 
     /// <summary>
