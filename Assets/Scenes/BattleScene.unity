@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 120127630}
   - component: {fileID: 120127635}
   - component: {fileID: 120127634}
+  - component: {fileID: 120127636}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -315,6 +316,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phaseUI: {fileID: 1717322608}
+--- !u!114 &120127636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 120127624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e067f74cdadf64479839ed1f4092e11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _inputReader: {fileID: 1817250752}
+  _gaugeSystem: {fileID: 147126858}
+  _playerTurn: {fileID: 120127628}
 --- !u!1 &147126855
 GameObject:
   m_ObjectHideFlags: 0
@@ -388,9 +404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e067f74cdadf64479839ed1f4092e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputReader: {fileID: 1817250752}
-  gaugeSystem: {fileID: 147126858}
-  playerTurn: {fileID: 120127628}
+  _inputReader: {fileID: 0}
+  _gaugeSystem: {fileID: 0}
+  _playerTurn: {fileID: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
