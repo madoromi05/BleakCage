@@ -1025,7 +1025,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 604561242}
   m_FillRect: {fileID: 604561241}
   m_HandleRect: {fileID: 0}
@@ -2688,12 +2688,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49a9fe7fb794366409b7765ddf5275c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialObjectsParent: {fileID: 1716922254}
-  tutorialUIPanel: {fileID: 734451571}
-  tutorialManager: {fileID: 1655738822}
-  selectTurnTutorialManager: {fileID: 1655738821}
-  enemyTurnTutorialManager: {fileID: 1655738823}
-  tortrialInputReader: {fileID: 1853795529}
+  _tutorialObjectsParent: {fileID: 0}
+  _tutorialUIPanel: {fileID: 0}
+  _tutorialManager: {fileID: 0}
+  _selectTurnTutorialManager: {fileID: 0}
+  _enemyTurnTutorialManager: {fileID: 0}
+  _tortrialInputReader: {fileID: 0}
 --- !u!1 &1705824224
 GameObject:
   m_ObjectHideFlags: 0
