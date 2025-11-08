@@ -9,6 +9,7 @@ public class BattlePhaseManager : MonoBehaviour
 {
     [Header("UI & Time")]
     [SerializeField] private PhaseAnnouncementUIController phaseUI;
+    [SerializeField] private BattleInputReader _inputReader;
 
     private SelectTurn selectTurn;
     private PlayerTurn playerTurn;

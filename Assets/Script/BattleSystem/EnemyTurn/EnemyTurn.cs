@@ -15,7 +15,6 @@ public class EnemyTurn : MonoBehaviour
     [SerializeField] private BattleEntitiesManager entitiesManager;
     [SerializeField] private PlayerDefenseHandler defenseHandler;
 
-    // --- 元のフィールド ---
     private List<PlayerModel> players;
     private List<EnemyModel> enemies;
     private IEnemyAttackStrategy damageStrategy;
@@ -85,7 +84,6 @@ public class EnemyTurn : MonoBehaviour
 
     private void PrepareAttackCommands()
     {
-        // (元のロジックは変更なし: コマンドをキューに追加)
         foreach (var attacker in enemies)
         {
             if (attacker == null || attacker.EnemyHP <= 0) continue;
@@ -117,8 +115,6 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void HandleDamageToPlayer(PlayerModel target)
     {
-        // 被弾処理を EnemyTurn から PlayerDefenseHandler に移動したため、
-        // ここでは単にダメージ処理を AttackCommand に委譲する
         if (currentAttackCommand != null)
         {
             Debug.LogWarning($"P{target.PlayerID} にダメージを適用します。");

@@ -199,16 +199,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battleCardDeck: {fileID: 782690699}
+  guardGaugeSystem: {fileID: 147126858}
   normalPhaseManager: {fileID: 120127635}
   tutorialFlowManager: {fileID: 1655738824}
   entitiesManager: {fileID: 120127634}
-  guardGaugeSystem: {fileID: 147126858}
   defenseFeedbackUI: {fileID: 147126857}
   playerTurn: {fileID: 120127628}
   enemyTurn: {fileID: 120127629}
   selectTurn: {fileID: 120127630}
-  timeText: {fileID: 691840769}
   selectionChoicePanel: {fileID: 1991256336}
+  timeText: {fileID: 691840769}
   keepSelectionsButton: {fileID: 1705824226}
   changeSelectionsButton: {fileID: 1987222925}
   targetMarkerPrefab: {fileID: 7812197052377839266, guid: 5439037ea6d9baf4f99b7efc775794b0, type: 3}
@@ -404,9 +404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e067f74cdadf64479839ed1f4092e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputReader: {fileID: 0}
-  _gaugeSystem: {fileID: 0}
-  _playerTurn: {fileID: 0}
+  _inputReader: {fileID: 1817250752}
+  _gaugeSystem: {fileID: 147126858}
+  _playerTurn: {fileID: 120127628}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1148,7 +1148,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.000015258789}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &636231108
@@ -2641,9 +2641,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04617bbd19ac2a84693a95f18e9b88a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tutorialUIPanel: {fileID: 734451571}
+  _tutorialUIPanel: {fileID: 1716922254}
   _tutorialText: {fileID: 713554808}
   _selectTurn: {fileID: 120127630}
+  _selectInputReader: {fileID: 1817250751}
 --- !u!114 &1655738822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2661,6 +2662,7 @@ MonoBehaviour:
   _battleManager: {fileID: 120127625}
   _tutorialText: {fileID: 713554808}
   _selectTurn: {fileID: 120127630}
+  _battleInputReader: {fileID: 1817250752}
 --- !u!114 &1655738823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2673,9 +2675,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d7523721a794b04d84c4ff2ec3ba363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialUIPanel: {fileID: 734451571}
-  tutorialText: {fileID: 713554808}
-  enemyTurn: {fileID: 120127629}
+  TutorialUIPanel: {fileID: 734451571}
+  _tutorialText: {fileID: 713554808}
+  _enemyTurn: {fileID: 120127629}
 --- !u!114 &1655738824
 MonoBehaviour:
   m_ObjectHideFlags: 0
