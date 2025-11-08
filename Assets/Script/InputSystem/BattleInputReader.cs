@@ -29,7 +29,7 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     }
 
     /// <summary>
-    /// プレイヤーのカード選択など、通常のバトル入力だけを許可する
+    /// プレイヤーのカード選択入力だけを許可する
     /// </summary>
     public void EnableBattleActionMap()
     {
@@ -45,6 +45,16 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
         Debug.Log("DefenseActionMap enabled.");
         controls.BattleAction.Disable();
         controls.DefenseAction.Enable();
+    }
+
+    /// <summary>
+    /// 全てのバトル/防御入力を無効にする
+    /// </summary>
+    public void DisableAllActionMaps()
+    {
+        controls?.BattleAction.Disable();
+        controls?.DefenseAction.Disable();
+        Debug.Log("All Battle/Defense Action Maps DISABLED.");
     }
 
     // --- BattleAction (カード選択) ---

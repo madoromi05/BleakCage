@@ -6,136 +6,126 @@ using UnityEngine.UI;
 #if TUTORIAL_ENABLED
 
 /// <summary>
-/// 敵ターンのチュートリアル（防御/カウンター）を担当するクラス
+/// 敵ターンのチュートリアル担当するクラス
 /// </summary>
 public class EnemyTurnTutorialManager : MonoBehaviour, IPhase
 {
     public event System.Action OnPhaseFinished;
 
     [Header("Component References")]
-    [SerializeField] public GameObject tutorialUIPanel;
-    [SerializeField] private Text tutorialText;
-    [SerializeField] private EnemyTurn enemyTurn;
+    [SerializeField] public GameObject TutorialUIPanel;
+    [SerializeField] private Text _tutorialText;
+    [SerializeField] private EnemyTurn _enemyTurn;
 
-    private TutorialInputReader inputReader; // PhaseManager から渡される
-    private Queue<string> enemyTurnMessages;
-    private bool canProceed = false;
-    private bool hasEnemyTurnFinished = false;
+    private TutorialInputReader _inputReader;
+    private Queue<string> _enemyTurnMessages;
+    private bool _canProceed = false;
+    private bool _hasEnemyTurnFinished = false;
 
-    /// <summary>
-    /// BattlePhaseManagerから呼び出される初期化
-    /// </summary>
     public void Initialize(TutorialInputReader ir)
     {
-        this.inputReader = ir;
-        if (inputReader != null)
+        _inputReader = ir;
+        if (_inputReader != null)
         {
-            inputReader.OnProceed += HandleProceedInput;
+            _inputReader.OnProceed += HandleProceedInput;
         }
 
-        if (enemyTurn != null)
+        if (_enemyTurn != null)
         {
-            enemyTurn.TurnFinished += HandleEnemyTurnFinished;
+            _enemyTurn.TurnFinished += HandleEnemyTurnFinished;
         }
     }
 
     private void OnDisable()
     {
-        if (inputReader != null)
+        if (_inputReader != null)
         {
-            inputReader.OnProceed -= HandleProceedInput;
+            _inputReader.OnProceed -= HandleProceedInput;
         }
-        if (enemyTurn != null)
+        if (_enemyTurn != null)
         {
-            enemyTurn.TurnFinished -= HandleEnemyTurnFinished;
+            _enemyTurn.TurnFinished -= HandleEnemyTurnFinished;
         }
     }
 
     private void HandleProceedInput()
     {
-        canProceed = true;
+        _canProceed = true;
     }
 
     private void HandleEnemyTurnFinished()
     {
-        hasEnemyTurnFinished = true;
+        _hasEnemyTurnFinished = true;
     }
 
-    /// <summary>
-    /// IPhase インターフェース経由で BattleManager から呼び出される
-    /// </summary>
     public void StartPhase()
     {
         StartCoroutine(TutorialCoroutine());
     }
 
+    /// <summary>
+    /// チュートリアルの文章を順に表示し、敵ターンを実行するコルーチン 
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator TutorialCoroutine()
     {
         InitializeEnemyTurnMessages();
-        tutorialUIPanel.SetActive(true);
-        hasEnemyTurnFinished = false;
-        canProceed = false;
+        TutorialUIPanel.SetActive(true);
+        _hasEnemyTurnFinished = false;
+        _canProceed = false;
         yield return null;
 
-        // 1. メッセージ
-        SetTutorialText(enemyTurnMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_enemyTurnMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
-        // 2. メッセージ
-        SetTutorialText(enemyTurnMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_enemyTurnMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
-        // 3. メッセージ
-        SetTutorialText(enemyTurnMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_enemyTurnMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
-        // 4. メッセージ (攻撃開始)
-        SetTutorialText(enemyTurnMessages.Dequeue());
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        SetTutorialText(_enemyTurnMessages.Dequeue());
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
-        // UIを非表示にして、敵ターンを開始
-        tutorialUIPanel.SetActive(false);
-        enemyTurn.StartEnemyTurn();
+        TutorialUIPanel.SetActive(false);
+        _enemyTurn.StartEnemyTurn();
 
         // 敵ターンの実行が完了するのを待つ
-        yield return new WaitUntil(() => hasEnemyTurnFinished);
+        yield return new WaitUntil(() => _hasEnemyTurnFinished);
 
         // --- チュートリアル終了 ---
         yield return StartCoroutine(EndTutorial());
-
-        // すべて完了したら、BattleManager に通知
         OnPhaseFinished?.Invoke();
     }
 
     private void InitializeEnemyTurnMessages()
     {
-        enemyTurnMessages = new Queue<string>();
-        enemyTurnMessages.Enqueue("次は敵のターンです。\n敵が攻撃対象を選択し、攻撃してきます。");
-        enemyTurnMessages.Enqueue("敵の攻撃がヒットする瞬間（ジャストタイミング）で防御キーを押すと「COUNTER」となり、エクストラターンを獲得できます。");
-        enemyTurnMessages.Enqueue("ジャストタイミングより早くても、キーを押し続けていれば「GUARD」となり、ダメージを軽減できます。");
-        enemyTurnMessages.Enqueue("敵が攻撃してきます！防御の準備を！\n（クリックで次のステップへ）");
+        _enemyTurnMessages = new Queue<string>();
+        _enemyTurnMessages.Enqueue("次は敵のターンです。\n敵が攻撃対象を選択し、攻撃してきます。");
+        _enemyTurnMessages.Enqueue("敵の攻撃がヒットする瞬間（ジャストタイミング）で防御キーを押すと「COUNTER」となり、エクストラターンを獲得できます。");
+        _enemyTurnMessages.Enqueue("ジャストタイミングより早くても、キーを押し続けていれば「GUARD」となり、ダメージを軽減できます。");
+        _enemyTurnMessages.Enqueue("敵が攻撃してきます！防御の準備を！\n（クリックで次のステップへ）");
     }
 
     private IEnumerator EndTutorial()
     {
-        // 終了UIを表示
-        tutorialUIPanel.SetActive(true);
-        tutorialText.text = "敵のターンが終了しました。\nこれでチュートリアルは終わりです。\n\n（クリックで通常の戦闘を開始します）";
+        TutorialUIPanel.SetActive(true);
+        _tutorialText.text = "敵のターンが終了しました。\nこれでチュートリアルは終わりです。\n\n（クリックで通常の戦闘を開始します）";
 
-        yield return new WaitUntil(() => canProceed);
-        canProceed = false;
+        yield return new WaitUntil(() => _canProceed);
+        _canProceed = false;
 
-        tutorialUIPanel.SetActive(false);
+        TutorialUIPanel.SetActive(false);
         Debug.Log("敵ターンチュートリアル完了");
     }
 
     private void SetTutorialText(string text)
     {
-        tutorialText.text = text;
+        _tutorialText.text = text;
     }
 }
 #endif

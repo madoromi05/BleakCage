@@ -9,8 +9,26 @@ public class SelectInputReader : MonoBehaviour, InputControls.ISelectActionActio
     public event Action ConfirmEvent;
 
     private InputControls controls;
+    private void Awake()
+    {
+        if (controls == null)
+        {
+            controls = new InputControls();
+            controls.SelectAction.SetCallbacks(this);
+        }
+    }
 
     private void OnEnable()
+    {
+        EnableActionMap();
+    }
+
+    private void OnDisable()
+    {
+        DisableActionMap();
+    }
+
+    public void EnableActionMap()
     {
         if (controls == null)
         {
@@ -18,12 +36,12 @@ public class SelectInputReader : MonoBehaviour, InputControls.ISelectActionActio
             controls.SelectAction.SetCallbacks(this);
         }
         controls.SelectAction.Enable();
-        Debug.Log("SelectInputReader enabled and controls set up.");
+        Debug.Log("SelectAction Map Manually ENABLED.");
     }
-
-    private void OnDisable()
+    public void DisableActionMap()
     {
         controls?.SelectAction.Disable();
+        Debug.Log("SelectAction Map Manually DISABLED.");
     }
 
     public void OnUpStatus(InputAction.CallbackContext context)

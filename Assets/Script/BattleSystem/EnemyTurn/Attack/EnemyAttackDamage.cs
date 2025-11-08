@@ -8,7 +8,7 @@ using UnityEngine;
 public class EnemyAttackDamage : IEnemyAttackStrategy
 {
     [Header("難易度によって変わる値")]
-    private float decayAdjustment = 1.0f;                           // 減衰調整 (デフォルト値)
+    private float decayAdjustment = 1.0f;
 
     /// <summary>
     /// ダメージ計算を実行

@@ -71,7 +71,6 @@ public class TutorialFlowManager : MonoBehaviour
     // チュートリアルフローを開始する
     public void StartTutorialFlow()
     {
-        // 最初のフェーズ（SelectTurnTutorial）を開始
         _currentPhase.StartPhase();
     }
 
@@ -87,6 +86,7 @@ public class TutorialFlowManager : MonoBehaviour
         _currentPhase.OnPhaseFinished += OnCardTutorialPhaseFinished;
         if (_tutorialUIPanel != null)
         {
+            Debug.Log("チュートリアル：UIPanelを表示します。");
             _tutorialUIPanel.SetActive(true);
         }
         _currentPhase.StartPhase();

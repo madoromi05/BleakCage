@@ -1,6 +1,7 @@
-using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// UI、データをゲームにsetするクラス
@@ -15,15 +16,17 @@ public class EnemyController : MonoBehaviour
     private Vector3 originalPosition; // 攻撃前の元の位置
     private Transform playerTransform; // 攻撃対象（プレイヤー）のTransform
 
-    // AnimatorのParametersタブと一致させる
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
     private static readonly int AttackIDHash = Animator.StringToHash("AttackID");
 
-    // Animatorのステート名と一致させる
     private const string IdleClipName = "Idle";
-    private const string AttackClipName001 = "Attack001";
-    private const string AttackClipName002 = "Attack002";
-    private const string AttackClipName003 = "Attack003";
+    private static readonly List<string> AnimatorAttackSlotNames = new List<string>
+    {
+        //攻撃アニメーションの最大数分作る
+        "Attack001",
+        "Attack002",
+        "Attack003",
+    };
 
     /// <summary>
     /// 敵のデータを初期化し、表示とアニメーションを設定する
@@ -41,7 +44,6 @@ public class EnemyController : MonoBehaviour
             // プレハブを生成し、その参照(instance)を保持する
             GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
 
-            // 生成したインスタンスから "Animator" を取得する
             this.animator = instance.GetComponent<Animator>();
             if (this.animator == null)
             {
@@ -49,18 +51,7 @@ public class EnemyController : MonoBehaviour
                 return;
             }
         }
-        else
-        {
-            Debug.LogError($"EnemyModel.CharacterPrefabが設定されていません！ (EnemyID: {model.EnemyID})", this.gameObject);
-            return; // Animatorがないのでここで処理終了
-        }
 
-        // "animator" が取得できたので、OverrideController の設定を "Init" で行う
-        if (animator.runtimeAnimatorController == null)
-        {
-            Debug.LogError("キャラクターのAnimatorにベースとなるAnimator Controllerが設定されていません！", this.animator.gameObject);
-            return;
-        }
         overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
         animator.runtimeAnimatorController = overrideController;
 
@@ -68,13 +59,23 @@ public class EnemyController : MonoBehaviour
         if (model.EnemyAnimator != null)
         {
             overrideController[IdleClipName] = model.EnemyAnimator.Idle;
-            overrideController[AttackClipName001] = model.EnemyAnimator.Attack001;
-            overrideController[AttackClipName002] = model.EnemyAnimator.Attack002;
-            overrideController[AttackClipName003] = model.EnemyAnimator.Attack003;
-        }
-        else
-        {
-            Debug.LogError($"EnemyModel (ID: {model.EnemyID}) に EnemyAnimator が設定されていません。");
+            var clipsFromSet = model.EnemyAnimator.AttackAnimations;
+            int clipsToAssign = Mathf.Min(clipsFromSet.Count, AnimatorAttackSlotNames.Count);
+
+            if (clipsFromSet.Count != AnimatorAttackSlotNames.Count)
+            {
+                Debug.LogWarning($"EnemyAnimatorSet ({model.EnemyAnimator.name}) には {clipsFromSet.Count} 個のアニメが設定されていますが、" +
+                                 $"EnemyController の Animator スロットは {AnimatorAttackSlotNames.Count} 個です。" +
+                                 $"{clipsToAssign} 個分だけ割り当てます。", this);
+            }
+
+            for (int i = 0; i < clipsToAssign; i++)
+            {
+                if (clipsFromSet[i] != null)
+                {
+                    overrideController[AnimatorAttackSlotNames[i]] = clipsFromSet[i];
+                }
+            }
         }
     }
 
@@ -131,34 +132,20 @@ public class EnemyController : MonoBehaviour
     /// <returns>再生したアニメーションの長さ(秒)</returns>
     public float PlayRandomAttackAnimation()
     {
-        // 0, 1, 2 のいずれかをランダムに生成
-        int randomAttackID = Random.Range(0, 3);
+        int availableAttackCount = Mathf.Min(
+            model.EnemyAnimator.AttackAnimations.Count,
+            AnimatorAttackSlotNames.Count
+        );
 
-        // --- [デバッグログ] ---
-        Debug.Log($"[EnemyController] アニメーション再生: AttackID = {randomAttackID}");
-        if (animator == null)
-        {
-            Debug.LogError("[EnemyController] Animatorがnullです！ Init()の処理が正しく完了していません。");
-            return 0.5f;
-        }
-        // ---
+        int randomAttackID = Random.Range(0, availableAttackCount);
 
-        // Animatorにパラメータを設定
+        Debug.Log($"[EnemyController] アニメーション再生: AttackID = {randomAttackID} (利用可能な数: {availableAttackCount})");
+
         animator.SetInteger(AttackIDHash, randomAttackID);
         animator.SetTrigger(AttackTriggerHash);
 
-        // 再生したアニメーションの長さを返す
-        switch (randomAttackID)
-        {
-            case 0:
-                return GetAnimationClipLength(AttackClipName001);
-            case 1:
-                return GetAnimationClipLength(AttackClipName002);
-            case 2:
-                return GetAnimationClipLength(AttackClipName003);
-            default:
-                return 0.5f; // 安全なデフォルト値
-        }
+        string clipSlotName = AnimatorAttackSlotNames[randomAttackID];
+        return GetAnimationClipLength(clipSlotName);
     }
 
     public void SetStatusUI(EnemyStatusUIController ui)
@@ -175,7 +162,7 @@ public class EnemyController : MonoBehaviour
     }
 
     /// <summary>
-    /// アニメーションイベントから呼び出される関数
+    /// 攻撃が当たる瞬間のアニメーションイベント
     /// </summary>
     public void TriggerAttackHit()
     {

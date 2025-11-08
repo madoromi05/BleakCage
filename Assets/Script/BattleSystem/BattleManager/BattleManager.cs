@@ -12,19 +12,20 @@ using UnityEngine.UI;
 public class BattleManager : MonoBehaviour
 {
     [Header("コアコンポーネント参照")]
-    [SerializeField] public BattleCardDeck battleCardDeck; // デッキはここに残す
-    [SerializeField] private BattlePhaseManager normalPhaseManager; // ターン進行の核
-    [SerializeField] private TutorialFlowManager tutorialFlowManager; // チュートリアルフロー管理
-    [SerializeField] private BattleEntitiesManager entitiesManager; // エンティティ管理
-    [SerializeField] public GuardGaugeSystem guardGaugeSystem; // ゲージシステム
-    [SerializeField] private DefenseFeedbackUI defenseFeedbackUI; // フィードバックUI
+    [SerializeField] public BattleCardDeck battleCardDeck;
+    [SerializeField] public GuardGaugeSystem guardGaugeSystem;
+
+    [SerializeField] private BattlePhaseManager normalPhaseManager;
+    [SerializeField] private TutorialFlowManager tutorialFlowManager;
+    [SerializeField] private BattleEntitiesManager entitiesManager;
+    [SerializeField] private DefenseFeedbackUI defenseFeedbackUI;
     [SerializeField] private PlayerTurn playerTurn;
     [SerializeField] private EnemyTurn enemyTurn;
     [SerializeField] private SelectTurn selectTurn;
 
     [Header("UI関連")]
-    [SerializeField] private Text timeText;
     [SerializeField] public GameObject selectionChoicePanel;
+    [SerializeField] private Text timeText;
     [SerializeField] private Button keepSelectionsButton;
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
@@ -50,7 +51,6 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
-        // 1. UIとインスタンスの初期化
         if (targetMarkerPrefab != null)
         {
             MarkerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, Quaternion.identity, this.transform);
@@ -59,11 +59,9 @@ public class BattleManager : MonoBehaviour
 
         selectionChoicePanel.SetActive(false);
 
-        // 2. システムの初期化
         guardGaugeSystem.Init();
         entitiesManager.Setup();
 
-        // 3. コアロジックの初期化と委譲
         InitializeBattleFlow();
     }
 
@@ -73,7 +71,6 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void InitializeBattleFlow()
     {
-        // === 共通のセットアップ (PlayerTurn, EnemyTurn) ===
         List<CardRuntime> allCardsForDeck = new PlayerDataLoader().LoadPlayerPartyAndCards().AllCards;
         battleCardDeck.InitFromCardList(allCardsForDeck);
 
@@ -81,12 +78,11 @@ public class BattleManager : MonoBehaviour
         enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
 
         // === フローの分岐 ===
-        bool isTutorial = entitiesManager.IsTutorialMode; // チュートリアル判定
+        bool isTutorial = entitiesManager.IsTutorialMode;
 
         if (isTutorial)
         {
             // --- チュートリアルフローを開始 ---
-            normalPhaseManager.gameObject.SetActive(false);
             tutorialFlowManager.gameObject.SetActive(true);
 
             // TutorialFlowManager に必要な依存関係をすべて渡して初期化

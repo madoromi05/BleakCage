@@ -306,9 +306,10 @@ public class PlayerTurn : MonoBehaviour
         }
         else
         {
-            // === 通常ターンの場合 (元のロジック) ===
-            // 手札を再抽選する
-            DrawHandCards();
+            if (!isTutorialMode)
+            {
+                DrawHandCards();
+            }
         }
     }
 
