@@ -178,7 +178,6 @@ GameObject:
   - component: {fileID: 120127630}
   - component: {fileID: 120127635}
   - component: {fileID: 120127634}
-  - component: {fileID: 120127636}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -199,16 +198,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battleCardDeck: {fileID: 782690699}
+  guardGaugeSystem: {fileID: 147126858}
   normalPhaseManager: {fileID: 120127635}
   tutorialFlowManager: {fileID: 1655738824}
   entitiesManager: {fileID: 120127634}
-  guardGaugeSystem: {fileID: 147126858}
   defenseFeedbackUI: {fileID: 147126857}
   playerTurn: {fileID: 120127628}
   enemyTurn: {fileID: 120127629}
   selectTurn: {fileID: 120127630}
-  timeText: {fileID: 691840769}
   selectionChoicePanel: {fileID: 1991256336}
+  timeText: {fileID: 691840769}
   keepSelectionsButton: {fileID: 1705824226}
   changeSelectionsButton: {fileID: 1987222925}
   targetMarkerPrefab: {fileID: 7812197052377839266, guid: 5439037ea6d9baf4f99b7efc775794b0, type: 3}
@@ -316,21 +315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phaseUI: {fileID: 1717322608}
---- !u!114 &120127636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 120127624}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e067f74cdadf64479839ed1f4092e11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   _inputReader: {fileID: 1817250752}
-  _gaugeSystem: {fileID: 147126858}
-  _playerTurn: {fileID: 120127628}
 --- !u!1 &147126855
 GameObject:
   m_ObjectHideFlags: 0
@@ -404,9 +389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e067f74cdadf64479839ed1f4092e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputReader: {fileID: 0}
-  _gaugeSystem: {fileID: 0}
-  _playerTurn: {fileID: 0}
+  _inputReader: {fileID: 1817250752}
+  _gaugeSystem: {fileID: 147126858}
+  _playerTurn: {fileID: 120127628}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -2644,6 +2629,7 @@ MonoBehaviour:
   _tutorialUIPanel: {fileID: 734451571}
   _tutorialText: {fileID: 713554808}
   _selectTurn: {fileID: 120127630}
+  _selectInputReader: {fileID: 0}
 --- !u!114 &1655738822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2661,6 +2647,7 @@ MonoBehaviour:
   _battleManager: {fileID: 120127625}
   _tutorialText: {fileID: 713554808}
   _selectTurn: {fileID: 120127630}
+  _battleInputReader: {fileID: 0}
 --- !u!114 &1655738823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2673,9 +2660,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d7523721a794b04d84c4ff2ec3ba363, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialUIPanel: {fileID: 734451571}
-  tutorialText: {fileID: 713554808}
-  enemyTurn: {fileID: 120127629}
+  TutorialUIPanel: {fileID: 0}
+  _tutorialText: {fileID: 0}
+  _enemyTurn: {fileID: 0}
 --- !u!114 &1655738824
 MonoBehaviour:
   m_ObjectHideFlags: 0

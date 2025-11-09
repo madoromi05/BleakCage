@@ -23,26 +23,25 @@ public class PlayerDefenseHandler : MonoBehaviour
     private const float GUARD_DRAIN_PER_SECOND = 10f;
     private const float GUARD_COST_ON_SUCCESS = 5f;
 
-    /// <summary>
-    /// ジャストガード(カウンター)になる受付時間(フレーム管理)
-    /// </summary>
     private const int JUST_GUARD_DURATION = 1;
-    /// <summary>
-    /// 通常ガードになる受付時間（この時間までホールドしていればガード)
-    /// </summary>
     private const int NORMAL_GUARD_WINDOW_DURATION = 3;
-
 
     // --- 状態変数 ---
     private List<PlayerModel> _players;
     private Dictionary<PlayerModel, PlayerController> _playerControllers;
-    private int _defenseInput = 0; // "押した瞬間" の判定用
-    private bool[] _isDefending;   // "ホールド状態" の判定用
+    private int _defenseInput = 0;
+    private int _defenseInputCanceled = 0;
+    private bool[] _isDefending;
     private bool _isDefenseWindowOpen = false;
     private PlayerModel _currentPlayerTarget;
 
     private System.Action _currentDefenseResolutionCallback;
     private Coroutine _defenseMonitoringCoroutine;
+
+    //　防御ウィンドウ内の状態を追跡する変数
+    private bool _pressedDuringJustWindow = false;
+    private bool _pressedDuringNormalWindow = false;
+    private bool _counterSuccess = false;
 
     public void Init(List<PlayerModel> players, Dictionary<PlayerModel, PlayerController> playerControllers)
     {
@@ -91,16 +90,17 @@ public class PlayerDefenseHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 防御入力検知
+    /// </summary>
+    /// <param name="playerIndex"></param>
     private void HandleDefenseInput(int playerIndex)
     {
-        // 押した瞬間の入力として記録
-        // defenseInput はジャストガード判定で消費される
         _defenseInput = playerIndex;
-
         if (playerIndex > 0 && playerIndex <= _players.Count)
         {
             int index = playerIndex - 1;
-            _isDefending[index] = true; // ホールド状態をON
+            _isDefending[index] = true;
             if (_playerControllers.TryGetValue(_players[index], out PlayerController pc))
             {
                 pc.SetGuardAnimation(true);
@@ -108,12 +108,16 @@ public class PlayerDefenseHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 防御入力を離した瞬間を検知
+    /// </summary>
     private void HandleDefenseInputCanceled(int playerIndex)
     {
+        _defenseInputCanceled = playerIndex;
         if (playerIndex > 0 && playerIndex <= _players.Count)
         {
             int index = playerIndex - 1;
-            _isDefending[index] = false; // ホールド状態をOFF
+            _isDefending[index] = false;
             if (_playerControllers.TryGetValue(_players[index], out PlayerController pc))
             {
                 pc.SetGuardAnimation(false);
@@ -121,7 +125,6 @@ public class PlayerDefenseHandler : MonoBehaviour
         }
     }
 
-    // ガードホールド中のゲージ消費コルーチン (変更なし)
     private IEnumerator GuardMonitoringCoroutine()
     {
         yield return new WaitUntil(() => _players != null && _isDefending != null && _gaugeSystem != null);
@@ -148,36 +151,6 @@ public class PlayerDefenseHandler : MonoBehaviour
     }
 
     /// <summary>
-    /// ガードまたは被弾の最終判定
-    /// (通常ガード受付時間 終了時、またはジャストガード失敗時に呼ばれる)
-    /// </summary>
-    private void ResolveAttackDamage(int targetPlayerIndex)
-    {
-        int targetPlayerNum = targetPlayerIndex + 1;
-
-        // "ホールド状態" (isDefending) かどうかだけを見る
-        if (_isDefending[targetPlayerIndex] && _gaugeSystem.TrySpendGuardGauge(GUARD_COST_ON_SUCCESS))
-        {
-            Debug.Log($"P{targetPlayerNum}: ガード成功");
-            _gaugeSystem.AddGuardGauge(GUARD_RECOVERY_SMALL);
-            OnDefenseResultFeedback?.Invoke("GUARD", Color.cyan);
-        }
-        else
-        {
-            if (!_isDefending[targetPlayerIndex]) Debug.Log($"P{targetPlayerNum}: 被弾！ (ガードしていない)");
-            else Debug.Log($"P{targetPlayerNum}: ゲージ不足で被弾！");
-
-            _gaugeSystem.AddGuardGauge(HIT_RECOVERY_MEDIUM);
-            OnDefenseResultFeedback?.Invoke("HIT", Color.red);
-            OnDamageToPlayer?.Invoke(_currentPlayerTarget);
-        }
-
-        _currentDefenseResolutionCallback?.Invoke();
-        _currentDefenseResolutionCallback = null;
-    }
-
-
-    /// <summary>
     /// (EnemyControllerのアニメーションイベントから) 攻撃が当たる瞬間に呼ばれる
     /// ジャストガード/通常ガードの受付と判定を行うコルーチン
     /// </summary>
@@ -190,14 +163,14 @@ public class PlayerDefenseHandler : MonoBehaviour
             yield break;
         }
 
-        Debug.Log($"★防御受付開始 (ジャスト: {JUST_GUARD_DURATION}フレーム, 通常: {NORMAL_GUARD_WINDOW_DURATION}フレーム)");
-
         _isDefenseWindowOpen = true;
 
-        int justGuardFrameCounter = JUST_GUARD_DURATION;
-        int normalGuardFrameCounter = NORMAL_GUARD_WINDOW_DURATION;
-
+        // --- ウィンドウ内状態のリセット ---
+        _pressedDuringJustWindow = false;
+        _pressedDuringNormalWindow = false;
+        _counterSuccess = false;
         _defenseInput = 0;
+        _defenseInputCanceled = 0;
 
         _currentPlayerTarget = target;
         _currentDefenseResolutionCallback = onResolved;
@@ -213,6 +186,11 @@ public class PlayerDefenseHandler : MonoBehaviour
         }
         int targetPlayerNum = targetPlayerIndex + 1;
 
+        int justGuardFrameCounter = JUST_GUARD_DURATION;
+        int normalGuardFrameCounter = NORMAL_GUARD_WINDOW_DURATION;
+
+        Debug.Log($"★防御受付開始 (ジャスト: {justGuardFrameCounter}F, 通常: {normalGuardFrameCounter}F)");
+
         // ----------------------------------------------------
         // 1. ジャストガード (カウンター) 判定フェーズ
         // ----------------------------------------------------
@@ -221,44 +199,24 @@ public class PlayerDefenseHandler : MonoBehaviour
             justGuardFrameCounter--;
             normalGuardFrameCounter--; // 通常ガードのカウンターも同時に減らす
 
-            if (_defenseInput == targetPlayerNum)
+            HandleJustGuardInputs(targetPlayerNum);
+
+            if (_counterSuccess)
             {
-                Debug.Log($"P{targetPlayerNum}: カウンター成功！");
-                _gaugeSystem.IncrementCounterCount();
-                _gaugeSystem.AddGuardGauge(COUNTER_RECOVERY_LARGE);
-                OnDefenseResultFeedback?.Invoke("COUNTER!!", Color.yellow);
-
-                // メンバ変数を直接ラムダでキャプチャせず、ローカル変数にコピーしてから渡す
-                System.Action callbackToRun = _currentDefenseResolutionCallback;
-                _playerTurn.StartCounterAction(() => callbackToRun?.Invoke());
-
-                _isDefenseWindowOpen = false;
-                _defenseInput = 0; // 入力イベントを消費
-                _currentDefenseResolutionCallback = null;
-                yield break;
+                TriggerCounter(targetPlayerNum);
+                yield break; // カウンター成功、コルーチン終了
             }
-
             yield return null;
         }
 
         // ----------------------------------------------------
         // 2. 通常ガード判定フェーズ
         // ----------------------------------------------------
-        // ジャストガードの時間が終了した ( "押されなかった" )
         Debug.Log("ジャストガード時間 終了。通常ガード判定へ移行。");
-
-        // 残りの "通常ガード受付時間" が終わるまで、ひたすら待つ
-        // (例: 通常3F, ジャスト1F の場合、残り 3-1 = 2F)
         while (normalGuardFrameCounter > 0)
         {
-            // "押した" (defenseInput) 入力は、ジャストガード時間外なので無視する
-            if (_defenseInput == targetPlayerNum)
-            {
-                Debug.Log("入力が遅すぎます (ジャスト失敗)");
-                _defenseInput = 0; // 遅れた入力を消費
-            }
-
             normalGuardFrameCounter--;
+            HandleNormalGuardInputs(targetPlayerNum);
             yield return null;
         }
 
@@ -268,7 +226,111 @@ public class PlayerDefenseHandler : MonoBehaviour
         Debug.Log("通常ガード受付 終了。最終判定へ。");
         _isDefenseWindowOpen = false;
 
-        // "ホールド" (isDefending) していたかどうかを ResolveAttackDamage が判定する
-        ResolveAttackDamage(targetPlayerIndex);
+        ResolveFinalDefense(targetPlayerIndex);
+
+        _currentDefenseResolutionCallback?.Invoke();
+        _currentDefenseResolutionCallback = null;
+    }
+
+    /// <summary>
+    /// (Phase 1) ジャストガード時間中の入力を処理する
+    /// </summary>
+    private void HandleJustGuardInputs(int targetPlayerNum)
+    {
+        // "押した" 瞬間を検知
+        if (_defenseInput == targetPlayerNum)
+        {
+            Debug.Log("ジャスト時間内に「押し」を検知");
+            _pressedDuringJustWindow = true;
+            _pressedDuringNormalWindow = true; // 通常ガードの条件も満たす
+            _defenseInput = 0; // 入力を消費
+        }
+
+        // "離した" 瞬間を検知
+        if (_defenseInputCanceled == targetPlayerNum)
+        {
+            Debug.Log("ジャスト時間内に「離し」を検知");
+            _defenseInputCanceled = 0; // 入力を消費
+
+            // ジャスト時間内に「押して」かつ「離した」か？
+            if (_pressedDuringJustWindow)
+            {
+                _counterSuccess = true; // カウンター成功のフラグを立てる
+            }
+        }
+    }
+
+    /// <summary>
+    /// (Phase 2) 通常ガード時間中の入力を処理する
+    /// </summary>
+    private void HandleNormalGuardInputs(int targetPlayerNum)
+    {
+        if (_defenseInput == targetPlayerNum)
+        {
+            Debug.Log("通常ガード時間内に「押し」を検知");
+            _pressedDuringNormalWindow = true; // 押したことを記録
+            _defenseInput = 0; // 入力を消費
+        }
+
+        // "離した" 瞬間を検知 (このフェーズでは特に何もしないが、入力は消費する)
+        if (_defenseInputCanceled == targetPlayerNum)
+        {
+            _defenseInputCanceled = 0; // 入力を消費
+        }
+    }
+
+    /// <summary>
+    /// (Phase 1 Result) カウンター成功時の処理
+    /// </summary>
+    private void TriggerCounter(int targetPlayerNum)
+    {
+        Debug.Log($"P{targetPlayerNum}: カウンター成功！ (ジャスト時間内に押して離した)");
+        _gaugeSystem.IncrementCounterCount();
+        _gaugeSystem.AddGuardGauge(COUNTER_RECOVERY_LARGE);
+        OnDefenseResultFeedback?.Invoke("COUNTER!!", Color.yellow);
+
+        _playerTurn.StartCounterAction(() => _currentDefenseResolutionCallback?.Invoke());
+
+        _isDefenseWindowOpen = false;
+        _currentDefenseResolutionCallback = null;
+    }
+
+    /// <summary>
+    /// (Phase 3 Result) 最終的なガード/ヒット判定
+    /// </summary>
+    private void ResolveFinalDefense(int targetPlayerIndex)
+    {
+        bool isGuardOverlapping = _pressedDuringNormalWindow || _isDefending[targetPlayerIndex];
+
+        if (isGuardOverlapping)
+        {
+            // ガード入力はあった。ゲージを消費できるか？
+            if (_gaugeSystem.TrySpendGuardGauge(GUARD_COST_ON_SUCCESS))
+            {
+                Debug.Log($"P{targetPlayerIndex + 1}: ガード成功");
+                _gaugeSystem.AddGuardGauge(GUARD_RECOVERY_SMALL);
+                OnDefenseResultFeedback?.Invoke("GUARD", Color.cyan);
+            }
+            else
+            {
+                Debug.Log($"P{targetPlayerIndex + 1}: ゲージ不足で被弾！");
+                TriggerHit(targetPlayerIndex);
+            }
+        }
+        else
+        {
+            Debug.Log($"P{targetPlayerIndex + 1}: 被弾！ (ガードしていない)");
+            TriggerHit(targetPlayerIndex);
+        }
+    }
+
+    /// <summary>
+    /// (Phase 3 Result) 被弾時の共通処理
+    /// </summary>
+    private void TriggerHit(int targetPlayerIndex)
+    {
+        _gaugeSystem.AddGuardGauge(HIT_RECOVERY_MEDIUM);
+        OnDefenseResultFeedback?.Invoke("HIT", Color.red);
+        OnDamageToPlayer?.Invoke(_players[targetPlayerIndex]);
     }
 }

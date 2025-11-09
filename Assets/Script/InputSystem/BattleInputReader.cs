@@ -2,6 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// カード選択と防御アクションの入力を処理するコンポーネント
+/// </summary>
 public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActions, InputControls.IDefenseActionActions
 {
     public event Action<int> CardSelectEvent;
