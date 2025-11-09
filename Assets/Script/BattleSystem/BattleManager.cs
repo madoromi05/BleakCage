@@ -35,7 +35,7 @@ public class BattleManager : MonoBehaviour
 #if TUTORIAL_ENABLED
     [Header("チュートリアル用コンポーネント")]
     [SerializeField] private TutorialManager tutorialManager;
-    [SerializeField] private TortrialInputReader tortrialInputReader;
+    [SerializeField] private TutorialInputReader tortrialInputReader;
 #endif
     //=================================================================================
     // Private Variables
@@ -84,7 +84,7 @@ public class BattleManager : MonoBehaviour
         {
 #if TUTORIAL_ENABLED
             isTutorialMode = true;
-            tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
+            //tutorialManager.StartTutorialFlow(this, playerTurn, enemyTurn, tortrialInputReader);
 #endif
         }
             StartSelectionPhase();
@@ -197,7 +197,7 @@ public class BattleManager : MonoBehaviour
         audioSource.PlayOneShot(startselectturn);
         Debug.Log("【攻撃対象選択ターン開始】");
         selectTurn.SelectTurnFinished += OnSelectionPhaseFinished;
-        selectTurn.StartSelectTurn(playerParty, predators, playerStatusUIs, enemyStatusUIs);
+        //selectTurn.StartSelectTurn(playerParty, predators, playerStatusUIs, enemyStatusUIs);
     }
 
     /// <summary>
