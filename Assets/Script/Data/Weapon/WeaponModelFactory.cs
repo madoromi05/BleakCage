@@ -29,7 +29,7 @@ public class WeaponModelFactory
     /// <returns>WeaponEntityÅBå©Ç¬Ç©ÇÁÇ»Ç¢èÍçáÇÕnull</returns>
     private WeaponEntity LoadWeaponEntity(int weaponId)
     {
-        string path = $"WeaponEntityList/Weapon_{weaponId}";
+        string path = $"EntityDataList/WeaponEntityList/Weapon_{weaponId}";
         WeaponEntity weaponEntity = Resources.Load<WeaponEntity>(path);
 
         if (weaponEntity == null)

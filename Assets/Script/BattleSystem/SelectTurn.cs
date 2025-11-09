@@ -14,8 +14,6 @@ public class SelectTurn : MonoBehaviour, IPhase
     private void OnUpPressed() { upPressed = true; }
     private void OnDownPressed() { downPressed = true; }
     private void OnConfirmPressed() { confirmPressed = true; }
-    private AudioSource audioSource;
-    public AudioClip check;
 
     private int livingEnemyCount;
     private int currentTargetIndex;
@@ -42,9 +40,6 @@ public class SelectTurn : MonoBehaviour, IPhase
         {
             PlayerSelections[player] = new List<EnemyModel>();
         }
-        Debug.Log("選択データの初期化完了");
-        // 選択プロセスを開始
-        audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -182,9 +177,9 @@ public class SelectTurn : MonoBehaviour, IPhase
             targetUI.SetHighlight(new Color(1f, 0.5f, 0.5f));
         }
 
-        selectInputReader.UpStatusEvent   += OnUpPressed;
+        selectInputReader.UpStatusEvent += OnUpPressed;
         selectInputReader.DownStatusEvent += OnDownPressed;
-        selectInputReader.ConfirmEvent    += OnConfirmPressed;
+        selectInputReader.ConfirmEvent += OnConfirmPressed;
 
         upPressed = false;
         downPressed = false;

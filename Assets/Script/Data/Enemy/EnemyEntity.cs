@@ -8,15 +8,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyEntity", menuName = "Create EnemyEntity")]
 public class EnemyEntity : ScriptableObject
 {
-    public int EnemyID;                              // Enemy固有ID
-    public string EnemyName;                         // Enemy名
-    public AttributeType EnemyAttribute;             // 攻撃属性
+    public int EnemyID;                     // Enemy固有ID
+    public string EnemyName;                // Enemy名
+    public AttributeType EnemyAttribute;    // 攻撃属性
     public DefensAttributeType EnemyDefensAttribute; // 防御属性
-    public Sprite EnemySprite;                       // 画像
-    public string EnemyDescription;                  // 説明文
+    public Sprite EnemySprite;              // 画像
+    public string EnemyDescription;         // 説明文
 
-    public float EnemyHP;                            // EnemyのHP
-    public float EnemyAttackPower;                   // キャラ攻撃力
-    public float EnemyDefensePower;                  // キャラ防御力
-    public AnimatorSet AnimationSet;                 // アニメーションセット
+    public float EnemyHP;                   // EnemyのHP
+    public float EnemyAttackPower;          // キャラ攻撃力
+    public float EnemyDefensePower;         // キャラ防御力
+    public EnemyAnimatorSet AnimationSet;        // アニメーションセット
+
+    // --- PlayerEntityに合わせて追加 ---
+    public GameObject CharacterPrefab;      // キャラクタープレハブ
+    public Vector3 InitialRotation;         // 初期回転
 }

@@ -10,9 +10,12 @@ public class AnimatorSet : ScriptableObject
     [Header("待機アニメーション")]
     public AnimationClip Idle;
 
-    [Header("死亡アニメーション")]
-    public AnimationClip Death;
+    //[Header("死亡アニメーション")]
+    //public AnimationClip Death;
 
-    [Header("ダメージ受けアニメーション")]
-    public AnimationClip Damaged;
+    //[Header("ダメージ受けアニメーション")]
+    //public AnimationClip Damaged;
+
+    [Header("防御アニメーション")]
+    public AnimationClip Guard;
 }

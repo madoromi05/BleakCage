@@ -90,6 +90,74 @@
             ]
         },
         {
+            "name": "DefenseAction",
+            "id": "76f7ce69-30ce-44ec-a731-e29cf9e046b4",
+            "actions": [
+                {
+                    "name": "DefenseOne",
+                    "type": "Button",
+                    "id": "a4f448ce-5138-46d7-8355-460e8940f5f4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DefenseTwo",
+                    "type": "Button",
+                    "id": "7e897da4-82a2-47de-b611-a7e2554b4527",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DefenseTree",
+                    "type": "Button",
+                    "id": "c5c9bb89-f217-4a91-b7b5-7107c4d2481e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0db5c84f-d9cb-47d0-a6be-66ff4d926668",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "DefenseOne",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7572d60a-4814-4489-89e1-d1be3a093ed5",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "DefenseTwo",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "47fd6970-e266-4a64-b80c-6d96477c5ed0",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "DefenseTree",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
             "name": "TutorialAction",
             "id": "a073e853-2b82-49f6-ba0b-021a1c6758e2",
             "actions": [

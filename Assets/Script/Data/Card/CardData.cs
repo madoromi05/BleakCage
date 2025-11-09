@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.AddressableAssets; // AssetReferenceを使うため
+using UnityEngine.AddressableAssets;
 
 /// <summary>
 /// カード1枚分のデータ（ScriptableObjectではない）

@@ -29,7 +29,7 @@ public class PlayerModelFactory
     /// <returns>PlayerEntityBŒ©‚Â‚©‚ç‚È‚¢ê‡‚Ínull</returns>
     private PlayerEntity LoadPlayerEntity(int playerId)
     {
-        string path = $"PlayerEntityList/Player_{playerId}";
+        string path = $"EntityDataList/PlayerEntityList/Player_{playerId}";
         PlayerEntity playerEntity = Resources.Load<PlayerEntity>(path);
 
         if (playerEntity == null)

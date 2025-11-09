@@ -16,7 +16,8 @@ public class PlayerRuntime : IAttackComponent
     public PlayerModel PlayerModel { get; private set; }
     public PlayerController PlayerController { get; set; }
     public int Level { get; private set; }
-
+    public StatusEffectHandler BuffHandler { get; private set; }
+    public PlayerStatsHandler StatsHandler { get; private set; }
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private readonly IAttackStrategy attackStrategy;
     private const float PlayerAttackPower = 10f; 
@@ -32,6 +33,8 @@ public class PlayerRuntime : IAttackComponent
         attackStrategy = strategy;
         this.PlayerModel = model;
         this.Level = model.PlayerLevel;
+        this.BuffHandler = new StatusEffectHandler(this.PlayerModel);
+        this.StatsHandler = new PlayerStatsHandler(this.PlayerModel);
 
         // キャラクターカード用の専用武器
         // AttackPowerは仮で10に設定

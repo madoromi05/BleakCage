@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Data;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,29 +10,31 @@ using UnityEngine.UI;
 /// </summary>
 public class CardView : MonoBehaviour
 {
-    [SerializeField] Text Name;
-    [SerializeField] Text attackAttribute;
-    [SerializeField] Text Description;
-    [SerializeField] Image IconImage;
+    [SerializeField] private Text Name;
+    [SerializeField] private Outline NameOutline;
+    [SerializeField] private Text attackAttribute;
+    [SerializeField] private Outline AttackAttributeOutline;
+    [SerializeField] private Text Description;
+    [SerializeField] private Image IconImage;
     [Header("Attribute Icons")]
     [SerializeField] private List<AttributeSpriteMapping> attributeIconMappings;
 
-    private Dictionary<AttributeType, Sprite> attributeIcons = new Dictionary<AttributeType, Sprite>();
-
+    private Dictionary<AttributeType, AttributeSpriteMapping> attributeData 
+            = new Dictionary<AttributeType, AttributeSpriteMapping>();
     [System.Serializable]
     public class AttributeSpriteMapping
     {
         public AttributeType attribute;
         public Sprite sprite;
+        public Color TextOutlineColor;
     }
     private void Awake()
     {
-        // Inspectorで設定されたリストからDictionaryを初期化
         foreach (var mapping in attributeIconMappings)
         {
-            if (!attributeIcons.ContainsKey(mapping.attribute))
+            if (!attributeData.ContainsKey(mapping.attribute))
             {
-                attributeIcons.Add(mapping.attribute, mapping.sprite);
+                attributeData.Add(mapping.attribute, mapping);
             }
         }
     }
@@ -45,24 +49,100 @@ public class CardView : MonoBehaviour
 
         // 説明文テンプレートを置換
         if (Description != null)
-            Description.text = ReplacePlaceholders(cardModel.Description, cardModel);
+        {
+            // 1. まずCSVから読み込んだ独自の説明文（パッシブ効果など）を取得
+            string csvDescription = cardModel.Description;
 
+            // 2. CSVの説明文とモデルデータを使って、最終的な説明文を生成
+            Description.text = GenerateFormattedDescription(csvDescription, cardModel);
+        }
         // 属性に応じてアイコン画像を切り替える
         if (IconImage != null)
         {
-            if (attributeIcons.TryGetValue(cardModel.Attribute, out Sprite attributeSprite))
+            if (attributeData.TryGetValue(cardModel.Attribute, out AttributeSpriteMapping mapping))
             {
-                IconImage.sprite = attributeSprite;
+                IconImage.sprite = mapping.sprite;
+                if (NameOutline != null)
+                {
+                    NameOutline.effectColor = mapping.TextOutlineColor;
+                }
             }
             else
             {
                 // 属性に対応するアイコンがない場合は、CardEntityに設定されているデフォルトのアイコンを使用
                 IconImage.sprite = cardModel.CardSprite;
                 Debug.LogWarning($"No specific icon found for attribute: {cardModel.Attribute}. Using default icon for card ID: {cardModel.ID}");
+
+                if (NameOutline != null)
+                {
+                    NameOutline.effectColor = Color.black;
+                }
             }
         }
     }
 
+    /// <summary>
+    /// CardModelのデータに基づいて、フォーマットされた説明文を生成する
+    /// </summary>
+    /// <summary>
+    /// CardModelのデータに基づいて、フォーマットされた説明文を生成する
+    /// </summary>
+    private string GenerateFormattedDescription(string csvInput, CardModel model)
+    {
+        StringBuilder descriptionBuilder = new StringBuilder();
+
+        // OutputModifierをパーセンテージに変換
+        float outputValue = model.OutputModifier * 100;
+
+        switch (model.Attribute)
+        {
+            // --- 援属性の場合 ---
+            case AttributeType.Heal:
+                descriptionBuilder.AppendLine($"自身に {outputValue:F0}% 回復");
+                break;
+
+            case AttributeType.Defence:
+                descriptionBuilder.AppendLine($"自身の防御力を {outputValue:F0}% アップ");
+                break;
+
+            // --- 攻撃属性の場合 ---
+            case AttributeType.Slash:
+            case AttributeType.Blunt:
+            case AttributeType.Pierce:
+            case AttributeType.Bullet:
+            default: // デフォルトは攻撃として扱う
+                descriptionBuilder.AppendLine($"出力 {outputValue:F0}%");
+
+                // 攻撃回数 (2回以上のみ表示)
+                if (model.AttackCount > 1)
+                {
+                    descriptionBuilder.AppendLine($"攻撃回数 {model.AttackCount}回");
+                }
+
+                // 攻撃対象 (2体以上のみ表示)
+                if (model.TargetCount > 1)
+                {
+                    descriptionBuilder.AppendLine($"攻撃対象 {model.TargetCount}体");
+                }
+
+                // 命中率 (100%未満のみ表示)
+                if (model.HitRate < 1.0f)
+                {
+                    descriptionBuilder.AppendLine($"命中率 {model.HitRate * 100:F0}%");
+                }
+                break;
+        }
+
+        // 5. CSVから読み込んだ独自の説明文（パッシブ効果など）
+        //if (!string.IsNullOrEmpty(csvInput))
+        //{
+        //    // 間に空行を1行入れる
+        //    descriptionBuilder.AppendLine();
+        //    descriptionBuilder.Append(csvInput);
+        //}
+
+        return descriptionBuilder.ToString();
+    }
     private string ReplacePlaceholders(string input, CardModel model)
     {
         return input
@@ -94,7 +174,7 @@ public class CardView : MonoBehaviour
             case AttributeType.Blunt:  return "鈍";
             case AttributeType.Pierce: return "突";
             case AttributeType.Bullet: return "弾";
-            default:                         return attr.ToString();
+            default: return "援";
         }
     }
 }
