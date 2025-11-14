@@ -50,10 +50,10 @@ public class CardView : MonoBehaviour
         // 説明文テンプレートを置換
         if (Description != null)
         {
-            // 1. まずCSVから読み込んだ独自の説明文（パッシブ効果など）を取得
+            // CSVから読み込んだ独自の説明文（パッシブ効果など）を取得
             string csvDescription = cardModel.Description;
 
-            // 2. CSVの説明文とモデルデータを使って、最終的な説明文を生成
+            // CSVの説明文とモデルデータを使って、最終的な説明文を生成
             Description.text = GenerateFormattedDescription(csvDescription, cardModel);
         }
         // 属性に応じてアイコン画像を切り替える
@@ -81,9 +81,6 @@ public class CardView : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// CardModelのデータに基づいて、フォーマットされた説明文を生成する
-    /// </summary>
     /// <summary>
     /// CardModelのデータに基づいて、フォーマットされた説明文を生成する
     /// </summary>
@@ -132,14 +129,6 @@ public class CardView : MonoBehaviour
                 }
                 break;
         }
-
-        // 5. CSVから読み込んだ独自の説明文（パッシブ効果など）
-        //if (!string.IsNullOrEmpty(csvInput))
-        //{
-        //    // 間に空行を1行入れる
-        //    descriptionBuilder.AppendLine();
-        //    descriptionBuilder.Append(csvInput);
-        //}
 
         return descriptionBuilder.ToString();
     }

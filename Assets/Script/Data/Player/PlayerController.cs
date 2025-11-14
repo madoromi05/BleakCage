@@ -74,6 +74,8 @@ public class PlayerController : MonoBehaviour
     /// <param name="targetEnemy">攻撃対象のTransform</param>
     public IEnumerator AttackSequence(AnimationClip cardAttackClip, Transform targetEnemy)
     {
+        Debug.Log($"[PlayerController] AttackSequence() 実行開始。再生するクリップ: {cardAttackClip.name}");
+
         if (animator == null)
         {
             Debug.LogError("Animatorがnullです！ Init()が完了していません。");
@@ -97,20 +99,36 @@ public class PlayerController : MonoBehaviour
         // 相手の 1.5 ユニット手前の位置を計算
         Vector3 targetPosition = targetEnemy.position + (transform.position - targetEnemy.position).normalized * 1.5f;
 
-        // 5a. 敵に接近
         transform.DOMove(targetPosition, moveDuration).SetEase(Ease.OutCubic);
         yield return new WaitForSeconds(moveDuration);
 
-        // 5b. 攻撃アニメーション再生
-        Debug.Log($"Playing attack animation: {cardAttackClip.name} for PlayerID: {playerModel.PlayerID}");
+        // 攻撃アニメーション再生
+        Debug.Log($"[PlayerController] 攻撃クリップ '{cardAttackClip.name}' を 'Attack' ステートにオーバーライドします。");
         overrideController[AttackClipName] = cardAttackClip;
+
+        AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
+        Debug.Log($"[PlayerController] SetTrigger('AttackTrigger') を呼び出します。");
+
+        // IsName() で現在のステートが何かを判定
+        bool isIdle = currentState.IsName("Idle");
+        bool isGuard = currentState.IsName("Guard");
+        Debug.Log($"[PlayerController] 現在のステートは 'Idle' ですか？ -> {isIdle}");
+        Debug.Log($"[PlayerController] 現在のステートは 'Guard' ですか？ -> {isGuard}");
+
+        if (!isIdle && !isGuard)
+        {
+            Debug.LogWarning("[PlayerController] IdleでもGuardでもないステートにいます！ Animatorで 'Idle -> Attack' または 'Guard -> Attack' の遷移が正しく設定されているか確認してください。");
+        }
+
         animator.SetTrigger(AttackTriggerHash);
 
         // 5c. アニメーションの長さだけ待機
         yield return new WaitForSeconds(cardAttackClip.length);
+        Debug.Log("[PlayerController] アニメーション待機完了。元の位置に戻ります。");
 
-        // 5d. 元の位置に戻る
-        transform.DOLocalMove(originalPosition, returnDuration).SetEase(Ease.InOutQuad); yield return new WaitForSeconds(returnDuration);
+        // 元の位置に戻る
+        transform.DOLocalMove(originalPosition, returnDuration).SetEase(Ease.InOutQuad);
+        yield return new WaitForSeconds(returnDuration);
     }
 
     /// <summary>

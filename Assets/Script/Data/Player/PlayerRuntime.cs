@@ -52,23 +52,4 @@ public class PlayerRuntime : IAttackComponent
         equippedWeapons.Add(weapon);
         weapon.SetParent(this);
     }
-
-    /// <summary>
-    /// PlayerRuntimeから武器を外すメソッド
-    /// </summary>
-    public void UnequipWeapon(WeaponRuntime weapon)
-    {
-        if (weapon == null) return;
-        weapon.SetParent(null);
-        equippedWeapons.Remove(weapon);
-    }
-
-    /// <summary>
-    /// デバッグ用に内部のリストがnullでないか確認するメソッド
-    /// </summary>
-    public void CheckInternalListForDebug()
-    {
-        Debug.Log($"--- Inside PlayerRuntime Check ---");
-        Debug.Log($"Checking equippedWeapons list: {(equippedWeapons == null ? "IS NULL!!! <- おそらくこれが原因です" : "is OK")}");
-    }
 }

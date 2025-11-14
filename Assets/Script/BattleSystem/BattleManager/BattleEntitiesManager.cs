@@ -23,21 +23,19 @@ public class BattleEntitiesManager : MonoBehaviour
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
 
-    public List<PlayerRuntime> Players { get; private set; } = new List<PlayerRuntime>();
     public List<EnemyModel> Enemies { get; private set; } = new List<EnemyModel>();
     public List<PlayerStatusUIController> PlayerStatusUIs { get; private set; } = new List<PlayerStatusUIController>();
     public List<EnemyStatusUIController> EnemyStatusUIs { get; private set; } = new List<EnemyStatusUIController>();
     public Dictionary<PlayerModel, PlayerController> PlayerControllers { get; private set; } = new Dictionary<PlayerModel, PlayerController>();
     public Dictionary<EnemyModel, EnemyController> EnemyControllers { get; private set; } = new Dictionary<EnemyModel, EnemyController>();
     public StageEnemyData CurrentStage { get; private set; }
-
+    public DeckSetupRepository LoadedDeckData { get; private set; }
     public bool IsTutorialMode { get; private set; } = false;
-
+    public List<PlayerRuntime> Players => LoadedDeckData?.Party;
     public void Setup()
     {
         LoadGameData();
         SetupStageAndCharacters();
-        // チュートリアルモードの判定
         IsTutorialMode = Enemies.Count > 0 && Enemies[0].EnemyID == 0;
     }
 
@@ -48,7 +46,7 @@ public class BattleEntitiesManager : MonoBehaviour
     {
         var dataLoader = new PlayerDataLoader();
         DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-        Players = setupData.Party;
+        LoadedDeckData = dataLoader.LoadPlayerPartyAndCards();
     }
 
     /// <summary>
@@ -142,7 +140,11 @@ public class BattleEntitiesManager : MonoBehaviour
     {
         var playerObject = Instantiate(playerBasePrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
         PlayerController playerController = playerObject.GetComponent<PlayerController>();
-        if (playerController == null) return;
+        if (playerController == null)
+        {
+            Debug.LogError($"'Player Base Prefab' ({playerBasePrefab.name}) に PlayerController コンポーネントがアタッチされていません！", playerBasePrefab);
+            return;
+        }
 
         playerController.Init(runtime.PlayerModel);
         runtime.PlayerController = playerController;

@@ -71,8 +71,12 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void InitializeBattleFlow()
     {
-        List<CardRuntime> allCardsForDeck = new PlayerDataLoader().LoadPlayerPartyAndCards().AllCards;
-        battleCardDeck.InitFromCardList(allCardsForDeck);
+        if (entitiesManager.LoadedDeckData == null || entitiesManager.LoadedDeckData.AllCards == null)
+        {
+            Debug.LogError("entitiesManager がカードデータをロードしていません！");
+            return;
+        }
+        battleCardDeck.InitFromCardList(entitiesManager.LoadedDeckData.AllCards);
 
         List<PlayerModel> playerModels = entitiesManager.Players.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
@@ -134,8 +138,22 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
 
+        if (selectTurn.PlayerSelections == null)
+        {
+            Debug.LogError("[BattleManager] selectTurn.PlayerSelections が null です！");
+        }
+        else
+        {
+            Debug.Log($"[BattleManager] playerTurn.Setup に渡すターゲット辞書のキーの数: {selectTurn.PlayerSelections.Count}");
+            foreach (var playerId in selectTurn.PlayerSelections.Keys)
+            {
+                Debug.Log($"[BattleManager] ...キー: Player ID {playerId}");
+            }
+        }
+
         playerTurn.Setup(
             selectTurn.PlayerSelections,
+            entitiesManager.Players,
             battleCardDeck,
             entitiesManager.EnemyStatusUIs,
             entitiesManager.EnemyControllers

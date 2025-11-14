@@ -30,6 +30,7 @@ public class AttackCommand : ICommand
 
     public IEnumerator Do()
     {
+        Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.EnemyID}");
         if (targetEnemy.EnemyHP <= 0)
         {
             Debug.Log($" EnemyID： {targetEnemy.EnemyID} は既に倒されているため、攻撃をスキップしました。");
@@ -44,13 +45,19 @@ public class AttackCommand : ICommand
             yield break;
         }
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
-        if (cardModel.AttackAnimation == null)
+        if (cardModel.AttackAnimation != null)
         {
-            Debug.LogError($"CardModel (ID: {card.ID}) に AttackAnimation が設定されていません！");
-            yield break;
+            Debug.Log($"[AttackCommand] CardModelからアニメーションクリップ '{cardModel.AttackAnimation.name}' を取得成功。");
+        }
+        else
+        {
+            Debug.LogError($"[AttackCommand] CardModel (ID: {card.ID}) の AttackAnimation が NULL です！ CardEntityに設定されていますか？");
+            yield break; // アニメがないなら中断
         }
 
         yield return controller.AttackSequence(cardModel.AttackAnimation, targetTransform);
+
+        Debug.Log("[AttackCommand] AttackSequence() が完了。ダメージ計算に移ります。");
 
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 

@@ -13,6 +13,7 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private BattleInputReader inputReader;
     [SerializeField] private GuardGaugeSystem guardGaugeSystem;
+    [SerializeField] private float cardSelectionYOffset = 30.0f;
 
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
@@ -30,10 +31,11 @@ public class PlayerTurn : MonoBehaviour
     private List<CardController> handCardControllers = new();                       // 手札のカード表示
     private List<CardRuntime> handCards = new();                                    // 手札のカードdata
     private List<CardRuntime> selectedCardsThisTurn = new List<CardRuntime>();      // 選択されたカードのIDを保持
-    private Dictionary<PlayerRuntime, List<EnemyModel>> playerTargetSelections;
+    private Dictionary<int, List<EnemyModel>> playerTargetSelections;
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>(); // 破棄されたカードのIDを保持
     private List<EnemyStatusUIController> enemyStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
+    private List<Vector3> cardInitialPositions = new List<Vector3>();
 
     private bool isCounterTurn = false;
     private System.Action onCounterActionFinishedCallback;
@@ -41,10 +43,11 @@ public class PlayerTurn : MonoBehaviour
     private bool inputEnabled = false;                // ターン中全体の入力フラグ
     private bool isInputLocked = false;               // 入力受付処理中に他の入力を受け取らない
     private bool isTutorialMode = false;
-    private float lastInputTime = 0f;                 // 前回入力時刻
-    private float inputCooldown = 0.1f;               // 入力クールダウン時間（秒）
+    private float lastInputTime = 0f;
+    private float inputCooldown = 0.1f;
     private IAttackStrategy damageStrategy;
-    private PlayerActionExecutor actionExecutor; // カード実行クラス
+    private PlayerActionExecutor actionExecutor;
+    private List<PlayerRuntime> allPlayers;
 
     // private AudioSource audioSource;
     // public AudioClip disposecard;
@@ -62,12 +65,14 @@ public class PlayerTurn : MonoBehaviour
         // audioSource = GetComponent<AudioSource>();
     }
 
-    public void Setup(Dictionary<PlayerRuntime, List<EnemyModel>> playerSelections,
-                BattleCardDeck battleDeck,
-                List<EnemyStatusUIController> enemyUIControllers,
-                Dictionary<EnemyModel, EnemyController> enemyControllers)
+    public void Setup(Dictionary<int, List<EnemyModel>> playerSelections,
+                      List<PlayerRuntime> allPlayers,
+                      BattleCardDeck battleDeck,
+                      List<EnemyStatusUIController> enemyUIControllers,
+                      Dictionary<EnemyModel, EnemyController> enemyControllers)
     {
         this.playerTargetSelections = playerSelections;
+        this.allPlayers = allPlayers;
         this.battleDeck = battleDeck;
         this.enemyStatusUIControllers = enemyUIControllers;
         this.enemyControllers = enemyControllers;
@@ -85,6 +90,7 @@ public class PlayerTurn : MonoBehaviour
         isTurnFinished = false;
         selectedCardsThisTurn.Clear();
         excludedCardInstancesThisTurn.Clear();
+        cardInitialPositions.Clear();
         TickDownAllPlayerBuffs();
         battleDeck.ResetBattleDeck(battleDeck.battleCardDeck);
         inputEnabled = true;
@@ -108,14 +114,13 @@ public class PlayerTurn : MonoBehaviour
         }
         handCardControllers.Clear();
 
-        // 実行クラスに処理を委任
         StartCoroutine(actionExecutor.ExecuteActions(
             selectedCardsThisTurn,
             playerTargetSelections,
             enemyStatusUIControllers,
             enemyControllers,
             damageStrategy,
-            () => OnTurnFinished?.Invoke() // 実行完了時にイベントを発火
+            () => OnTurnFinished?.Invoke()
         ));
     }
 
@@ -124,7 +129,6 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     public void DrawHandCards()
     {
-        // 既存のカードを消す
         foreach (var contCard in handCardControllers)
         {
             if (contCard != null) Destroy(contCard.gameObject);
@@ -146,16 +150,48 @@ public class PlayerTurn : MonoBehaviour
                 handCardControllers.Add(cardObject);
             }
         }
-    }
 
-    // (中略: OnCardSelect から ConfirmSelectionAndRedraw までは変更なし)
+        Canvas canvas = playerHandTransform.GetComponentInParent<Canvas>();
+        if (canvas != null)
+        {
+            // Canvas配下のすべてのUI要素のレイアウトを強制的に即時更新
+            Canvas.ForceUpdateCanvases();
+        }
+        else
+        {
+            // Canvas が見つからない場合、レイアウトグループに直接働きかける (予備)
+            var layoutGroup = playerHandTransform.GetComponent<UnityEngine.UI.LayoutGroup>();
+            if (layoutGroup != null)
+            {
+                layoutGroup.CalculateLayoutInputHorizontal();
+                layoutGroup.CalculateLayoutInputVertical();
+                layoutGroup.SetLayoutHorizontal();
+                layoutGroup.SetLayoutVertical();
+            }
+        }
+        cardInitialPositions.Clear();
+        for (int i = 0; i < handCardControllers.Count; i++)
+        {
+            // CardSelect のロジック (visualRoot.localPosition = Vector3.zero) に合わせる
+            cardInitialPositions.Add(Vector3.zero);
+        }
+    }
 
     /// <summary>
     /// 1,2,3ボタンでカードを選択
     /// </summary>
     private void OnCardSelect(int inputNumber)
     {
-        if (!inputEnabled || isInputLocked) return;
+        if (!inputEnabled)
+        {
+            Debug.LogWarning($"入力が無効です (inputEnabled=false)");
+            return;
+        }
+        if (isInputLocked)
+        {
+            Debug.LogWarning($"入力がロックされています (isInputLocked=true)");
+            return;
+        }
         if (Time.time - lastInputTime < inputCooldown) return;
 
         lastInputTime = Time.time;
@@ -176,7 +212,8 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     private void CardSelect(int inputNumber)
     {
-        if (inputNumber < 0 || inputNumber >= isCardSelected.Length)
+        if (inputNumber < 0 || inputNumber >= isCardSelected.Length ||
+            inputNumber >= handCardControllers.Count || inputNumber >= cardInitialPositions.Count)
         {
             Debug.Log($"無効なカード番号: {inputNumber}");
             return;
@@ -197,6 +234,24 @@ public class PlayerTurn : MonoBehaviour
             }
 
             isCardSelected[inputNumber] = true;
+        }
+
+        // カードの位置を少し上に上げる
+        CardController cardObject = handCardControllers[inputNumber];
+        Transform visualRoot = cardObject.transform.Find("VisualRoot");
+        if (visualRoot == null)
+        {
+            Debug.LogError("CardController プレハブに 'VisualRoot' という名前の子オブジェクトが見つかりません！");
+            return;
+        }
+
+        if (isCardSelected[inputNumber])
+        {
+            visualRoot.localPosition = new Vector3(0, cardSelectionYOffset, 0);
+        }
+        else
+        {
+            visualRoot.localPosition = Vector3.zero;
         }
     }
 
@@ -318,9 +373,9 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     private void TickDownAllPlayerBuffs()
     {
-        if (playerTargetSelections == null) return;
+        if (allPlayers == null) return;
 
-        foreach (PlayerRuntime player in playerTargetSelections.Keys)
+        foreach (PlayerRuntime player in allPlayers)
         {
             if (player != null)
             {
@@ -346,6 +401,5 @@ public class PlayerTurn : MonoBehaviour
 
         // 3枚引いて表示
         DrawHandCards();
-        // ここで PlayerTurn は ConfirmSelectionAndRedraw() が呼ばれるのを待つ
     }
 }
