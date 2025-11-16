@@ -123,17 +123,32 @@ public class BattleEntitiesManager : MonoBehaviour
 
     private void playerView()
     {
-        // プレイヤーを1体だけ生成するロジック
-        PlayerRuntime targetPlayer = Players.FirstOrDefault(p => p.PlayerModel.PlayerID == 1) ?? Players.FirstOrDefault();
-
-        if (targetPlayer == null || playerPositions.Count == 0 || playerPositions[0] == null)
+        if (Players == null || Players.Count == 0)
         {
-            Debug.LogError("プレイヤーデータまたは出現位置が設定されていません！");
+            Debug.LogError("プレイヤーデータがありません！ PlayerDataLoaderを確認してください。");
             return;
         }
 
-        Transform spawnPoint = playerPositions[0];
-        SpawnPlayerCharacter(targetPlayer, spawnPoint);
+        if (playerPositions == null || playerPositions.Count == 0)
+        {
+            Debug.LogError("プレイヤーの出現位置(playerPositions)が設定されていません！");
+            return;
+        }
+
+        // ロードされたプレイヤー全員をループ処理
+        for (int i = 0; i < Players.Count; i++)
+        {
+            if (i >= playerPositions.Count || playerPositions[i] == null)
+            {
+                Debug.LogWarning($"プレイヤー {i + 1} のための出現位置(playerPositions[{i}])が設定されていません。");
+                break;
+            }
+
+            PlayerRuntime targetPlayer = Players[i];
+            Transform spawnPoint = playerPositions[i];
+
+            SpawnPlayerCharacter(targetPlayer, spawnPoint);
+        }
     }
 
     private void SpawnPlayerCharacter(PlayerRuntime runtime, Transform spawnPoint)

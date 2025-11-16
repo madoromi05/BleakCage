@@ -30,7 +30,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
 
-    // --- ゲージ・フィードバック関連の Public メソッド (古い BattleManager のインターフェースを維持するためのラッパー) ---
     public bool TrySpendGuardGauge(float amount) => guardGaugeSystem.TrySpendGuardGauge(amount);
     public void AddGuardGauge(float amount) => guardGaugeSystem.AddGuardGauge(amount);
     public void IncrementCounterCount() => guardGaugeSystem.IncrementCounterCount();
@@ -88,8 +87,6 @@ public class BattleManager : MonoBehaviour
         {
             // --- チュートリアルフローを開始 ---
             tutorialFlowManager.gameObject.SetActive(true);
-
-            // TutorialFlowManager に必要な依存関係をすべて渡して初期化
             tutorialFlowManager.Init(
                 this,
                 normalPhaseManager,
@@ -110,8 +107,6 @@ public class BattleManager : MonoBehaviour
             // --- 通常フローを開始 ---
             normalPhaseManager.gameObject.SetActive(true);
             tutorialFlowManager.gameObject.SetActive(false);
-
-            // NormalPhaseManager を初期化 (引数が少し変わる可能性あり)
             normalPhaseManager.Init(
                 entitiesManager,
                 entitiesManager.Players,
@@ -130,8 +125,8 @@ public class BattleManager : MonoBehaviour
             normalPhaseManager.StartSelectionPhase();
         }
     }
-    // --- PlayerTurnWithTimer (PhaseManagerから呼ばれるため残すか、PhaseManagerに移動) ---
-    // PlayerTurnWithTimer は BattleManager に残し、PhaseManager から Coroutine の開始を依頼する
+
+
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")
     {
         yield return StartCoroutine(normalPhaseManager.ShowPhaseUI(phaseName));

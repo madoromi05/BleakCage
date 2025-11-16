@@ -28,7 +28,7 @@ public class PlayerDataLoader
 
     [Header("ヘルパー関数用変数")]
     private const string ProfileFileName = "player_profile.json";
-    private const int MockCharacterCount = 1;
+    private const int MockCharacterCount = 3;
     private const int MockWeaponsPerCharacter = 3;
     private const int MockDirectlyEquippedCardsPerCharacter = 3;
     private const int MockWeaponsWithMinCards = 3; // 最小枚数のカードを持つ武器の数

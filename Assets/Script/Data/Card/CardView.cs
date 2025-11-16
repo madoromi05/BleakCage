@@ -19,7 +19,7 @@ public class CardView : MonoBehaviour
     [Header("Attribute Icons")]
     [SerializeField] private List<AttributeSpriteMapping> attributeIconMappings;
 
-    private Dictionary<AttributeType, AttributeSpriteMapping> attributeData 
+    private Dictionary<AttributeType, AttributeSpriteMapping> attributeData
             = new Dictionary<AttributeType, AttributeSpriteMapping>();
     [System.Serializable]
     public class AttributeSpriteMapping
@@ -50,10 +50,7 @@ public class CardView : MonoBehaviour
         // 説明文テンプレートを置換
         if (Description != null)
         {
-            // CSVから読み込んだ独自の説明文（パッシブ効果など）を取得
             string csvDescription = cardModel.Description;
-
-            // CSVの説明文とモデルデータを使って、最終的な説明文を生成
             Description.text = GenerateFormattedDescription(csvDescription, cardModel);
         }
         // 属性に応じてアイコン画像を切り替える
@@ -149,9 +146,9 @@ public class CardView : MonoBehaviour
         switch (type)
         {
             case CardTypeData.Character: return "キャラ";
-            case CardTypeData.Weapon:    return "武器";
+            case CardTypeData.Weapon: return "武器";
             case CardTypeData.Universal: return "汎用";
-            default:                                return type.ToString();
+            default: return type.ToString();
         }
     }
 
@@ -159,8 +156,8 @@ public class CardView : MonoBehaviour
     {
         switch (attr)
         {
-            case AttributeType.Slash:  return "斬";
-            case AttributeType.Blunt:  return "鈍";
+            case AttributeType.Slash: return "斬";
+            case AttributeType.Blunt: return "鈍";
             case AttributeType.Pierce: return "突";
             case AttributeType.Bullet: return "弾";
             default: return "援";

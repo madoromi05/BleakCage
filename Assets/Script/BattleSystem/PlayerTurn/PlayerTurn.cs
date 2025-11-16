@@ -175,6 +175,7 @@ public class PlayerTurn : MonoBehaviour
             // CardSelect のロジック (visualRoot.localPosition = Vector3.zero) に合わせる
             cardInitialPositions.Add(Vector3.zero);
         }
+        UpdateAllCardVisuals();
     }
 
     /// <summary>
@@ -236,23 +237,7 @@ public class PlayerTurn : MonoBehaviour
             isCardSelected[inputNumber] = true;
         }
 
-        // カードの位置を少し上に上げる
-        CardController cardObject = handCardControllers[inputNumber];
-        Transform visualRoot = cardObject.transform.Find("VisualRoot");
-        if (visualRoot == null)
-        {
-            Debug.LogError("CardController プレハブに 'VisualRoot' という名前の子オブジェクトが見つかりません！");
-            return;
-        }
-
-        if (isCardSelected[inputNumber])
-        {
-            visualRoot.localPosition = new Vector3(0, cardSelectionYOffset, 0);
-        }
-        else
-        {
-            visualRoot.localPosition = Vector3.zero;
-        }
+        UpdateAllCardVisuals();
     }
 
     /// <summary>
@@ -365,6 +350,10 @@ public class PlayerTurn : MonoBehaviour
             {
                 DrawHandCards();
             }
+            else
+            {
+                UpdateAllCardVisuals();
+            }
         }
     }
 
@@ -375,7 +364,7 @@ public class PlayerTurn : MonoBehaviour
     {
         if (allPlayers == null) return;
 
-        foreach (PlayerRuntime player in allPlayers)
+        foreach (PlayerRuntime player in allPlayers)
         {
             if (player != null)
             {
@@ -401,5 +390,49 @@ public class PlayerTurn : MonoBehaviour
 
         // 3枚引いて表示
         DrawHandCards();
+    }
+
+    /// <summary>
+    /// 手札のすべてのカードのビジュアル（選択時のYオフセット、選択可否の見た目）を更新する
+    /// </summary>
+    private void UpdateAllCardVisuals()
+    {
+        // 現在の選択枚数をカウント
+        int selectedCount = isCardSelected.Count(x => x);
+
+        // 2枚（最大数）選択されているか
+        bool maxCardsSelected = (selectedCount >= 2);
+
+        for (int i = 0; i < handCardControllers.Count; i++)
+        {
+            if (handCardControllers[i] == null) continue;
+
+            CardController cardObject = handCardControllers[i];
+
+            bool shouldBeInteractable = true;
+            if (!isCardSelected[i] && maxCardsSelected)
+            {
+                shouldBeInteractable = false;
+            }
+
+            cardObject.SetInteractable(shouldBeInteractable);
+
+
+            Transform visualRoot = cardObject.transform.Find("VisualRoot");
+            if (visualRoot == null)
+            {
+                Debug.LogError("CardController プレハブに 'VisualRoot' という名前の子オブジェクトが見つかりません！");
+                continue;
+            }
+
+            if (isCardSelected[i])
+            {
+                visualRoot.localPosition = new Vector3(0, cardSelectionYOffset, 0);
+            }
+            else
+            {
+                visualRoot.localPosition = Vector3.zero;
+            }
+        }
     }
 }
