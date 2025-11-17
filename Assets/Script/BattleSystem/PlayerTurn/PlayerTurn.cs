@@ -137,6 +137,7 @@ public class PlayerTurn : MonoBehaviour
         handCardControllers.Clear();
         handCards.Clear();
         isCardSelected = new bool[3];
+        int drawnCardCount = 0;
 
         //三枚提示
         for (int i = 0; i < 3; i++)
@@ -148,7 +149,18 @@ public class PlayerTurn : MonoBehaviour
                 cardObject.Init(cardModel);
                 handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
+                drawnCardCount++;
             }
+        }
+
+        if (drawnCardCount == 0)
+        {
+            if (!isCounterTurn)
+            {
+                Debug.Log("デッキが空のため、ターンを終了します。");
+                FinishPlayerTurn();
+            }
+            return;
         }
 
         Canvas canvas = playerHandTransform.GetComponentInParent<Canvas>();

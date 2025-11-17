@@ -133,19 +133,6 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
 
-        if (selectTurn.PlayerSelections == null)
-        {
-            Debug.LogError("[BattleManager] selectTurn.PlayerSelections が null です！");
-        }
-        else
-        {
-            Debug.Log($"[BattleManager] playerTurn.Setup に渡すターゲット辞書のキーの数: {selectTurn.PlayerSelections.Count}");
-            foreach (var playerId in selectTurn.PlayerSelections.Keys)
-            {
-                Debug.Log($"[BattleManager] ...キー: Player ID {playerId}");
-            }
-        }
-
         playerTurn.Setup(
             selectTurn.PlayerSelections,
             entitiesManager.Players,
@@ -163,6 +150,8 @@ public class BattleManager : MonoBehaviour
             timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
+        turnTime = 0f;
+        timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
         playerTurn.FinishPlayerTurn();
     }
 }

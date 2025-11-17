@@ -12,6 +12,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private AnimatorOverrideController overrideController;
     private Vector3 originalPosition;
+    float moveDuration = 0.3f;   // 接近にかかる時間
+    float returnDuration = 0.5f; // 戻るにかかる時間
 
     // アニメーターのパラメータハッシュ
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
@@ -91,10 +93,6 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("targetEnemyがnullです！");
             yield break;
         }
-
-        // --- 5. 攻撃シーケンスのロジック ---
-        float moveDuration = 0.3f;   // 接近にかかる時間
-        float returnDuration = 0.5f; // 戻るにかかる時間
 
         // 相手の 1.5 ユニット手前の位置を計算
         Vector3 targetPosition = targetEnemy.position + (transform.position - targetEnemy.position).normalized * 1.5f;
