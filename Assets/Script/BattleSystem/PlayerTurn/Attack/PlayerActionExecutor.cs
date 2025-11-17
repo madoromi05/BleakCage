@@ -145,12 +145,14 @@ public class PlayerActionExecutor
         {
             // --- 回復コマンドの処理 ---
             Debug.Log($"{player.PlayerModel.PlayerName} が回復カードを使用。");
+            SoundManager.Instance.PlaySE(SEType.Heal);
             // commandQueue.Enqueue(new HealCommand(player, 0.2f)); // 例：最大HPの20%回復
         }
         else if (selectedCardRuntime.attribute == AttributeType.Defence)
         {
             // --- 防御コマンドの処理 ---
             Debug.Log($"{player.PlayerModel.PlayerName} が防御カードを使用。");
+            SoundManager.Instance.PlaySE(SEType.Defence);
             // commandQueue.Enqueue(new DefenceCommand(player, ...)); // 将来的な実装
         }
     }

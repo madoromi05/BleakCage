@@ -230,7 +230,7 @@ public class SelectTurn : MonoBehaviour, IPhase
                     Debug.Log("その敵は既に選択済みです。別の敵を選択してください。");
                     continue;
                 }
-
+                SoundManager.Instance.PlaySE(SEType.Check);
                 PlayerSelections[player].Add(selectedEnemy);
                 onSelected?.Invoke(selectedEnemy);
 

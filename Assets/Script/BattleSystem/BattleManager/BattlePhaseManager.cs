@@ -86,6 +86,7 @@ public class BattlePhaseManager : MonoBehaviour
     public void StartSelectionPhase()
     {
         Debug.Log("【攻撃対象選択ターン開始】");
+        SoundManager.Instance.PlaySE(SEType.startedSelectCard);
 
         if (isFirstSelectionPhase)
         {
@@ -132,6 +133,7 @@ public class BattlePhaseManager : MonoBehaviour
     {
         yield return StartCoroutine(ShowPhaseUI("Enemy Phase"));
         Debug.Log("【敵ターン開始】");
+        SoundManager.Instance.PlaySE(SEType.SwitchingPhases);
         enemyTurn.StartEnemyTurn();
         yield return null;
     }
@@ -201,6 +203,7 @@ public class BattlePhaseManager : MonoBehaviour
             }
         }
 
+        SoundManager.Instance.PlaySE(SEType.SwitchingPhases);
         currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
 
         if (currentPhase is SelectTurn concreteSelectTurn)

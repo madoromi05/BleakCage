@@ -144,9 +144,16 @@ public class BattleManager : MonoBehaviour
         playerTurn.StartPlayerTurn();
 
         turnTime = playerTurnDuration;
+        float soundTime = 1f;
         while (turnTime >= 0 && !playerTurn.isTurnFinished)
         {
+            if(soundTime <= 0f)
+            {
+                SoundManager.Instance.PlaySE(SEType.CountDown);
+                soundTime = 1f;
+            }
             turnTime -= Time.deltaTime;
+            soundTime -= Time.deltaTime;
             timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }

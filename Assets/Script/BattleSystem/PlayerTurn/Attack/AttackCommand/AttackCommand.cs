@@ -54,6 +54,8 @@ public class AttackCommand : ICommand
 
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 
+        //Card属性ごとの効果音
+        attackedSoundEffect(card.attribute);
         // ターゲットのHPを減算
         targetEnemy.EnemyHP -= damage;
         enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
@@ -69,5 +71,12 @@ public class AttackCommand : ICommand
     {
         Debug.Log("[AttackCardCommand] Undo not implemented.");
         return false;
+    }
+    private void attackedSoundEffect(AttributeType attribute)
+    {
+        if(attribute == AttributeType.Slash)  SoundManager.Instance.PlaySE(SEType.SlashAttack);
+        else if(attribute == AttributeType.Blunt)  SoundManager.Instance.PlaySE(SEType.BluntAttack);
+        else if(attribute == AttributeType.Bullet)  SoundManager.Instance.PlaySE(SEType.BulletAttack);
+        else if(attribute == AttributeType.Pierce)  SoundManager.Instance.PlaySE(SEType.PierceAttack);
     }
 }

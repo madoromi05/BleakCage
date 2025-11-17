@@ -54,6 +54,7 @@ public class EnemyAttackCommand : ICommand
         float baseDamage = DamageStrategy.CalculateFinalDamage(Attacker, PlayerTarget);
 
         // 2. HP‚ðŒ¸ŽZ‚·‚é
+        SoundManager.Instance.PlaySE(SEType.damagedPlayer);
         PlayerTarget.PlayerHP -= baseDamage;
         _playerStatusUIController.UpdateHP(PlayerTarget.PlayerHP);
 
