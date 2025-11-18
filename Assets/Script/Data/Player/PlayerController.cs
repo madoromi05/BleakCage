@@ -101,22 +101,9 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(moveDuration);
 
         // 攻撃アニメーション再生
-        Debug.Log($"[PlayerController] 攻撃クリップ '{cardAttackClip.name}' を 'Attack' ステートにオーバーライドします。");
         overrideController[AttackClipName] = cardAttackClip;
 
         AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
-        Debug.Log($"[PlayerController] SetTrigger('AttackTrigger') を呼び出します。");
-
-        // IsName() で現在のステートが何かを判定
-        bool isIdle = currentState.IsName("Idle");
-        bool isGuard = currentState.IsName("Guard");
-        Debug.Log($"[PlayerController] 現在のステートは 'Idle' ですか？ -> {isIdle}");
-        Debug.Log($"[PlayerController] 現在のステートは 'Guard' ですか？ -> {isGuard}");
-
-        if (!isIdle && !isGuard)
-        {
-            Debug.LogWarning("[PlayerController] IdleでもGuardでもないステートにいます！ Animatorで 'Idle -> Attack' または 'Guard -> Attack' の遷移が正しく設定されているか確認してください。");
-        }
 
         animator.SetTrigger(AttackTriggerHash);
 

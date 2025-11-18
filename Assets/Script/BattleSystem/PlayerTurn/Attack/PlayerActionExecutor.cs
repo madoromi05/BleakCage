@@ -44,11 +44,9 @@ public class PlayerActionExecutor
             }
 
             AttributeType attribute = selectedCardRuntime.attribute;
-            Debug.Log($"[ActionExecutor] カード {selectedCardRuntime.ID} を処理中... 属性: {attribute}");
 
             if (IsAttackAttribute(attribute))
             {
-                Debug.Log($"[ActionExecutor] ...これは攻撃属性です。HandleAttackActionを呼び出します。");
                 if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
                 {
                     HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageStrategy);
@@ -60,7 +58,6 @@ public class PlayerActionExecutor
             }
             else
             {
-                Debug.Log($"[ActionExecutor] ...これは攻撃属性ではありません。HandleSupportActionを呼び出します。");
                 HandleSupportAction(player, selectedCardRuntime);
             }
         }

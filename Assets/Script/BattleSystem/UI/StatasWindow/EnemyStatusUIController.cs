@@ -71,8 +71,7 @@ public class EnemyStatusUIController : MonoBehaviour
             StopCoroutine(hpAnimationCoroutine);
         }
 
-        float hpPercentage = (maxHP > 0) ? (currentHP / maxHP) * 100f : 0f;
-        hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(hpPercentage));
+        hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(currentHP));
     }
 
     /// <summary>
