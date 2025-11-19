@@ -21,7 +21,9 @@ public class CardModel
     public Sprite CardSprite{ get; private set; }                           // CardのIcon
     public string Description { get; private set; }                         // Cardの説明文
     public AnimationClip AttackAnimation { get; private set; }
-
+    public GameObject WeaponPrefab { get; private set; }
+    public HandPosition WeaponHand { get; private set; }
+    public bool IsMelee { get; private set; }
     /// <summary>
     /// CardEntity からデータを読み取って CardModel を生成する
     /// 読み取り専用にしている
@@ -50,5 +52,8 @@ public class CardModel
         OutputModifier = entity.OutputModifier;
         DefensePenetration = entity.DefensePenetration;
         AttackAnimation = entity.AttackAnimation;
+        WeaponPrefab = entity.WeaponPrefab;
+        WeaponHand = entity.WeaponHand;
+        IsMelee = entity.IsMelee;
     }
 }

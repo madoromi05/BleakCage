@@ -27,3 +27,5 @@ MonoBehaviour:
   OutputModifier: 1
   DefensePenetration: 0
   AttackAnimation: {fileID: 7400000, guid: 6fd92ca4a8e12ca49adccc154c809987, type: 2}
+  WeaponPrefab: {fileID: 3508136266559725065, guid: 0c8592a7d9d8e784380bddb6c64cebb1, type: 3}
+  WeaponHand: 0

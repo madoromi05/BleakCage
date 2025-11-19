@@ -51,8 +51,7 @@ public class AttackCommand : ICommand
             yield break; // アニメがないなら中断
         }
 
-
-        yield return controller.AttackSequence(cardModel.AttackAnimation, targetTransform);
+        yield return controller.AttackSequence(cardModel, targetTransform);
 
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 
@@ -60,7 +59,6 @@ public class AttackCommand : ICommand
         targetEnemy.EnemyHP -= damage;
         enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
 
-        // 結果をログに出力
         Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
 
         // アニメーション後の硬直時間
