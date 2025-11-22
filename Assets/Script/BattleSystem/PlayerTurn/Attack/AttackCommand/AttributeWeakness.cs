@@ -85,15 +85,15 @@ public class AttributeWeakness : IAttackStrategy
         float finalDamage = baseAttack * attenuationRate * affinityMultiplier;
 
         // --- (Debug Log) ---
-        Debug.Log("------------------------- 新ダメージ計算開始 -------------------------");
-        Debug.Log($"入力値: A(Lv)={A}, O(武器)={O}, Co(カード)={Co}, D(敵防御)={D}, Cp(貫通)={Cp}, R(相性)={R}, P(ピーキー)={P}");
-        Debug.Log($"定数: k={k}, Ca={attenuationConstant}");
-        Debug.Log($"[ステップ1] 基礎攻撃力: ({A} + {O}) * {Co} = {baseAttack}");
-        Debug.Log($"[ステップ2] 実質的防御力(D/Cp): {D} / {Cp} = {effectiveDefense}");
-        Debug.Log($"[ステップ3] 減衰率(kCa / (kCa + D/Cp)): ({kCa}) / ({kCa} + {effectiveDefense}) = {attenuationRate}");
-        Debug.Log($"[ステップ4] 相性倍率(R^P): {R}^{P} = {affinityMultiplier}");
-        Debug.Log($"<b>[最終結果] Final Damage: {baseAttack} * {attenuationRate} * {affinityMultiplier} = {finalDamage}</b>");
-        Debug.Log("------------------------- 新ダメージ計算終了 -------------------------");
+        //Debug.Log("------------------------- 新ダメージ計算開始 -------------------------");
+        //Debug.Log($"入力値: A(Lv)={A}, O(武器)={O}, Co(カード)={Co}, D(敵防御)={D}, Cp(貫通)={Cp}, R(相性)={R}, P(ピーキー)={P}");
+        //Debug.Log($"定数: k={k}, Ca={attenuationConstant}");
+        //Debug.Log($"[ステップ1] 基礎攻撃力: ({A} + {O}) * {Co} = {baseAttack}");
+        //Debug.Log($"[ステップ2] 実質的防御力(D/Cp): {D} / {Cp} = {effectiveDefense}");
+        //Debug.Log($"[ステップ3] 減衰率(kCa / (kCa + D/Cp)): ({kCa}) / ({kCa} + {effectiveDefense}) = {attenuationRate}");
+        //Debug.Log($"[ステップ4] 相性倍率(R^P): {R}^{P} = {affinityMultiplier}");
+        //Debug.Log($"<b>[最終結果] Final Damage: {baseAttack} * {attenuationRate} * {affinityMultiplier} = {finalDamage}</b>");
+        //Debug.Log("------------------------- 新ダメージ計算終了 -------------------------");
 
         return finalDamage;
     }

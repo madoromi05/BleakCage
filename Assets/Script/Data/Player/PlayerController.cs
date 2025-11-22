@@ -96,7 +96,9 @@ public class PlayerController : MonoBehaviour
                 // 武器生成
                 currentWeaponInstance = Instantiate(cardModel.WeaponPrefab, handTransform);
 
-                // 位置合わせ
+                // 名前からクローンを削除してアニメーションに認識されるようにする
+                currentWeaponInstance.name = cardModel.WeaponPrefab.name;
+                // 攻撃対象との位置合わせ
                 currentWeaponInstance.transform.localPosition = Vector3.zero;
                 currentWeaponInstance.transform.localRotation = Quaternion.identity;
             }
