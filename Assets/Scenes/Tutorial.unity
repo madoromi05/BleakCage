@@ -245,6 +245,7 @@ MonoBehaviour:
   playerHandTransform: {fileID: 457889571}
   inputReader: {fileID: 1817250752}
   guardGaugeSystem: {fileID: 147126858}
+  cardSelectionYOffset: 30
   isTurnFinished: 0
 --- !u!114 &120127629
 MonoBehaviour:
@@ -316,6 +317,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   phaseUI: {fileID: 1717322608}
+  _inputReader: {fileID: 1817250752}
 --- !u!114 &120127636
 MonoBehaviour:
   m_ObjectHideFlags: 0

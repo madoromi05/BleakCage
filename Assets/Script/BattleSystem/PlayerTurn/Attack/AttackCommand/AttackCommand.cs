@@ -30,6 +30,7 @@ public class AttackCommand : ICommand
 
     public IEnumerator Do()
     {
+        Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.EnemyID}");
         if (targetEnemy.EnemyHP <= 0)
         {
             Debug.Log($" EnemyID： {targetEnemy.EnemyID} は既に倒されているため、攻撃をスキップしました。");
@@ -46,11 +47,11 @@ public class AttackCommand : ICommand
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
         if (cardModel.AttackAnimation == null)
         {
-            Debug.LogError($"CardModel (ID: {card.ID}) に AttackAnimation が設定されていません！");
-            yield break;
+            Debug.LogError($"[AttackCommand] CardModel (ID: {card.ID}) の AttackAnimation が NULL です！ CardEntityに設定されていますか？");
+            yield break; // アニメがないなら中断
         }
 
-        yield return controller.AttackSequence(cardModel.AttackAnimation, targetTransform);
+        yield return controller.AttackSequence(cardModel, targetTransform);
 
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 
@@ -60,7 +61,6 @@ public class AttackCommand : ICommand
         targetEnemy.EnemyHP -= damage;
         enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
 
-        // 結果をログに出力
         Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
 
         // アニメーション後の硬直時間

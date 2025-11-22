@@ -30,7 +30,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
 
-    // --- ゲージ・フィードバック関連の Public メソッド (古い BattleManager のインターフェースを維持するためのラッパー) ---
     public bool TrySpendGuardGauge(float amount) => guardGaugeSystem.TrySpendGuardGauge(amount);
     public void AddGuardGauge(float amount) => guardGaugeSystem.AddGuardGauge(amount);
     public void IncrementCounterCount() => guardGaugeSystem.IncrementCounterCount();
@@ -71,8 +70,12 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void InitializeBattleFlow()
     {
-        List<CardRuntime> allCardsForDeck = new PlayerDataLoader().LoadPlayerPartyAndCards().AllCards;
-        battleCardDeck.InitFromCardList(allCardsForDeck);
+        if (entitiesManager.LoadedDeckData == null || entitiesManager.LoadedDeckData.AllCards == null)
+        {
+            Debug.LogError("entitiesManager がカードデータをロードしていません！");
+            return;
+        }
+        battleCardDeck.InitFromCardList(entitiesManager.LoadedDeckData.AllCards);
 
         List<PlayerModel> playerModels = entitiesManager.Players.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
@@ -84,8 +87,6 @@ public class BattleManager : MonoBehaviour
         {
             // --- チュートリアルフローを開始 ---
             tutorialFlowManager.gameObject.SetActive(true);
-
-            // TutorialFlowManager に必要な依存関係をすべて渡して初期化
             tutorialFlowManager.Init(
                 this,
                 normalPhaseManager,
@@ -106,8 +107,6 @@ public class BattleManager : MonoBehaviour
             // --- 通常フローを開始 ---
             normalPhaseManager.gameObject.SetActive(true);
             tutorialFlowManager.gameObject.SetActive(false);
-
-            // NormalPhaseManager を初期化 (引数が少し変わる可能性あり)
             normalPhaseManager.Init(
                 entitiesManager,
                 entitiesManager.Players,
@@ -126,8 +125,8 @@ public class BattleManager : MonoBehaviour
             normalPhaseManager.StartSelectionPhase();
         }
     }
-    // --- PlayerTurnWithTimer (PhaseManagerから呼ばれるため残すか、PhaseManagerに移動) ---
-    // PlayerTurnWithTimer は BattleManager に残し、PhaseManager から Coroutine の開始を依頼する
+
+
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")
     {
         yield return StartCoroutine(normalPhaseManager.ShowPhaseUI(phaseName));
@@ -136,6 +135,7 @@ public class BattleManager : MonoBehaviour
 
         playerTurn.Setup(
             selectTurn.PlayerSelections,
+            entitiesManager.Players,
             battleCardDeck,
             entitiesManager.EnemyStatusUIs,
             entitiesManager.EnemyControllers
@@ -157,6 +157,8 @@ public class BattleManager : MonoBehaviour
             timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
+        turnTime = 0f;
+        timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
         playerTurn.FinishPlayerTurn();
     }
 }

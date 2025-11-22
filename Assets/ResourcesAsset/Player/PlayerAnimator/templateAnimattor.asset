@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: templateAnimattor
   m_EditorClassIdentifier: 
   Idle: {fileID: 7400000, guid: 901aa0a0e11bb5a4d835ece4f8d305cf, type: 2}
-  Death: {fileID: 7400000, guid: 82f5c6585dd7fd448b3e5fdc99db7bff, type: 2}
-  Damaged: {fileID: 7400000, guid: ba20e24f05ffc5e4ea978734f2b75c5e, type: 2}
+  Guard: {fileID: 7400000, guid: 268640514c7aa2540bcbce14be6699b6, type: 2}

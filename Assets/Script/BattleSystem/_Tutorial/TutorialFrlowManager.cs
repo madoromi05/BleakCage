@@ -49,8 +49,8 @@ public class TutorialFlowManager : MonoBehaviour
         _enemies = enemies;
         _playerStatusUIs = playerStatusUIs;
         _enemyStatusUIs = enemyStatusUIs;
-        _selectTurn = selectTurn; // TutorialManagerのInit用
-        _playerTurn = playerTurn; // PlayerTurnのセットアップ用
+        _selectTurn = selectTurn;
+        _playerTurn = playerTurn;
         _battleCardDeck = battleCardDeck;
 
         // --- BattlePhaseManager の Init から持ってきたロジック ---
@@ -65,7 +65,7 @@ public class TutorialFlowManager : MonoBehaviour
         _tutorialManager.Initialize(battleManager, _tortrialInputReader, enemyStatusUIs, _entitiesManager.EnemyControllers, selectTurn);
         _enemyTurnTutorialManager.Initialize(_tortrialInputReader);
         playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(selectTurn.PlayerSelections, battleCardDeck, enemyStatusUIs, _entitiesManager.EnemyControllers);
+        playerTurn.Setup(selectTurn.PlayerSelections, _players, battleCardDeck, enemyStatusUIs, _entitiesManager.EnemyControllers);
     }
 
     // チュートリアルフローを開始する
@@ -124,7 +124,6 @@ public class TutorialFlowManager : MonoBehaviour
         }
 
         // 1. 通常モードのフェーズ管理を初期化
-        // (Initに必要な引数をBattleManagerから渡してもらう)
         _normalPhaseManager.Init(
             _entitiesManager,
             _players, _enemies,

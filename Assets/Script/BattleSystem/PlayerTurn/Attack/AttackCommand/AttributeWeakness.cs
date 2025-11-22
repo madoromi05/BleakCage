@@ -1,95 +1,101 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 弱点属性によるダメージ計算システム
+/// 弱点属性によるダメージ計算システム (新計算式)
 /// 攻撃する側 -> Attacker
 /// 攻撃を受ける側 -> Defender
 /// </summary>
 public class AttributeWeakness : IAttackStrategy
 {
-    [Header("難易度によって変わる値")]
-    private float attributeMultiplier = 1.5f;                   // 属性倍率 (デフォルト値)
-    private float damageScale = 1.0f;                           // 減衰調整 (デフォルト値)
+    [Header("属性相性")]
+    [SerializeField] private float attributeMultiplier = 1.5f;      // 属性倍率 (デフォルト値)
 
-    private const float ATTACK_COEFFICIENT_X = 10f;             // レベルにかける変数
+    [Header("新ダメージ計算式用パラメータ")]
+    [Tooltip("減衰率のスケーリング係数 (k)")]
+    [SerializeField] private float k = 1.0f;
+    [Tooltip("減衰定数 (Ca)。この値が実質的防御力と等しい時、減衰率が50%になる")]
+    [SerializeField] private float attenuationConstant = 100f;
+
     /// <summary>
     /// ダメージ計算を実行
-    /// これを基本的に呼び出す
+    /// 計算式: E = (基礎攻撃力) * (減衰率) * (相性倍率)
+    /// - 基礎攻撃力 = (A + O) * Co
+    /// - 減衰率 = (k * Ca) / (k * Ca + (D / Cp))
+    /// - 相性倍率 = R^P
     /// </summary>
-    public float CalculateFinalDamage(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card,EnemyModel enemy)
+    public float CalculateFinalDamage(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyModel enemy)
     {
-        // 1. 属性倍率を取得
-        float relationCoefficient = GetRelationCoefficient(weapon.Attribute, enemy.EnemyDefensAttribute);
+        float A = player.Level;
+        float O = weapon.attackPower;
+        float Co = card.GetOutput();
+        float D = enemy.EnemyDefensePower;
+        float Cp = card.DefensePenetration;
+        float R = GetRelationCoefficient(weapon.Attribute, enemy.EnemyDefensAttribute);
+        float P = weapon.PeakyCoefficient;
 
-        // 2. 効率ηを計算
-        float efficiency = CalculateEfficiency(
-            relationCoefficient,
-            weapon.PeakyCoefficient,
-            player.Level,         // 攻撃側のパワー
-            weapon.attackPower,   // 武器のパワー
-            enemy.EnemyDefensePower,
-            card.DefensePenetration
-        );
+        // --- 1. 基礎攻撃力 ((A + O) * Co) の計算 ---
+        float baseAttack = (A + O) * Co;
 
-        // 3. 最終ダメージを計算
-        float finalDamage = weapon.attackPower * efficiency * card.GetOutput();
-        //Debug.Log("------------------------- ダメージ計算開始 -------------------------");
-        //Debug.Log($"プレイヤーLv: {player.Level}, 武器攻撃力: {weapon.attackPower}, カード出力: {card.GetOutput()}");
-        //Debug.Log($"敵防御力: {enemy.EnemyDefensePower}, 敵防御属性: {enemy.EnemyDefensAttribute}");
-        //Debug.Log($"[ステップ1] 属性相性係数(R): {relationCoefficient}");
-        //Debug.Log($"<b>[最終結果] Final Damage: {weapon.attackPower} * {efficiency} * {card.GetOutput()} = {finalDamage}</b>");
-        //Debug.Log("------------------------- ダメージ計算終了 -------------------------");
+        // --- 2. 減衰率 ((k * Ca) / (k * Ca + (D / Cp))) の計算 ---
 
-        return finalDamage;
-    }
-
-    /// <summary>
-    /// ダメージ効率ηを計算します。
-    /// 計算式: η = 1 - ( (R^P) * (D*R)^2 ) / (L * X * P * d)
-    /// </summary>
-    /// <param name="relationCoefficient">R: 相性係数</param>
-    /// <param name="peakyCoefficient">P: ピーキー係数</param>
-    /// <param name="playerLevel">L: 攻撃側のレベル</param>
-    /// <param name="defenderPower">D: 防御側の防御力</param>
-    /// <returns>0から1の範囲に丸められたダメージ効率</returns>
-    private float CalculateEfficiency(float relationCoefficient, float peakyCoefficient,
-            float playerLevel, float weaponPower, float defenderPower, float defensePenetration)
-    {
-        float penetratedDefenderPower = defenderPower * (1f - Mathf.Clamp01(defensePenetration));
-
-
-        // (D*R*Cp)^2 の部分
-        float relationPoweredByPeaky = Mathf.Pow(relationCoefficient, peakyCoefficient);
-        float defenderEffectiveness = penetratedDefenderPower * relationCoefficient;
-        float defenderEffectivenessSquared = Mathf.Pow(defenderEffectiveness, 2);
-        float numerator = relationPoweredByPeaky * defenderEffectivenessSquared;
-
-        // --- 分母の計算: L * X * P * d ---
-        // L: playerLevel, X: ATTACK_COEFFICIENT_X, P: peakyCoefficient, d: damageScale
-        float denominator = playerLevel * ATTACK_COEFFICIENT_X * peakyCoefficient * damageScale;
-
-        // ゼロ除算を防止
-        if (Mathf.Approximately(denominator, 0))
+        // (D / Cp) (実質的防御力)
+        float effectiveDefense;
+        if (Mathf.Approximately(Cp, 0))
         {
-            Debug.LogError("分母が0になりました。playerLevelまたはpeakyCoefficientが0の可能性があります。");
-            return 0f;
+            effectiveDefense = D;
+        }
+        else
+        {
+            effectiveDefense = D / Cp;
         }
 
-        // --- 効率(η)の計算 ---
-        float calculatedEfficiency = 1f - (numerator / denominator);
-        float finalEfficiency = Mathf.Clamp01(calculatedEfficiency);
+        // (k * Ca)
+        float kCa = k * attenuationConstant;
 
-        //Debug.Log("------------------------- 効率ηの計算開始 -------------------------");
-        //Debug.Log($"入力値: R={relationCoefficient}, P(ピーキー係数)={peakyCoefficient}, L={playerLevel}, D={defenderPower}, 貫通率={defensePenetration}");
-        //Debug.Log($"貫通適用後の防御力: {penetratedDefenderPower}");
-        //Debug.Log($"分子: (R^P) * (D*R)^2 = {numerator}");
-        //Debug.Log($"分母: L * X * P * d = {denominator}");
-        //Debug.Log($"効率η (クランプ前): 1 - ({numerator} / {denominator}) = {calculatedEfficiency}");
-        //Debug.Log($"<b>[ステップ2] 最終的な効率η (0-1にクランプ後): {finalEfficiency}</b>");
-        //Debug.Log("------------------------- 効率ηの計算終了 -------------------------");
+        // 分母 (k * Ca + 実質的防御力)
+        float denominator = kCa + effectiveDefense;
 
-        // 効率がマイナスにならないよう、0から1の範囲に値を制限（クランプ）します。
-        return finalEfficiency;
+        // 減衰率の計算
+        float attenuationRate;
+        if (effectiveDefense == float.MaxValue)
+        {
+            attenuationRate = 0f; // 分母が無限大
+        }
+        else if (Mathf.Approximately(denominator, 0))
+        {
+            // kCaとeffectiveDefenseが両方0の場合など
+            Debug.LogWarning("減衰率の分母が0です。");
+            attenuationRate = 0f;
+        }
+        else
+        {
+            // 減衰率 = (k * Ca) / (k * Ca + D / Cp)
+            attenuationRate = kCa / denominator;
+        }
+
+        // 念のため 0..1 の範囲にクランプ
+        attenuationRate = Mathf.Clamp01(attenuationRate);
+
+        // --- 3. 相性倍率 (R^P) の計算 ---
+        float affinityMultiplier = Mathf.Pow(R, P);
+
+
+        // --- 4. 最終ダメージ (E) の計算 ---
+        // E = 基礎攻撃力 * 減衰率 * 相性倍率
+        float finalDamage = baseAttack * attenuationRate * affinityMultiplier;
+
+        // --- (Debug Log) ---
+        //Debug.Log("------------------------- 新ダメージ計算開始 -------------------------");
+        //Debug.Log($"入力値: A(Lv)={A}, O(武器)={O}, Co(カード)={Co}, D(敵防御)={D}, Cp(貫通)={Cp}, R(相性)={R}, P(ピーキー)={P}");
+        //Debug.Log($"定数: k={k}, Ca={attenuationConstant}");
+        //Debug.Log($"[ステップ1] 基礎攻撃力: ({A} + {O}) * {Co} = {baseAttack}");
+        //Debug.Log($"[ステップ2] 実質的防御力(D/Cp): {D} / {Cp} = {effectiveDefense}");
+        //Debug.Log($"[ステップ3] 減衰率(kCa / (kCa + D/Cp)): ({kCa}) / ({kCa} + {effectiveDefense}) = {attenuationRate}");
+        //Debug.Log($"[ステップ4] 相性倍率(R^P): {R}^{P} = {affinityMultiplier}");
+        //Debug.Log($"<b>[最終結果] Final Damage: {baseAttack} * {attenuationRate} * {affinityMultiplier} = {finalDamage}</b>");
+        //Debug.Log("------------------------- 新ダメージ計算終了 -------------------------");
+
+        return finalDamage;
     }
 
     /// <summary>
@@ -103,18 +109,18 @@ public class AttributeWeakness : IAttackStrategy
         switch (attackAttr)
         {
             case AttributeType.Slash:
-                if (enemyAttr == DefensAttributeType.Repulsive) coefficient = attributeMultiplier;            // 斥力:有利
-                else if (enemyAttr == DefensAttributeType.Hardness) coefficient = 1f / attributeMultiplier;   // 堅牢:不利
+                if (enemyAttr == DefensAttributeType.Repulsive) coefficient = attributeMultiplier;        // 斥力:有利
+                else if (enemyAttr == DefensAttributeType.Hardness) coefficient = 1f / attributeMultiplier;  // 堅牢:不利
                 break;
 
             case AttributeType.Blunt:
-                if(enemyAttr == DefensAttributeType.Softness) coefficient = attributeMultiplier;             // 軟体:有利
-                else if(enemyAttr == DefensAttributeType.Repulsive) coefficient = 1f / attributeMultiplier;  // 斥力:不利
+                if (enemyAttr == DefensAttributeType.Softness) coefficient = attributeMultiplier;      // 軟体:有利
+                else if (enemyAttr == DefensAttributeType.Repulsive) coefficient = 1f / attributeMultiplier; // 斥力:不利
                 break;
 
             case AttributeType.Pierce:
-                if (enemyAttr == DefensAttributeType.Hardness) coefficient = attributeMultiplier;            // 堅牢:有利
-                else if(enemyAttr == DefensAttributeType.Softness) coefficient = 1f / attributeMultiplier;   // 軟体:不利
+                if (enemyAttr == DefensAttributeType.Hardness) coefficient = attributeMultiplier;       // 堅牢:有利
+                else if (enemyAttr == DefensAttributeType.Softness) coefficient = 1f / attributeMultiplier;  // 軟体:不利
                 break;
 
             case AttributeType.Bullet:

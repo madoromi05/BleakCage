@@ -15,7 +15,7 @@ MonoBehaviour:
   PlayerId: 1
   PlayerName: Player_1
   PlayerAttribute: 3
-  CharacterPrefab: {fileID: 4766743604865731100, guid: 12302907f8375454c9fe38dbfb233d69, type: 3}
+  CharacterPrefab: {fileID: 1345631006696095944, guid: 9cad97e2414826a488498c7fba1699f2, type: 3}
   InitialRotation: {x: 0, y: 0, z: 0}
   PlayerDescription: 
   PlayerIcon: {fileID: 0}

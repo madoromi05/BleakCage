@@ -244,6 +244,7 @@ MonoBehaviour:
   playerHandTransform: {fileID: 457889571}
   inputReader: {fileID: 1817250752}
   guardGaugeSystem: {fileID: 147126858}
+  cardSelectionYOffset: 30
   isTurnFinished: 0
 --- !u!114 &120127629
 MonoBehaviour:
@@ -1391,7 +1392,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -667, y: -403}
+  m_AnchoredPosition: {x: -667, y: -360}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &558441649
@@ -4362,7 +4363,7 @@ Transform:
   m_GameObject: {fileID: 1817250750}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 393.65417, y: 294.37277, z: 274.03534}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4937,7 +4938,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -668, y: -173.3}
+  m_AnchoredPosition: {x: -793, y: -245}
   m_SizeDelta: {x: 250, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2027251457
