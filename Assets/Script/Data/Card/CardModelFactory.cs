@@ -1,42 +1,62 @@
+using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-/// <summary>
-/// CardModelを生成するファクトリクラス
-/// 責任：CardEntityの読み込みとCardModelの生成
-/// </summary>
 public class CardModelFactory
 {
-    /// <summary>
-    /// IDからCardModelを生成
-    /// </summary>
-    /// <param name="cardId">カードID</param>
-    /// <returns>CardModel。生成に失敗した場合はnull</returns>
-    public CardModel CreateFromID(int cardId)
+    private static Dictionary<int, CardEntity> cardCache;
+
+    // ★ここより下のフォルダをすべて自動で探します
+    private const string BaseLoadPath = "EntityDataList/CardEntityList";
+
+    public CardModelFactory()
     {
-        CardEntity cardEntity = LoadCardEntity(cardId);
-        if (cardEntity == null)
+        // まだ辞書を作っていなければ、作る処理を実行
+        if (cardCache == null)
         {
-            Debug.LogError($"CardEntity not found for ID: {cardId}");
-            return null;
+            LoadAllCardEntities();
         }
-        return new CardModel(cardEntity);
     }
 
-    /// <summary>
-    /// CardEntityを読み込む
-    /// </summary>
-    /// <param name="cardId">カードID</param>
-    /// <returns>CardEntity。見つからない場合はnull</returns>
-    private CardEntity LoadCardEntity(int cardId)
+    // JSONのデータ(ID)を使って、本物のデータ(Model)を作る
+    public CardModel CreateFromID(int cardId)
     {
-        string path = $"EntityDataList/CardEntityList/Card_{cardId}";
-        CardEntity cardEntity = Resources.Load<CardEntity>(path);
-
-        if (cardEntity == null)
+        if (cardCache.TryGetValue(cardId, out CardEntity entity))
         {
-            Debug.LogWarning($"CardEntity not found at path: {path}");
+            // 見つかったらモデルを作って返す
+            return new CardModel(entity);
         }
 
-        return cardEntity;
+        Debug.LogError($"ID: {cardId} のカードが見つかりません。Resources/{BaseLoadPath} 以下のどこかにファイルが存在するか、IDが正しいか確認してください。");
+        return null;
+    }
+
+    // 全ファイルを読み込んで辞書を作る処理
+    private void LoadAllCardEntities()
+    {
+        cardCache = new Dictionary<int, CardEntity>();
+
+        CardEntity[] allCards = Resources.LoadAll<CardEntity>(BaseLoadPath);
+
+        if (allCards.Length == 0)
+        {
+            Debug.LogWarning($"パス: {BaseLoadPath} にカードデータが一つも見つかりません！パスが合っているか確認してください。");
+            return;
+        }
+
+        foreach (var card in allCards)
+        {
+            // IDが被っていないかチェックしながら登録
+            if (card != null && !cardCache.ContainsKey(card.ID))
+            {
+                cardCache.Add(card.ID, card);
+            }
+            else if (card != null)
+            {
+                Debug.LogWarning($"ID重複エラー: ID {card.ID} が複数のファイルで使われています: {card.name}");
+            }
+        }
+
+        Debug.Log($"カード図鑑のロード完了: 全 {cardCache.Count} 枚を読み込みました。");
     }
 }

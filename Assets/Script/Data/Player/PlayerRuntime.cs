@@ -18,9 +18,10 @@ public class PlayerRuntime : IAttackComponent
     public int Level { get; private set; }
     public StatusEffectHandler BuffHandler { get; private set; }
     public PlayerStatsHandler StatsHandler { get; private set; }
+    public IReadOnlyList<WeaponRuntime> EquippedWeapons => equippedWeapons;
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private readonly IAttackStrategy attackStrategy;
-    private const float PlayerAttackPower = 10f; 
+    private const float PlayerAttackPower = 10f;
 
     /// <summary>
     /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
@@ -51,5 +52,26 @@ public class PlayerRuntime : IAttackComponent
         if (weapon == null) return;
         equippedWeapons.Add(weapon);
         weapon.SetParent(this);
+    }
+
+    public List<CardRuntime> GetAllCards()
+    {
+        List<CardRuntime> allCards = new List<CardRuntime>();
+
+        // 直差しカード
+        if (this.CaracterCardWeapon != null && this.CaracterCardWeapon.Cards != null)
+        {
+            allCards.AddRange(this.CaracterCardWeapon.Cards);
+        }
+
+        // 装備武器のカード
+        foreach (var weapon in this.equippedWeapons)
+        {
+            if (weapon.Cards != null)
+            {
+                allCards.AddRange(weapon.Cards);
+            }
+        }
+        return allCards;
     }
 }

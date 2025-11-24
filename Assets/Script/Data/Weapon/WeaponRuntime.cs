@@ -11,6 +11,7 @@ public class WeaponRuntime : IAttackComponent
     public AttributeType Attribute { get; private set; }
     public float PeakyCoefficient { get; private set; }
     public PlayerRuntime ParentPlayer { get; private set; }
+    public List<CardRuntime> Cards { get; private set; }
     public float attackPower;
     private readonly List<CardRuntime> slottedCards = new List<CardRuntime>();
 

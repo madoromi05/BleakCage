@@ -7,12 +7,10 @@ using UnityEngine;
 public class DeckSetupRepository
 {
     public List<PlayerRuntime> Party { get; }
-    public List<CardRuntime> AllCards { get; }
 
-    public DeckSetupRepository(List<PlayerRuntime> party, List<CardRuntime> allCards)
+    public DeckSetupRepository(List<PlayerRuntime> party)
     {
         Party = party;
-        AllCards = allCards;
     }
 }
 
@@ -58,7 +56,6 @@ public class PlayerDataLoader
         }
 
         List<PlayerRuntime> party = new List<PlayerRuntime>();
-        List<CardRuntime> allCardsForBattle = new List<CardRuntime>();
         IAttackStrategy defaultStrategy = new AttributeWeakness();
 
         foreach (var charData in playerProfile.BattleCharacters)
@@ -82,27 +79,31 @@ public class PlayerDataLoader
                     CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
                     CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
                     playerRuntime.CaracterCardWeapon.AddCard(cardRuntime);
-                    allCardsForBattle.Add(cardRuntime);
                 }
             }
 
             // 装備している武器と、それにスロットされたカードを生成
-            foreach (var weaponData in charData.EquippedWeapons)
+            if (charData.EquippedWeapons != null)
             {
-                WeaponModel weaponModel = weaponFactory.CreateFromId(weaponData.WeaponId);
-                WeaponRuntime weaponRuntime = new WeaponRuntime(weaponModel, weaponData.InstanceId);
-                playerRuntime.EquipWeapon(weaponRuntime);
-
-                foreach (var cardData in weaponData.SlottedCards)
+                foreach (var weaponData in charData.EquippedWeapons)
                 {
-                    CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
-                    CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
-                    weaponRuntime.AddCard(cardRuntime);
-                    allCardsForBattle.Add(cardRuntime);
+                    WeaponModel weaponModel = weaponFactory.CreateFromId(weaponData.WeaponId);
+                    WeaponRuntime weaponRuntime = new WeaponRuntime(weaponModel, weaponData.InstanceId);
+                    playerRuntime.EquipWeapon(weaponRuntime);
+
+                    if (weaponData.SlottedCards != null)
+                    {
+                        foreach (var cardData in weaponData.SlottedCards)
+                        {
+                            CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
+                            CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
+                            weaponRuntime.AddCard(cardRuntime);
+                        }
+                    }
                 }
             }
         }
-        return new DeckSetupRepository(party, allCardsForBattle);
+        return new DeckSetupRepository(party);
     }
 
     /// <summary>

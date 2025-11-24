@@ -6,7 +6,7 @@ using UnityEngine;
 public class SelectTurn : MonoBehaviour, IPhase
 {
     [SerializeField] private SelectInputReader selectInputReader;
-    public Dictionary<PlayerRuntime, List<EnemyModel>> PlayerSelections { get; private set; }
+    public Dictionary<int, List<EnemyModel>> PlayerSelections { get; private set; }
 
     public event System.Action SelectTurnFinished;
     public event System.Action OnPhaseFinished;
@@ -35,10 +35,10 @@ public class SelectTurn : MonoBehaviour, IPhase
         _playerUIs = pUIs;
         _enemyUIs = eUIs;
 
-        PlayerSelections = new Dictionary<PlayerRuntime, List<EnemyModel>>();
+        PlayerSelections = new Dictionary<int, List<EnemyModel>>();
         foreach (var player in _currentPlayers)
         {
-            PlayerSelections[player] = new List<EnemyModel>();
+            PlayerSelections[player.ID] = new List<EnemyModel>();
         }
     }
 
@@ -50,10 +50,10 @@ public class SelectTurn : MonoBehaviour, IPhase
         if (PlayerSelections == null)
         {
             // 念のため初期化
-            PlayerSelections = new Dictionary<PlayerRuntime, List<EnemyModel>>();
+            PlayerSelections = new Dictionary<int, List<EnemyModel>>();
             foreach (var player in _currentPlayers)
             {
-                PlayerSelections[player] = new List<EnemyModel>();
+                PlayerSelections[player.ID] = new List<EnemyModel>();
             }
             return;
         }
@@ -61,13 +61,13 @@ public class SelectTurn : MonoBehaviour, IPhase
         // 既存のリストをクリアする
         foreach (var player in _currentPlayers)
         {
-            if (PlayerSelections.ContainsKey(player))
+            if (PlayerSelections.ContainsKey(player.ID))
             {
-                PlayerSelections[player].Clear();
+                PlayerSelections[player.ID].Clear();
             }
             else
             {
-                PlayerSelections[player] = new List<EnemyModel>();
+                PlayerSelections[player.ID] = new List<EnemyModel>();
             }
         }
         Debug.Log("全プレイヤーのターゲット選択がクリアされました。");
@@ -124,7 +124,7 @@ public class SelectTurn : MonoBehaviour, IPhase
                     break;
                 }
 
-                int alreadySelectedCount = PlayerSelections[currentPlayer].Count;
+                int alreadySelectedCount = PlayerSelections[currentPlayer.ID].Count;
                 if (alreadySelectedCount >= livingEnemyCount)
                 {
                     Debug.LogWarning($"Player {currentPlayer.PlayerModel.PlayerName} は全ての生存している敵を選択済みです。");
@@ -225,13 +225,13 @@ public class SelectTurn : MonoBehaviour, IPhase
                 confirmPressed = false;
                 EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
 
-                if (PlayerSelections[player].Contains(selectedEnemy))
+                if (PlayerSelections[player.ID].Contains(selectedEnemy))
                 {
                     Debug.Log("その敵は既に選択済みです。別の敵を選択してください。");
                     continue;
                 }
                 SoundManager.Instance.PlaySE(SEType.Check);
-                PlayerSelections[player].Add(selectedEnemy);
+                PlayerSelections[player.ID].Add(selectedEnemy);
                 onSelected?.Invoke(selectedEnemy);
 
                 foreach (var eUI in _enemyUIs) eUI.ResetHighlight();
@@ -256,9 +256,9 @@ public class SelectTurn : MonoBehaviour, IPhase
         foreach (var player in _currentPlayers)
         {
             // まだ誰も選択していない場合、最初の敵を自動で選択させる
-            if (PlayerSelections.ContainsKey(player) && PlayerSelections[player].Count == 0)
+            if (PlayerSelections.ContainsKey(player.ID) && PlayerSelections[player.ID].Count == 0)
             {
-                PlayerSelections[player].Add(livingEnemies[0]);
+                PlayerSelections[player.ID].Add(livingEnemies[0]);
             }
         }
     }

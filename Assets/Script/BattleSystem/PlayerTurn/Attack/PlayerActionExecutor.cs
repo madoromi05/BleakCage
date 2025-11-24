@@ -22,7 +22,7 @@ public class PlayerActionExecutor
     /// </summary>
     public IEnumerator ExecuteActions(
         List<CardRuntime> selectedCards,
-        Dictionary<PlayerRuntime, List<EnemyModel>> playerTargetSelections,
+        Dictionary<int, List<EnemyModel>> playerTargetSelections,
         List<EnemyStatusUIController> enemyStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
         IAttackStrategy damageStrategy,
@@ -51,7 +51,7 @@ public class PlayerActionExecutor
             if (IsAttackAttribute(attribute))
             {
                 // çUåÇëÆê´ÇÃèÍçá
-                if (playerTargetSelections.TryGetValue(player, out List<EnemyModel> targets))
+                if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
                 {
                     HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageStrategy);
                 }
@@ -119,7 +119,7 @@ public class PlayerActionExecutor
             EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == finalTarget);
             if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTarget, out EnemyController targetEnemyController))
             {
-                Transform targetTransform = targetEnemyController.transform; // 3DÉÇÉfÉãÇÃTransform
+                Transform targetTransform = targetEnemyController.transform;
                 commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime, selectedCardRuntime,
                                                       targetEnemyUI, finalTarget,
                                                       targetTransform,

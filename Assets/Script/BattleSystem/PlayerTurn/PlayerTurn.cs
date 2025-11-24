@@ -115,13 +115,13 @@ public class PlayerTurn : MonoBehaviour
         handCardControllers.Clear();
 
         StartCoroutine(actionExecutor.ExecuteActions(
-            selectedCardsThisTurn,
-            playerTargetSelections,
-            enemyStatusUIControllers,
-            enemyControllers,
-            damageStrategy,
-            () => OnTurnFinished?.Invoke()
-        ));
+           selectedCardsThisTurn,
+           playerTargetSelections,
+           enemyStatusUIControllers,
+           enemyControllers,
+           damageStrategy,
+           () => OnTurnFinished?.Invoke()
+       ));
     }
 
     /// <summary>

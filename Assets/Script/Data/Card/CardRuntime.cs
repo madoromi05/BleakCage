@@ -41,4 +41,9 @@ public class CardRuntime : IAttackComponent
     {
         weaponRuntime = weapon;
     }
+    public PlayerRuntime GetOwnerPlayer()
+    {
+        if (this.weaponRuntime == null) return null;
+        return this.weaponRuntime.ParentPlayer;
+    }
 }
