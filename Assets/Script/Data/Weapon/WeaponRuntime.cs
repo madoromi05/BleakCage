@@ -11,9 +11,10 @@ public class WeaponRuntime : IAttackComponent
     public AttributeType Attribute { get; private set; }
     public float PeakyCoefficient { get; private set; }
     public PlayerRuntime ParentPlayer { get; private set; }
-    public List<CardRuntime> Cards { get; private set; }
+
+    public List<CardRuntime> Cards { get; private set; } = new List<CardRuntime>();
+
     public float attackPower;
-    private readonly List<CardRuntime> slottedCards = new List<CardRuntime>();
 
     public WeaponRuntime(WeaponModel weaponModel, string instanceID)
     {
@@ -37,7 +38,7 @@ public class WeaponRuntime : IAttackComponent
     public void AddCard(CardRuntime card)
     {
         if (card == null) return;
-        slottedCards.Add(card);
+        Cards.Add(card);
         card.SetParent(this);
     }
 
@@ -48,6 +49,6 @@ public class WeaponRuntime : IAttackComponent
     {
         if (card == null) return;
         card.SetParent(null);
-        slottedCards.Remove(card);
+        Cards.Remove(card);
     }
 }

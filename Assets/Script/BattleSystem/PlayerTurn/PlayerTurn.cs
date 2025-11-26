@@ -166,12 +166,10 @@ public class PlayerTurn : MonoBehaviour
         Canvas canvas = playerHandTransform.GetComponentInParent<Canvas>();
         if (canvas != null)
         {
-            // Canvas配下のすべてのUI要素のレイアウトを強制的に即時更新
             Canvas.ForceUpdateCanvases();
         }
         else
         {
-            // Canvas が見つからない場合、レイアウトグループに直接働きかける (予備)
             var layoutGroup = playerHandTransform.GetComponent<UnityEngine.UI.LayoutGroup>();
             if (layoutGroup != null)
             {
@@ -184,7 +182,6 @@ public class PlayerTurn : MonoBehaviour
         cardInitialPositions.Clear();
         for (int i = 0; i < handCardControllers.Count; i++)
         {
-            // CardSelect のロジック (visualRoot.localPosition = Vector3.zero) に合わせる
             cardInitialPositions.Add(Vector3.zero);
         }
         UpdateAllCardVisuals();
