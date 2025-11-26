@@ -70,12 +70,18 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void InitializeBattleFlow()
     {
-        if (entitiesManager.LoadedDeckData == null || entitiesManager.LoadedDeckData.AllCards == null)
+        if (entitiesManager.LoadedDeckData == null || entitiesManager.LoadedDeckData.Party == null)
         {
-            Debug.LogError("entitiesManager がカードデータをロードしていません！");
+            Debug.LogError("entitiesManager がデッキデータ(Party)をロードしていません！");
             return;
         }
-        battleCardDeck.InitFromCardList(entitiesManager.LoadedDeckData.AllCards);
+
+        List<CardRuntime> allCards = new List<CardRuntime>();
+        foreach (var player in entitiesManager.LoadedDeckData.Party)
+        {
+            allCards.AddRange(player.GetAllCards());
+        }
+        battleCardDeck.InitFromCardList(allCards);
 
         List<PlayerModel> playerModels = entitiesManager.Players.Select(p => p.PlayerModel).ToList();
         enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
