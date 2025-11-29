@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 ///　動的または、UUIDで管理するためのクラス
@@ -11,13 +12,15 @@ public class WeaponRuntime : IAttackComponent
     public AttributeType Attribute { get; private set; }
     public float PeakyCoefficient { get; private set; }
     public PlayerRuntime ParentPlayer { get; private set; }
-
+    public WeaponModel Model { get; private set; }
+    public GameObject Prefab => Model != null ? Model.WeaponPrefab : null;
     public List<CardRuntime> Cards { get; private set; } = new List<CardRuntime>();
 
     public float attackPower;
 
     public WeaponRuntime(WeaponModel weaponModel, string instanceID)
     {
+        Model = weaponModel;
         ID = weaponModel.ID;
         InstanceID = Guid.Parse(instanceID);
         attackPower = weaponModel.AttackPower;

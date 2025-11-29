@@ -28,7 +28,6 @@ public class CardEntity : ScriptableObject
     public float OutputModifier;            // o—Í’²®
     public float DefensePenetration;        // –hŒäŠÑ’Ê 
     public AnimationClip AttackAnimation;
-    public GameObject WeaponPrefab;
     public HandPosition WeaponHand;
     public bool IsMelee;
 }

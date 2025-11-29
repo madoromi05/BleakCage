@@ -19,3 +19,4 @@ MonoBehaviour:
   Description: "\u65B0\u3057\u3044\u6B66\u5668\u306E\u8AAC\u660E\u6587"
   AttackPower: 50
   PeakyCoefficient: 1
+  WeaponPrefab: {fileID: 3508136266559725065, guid: 0c8592a7d9d8e784380bddb6c64cebb1, type: 3}

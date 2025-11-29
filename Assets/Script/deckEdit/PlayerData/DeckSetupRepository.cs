@@ -44,7 +44,6 @@ public class PlayerDataLoader
     /// <summary>
     /// Playerのパーティー情報と全カードリストを読み込んで生成する
     /// </summary>
-    /// <returns>生成されたパーティーとカードのデータ</returns>
     public DeckSetupRepository LoadPlayerPartyAndCards()
     {
         PlayerProfile playerProfile = DataManager.LoadData<PlayerProfile>(ProfileFileName);
@@ -122,7 +121,6 @@ public class PlayerDataLoader
         int cardIdCounter = 1;
         int totalWeaponCount = 0;
 
-        // ループは MockCharacterCount (1に設定) 回だけ実行される
         for (int i = 1; i <= MockCharacterCount; i++)
         {
             var character = new CharacterData

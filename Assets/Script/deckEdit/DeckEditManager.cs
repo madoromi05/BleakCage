@@ -9,8 +9,6 @@ public class DeckEditManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject deckEditPanel; // パネル全体
     [SerializeField] private Transform characterListContent; // キャラクターを表示するエリア
-
-    // ★インベントリ一覧表示が不要ならこの変数は削除してもOKです
     [SerializeField] private Transform cardInventoryContent;
 
     [Header("Prefabs")]

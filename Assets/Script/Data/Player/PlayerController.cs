@@ -80,25 +80,21 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     /// <param name="cardModel">使用するカードのデータ（ここを修正！）</param>
     /// <param name="targetEnemy">攻撃対象のTransform</param>
-    public IEnumerator AttackSequence(CardModel cardModel, Transform targetEnemy)
+    public IEnumerator AttackSequence(CardModel cardModel, WeaponRuntime weaponRuntime, Transform targetEnemy)
     {
         AnimationClip cardAttackClip = cardModel.AttackAnimation;
         GameObject currentWeaponInstance = null;
 
-        if (cardModel.WeaponPrefab != null)
+        if(weaponRuntime != null && weaponRuntime.Prefab != null)
         {
             Transform handTransform = (cardModel.WeaponHand == HandPosition.RightHand)
-                                      ? this.rightHandSocket
-                                      : this.leftHandSocket;
+                                        ? this.rightHandSocket
+                                        : this.leftHandSocket;
 
             if (handTransform != null)
             {
-                // 武器生成
-                currentWeaponInstance = Instantiate(cardModel.WeaponPrefab, handTransform);
-
-                // 名前からクローンを削除してアニメーションに認識されるようにする
-                currentWeaponInstance.name = cardModel.WeaponPrefab.name;
-                // 攻撃対象との位置合わせ
+                currentWeaponInstance = Instantiate(weaponRuntime.Prefab, handTransform);
+                currentWeaponInstance.name = weaponRuntime.Prefab.name;
                 currentWeaponInstance.transform.localPosition = Vector3.zero;
                 currentWeaponInstance.transform.localRotation = Quaternion.identity;
             }

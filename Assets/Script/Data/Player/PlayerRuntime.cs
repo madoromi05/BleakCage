@@ -39,7 +39,7 @@ public class PlayerRuntime : IAttackComponent
 
         // キャラクターカード用の専用武器
         // AttackPowerは仮で10に設定
-        var CaracterCardWeaponModel = new WeaponModel(0, "CharacterPersonalSkill", PlayerAttackPower, AttributeType.Bullet, 1.0f);
+        var CaracterCardWeaponModel = new WeaponModel(0, "CharacterPersonalSkill", PlayerAttackPower, AttributeType.Bullet, 1.0f, null);
         CaracterCardWeapon = new WeaponRuntime(CaracterCardWeaponModel, System.Guid.NewGuid().ToString());
         this.EquipWeapon(CaracterCardWeapon);
     }

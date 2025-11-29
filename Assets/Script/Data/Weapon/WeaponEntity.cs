@@ -16,4 +16,5 @@ public class WeaponEntity : ScriptableObject
 
     public float AttackPower;                 // •ŠíUŒ‚—Í
     public float PeakyCoefficient;            // “Á‰»ŒW”
+    public GameObject WeaponPrefab;
 }

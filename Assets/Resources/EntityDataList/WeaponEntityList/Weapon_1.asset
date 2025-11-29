@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Weapon_1
   m_EditorClassIdentifier: 
   ID: 1
-  Name: "\u6B66\u56681"
+  Name: arterWeapon
   Attribute: 0
   Icon: {fileID: 0}
   Description: 
   AttackPower: 50
   PeakyCoefficient: 1
+  WeaponPrefab: {fileID: 3508136266559725065, guid: 0c8592a7d9d8e784380bddb6c64cebb1, type: 3}

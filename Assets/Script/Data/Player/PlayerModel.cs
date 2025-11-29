@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 /// <summary>
 /// ゲーム中で使用するプレイヤーモデル（プレイヤーのステータスなど）
@@ -17,7 +18,7 @@ public class PlayerModel
     public string PlayerDescription { get; private set; }
     public AnimatorSet PlayerAnimator { get; private set; }
     public Sprite PlayerIcon { get; private set; }
-
+    public WeaponModel PlayerWeapon { get; private set; }
     /// <summary>
     /// コンストラクタ：IDからScriptableObjectを読み込んでモデルを生成
     /// </summary>
@@ -42,5 +43,9 @@ public class PlayerModel
         PlayerAnimator = playerEntity.AnimationSet;
         CharacterPrefab = playerEntity.CharacterPrefab;
         InitialRotation = playerEntity.InitialRotation;
+        if (playerEntity.PlayerWeapon != null)
+        {
+            PlayerWeapon = new WeaponModel(playerEntity.PlayerWeapon);
+        }
     }
 }

@@ -51,7 +51,7 @@ public class AttackCommand : ICommand
             yield break; // アニメがないなら中断
         }
 
-        yield return controller.AttackSequence(cardModel, targetTransform);
+        yield return controller.AttackSequence(cardModel, weapon, targetTransform);
 
         float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
 
