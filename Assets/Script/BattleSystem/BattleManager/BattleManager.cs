@@ -30,18 +30,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
 
-    public bool TrySpendGuardGauge(float amount) => guardGaugeSystem.TrySpendGuardGauge(amount);
-    public void AddGuardGauge(float amount) => guardGaugeSystem.AddGuardGauge(amount);
-    public void IncrementCounterCount() => guardGaugeSystem.IncrementCounterCount();
     public void ShowDefenseFeedback(string message, Color color) => defenseFeedbackUI.ShowDefenseFeedback(message, color);
-
-    // --- マーカー表示 (EntitiesManagerへの委譲) ---
-    public void ShowTargetMarkerOnPlayer(int playerIndex) => entitiesManager.ShowTargetMarkerOnPlayer(MarkerInstance, playerIndex);
-    public void HideTargetMarker() => entitiesManager.HideTargetMarker(MarkerInstance);
-
-    // --- UIコールバック ---
-    public void OnKeepSelections() => normalPhaseManager.OnKeepSelections();
-    public void OnChangeSelections() => normalPhaseManager.OnChangeSelections();
 
     public GameObject MarkerInstance { get; private set; } // マーカーインスタンスを公開
     private float playerTurnDuration = 10f; // PhaseManager に移動しても良い
@@ -83,9 +72,22 @@ public class BattleManager : MonoBehaviour
         }
         battleCardDeck.InitFromCardList(allCards);
 
-        List<PlayerModel> playerModels = entitiesManager.Players.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
+        Dictionary<PlayerRuntime, PlayerController> runtimeControllerMap = new Dictionary<PlayerRuntime, PlayerController>();
+        foreach (var runtime in entitiesManager.Players)
+        {
+            if (entitiesManager.PlayerControllers.TryGetValue(runtime.PlayerModel, out var controller))
+            {
+                runtimeControllerMap[runtime] = controller;
+            }
+        }
 
+        enemyTurn.EnemySetup(
+            entitiesManager.Players,
+            entitiesManager.Enemies,
+            entitiesManager.EnemyControllers,
+            runtimeControllerMap,
+            entitiesManager.PlayerStatusUIs
+        );
         // === フローの分岐 ===
         bool isTutorial = entitiesManager.IsTutorialMode;
 

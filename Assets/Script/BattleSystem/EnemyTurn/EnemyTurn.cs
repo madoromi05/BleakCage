@@ -21,7 +21,7 @@ public class EnemyTurn : MonoBehaviour
     private Queue<ICommand> commandQueue = new();
     private List<PlayerStatusUIController> playerStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
-    private Dictionary<PlayerModel, PlayerController> playerControllers;
+    private Dictionary<PlayerRuntime, PlayerController> playerControllers;
 
     private PlayerRuntime currentPlayerTarget;
     private EnemyAttackCommand currentAttackCommand;
@@ -34,17 +34,15 @@ public class EnemyTurn : MonoBehaviour
     }
 
     public void EnemySetup(List<PlayerRuntime> players, List<EnemyModel> enemys,
-                           Dictionary<EnemyModel, EnemyController> enemyControllers,
-                           Dictionary<PlayerModel, PlayerController> playerControllers,
-                           List<PlayerStatusUIController> playerStatusUIControllers)
+                       Dictionary<EnemyModel, EnemyController> enemyControllers,
+                       Dictionary<PlayerRuntime, PlayerController> playerControllers,
+                       List<PlayerStatusUIController> playerStatusUIControllers)
     {
         this.players = players;
         this.enemies = enemys;
         this.enemyControllers = enemyControllers;
         this.playerControllers = playerControllers;
         this.playerStatusUIControllers = playerStatusUIControllers;
-
-        //defenseHandler.Init(players, playerControllers);
 
         foreach (var enemyController in this.enemyControllers.Values)
         {
@@ -94,7 +92,7 @@ public class EnemyTurn : MonoBehaviour
                     ui.GetPlayerRuntime() == targetRuntime
                 );
                 enemyControllers.TryGetValue(attacker, out EnemyController attackerController);
-                playerControllers.TryGetValue(targetRuntime.PlayerModel, out PlayerController targetController);
+                playerControllers.TryGetValue(targetRuntime, out PlayerController targetController);
 
                 commandQueue.Enqueue(new EnemyAttackCommand(targetRuntime, attacker, attackerController, targetController, targetUIController));
             }
