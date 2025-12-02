@@ -8,6 +8,7 @@ public class EnemyModel
     public int EnemyID { get; private set; }                 // “G‚ÌID
     public string EnemyName { get; private set; }             // “G‚Ì–¼‘O
     public float EnemyHP { get; set; }                       // “G‚ÌHP
+    public float MaxHP { get; private set; }
     public float EnemyAttackPower { get; private set; }      // UŒ‚—Í
     public float EnemyDefensePower { get; private set; }     // –hŒä—Í
     public AttributeType EnemyAttribute { get; private set; } // UŒ‚‘®«
@@ -15,11 +16,10 @@ public class EnemyModel
     public Sprite EnemySprite { get; private set; }           // •\¦ƒAƒCƒRƒ“
     public string EnemyDescription { get; private set; }      // à–¾•¶
     public EnemyAnimatorSet EnemyAnimator { get; private set; }   // ƒAƒjƒ[ƒVƒ‡ƒ“ƒZƒbƒg
-
-    // --- PlayerModel‚É‡‚í‚¹‚Ä’Ç‰Á ---
-    public GameObject CharacterPrefab { get; private set; } // ƒvƒŒƒnƒu
+    public GameObject CharacterPrefab { get; private set; }
     public Vector3 InitialRotation { get; private set; }   // ‰Šú‰ñ“]
-    // ---------------------------------
+    public StatusEffectHandler StatusHandler { get; private set; }
+    public EnemyHPHandler HPHandler { get; private set; }
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)‚©‚çƒf[ƒ^‚ğ“Ç‚İ‚ñ‚Åƒ‚ƒfƒ‹‚É”½‰f
@@ -34,6 +34,7 @@ public class EnemyModel
         EnemyID = Entity.EnemyID;
         EnemyName = Entity.EnemyName;
         EnemyHP = Entity.EnemyHP;
+        MaxHP = Entity.EnemyHP;
         EnemyAttackPower = Entity.EnemyAttackPower;
         EnemyDefensePower = Entity.EnemyDefensePower;
         EnemyAttribute = Entity.EnemyAttribute;
@@ -44,5 +45,42 @@ public class EnemyModel
 
         CharacterPrefab = Entity.CharacterPrefab;
         InitialRotation = Entity.InitialRotation;
+        StatusHandler = new StatusEffectHandler(EnemyName);
+        HPHandler = new EnemyHPHandler(this);
+    }
+
+    // <summary>
+    /// Œ»İ‚ÌUŒ‚—Í‚ğæ“¾iy—o“Sz‚È‚Ç‚Ì•â³‚İj
+    /// </summary>
+    public float GetCurrentAttackPower()
+    {
+        float multiplier = 1.0f;
+
+        // y—o“Szƒ`ƒFƒbƒN: 1ƒXƒ^ƒbƒN‚É‚Â‚«10%ƒ_ƒEƒ“
+        int meltdown = StatusHandler.GetStackCount(StatusEffectType.Meltdown);
+        if (meltdown > 0)
+        {
+            multiplier -= (0.10f * meltdown);
+        }
+
+        // 0–¢–‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é
+        return Mathf.Max(0, EnemyAttackPower * multiplier);
+    }
+
+    /// <summary>
+    /// Œ»İ‚Ì–hŒä—Í‚ğæ“¾iy—o“Sz‚È‚Ç‚Ì•â³‚İj
+    /// </summary>
+    public float GetCurrentDefensePower()
+    {
+        float multiplier = 1.0f;
+
+        // y—o“Szƒ`ƒFƒbƒN: 1ƒXƒ^ƒbƒN‚É‚Â‚«5%ƒ_ƒEƒ“
+        int meltdown = StatusHandler.GetStackCount(StatusEffectType.Meltdown);
+        if (meltdown > 0)
+        {
+            multiplier -= (0.05f * meltdown);
+        }
+
+        return Mathf.Max(0, EnemyDefensePower * multiplier);
     }
 }

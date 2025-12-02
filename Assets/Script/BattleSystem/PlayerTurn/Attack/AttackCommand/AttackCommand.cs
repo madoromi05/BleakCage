@@ -31,34 +31,18 @@ public class AttackCommand : ICommand
     public IEnumerator Do()
     {
         Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.EnemyID}");
-        if (targetEnemy.EnemyHP <= 0)
-        {
-            Debug.Log($" EnemyID： {targetEnemy.EnemyID} は既に倒されているため、攻撃をスキップしました。");
-            yield break;
-        }
 
-        // 1. PlayerRuntime から PlayerController の実体を取得
         PlayerController controller = player.PlayerController;
-        if (controller == null)
-        {
-            Debug.LogError($"Player (ID: {player.ID}) の PlayerController が null です！");
-            yield break;
-        }
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
-        if (cardModel.AttackAnimation == null)
-        {
-            Debug.LogError($"[AttackCommand] CardModel (ID: {card.ID}) の AttackAnimation が NULL です！ CardEntityに設定されていますか？");
-            yield break; // アニメがないなら中断
-        }
 
         yield return controller.AttackSequence(cardModel, weapon, targetTransform);
 
-        float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
+        float damage = damageStrategy.CalculateFinalDamage(player, weapon, card, targetEnemy);
 
-        //Card属性ごとの効果音
+        //Card属性ごとの効果音s
         attackedSoundEffect(card.attribute);
         // ターゲットのHPを減算
-        targetEnemy.EnemyHP -= damage;
+        targetEnemy.HPHandler.TakeDamage(damage);
         enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
 
         Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");

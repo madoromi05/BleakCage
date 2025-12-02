@@ -10,6 +10,7 @@ public class PlayerModel
     public int    PlayerID { get; private set; }
     public string PlayerName { get; private set; }
     public int    PlayerLevel { get; private set; }
+    public float MaxHP { get; private set; }
     public float  PlayerHP { get; set; }
     public float  PlayerDefensePower { get; private set; }
     public AttributeType PlayerAttribute { get; private set; }
@@ -35,6 +36,7 @@ public class PlayerModel
         PlayerLevel = playerEntity.PlayerLevel;
         PlayerIcon = playerEntity.PlayerIcon;
         PlayerHP = playerEntity.PlayerHP;
+        MaxHP = playerEntity.PlayerHP;
         PlayerDefensePower = playerEntity.PlayerDefensePower;
 
         PlayerAttribute = playerEntity.PlayerAttribute;

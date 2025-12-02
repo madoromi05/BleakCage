@@ -12,12 +12,13 @@ public class PlayerRuntime : IAttackComponent
     public int ID { get; private set; }
     public System.Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
+    public float MaxHP => PlayerModel.MaxHP;
     public WeaponRuntime CaracterCardWeapon { get; private set; }
     public PlayerModel PlayerModel { get; private set; }
     public PlayerController PlayerController { get; set; }
     public int Level { get; private set; }
-    public StatusEffectHandler BuffHandler { get; private set; }
-    public PlayerStatsHandler StatsHandler { get; private set; }
+    public StatusEffectHandler StatusHandler { get; private set; }
+    public PlayerHPHandler HPHandler { get; private set; }
     public IReadOnlyList<WeaponRuntime> EquippedWeapons => equippedWeapons;
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private readonly IAttackStrategy attackStrategy;
@@ -31,11 +32,12 @@ public class PlayerRuntime : IAttackComponent
         ID = model.PlayerID;
         InstanceID = Guid.Parse(instanceID);
         CurrentHP = model.PlayerHP;
+        this.CurrentHP = model.MaxHP;
         attackStrategy = strategy;
         this.PlayerModel = model;
         this.Level = model.PlayerLevel;
-        this.BuffHandler = new StatusEffectHandler(this.PlayerModel);
-        this.StatsHandler = new PlayerStatsHandler(this.PlayerModel);
+        this.StatusHandler = new StatusEffectHandler(model.PlayerName);
+        this.HPHandler = new PlayerHPHandler(this);
 
         // キャラクターカード用の専用武器
         // AttackPowerは仮で10に設定

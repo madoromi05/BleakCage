@@ -1,237 +1,218 @@
-//using System.Collections.Generic;
-//using System.IO;
-//using System.Linq;
-//using UnityEditor;
-//using UnityEditor.AddressableAssets; // Addressablesを操作するために必要
-//using UnityEditor.AddressableAssets.Settings;
-//using UnityEngine;
-//using UnityEngine.AddressableAssets; // Addressablesを操作するために必要
+#if UNITY_EDITOR
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEditor;
+using UnityEngine;
 
-///// <summary>
-///// CSVファイルから CardEntity (ScriptableObject) アセットを
-///// 一括で「作成」「更新」「削除」するインポーター
-///// </summary>
-//public class CardDataImporter : AssetPostprocessor
-//{
-//    // 同期するCSVファイル名 (プロジェクト内のどこにあってもOK)
-//    private const string CSV_FILE_NAME = "CardEntityData.csv";
+public class CardDataImporter : AssetPostprocessor
+{
+    // CSVファイル名（Excelで保存する際の名前）
+    private const string CSV_FILE_NAME = "CardEntityData.csv";
 
-//    // CardEntityアセットを保存するベースフォルダ
-//    private const string CARD_ENTITY_BASE_PATH = "Assets/Resources/CardEntityList";
+    // CSVが置かれているフォルダのパス（部分一致検索用）
+    // Windowsのパス区切り '\' はUnity内では '/' として扱われます
+    private const string CSV_TARGET_FOLDER = "Script/Data/CardEccelData";
 
-//    // Addressablesのラベル
-//    private const string ADDRESSABLES_LABEL = "CardEntity";
+    // 生成されたCardEntityの保存先
+    private const string CARD_ENTITY_BASE_PATH = "Assets/Resources/EntityDataList/CardEntityList";
 
-//    private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-//    {
-//        // インポートされたファイルにCSV_FILE_NAMEが含まれているかチェック
-//        bool csvImported = importedAssets.Any(path => path.EndsWith(CSV_FILE_NAME));
+    // 名前検索用のキャッシュ
+    private static Dictionary<int, string> _characterNameCache;
+    private static Dictionary<int, string> _weaponNameCache;
 
-//        // CSVが削除された場合も処理（全削除など）を行う場合は、deletedAssetsもチェック
-//        // bool csvDeleted = deletedAssets.Any(path => path.EndsWith(CSV_FILE_NAME));
+    private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+    {
+        // 指定のフォルダ内にあるCSVのみを対象にする
+        foreach (string path in importedAssets)
+        {
+            // パスの中に "Script/Data/CardEccelData" が含まれていて、かつファイル名が一致するか
+            if (path.Contains(CSV_TARGET_FOLDER) && path.EndsWith(CSV_FILE_NAME))
+            {
+                // キャッシュをリセット
+                _characterNameCache = null;
+                _weaponNameCache = null;
 
-//        if (csvImported)
-//        {
-//            Debug.Log($"[{CSV_FILE_NAME}] の変更を検出。CardEntityアセットの同期を開始します。");
+                // 読み込み実行
+                SyncCardEntitiesFromCSV(path);
+                return;
+            }
+        }
+    }
 
-//            // CSVファイルの完全パスを取得
-//            string csvPath = importedAssets.First(path => path.EndsWith(CSV_FILE_NAME));
+    private static void SyncCardEntitiesFromCSV(string csvPath)
+    {
+        // 1. プロジェクト内の全CardEntityをロード（ID重複チェック用）
+        var existingCards = new Dictionary<int, CardEntity>();
+        string[] guids = AssetDatabase.FindAssets("t:CardEntity");
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            CardEntity entity = AssetDatabase.LoadAssetAtPath<CardEntity>(path);
+            if (entity != null && !existingCards.ContainsKey(entity.ID))
+            {
+                existingCards.Add(entity.ID, entity);
+            }
+        }
 
-//            // 同期処理を実行
-//            SyncCardEntitiesFromCSV(csvPath);
-//        }
-//    }
+        // 2. 名前解決のためのキャッシュを作成
+        BuildNameCache();
 
-//    private static void SyncCardEntitiesFromCSV(string csvPath)
-//    {
-//        // 1. 既存の全CardEntityアセットをロードし、IDをキーにした辞書を作成
-//        var existingCards = new Dictionary<int, CardEntity>();
-//        var settings = AddressableAssetSettingsDefaultObject.Settings;
+        // 3. CSV読み込み & 処理
+        string[] lines = File.ReadAllLines(csvPath);
+        if (lines.Length <= 1) return;
 
-//        // "t:CardEntity" でプロジェクト内の全CardEntityアセットを検索
-//        string[] guids = AssetDatabase.FindAssets("t:CardEntity");
-//        foreach (string guid in guids)
-//        {
-//            string path = AssetDatabase.GUIDToAssetPath(guid);
-//            CardEntity entity = AssetDatabase.LoadAssetAtPath<CardEntity>(path);
-//            if (entity != null && !existingCards.ContainsKey(entity.ID))
-//            {
-//                existingCards.Add(entity.ID, entity);
-//            }
-//        }
+        AssetDatabase.StartAssetEditing();
 
-//        // 2. CSVファイルを読み込む
-//        string[] lines = File.ReadAllLines(csvPath);
-//        if (lines.Length <= 1)
-//        {
-//            Debug.LogWarning("CSVファイルにヘッダー行以外データがありません。");
-//            return;
-//        }
+        try
+        {
+            // 1行目はヘッダーとしてスキップ
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (string.IsNullOrWhiteSpace(line)) continue;
 
-//        // アセットの変更処理を開始することをUnityに通知
-//        AssetDatabase.StartAssetEditing();
+                string[] values = line.Split(',');
 
-//        var settingsUpdated = false;
+                // 列数チェック（現在は13列必要）
+                if (values.Length < 13)
+                {
+                    Debug.LogWarning($"[CardImporter] Line {i + 1}: 列数が足りないためスキップ (Data: {line})");
+                    continue;
+                }
 
-//        try
-//        {
-//            // 3. 1行ずつパース (i=0 はヘッダーなのでスキップ)
-//            for (int i = 1; i < lines.Length; i++)
-//            {
-//                string line = lines[i];
-//                if (string.IsNullOrWhiteSpace(line)) continue;
+                try
+                {
+                    int id = int.Parse(values[0]);
+                    CardEntity targetCard = null;
+                    bool isNew = false;
 
-//                // 説明文にカンマが含まれているとパースが崩れます。
-//                // 本格的に運用する場合、CsvHelperなどの専用ライブラリの導入すること。
-//                string[] values = line.Split(',');
+                    // 既存データの更新か、新規作成か
+                    if (existingCards.TryGetValue(id, out targetCard))
+                    {
+                        existingCards.Remove(id); // 処理済みリストから除外
+                    }
+                    else
+                    {
+                        targetCard = ScriptableObject.CreateInstance<CardEntity>();
+                        isNew = true;
+                    }
 
-//                if (values.Length < 14) // 列が足りない行はスキップ
-//                {
-//                    Debug.LogWarning($"CSV {i + 1}行目: 列数が不足しています。スキップします。 (Line: {line})");
-//                    continue;
-//                }
+                    // データをセット
+                    PopulateCardEntity(targetCard, values);
 
-//                try
-//                {
-//                    int id = int.Parse(values[0]);
+                    // 保存先パスの決定（フォルダ自動振り分け）
+                    string idealPath = GetReadableSavePath(targetCard);
+                    string currentPath = isNew ? "" : AssetDatabase.GetAssetPath(targetCard);
+                    string directory = Path.GetDirectoryName(idealPath);
 
-//                    // 4. アセットの「更新」または「新規作成」
-//                    if (existingCards.TryGetValue(id, out CardEntity targetCard))
-//                    {
-//                        // 4a. [更新] 既存アセットのデータを上書き
-//                        PopulateCardEntity(targetCard, values);
-//                        EditorUtility.SetDirty(targetCard);
+                    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
-//                        // 既存リストから削除（＝処理済み）
-//                        existingCards.Remove(id);
-//                    }
-//                    else
-//                    {
-//                        // 4b. [新規作成] 新しいアセットを作成
-//                        targetCard = ScriptableObject.CreateInstance<CardEntity>();
-//                        PopulateCardEntity(targetCard, values);
+                    if (isNew)
+                    {
+                        AssetDatabase.CreateAsset(targetCard, idealPath);
+                    }
+                    else if (currentPath != idealPath)
+                    {
+                        AssetDatabase.MoveAsset(currentPath, idealPath); // 移動
+                        EditorUtility.SetDirty(targetCard);
+                    }
+                    else
+                    {
+                        EditorUtility.SetDirty(targetCard);
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[CardImporter] Error Line {i + 1}: {ex.Message}");
+                }
+            }
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
 
-//                        // 保存パスを決定
-//                        string path = GetSavePath(targetCard);
-//                        Directory.CreateDirectory(Path.GetDirectoryName(path));
-//                        string uniquePath = AssetDatabase.GenerateUniqueAssetPath(path);
+        Debug.Log($"CardEntity Import Complete: {csvPath}");
+    }
 
-//                        AssetDatabase.CreateAsset(targetCard, uniquePath);
+    // --- IDから名前を取得するためのキャッシュ ---
+    private static void BuildNameCache()
+    {
+        _characterNameCache = new Dictionary<int, string>();
+        _weaponNameCache = new Dictionary<int, string>();
 
-//                        // Addressablesに登録
-//                        if (settings != null)
-//                        {
-//                            var entry = settings.CreateOrMoveEntry(AssetDatabase.AssetPathToGUID(uniquePath), settings.DefaultGroup);
-//                            entry.SetLabel(ADDRESSABLES_LABEL, true);
-//                            settingsUpdated = true;
-//                        }
-//                    }
-//                }
-//                catch (System.Exception ex)
-//                {
-//                    Debug.LogError($"CSV {i + 1}行目の処理に失敗しました: {ex.Message} (Line: {line})");
-//                }
-//            }
+        foreach (var guid in AssetDatabase.FindAssets("t:PlayerEntity"))
+        {
+            var entity = AssetDatabase.LoadAssetAtPath<PlayerEntity>(AssetDatabase.GUIDToAssetPath(guid));
+            if (entity != null && !_characterNameCache.ContainsKey(entity.PlayerId))
+                _characterNameCache.Add(entity.PlayerId, entity.PlayerName);
+        }
 
-//            // 5. [削除] CSVに存在しなかった既存アセットを削除
-//            if (existingCards.Any())
-//            {
-//                Debug.Log($"{existingCards.Count}件の古いCardEntityアセットを削除します...");
-//                foreach (var pair in existingCards)
-//                {
-//                    CardEntity cardToDelete = pair.Value;
-//                    string path = AssetDatabase.GetAssetPath(cardToDelete);
+        foreach (var guid in AssetDatabase.FindAssets("t:WeaponEntity"))
+        {
+            var entity = AssetDatabase.LoadAssetAtPath<WeaponEntity>(AssetDatabase.GUIDToAssetPath(guid));
+            if (entity != null && !_weaponNameCache.ContainsKey((int)entity.ID))
+                _weaponNameCache.Add((int)entity.ID, entity.Name);
+        }
+    }
 
-//                    // Addressablesから削除
-//                    if (settings != null)
-//                    {
-//                        var guid = AssetDatabase.AssetPathToGUID(path);
-//                        settings.RemoveAssetEntry(guid);
-//                        settingsUpdated = true;
-//                    }
+    // --- CSVの値をCardEntityに流し込む ---
+    private static void PopulateCardEntity(CardEntity card, string[] values)
+    {
+        int categoryId = int.Parse(values[0]); // 1=キャラ, 2=武器
+        int ownerId    = int.Parse(values[1]);
+        int exclusiveId  = int.Parse(values[2]);
 
-//                    // アセットファイルを削除
-//                    AssetDatabase.DeleteAsset(path);
-//                    Debug.Log($"Deleted: {path}");
-//                }
-//            }
+        // 計算式: カテゴリ(1桁) + Owner(3桁) + Variant(2桁)
+        card.ID = (categoryId * 100000) + (ownerId * 100) + exclusiveId; ;
 
-//            if (settingsUpdated)
-//            {
-//                // Addressablesの設定変更を保存
-//                settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, null, true);
-//            }
-//        }
-//        finally
-//        {
-//            // アセットの変更処理を完了
-//            AssetDatabase.StopAssetEditing();
-//            AssetDatabase.SaveAssets();
-//            AssetDatabase.Refresh();
-//        }
+        // 分割したIDも便利なのでセットしておく
+        card.OwnerID = ownerId;
+        card.ExclusiveID = exclusiveId;
+        card.Name = values[3];
+        card.Type = (CardTypeData)System.Enum.Parse(typeof(CardTypeData), values[4]);
+        card.Attribute = (AttributeType)System.Enum.Parse(typeof(AttributeType), values[5]);
+        card.AttackCount = int.Parse(values[6]);
+        card.TargetCount = int.Parse(values[7]);
+        card.Passive = bool.Parse(values[8]);
+        card.HitRate = float.Parse(values[9]);
+        card.OutputModifier = float.Parse(values[10]);
+        card.DefensePenetration = float.Parse(values[11]);
+        card.IsMelee = bool.Parse(values[12]);
 
-//        Debug.Log($"[{CSV_FILE_NAME}] からの CardEntity 同期が完了しました。");
-//    }
+        // アセット名の更新
+        card.name = $"Card_{card.ID}";
+    }
+    // --- 保存先のパス生成 ---
+    private static string GetReadableSavePath(CardEntity card)
+    {
+        string subFolder = "Uncategorized";
+        string Sanitize(string name) => string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
 
-//    /// <summary>
-//    /// CSVの1行データ(values)を CardEntity インスタンスに書き込みます。
-//    /// </summary>
-//    private static void PopulateCardEntity(CardEntity card, string[] values)
-//    {
-//        // CSVの列の順番に合わせてパースします
-//        // 0: ID
-//        card.ID = int.Parse(values[0]);
-//        // 1: Name
-//        card.Name = values[1];
-//        // 2: CharacterID
-//        card.CharacterID = int.Parse(values[2]);
-//        // 3: EquipableWeaponID
-//        card.EquipableWeaponID = int.Parse(values[3]);
-//        // 4: Icon (アセットパスを想定)
-//        card.Icon = AssetDatabase.LoadAssetAtPath<Sprite>(values[4]);
-//        // 5: Description
-//        card.Description = values[5].Replace("\\n", "\n"); // CSV内で \n を改行として扱う
-//        // 6: Type
-//        card.Type = (CardTypeData)System.Enum.Parse(typeof(CardTypeData), values[6]);
-//        // 7: Attribute
-//        card.Attribute = (AttributeType)System.Enum.Parse(typeof(AttributeType), values[7]);
-//        // 8: AttackCount
-//        card.AttackCount = int.Parse(values[8]);
-//        // 9: TargetCount
-//        card.TargetCount = int.Parse(values[9]);
-//        // 10: Passive (TRUE/FALSE)
-//        card.Passive = bool.Parse(values[10].ToUpper());
-//        // 11: HitRate
-//        card.HitRate = float.Parse(values[11]);
-//        // 12: OutputModifier
-//        card.OutputModifier = float.Parse(values[12]);
-//        // 13: DefensePenetration
-//        card.DefensePenetration = float.Parse(values[13]);
+        if (card.Type == CardTypeData.Character)
+        {
+            int charId = card.CharacterID;
+            string charName = (_characterNameCache != null && _characterNameCache.TryGetValue(charId, out string n)) ? Sanitize(n) : "Unknown";
+            subFolder = Path.Combine("Character", $"Char_{charId:D2}_{charName}");
+        }
+        else if (card.Type == CardTypeData.Weapon)
+        {
+            int wpId = card.EquipableWeaponID;
+            string wpName = (_weaponNameCache != null && _weaponNameCache.TryGetValue(wpId, out string n)) ? Sanitize(n) : "Unknown";
+            subFolder = Path.Combine("Weapon", $"Weapon_{wpId}_{wpName}");
+        }
+        else
+        {
+            subFolder = "Common";
+        }
 
-//        // [注意] アセット名もIDと同期させます
-//        if (card.name != $"Card_{card.ID}")
-//        {
-//            card.name = $"Card_{card.ID}";
-//        }
-//    }
-
-//    /// <summary>
-//    /// 元の CardEntityTableEditor のロジックに基づき、アセットの保存パスを決定します。
-//    /// </summary>
-//    private static string GetSavePath(CardEntity card)
-//    {
-//        string subFolder = card.Type.ToString();
-
-//        if (card.Type == CardTypeData.Character)
-//        {
-//            subFolder = Path.Combine(subFolder, $"CharID_{card.CharacterID}");
-//        }
-//        else if (card.Type == CardTypeData.Weapon)
-//        {
-//            subFolder = Path.Combine(subFolder, $"WeaponID_{card.EquipableWeaponID}");
-//        }
-
-//        string fileName = $"Card_{card.ID}.asset";
-//        return Path.Combine(CARD_ENTITY_BASE_PATH, subFolder, fileName);
-//    }
-//}
+        // ここで最終的な保存先パスを作成
+        string fileName = $"Card_{card.ID}.asset";
+        return Path.Combine(CARD_ENTITY_BASE_PATH, subFolder, fileName).Replace("\\", "/");
+    }
+}
+#endif

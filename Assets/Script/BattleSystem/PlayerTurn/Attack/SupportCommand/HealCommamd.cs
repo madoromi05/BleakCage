@@ -18,7 +18,7 @@ public class HealCommand : ICommand
     {
         float healAmount = card.GetOutput();
 
-        player.StatsHandler.ApplyHeal(healAmount);
+        //player.StatsHandler.ApplyHeal(healAmount);
         yield break;
     }
 

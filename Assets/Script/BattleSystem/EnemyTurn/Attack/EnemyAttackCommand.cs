@@ -3,22 +3,20 @@ using UnityEngine;
 
 public class EnemyAttackCommand : ICommand
 {
-    public PlayerModel PlayerTarget { get; }
+    public PlayerRuntime PlayerTarget { get; }
     public EnemyModel Attacker { get; }
-    public IEnemyAttackStrategy DamageStrategy { get; }
+    private EnemyAttackDamage calculator = new EnemyAttackDamage();
     private EnemyController _enemyController;
     private PlayerStatusUIController _playerStatusUIController;
 
-    public EnemyAttackCommand(PlayerModel player, EnemyModel enemy,
+    public EnemyAttackCommand(PlayerRuntime player, EnemyModel enemy,
                               EnemyController enemyController,
                               PlayerController playerController,
-                              IEnemyAttackStrategy attackStrategy,
                               PlayerStatusUIController playerStatusUIController)
     {
         this.PlayerTarget = player;
         this.Attacker = enemy;
         _enemyController = enemyController;
-        this.DamageStrategy = attackStrategy;
         _playerStatusUIController = playerStatusUIController;
     }
 
@@ -28,7 +26,7 @@ public class EnemyAttackCommand : ICommand
     /// </summary>
     public IEnumerator Do()
     {
-        Debug.Log($"攻撃実行: Enemy='{Attacker.EnemyID}' が Player='{PlayerTarget.PlayerID}' に攻撃開始！");
+        Debug.Log($"攻撃実行: Enemy='{Attacker.EnemyID}' が Player='{PlayerTarget.PlayerModel.PlayerID}' に攻撃開始！");
 
         // 1. 敵の攻撃アニメーションを再生し、その長さを取得する
         // (このアニメーションの途中で 'OnAttackHitMoment' イベントが発火する)
@@ -50,15 +48,18 @@ public class EnemyAttackCommand : ICommand
     /// </summary>
     public void ApplyDamageAfterJudgement()
     {
-        // 1. ダメージを計算する (ガード/カウンターは EnemyTurn が判定済み)
-        float baseDamage = DamageStrategy.CalculateFinalDamage(Attacker, PlayerTarget);
+        // ダメージを計算する
+        float damage = calculator.CalculateFinalDamage(
+            Attacker,
+            PlayerTarget.PlayerModel
+        );
 
         // 2. HPを減算する
         SoundManager.Instance.PlaySE(SEType.damagedPlayer);
-        PlayerTarget.PlayerHP -= baseDamage;
-        _playerStatusUIController.UpdateHP(PlayerTarget.PlayerHP);
+        PlayerTarget.HPHandler.TakeDamage(damage);
+        _playerStatusUIController.UpdateHP(PlayerTarget.CurrentHP);
 
-        Debug.Log($"[EnemyAttackCardCommand] {PlayerTarget.PlayerName} に {baseDamage:F2} ダメージを与えた。残りHP: {PlayerTarget.PlayerHP:F2}");
+        Debug.Log($"[EnemyAttackCardCommand] {PlayerTarget.PlayerModel.PlayerName} に {damage:F2} ダメージを与えた。残りHP: {PlayerTarget.CurrentHP:F2}");
     }
 
     public bool Undo()

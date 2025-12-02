@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Mono.Cecil;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,26 +16,24 @@ public class EnemyTurn : MonoBehaviour
     [SerializeField] private BattleEntitiesManager entitiesManager;
     [SerializeField] private PlayerDefenseHandler defenseHandler;
 
-    private List<PlayerModel> players;
+    private List<PlayerRuntime> players;
     private List<EnemyModel> enemies;
-    private IEnemyAttackStrategy damageStrategy;
     private Queue<ICommand> commandQueue = new();
     private List<PlayerStatusUIController> playerStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
     private Dictionary<PlayerModel, PlayerController> playerControllers;
 
-    private PlayerModel currentPlayerTarget;
+    private PlayerRuntime currentPlayerTarget;
     private EnemyAttackCommand currentAttackCommand;
     private bool attackHasBeenResolved;
 
     private void Awake()
     {
-        damageStrategy = new EnemyAttackDamage();
         defenseHandler.OnDefenseResultFeedback += battleManager.ShowDefenseFeedback;
         defenseHandler.OnDamageToPlayer += HandleDamageToPlayer;
     }
 
-    public void EnemySetup(List<PlayerModel> players, List<EnemyModel> enemys,
+    public void EnemySetup(List<PlayerRuntime> players, List<EnemyModel> enemys,
                            Dictionary<EnemyModel, EnemyController> enemyControllers,
                            Dictionary<PlayerModel, PlayerController> playerControllers,
                            List<PlayerStatusUIController> playerStatusUIControllers)
@@ -45,7 +44,7 @@ public class EnemyTurn : MonoBehaviour
         this.playerControllers = playerControllers;
         this.playerStatusUIControllers = playerStatusUIControllers;
 
-        defenseHandler.Init(players, playerControllers);
+        //defenseHandler.Init(players, playerControllers);
 
         foreach (var enemyController in this.enemyControllers.Values)
         {
@@ -71,9 +70,9 @@ public class EnemyTurn : MonoBehaviour
     /// <summary>
     /// 攻撃対象となる生存プレイヤーをランダムに選択する
     /// </summary>
-    private PlayerModel GetRandomLivingPlayer()
+    private PlayerRuntime GetRandomLivingPlayer()
     {
-        var livingPlayers = players.Where(p => p != null && p.PlayerHP > 0).ToList();
+        var livingPlayers = players.Where(p => p != null && p.CurrentHP > 0).ToList();
         if (livingPlayers.Any())
         {
             int choice = Random.Range(0, livingPlayers.Count);
@@ -87,38 +86,18 @@ public class EnemyTurn : MonoBehaviour
         foreach (var attacker in enemies)
         {
             if (attacker == null || attacker.EnemyHP <= 0) continue;
-            PlayerModel target = GetRandomLivingPlayer();
+            PlayerRuntime targetRuntime = GetRandomLivingPlayer();
 
-            if (target != null)
+            if (targetRuntime != null)
             {
-                int targetIndex = players.FindIndex(p => p == target);
                 PlayerStatusUIController targetUIController = playerStatusUIControllers.FirstOrDefault(ui =>
-                    ui.GetPlayerRuntime() != null && ui.GetPlayerRuntime().PlayerModel == target
+                    ui.GetPlayerRuntime() == targetRuntime
                 );
-
-                if (targetUIController == null)
-                {
-                    Debug.LogError($"ターゲット {target.PlayerName} に一致する PlayerStatusUIController が見つかりません。");
-                    continue;
-                }
-
                 enemyControllers.TryGetValue(attacker, out EnemyController attackerController);
-                playerControllers.TryGetValue(target, out PlayerController targetController);
+                playerControllers.TryGetValue(targetRuntime.PlayerModel, out PlayerController targetController);
 
-                commandQueue.Enqueue(new EnemyAttackCommand(target, attacker, attackerController, targetController, damageStrategy, targetUIController));
+                commandQueue.Enqueue(new EnemyAttackCommand(targetRuntime, attacker, attackerController, targetController, targetUIController));
             }
-        }
-    }
-
-    /// <summary>
-    /// PlayerDefenseHandler からダメージ発生時に呼ばれる
-    /// </summary>
-    private void HandleDamageToPlayer(PlayerModel target)
-    {
-        if (currentAttackCommand != null)
-        {
-            Debug.LogWarning($"P{target.PlayerID} にダメージを適用します。");
-            currentAttackCommand.ApplyDamageAfterJudgement();
         }
     }
 
@@ -170,7 +149,7 @@ public class EnemyTurn : MonoBehaviour
             // 6. アニメーションイベントが発火しなかった場合のフォールバック
             if (!attackHasBeenResolved)
             {
-                Debug.LogWarning($"P{targetPlayerIndex + 1}: アニメーションイベントが発火しなかったため、被弾処理を強制実行します。");
+                Debug.LogWarning($"P{targetPlayerIndex + 1}: アニメーションイベント不発のため強制実行");
                 StartCoroutine(defenseHandler.StartDefenseWindowCoroutine(currentPlayerTarget, ResolveAttack));
             }
 
@@ -183,6 +162,18 @@ public class EnemyTurn : MonoBehaviour
         // 10. ターン終了処理
         defenseHandler.DisableDefenseInput();
         TurnFinished?.Invoke();
+    }
+
+    /// <summary>
+    /// PlayerDefenseHandler からダメージ発生時に呼ばれる
+    /// </summary>
+    private void HandleDamageToPlayer(PlayerRuntime target)
+    {
+        if (currentAttackCommand != null)
+        {
+            Debug.Log($"P{target.PlayerModel.PlayerID} にダメージを適用します。");
+            currentAttackCommand.ApplyDamageAfterJudgement();
+        }
     }
 
     private void OnDestroy()

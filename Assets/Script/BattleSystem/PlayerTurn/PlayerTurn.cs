@@ -377,7 +377,7 @@ public class PlayerTurn : MonoBehaviour
         {
             if (player != null)
             {
-                player.BuffHandler.TickDownBuffDurations();
+                //player.BuffHandler.TickDownBuffDurations();
             }
         }
     }
