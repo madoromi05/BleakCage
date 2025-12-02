@@ -84,19 +84,23 @@ public class CardDataImporter : AssetPostprocessor
 
                 try
                 {
-                    int id = int.Parse(values[0]);
+                    int categoryId = int.Parse(values[0]);
+                    int ownerId = int.Parse(values[1]);
+                    int exclusiveId = int.Parse(values[2]);
+                    int calculatedID = (categoryId * 100000) + (ownerId * 100) + exclusiveId;
                     CardEntity targetCard = null;
                     bool isNew = false;
 
                     // 既存データの更新か、新規作成か
-                    if (existingCards.TryGetValue(id, out targetCard))
+                    if (existingCards.TryGetValue(calculatedID, out targetCard))
                     {
-                        existingCards.Remove(id); // 処理済みリストから除外
+                        existingCards.Remove(calculatedID);
                     }
                     else
                     {
                         targetCard = ScriptableObject.CreateInstance<CardEntity>();
                         isNew = true;
+                        targetCard.ID = calculatedID;
                     }
 
                     // データをセット

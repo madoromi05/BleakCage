@@ -6,7 +6,6 @@ public class CardModelFactory
 {
     private static Dictionary<int, CardEntity> cardCache;
 
-    // š‚±‚±‚æ‚è‰º‚ÌƒtƒHƒ‹ƒ_‚ğ‚·‚×‚Ä©“®‚Å’T‚µ‚Ü‚·
     private const string BaseLoadPath = "EntityDataList/CardEntityList";
 
     public CardModelFactory()
