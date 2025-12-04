@@ -1,3 +1,4 @@
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 /// <summary>
@@ -5,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public enum StatusEffectType
 {
+    None,           // y‚È‚µz: Œø‰Ê‚È‚µ
     DefenceUp,      // y–hŒä—ÍUPz: ƒ_ƒ[ƒWƒJƒbƒg
     AttackUp,       // yUŒ‚—ÍUPz: UŒ‚—ÍUP
     Fracture,       // y”jÓz: –hŒäŠÑ’ÊUP
@@ -16,7 +18,7 @@ public enum StatusEffectType
 
 public class StatusEffect
 {
-    int MAX_STACK = 5;               // Å‘å’~Ï”
+    public const int MAX_STACK = 5;               // Å‘å’~Ï”
     public StatusEffectType Type { get; private set; }
     public float Value { get; private set; }        // Œø‰Ê’l
     public int DurationTurns { get; set; }          // c‚è‘±ƒ^[ƒ“
@@ -26,7 +28,7 @@ public class StatusEffect
         Type = type;
         Value = value;
         DurationTurns = duration;
-        StackCount = Mathf.Clamp(StackCount, 0, MAX_STACK);
+        StackCount = Mathf.Clamp(inflictsStack, 0, MAX_STACK);
     }
 
     /// <summary>

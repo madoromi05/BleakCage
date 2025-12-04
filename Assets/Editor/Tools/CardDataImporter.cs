@@ -167,6 +167,13 @@ public class CardDataImporter : AssetPostprocessor
     // --- CSVの値をCardEntityに流し込む ---
     private static void PopulateCardEntity(CardEntity card, string[] values)
     {
+        // 列が足りない場合は異常状態なしとして処理
+        if (values.Length < 17)
+        {
+            Debug.LogWarning($"[CardImporter] 列数が足りません。デフォルト値を設定します。 ID:{card.ID}");
+            card.StatusEffect = new StatusEffectData { Type = StatusEffectType.None };
+        }
+
         int categoryId = int.Parse(values[0]); // 1=キャラ, 2=武器
         int ownerId    = int.Parse(values[1]);
         int exclusiveId  = int.Parse(values[2]);
@@ -188,9 +195,30 @@ public class CardDataImporter : AssetPostprocessor
         card.DefensePenetration = float.Parse(values[11]);
         card.IsMelee = bool.Parse(values[12]);
 
+        // 異常状態データの読み込み
+        if (values.Length >= 17)
+        {
+            StatusEffectData statusData = new StatusEffectData();
+
+            if (System.Enum.TryParse(values[13], out StatusEffectType statType))
+            {
+                statusData.Type = statType;
+            }
+            else
+            {
+                statusData.Type = StatusEffectType.None;
+            }
+
+            statusData.Value = float.Parse(values[14]);         // 効果値
+            statusData.Duration = int.Parse(values[15]);        // 持続ターン
+            statusData.InflictStacks = int.Parse(values[16]);   // 付与スタック
+
+            card.StatusEffect = statusData;
+        }
         // アセット名の更新
         card.name = $"Card_{card.ID}";
     }
+
     // --- 保存先のパス生成 ---
     private static string GetReadableSavePath(CardEntity card)
     {
