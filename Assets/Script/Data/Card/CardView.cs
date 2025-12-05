@@ -131,7 +131,7 @@ public class CardView : MonoBehaviour
             string statusName = GetStatusEffectName(model.StatusEffect.Type);
             int stack = model.StatusEffect.InflictStacks;
             int turn = model.StatusEffect.Duration;
-            descriptionBuilder.AppendLine($"Åy{statusName}Åz{stack} ïtó^ ({turn}É^Å[Éì)");
+            descriptionBuilder.AppendLine($"Åy{statusName}Åz{stack} ({turn}É^Å[Éì)");
         }
         return descriptionBuilder.ToString();
     }
