@@ -21,6 +21,7 @@ public class CardModel
     public Sprite CardSprite{ get; private set; }                           // CardのIcon
     public string Description { get; private set; }                         // Cardの説明文
     public AnimationClip AttackAnimation { get; private set; }
+    public StatusEffectData StatusEffect { get; private set; }
     public HandPosition WeaponHand { get; private set; }
     public bool IsMelee { get; private set; }
     /// <summary>
@@ -50,6 +51,7 @@ public class CardModel
         HitRate = entity.HitRate;
         OutputModifier = entity.OutputModifier;
         DefensePenetration = entity.DefensePenetration;
+        StatusEffect = entity.StatusEffect;
         AttackAnimation = entity.AttackAnimation;
         WeaponHand = entity.WeaponHand;
         IsMelee = entity.IsMelee;

@@ -126,7 +126,13 @@ public class CardView : MonoBehaviour
                 }
                 break;
         }
-
+        if (model.StatusEffect.Type != StatusEffectType.None)
+        {
+            string statusName = GetStatusEffectName(model.StatusEffect.Type);
+            int stack = model.StatusEffect.InflictStacks;
+            int turn = model.StatusEffect.Duration;
+            descriptionBuilder.AppendLine($"y{statusName}z{stack} •t—^ ({turn}ƒ^[ƒ“)");
+        }
         return descriptionBuilder.ToString();
     }
     private string ReplacePlaceholders(string input, CardModel model)
@@ -161,6 +167,20 @@ public class CardView : MonoBehaviour
             case AttributeType.Pierce: return "“Ë";
             case AttributeType.Bullet: return "’e";
             default: return "‰‡";
+        }
+    }
+    private string GetStatusEffectName(StatusEffectType type)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Fracture: return "”jÓ";
+            case StatusEffectType.Laceration: return "‘¹";
+            case StatusEffectType.Meltdown: return "—o“S";
+            case StatusEffectType.Cover: return "‰‡Œì";
+            case StatusEffectType.Target: return "–Ú•W";
+            case StatusEffectType.DefenceUp: return "–hŒäUP";
+            case StatusEffectType.AttackUp: return "UŒ‚UP";
+            default: return type.ToString();
         }
     }
 }

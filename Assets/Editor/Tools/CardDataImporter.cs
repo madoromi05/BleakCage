@@ -75,7 +75,7 @@ public class CardDataImporter : AssetPostprocessor
 
                 string[] values = line.Split(',');
 
-                // 列数チェック（現在は13列必要）
+                // 列数チェック（最低限必要な列数）
                 if (values.Length < 13)
                 {
                     Debug.LogWarning($"[CardImporter] Line {i + 1}: 列数が足りないためスキップ (Data: {line})");
@@ -179,7 +179,7 @@ public class CardDataImporter : AssetPostprocessor
         int exclusiveId  = int.Parse(values[2]);
 
         // 計算式: カテゴリ(1桁) + Owner(3桁) + Variant(2桁)
-        card.ID = (categoryId * 100000) + (ownerId * 100) + exclusiveId; ;
+        card.ID = (categoryId * 100) + (ownerId * 10) + exclusiveId;
 
         // 分割したIDも便利なのでセットしておく
         card.OwnerID = ownerId;
