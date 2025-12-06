@@ -25,7 +25,7 @@ public class PlayerActionExecutor
         Dictionary<int, List<EnemyModel>> playerTargetSelections,
         List<EnemyStatusUIController> enemyStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
-        IAttackStrategy damageStrategy,
+        DamageCalculator damageCalculator,
         System.Action onExecutionComplete)
     {
         Debug.Log("実行するカード: " + string.Join(",", selectedCards.Select(c => c.ID)));
@@ -33,10 +33,10 @@ public class PlayerActionExecutor
 
         foreach (var selectedCardRuntime in selectedCards)
         {
-            // 1. このカードがアタッチされている特定の武器を取得する
+            // このカードがアタッチされている特定の武器を取得する
             WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
 
-            // 2. その武器を所持しているプレイヤーを取得する
+            // その武器を所持しているプレイヤーを取得する
             PlayerRuntime player = weaponRuntime.ParentPlayer;
             if (player == null || weaponRuntime == null)
             {
@@ -45,7 +45,7 @@ public class PlayerActionExecutor
                 continue;
             }
 
-            // 3. カードの属性に応じて処理を振り分け
+            // カードの属性に応じて処理を振り分け
             AttributeType attribute = selectedCardRuntime.attribute;
 
             if (IsAttackAttribute(attribute))
@@ -53,7 +53,7 @@ public class PlayerActionExecutor
                 // 攻撃属性の場合
                 if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
                 {
-                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageStrategy);
+                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageCalculator);
                 }
             }
             else
@@ -102,7 +102,8 @@ public class PlayerActionExecutor
         List<EnemyModel> targets,
         List<EnemyStatusUIController> enemyStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
-        IAttackStrategy damageStrategy)
+        DamageCalculator damageCalculator
+    )
     {
         EnemyModel finalTarget = null;
         foreach (var potentialTarget in targets)
@@ -120,10 +121,15 @@ public class PlayerActionExecutor
             if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTarget, out EnemyController targetEnemyController))
             {
                 Transform targetTransform = targetEnemyController.transform;
-                commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime, selectedCardRuntime,
-                                                      targetEnemyUI, finalTarget,
-                                                      targetTransform,
-                                                      damageStrategy, cardModelFactory));
+                commandQueue.Enqueue(new AttackCommand(
+                attackPlayer,
+                weaponRuntime,
+                selectedCardRuntime,
+                targetEnemyUI,
+                finalTarget,
+                targetTransform,
+                damageCalculator,
+                cardModelFactory));
             }
             else
             {

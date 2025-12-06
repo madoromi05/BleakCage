@@ -244,8 +244,11 @@ MonoBehaviour:
   playerHandTransform: {fileID: 457889571}
   inputReader: {fileID: 1817250752}
   guardGaugeSystem: {fileID: 147126858}
+  damageCalculator: {fileID: 0}
   cardSelectionYOffset: 30
   isTurnFinished: 0
+  disposecard: {fileID: 0}
+  check: {fileID: 0}
 --- !u!114 &120127629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4551,7 +4554,7 @@ Transform:
   m_GameObject: {fileID: 1967921060}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 327.49194, y: 628.20764, z: -101.19806}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

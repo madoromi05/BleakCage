@@ -13,6 +13,7 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private BattleInputReader inputReader;
     [SerializeField] private GuardGaugeSystem guardGaugeSystem;
+    [SerializeField] private DamageCalculator damageCalculator;
     [SerializeField] private float cardSelectionYOffset = 30.0f;
 
     public event System.Action OnTurnFinished;
@@ -45,7 +46,6 @@ public class PlayerTurn : MonoBehaviour
     private bool isTutorialMode = false;
     private float lastInputTime = 0f;
     private float inputCooldown = 0.1f;
-    private IAttackStrategy damageStrategy;
     private PlayerActionExecutor actionExecutor;
     private List<PlayerRuntime> allPlayers;
 
@@ -58,9 +58,7 @@ public class PlayerTurn : MonoBehaviour
         inputReader.CardSelectEvent += OnCardSelect;
         inputReader.DisCardEvent += OnConfirmSelectionAndRedraw;
 
-        damageStrategy = new AttributeWeakness();
         cardModelFactory = new CardModelFactory();
-
         actionExecutor = new PlayerActionExecutor(this);
         audioSource = GetComponent<AudioSource>();
     }
@@ -119,7 +117,7 @@ public class PlayerTurn : MonoBehaviour
            playerTargetSelections,
            enemyStatusUIControllers,
            enemyControllers,
-           damageStrategy,
+           damageCalculator,
            () => OnTurnFinished?.Invoke()
        ));
     }
@@ -340,18 +338,14 @@ public class PlayerTurn : MonoBehaviour
             handCardControllers.Clear();
             handCards.Clear();
 
-            StartCoroutine(actionExecutor.ExecuteActions(
-                cardsToExecute,
-                playerTargetSelections,
-                enemyStatusUIControllers,
-                enemyControllers,
-                damageStrategy,
-                () =>
-                {
-                    onCounterActionFinishedCallback?.Invoke();
-                    onCounterActionFinishedCallback = null;
-                }
-            ));
+           StartCoroutine(actionExecutor.ExecuteActions(
+           selectedCardsThisTurn,
+           playerTargetSelections,
+           enemyStatusUIControllers,
+           enemyControllers,
+           damageCalculator,
+           () => OnTurnFinished?.Invoke()
+       ));
         }
         else
         {

@@ -55,7 +55,6 @@ public class PlayerDataLoader
         }
 
         List<PlayerRuntime> party = new List<PlayerRuntime>();
-        IAttackStrategy defaultStrategy = new AttributeWeakness();
 
         foreach (var charData in playerProfile.BattleCharacters)
         {
@@ -67,7 +66,7 @@ public class PlayerDataLoader
                 continue;
             }
 
-            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, defaultStrategy, charData.InstanceId, level);
+            PlayerRuntime playerRuntime = new PlayerRuntime(playerModel, charData.InstanceId, level);
             party.Add(playerRuntime);
 
             // プレイヤー直持ちカード
@@ -76,7 +75,7 @@ public class PlayerDataLoader
                 foreach (var cardData in charData.EquippedCards)
                 {
                     CardModel cardModel = cardFactory.CreateFromID(cardData.CardId);
-                    if (cardModel != null) // nullチェック追加
+                    if (cardModel != null)
                     {
                         CardRuntime cardRuntime = new CardRuntime(cardModel, cardData.InstanceId);
                         playerRuntime.CaracterCardWeapon.AddCard(cardRuntime);

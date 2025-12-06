@@ -1,16 +1,12 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 弱点属性によるダメージ計算システム (新計算式)
-/// 攻撃する側 -> Attacker
-/// 攻撃を受ける側 -> Defender
+/// 弱点属性によるダメージ計算システム
 /// </summary>
-public class AttributeWeakness : IAttackStrategy
+public class DamageCalculator : MonoBehaviour
 {
     [Header("属性相性")]
-    [SerializeField] private float attributeMultiplier = 1.5f;      // 属性倍率 (デフォルト値)
-
-    [Header("新ダメージ計算式用パラメータ")]
+    [SerializeField] private float attributeMultiplier = 1.5f;      // 属性倍率
     [Tooltip("減衰率のスケーリング係数 (k)")]
     [SerializeField] private float k = 1.0f;
     [Tooltip("減衰定数 (Ca)。この値が実質的防御力と等しい時、減衰率が50%になる")]

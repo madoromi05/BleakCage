@@ -21,19 +21,17 @@ public class PlayerRuntime : IAttackComponent
     public PlayerHPHandler HPHandler { get; private set; }
     public IReadOnlyList<WeaponRuntime> EquippedWeapons => equippedWeapons;
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
-    private readonly IAttackStrategy attackStrategy;
     private const float PlayerAttackPower = 10f;
 
     /// <summary>
     /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
     /// </summary>
-    public PlayerRuntime(PlayerModel model, IAttackStrategy strategy, string instanceID, int level)
+    public PlayerRuntime(PlayerModel model,string instanceID, int level)
     {
         ID = model.PlayerID;
         InstanceID = Guid.Parse(instanceID);
         CurrentHP = model.PlayerHP;
         this.CurrentHP = model.MaxHP;
-        attackStrategy = strategy;
         this.PlayerModel = model;
         this.Level = model.PlayerLevel;
         this.StatusHandler = new StatusEffectHandler(model.PlayerName);

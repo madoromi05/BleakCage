@@ -44,6 +44,8 @@ public class EnemyTurn : MonoBehaviour
         this.playerControllers = playerControllers;
         this.playerStatusUIControllers = playerStatusUIControllers;
 
+        defenseHandler.Init(players, playerControllers);
+
         foreach (var enemyController in this.enemyControllers.Values)
         {
             if (enemyController != null)
