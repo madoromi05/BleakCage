@@ -64,35 +64,48 @@ public class DeckEditManager : MonoBehaviour
     private void BuildLayout()
     {
         if (selectedCharacter == null) return;
-
-        // 1. エリアをクリア（キャラ名テキスト以外）
         ClearUI(leftSidePanelRoot, characterNameText.gameObject);
         ClearUI(rightSidePanelRoot);
 
-        // 2. 左側：キャラ名の表示
+        //  左側：キャラ名の表示
         PlayerModel charModel = playerFactory.CreateFromId(selectedCharacter.CharacterId);
         if (charModel != null && characterNameText != null)
         {
             characterNameText.text = charModel.PlayerName;
         }
 
-        // 3. 右側：1行目（キャラカード）の作成
+        // 右側：1行目（キャラカード）の作成
         CreateCardRow(selectedCharacter.EquippedCards);
 
-        // 4. 武器ごとの処理（左側に名前、右側にカード行）
+        // 武器ごとの処理（左側に名前、右側にカード行）
         if (selectedCharacter.EquippedWeapons != null)
         {
             foreach (var weaponData in selectedCharacter.EquippedWeapons)
             {
                 // 左側：武器名の追加
                 WeaponModel weaponModel = weaponFactory.CreateFromId(weaponData.WeaponId);
+
                 if (weaponModel != null)
                 {
                     GameObject nameObj = Instantiate(weaponNameTextPrefab, leftSidePanelRoot);
-                    Text nameText = nameObj.GetComponent<Text>();
+                    Text nameText = nameObj.GetComponentInChildren<Text>();
                     if (nameText != null)
                     {
                         nameText.text = weaponModel.Name;
+                    }
+                    Image iconImage = nameObj.GetComponentInChildren<Image>();
+
+                    if (iconImage != null)
+                    {
+                        if (weaponModel.Icon != null)
+                        {
+                            iconImage.sprite = weaponModel.Icon;
+                            iconImage.enabled = true; // 画像を表示
+                        }
+                        else
+                        {
+                            iconImage.enabled = false;
+                        }
                     }
                 }
 

@@ -2,70 +2,35 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 初期デッキ（モックのプレイヤープロファイル）を作成するためのクラス
+/// チュートリアル用のデッキ（1キャラのみ）を作成して返すクラス
 /// </summary>
 public static class TutorialDeckCreate
 {
     /// <summary>
-    /// データが存在しない場合にモックデータを作成し、保存する。
-    /// これが初期デッキ（キャラクター、武器、カードの構成）になる。
+    /// PlayerDataLoaderを使って正規のデータをロードし、
+    /// パーティーの1体目（と、その装備カード）だけを抽出して返す
     /// </summary>
-    public static PlayerProfile CreateAndSaveMockProfile()
+    public static DeckSetupRepository LoadTutorialDeck()
     {
-        PlayerProfile profile = new PlayerProfile
-        {
-            PlayerName = "FarstPlayer",
-            BattleCharacters = new List<CharacterData>()
-        };
+        // 既存のローダーを使って、正しいIDで構成されたフルデータを読み込む
+        PlayerDataLoader loader = new PlayerDataLoader();
+        DeckSetupRepository fullData = loader.LoadPlayerPartyAndCards();
 
-        int cardIdCounter = 1;      // カードIDを1から順に割り振る
-
-        // 1体のプレイヤーキャラクターを作成
-        var character = new CharacterData
+        // データが空ならそのまま返す（エラー回避）
+        if (fullData == null || fullData.Party == null || fullData.Party.Count == 0)
         {
-            InstanceId = System.Guid.NewGuid().ToString(),
-            CharacterId = 1, // キャラクターIDを 1 に固定
-            EquippedCards = new List<CardData>(),
-            EquippedWeapons = new List<WeaponData>()
-        };
-
-        // キャラクターに直接3枚のカードを持たせる
-        for (int c = 0; c < 3; c++)
-        {
-            character.EquippedCards.Add(new CardData { InstanceId = System.Guid.NewGuid().ToString(), CardId = cardIdCounter });
-            cardIdCounter++;
+            Debug.LogError("チュートリアルデッキ生成エラー: 元データが空です。");
+            return fullData;
         }
 
-        // キャラクターに3つの武器を装備させる
-        for (int j = 1; j <= 3; j++)
-        {
-            var weapon = new WeaponData
-            {
-                InstanceId = System.Guid.NewGuid().ToString(),
-                WeaponId = j,
-                SlottedCards = new List<CardData>()
-            };
+        // パーティーの「1体目」だけを取り出す
+        PlayerRuntime firstCharacter = fullData.Party[0];
 
-            // 各武器に3枚のカードをセット
-            int numCardsToSlot = 3;
+        Debug.Log($"チュートリアル用デッキ: {firstCharacter.PlayerModel.PlayerName} (ID: {firstCharacter.ID}) のみを抽出しました。");
 
-            for (int k = 0; k < numCardsToSlot; k++)
-            {
-                weapon.SlottedCards.Add(new CardData
-                {
-                    InstanceId = System.Guid.NewGuid().ToString(),
-                    CardId = cardIdCounter
-                });
-                cardIdCounter++;
-            }
+        // 1体だけのリストを作成して、新しいリポジトリとして返す
+        List<PlayerRuntime> tutorialParty = new List<PlayerRuntime> { firstCharacter };
 
-            character.EquippedWeapons.Add(weapon);
-        }
-
-        // 作成したキャラクターをプロファイルに追加
-        profile.BattleCharacters.Add(character);
-
-        DataManager.SaveData(profile, "player_profile.json");
-        return profile;
+        return new DeckSetupRepository(tutorialParty);
     }
 }
