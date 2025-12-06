@@ -49,9 +49,9 @@ public class PlayerTurn : MonoBehaviour
     private PlayerActionExecutor actionExecutor;
     private List<PlayerRuntime> allPlayers;
 
-    // private AudioSource audioSource;
-    // public AudioClip disposecard;
-    // public AudioClip check;
+    private AudioSource audioSource;
+    public AudioClip disposecard;
+    public AudioClip check;
 
     private void Awake()
     {
@@ -62,7 +62,7 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
 
         actionExecutor = new PlayerActionExecutor(this);
-        // audioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void Setup(Dictionary<int, List<EnemyModel>> playerSelections,

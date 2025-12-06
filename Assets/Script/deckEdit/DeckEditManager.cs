@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,101 +7,139 @@ public class DeckEditManager : MonoBehaviour
 {
     public static DeckEditManager Instance { get; private set; }
 
-    [Header("UI References")]
-    [SerializeField] private GameObject deckEditPanel; // パネル全体
-    [SerializeField] private Transform characterListContent; // キャラクターを表示するエリア
-    [SerializeField] private Transform cardInventoryContent;
+    [Header("UI Areas")]
+    [SerializeField] private GameObject deckEditPanel;
+    [SerializeField] private Transform leftSidePanelRoot;  // 左側パネルの親
+    [SerializeField] private Text characterNameText;       // 左側一番上のキャラ名表示用テキスト
+    [SerializeField] private Transform rightSidePanelRoot; // 右側パネルの親
 
     [Header("Prefabs")]
-    [SerializeField] private GameObject cardRowPrefab; // カードUIプレハブ
-    [SerializeField] private GameObject characterSlotPrefab; // キャラクター表示用UI
+    [SerializeField] private GameObject weaponNameTextPrefab; // 新規: 左側の武器名表示用
+    [SerializeField] private GameObject cardRowPanelPrefab;   // 新規: 右側のカード1行分の枠
+    [SerializeField] private GameObject cardPrefab;           // カード単体
 
     private PlayerProfile currentProfile;
     private const string ProfileFileName = "player_profile.json";
     private CardModelFactory cardFactory;
-
+    private WeaponModelFactory weaponFactory;
+    private PlayerModelFactory playerFactory;
+    private CharacterData selectedCharacter;
+    private PlayerDataLoader dataLoader;
     private void Awake()
     {
         Instance = this;
         cardFactory = new CardModelFactory();
+        weaponFactory = new WeaponModelFactory();
+        playerFactory = new PlayerModelFactory();
+        dataLoader = new PlayerDataLoader();
     }
 
     private void Start()
     {
-        // 起動時にデータを読み込んで表示
-        OpenDeckView();
-    }
-
-    public void OpenDeckView()
-    {
-        deckEditPanel.SetActive(true);
-        LoadDataAndBuildUI();
-    }
-
-    public void ClosePanel()
-    {
-        deckEditPanel.SetActive(false);
-    }
-
-    private void LoadDataAndBuildUI()
-    {
+        // 1. まずデータをロードしてみる
         currentProfile = DataManager.LoadData<PlayerProfile>(ProfileFileName);
 
-        // 表示エリアをクリア
-        ClearUI(characterListContent);
-        if (cardInventoryContent != null) ClearUI(cardInventoryContent);
-
-        // キャラクターごとに装備カードを表示
-        foreach (var charData in currentProfile.BattleCharacters)
+        // 2. データがなければ、PlayerDataLoaderを使って生成・保存・再ロードする
+        if (currentProfile == null || currentProfile.BattleCharacters == null || currentProfile.BattleCharacters.Count == 0)
         {
-            // 1. キャラクター枠を生成
-            GameObject charObj = Instantiate(characterSlotPrefab, characterListContent);
+            Debug.Log("セーブデータが見つからないため、PlayerDataLoaderを使って新規作成します。");
+            dataLoader.LoadPlayerPartyAndCards();
 
-            // 2. 直差しカードの表示エリアを探す
-            // (プレハブ内で "CardListRoot" という名前のオブジェクトを作っておいてください)
-            Transform cardRoot = FindChildRecursive(charObj.transform, "CardListRoot");
+            // 保存されたファイルを読み直す
+            currentProfile = DataManager.LoadData<PlayerProfile>(ProfileFileName);
+        }
 
-            if (cardRoot != null)
+        if (currentProfile != null && currentProfile.BattleCharacters.Count > 0)
+        {
+            OpenDeckView(currentProfile.BattleCharacters[0]);
+        }
+    }
+
+    public void OpenDeckView(CharacterData charData)
+    {
+        selectedCharacter = charData;
+        deckEditPanel.SetActive(true);
+        BuildLayout();
+    }
+    private void BuildLayout()
+    {
+        if (selectedCharacter == null) return;
+
+        // 1. エリアをクリア（キャラ名テキスト以外）
+        ClearUI(leftSidePanelRoot, characterNameText.gameObject);
+        ClearUI(rightSidePanelRoot);
+
+        // 2. 左側：キャラ名の表示
+        PlayerModel charModel = playerFactory.CreateFromId(selectedCharacter.CharacterId);
+        if (charModel != null && characterNameText != null)
+        {
+            characterNameText.text = charModel.PlayerName;
+        }
+
+        // 3. 右側：1行目（キャラカード）の作成
+        CreateCardRow(selectedCharacter.EquippedCards);
+
+        // 4. 武器ごとの処理（左側に名前、右側にカード行）
+        if (selectedCharacter.EquippedWeapons != null)
+        {
+            foreach (var weaponData in selectedCharacter.EquippedWeapons)
             {
-                // 装備しているカードを生成して並べる
-                foreach (var cardData in charData.EquippedCards)
+                // 左側：武器名の追加
+                WeaponModel weaponModel = weaponFactory.CreateFromId(weaponData.WeaponId);
+                if (weaponModel != null)
                 {
-                    CreateCardUI(cardRoot, cardData);
+                    GameObject nameObj = Instantiate(weaponNameTextPrefab, leftSidePanelRoot);
+                    Text nameText = nameObj.GetComponent<Text>();
+                    if (nameText != null)
+                    {
+                        nameText.text = weaponModel.Name;
+                    }
                 }
+
+                // 右側：この武器のカード行を作成
+                CreateCardRow(weaponData.SlottedCards);
             }
         }
     }
 
-    private void CreateCardUI(Transform parent, CardData data)
+    // 右側にカード1行分を作成するヘルパーメソッド
+    private void CreateCardRow(List<CardData> cardList)
     {
-        // プレハブ生成
-        GameObject uiObj = Instantiate(cardRowPrefab, parent);
+        // 行の枠（Horizontal Layout Group付き）を生成
+        GameObject rowObj = Instantiate(cardRowPanelPrefab, rightSidePanelRoot);
 
-        // 表示内容の更新 (CardControllerを使用)
-        CardController controller = uiObj.GetComponent<CardController>();
-        if (controller != null)
+        // その中にカードを生成して並べる
+        if (cardList != null)
         {
-            CardModel model = cardFactory.CreateFromID(data.CardId);
-            if (model != null)
+            foreach (var cardData in cardList)
             {
-                controller.Init(model);
+                CreateCardUI(rowObj.transform, cardData.CardId);
             }
         }
     }
 
-    private void ClearUI(Transform root)
+    // カード単体を生成する共通メソッド（変更なし）
+    private void CreateCardUI(Transform parent, int cardId)
     {
-        foreach (Transform child in root) Destroy(child.gameObject);
+        CardModel model = cardFactory.CreateFromID(cardId);
+        if (model == null) return;
+
+        GameObject uiObj = Instantiate(cardPrefab, parent);
+
+        CardController controller = uiObj.GetComponent<CardController>();
+        if (controller != null) controller.Init(model);
+
+        CardView view = uiObj.GetComponent<CardView>();
+        if (view != null) view.Show(model);
     }
 
-    private Transform FindChildRecursive(Transform parent, string name)
+    // 指定したルート以下の子要素を削除する（例外指定付き）
+    private void ClearUI(Transform root, GameObject exclude = null)
     {
-        foreach (Transform child in parent)
+        foreach (Transform child in root)
         {
-            if (child.name == name) return child;
-            Transform result = FindChildRecursive(child, name);
-            if (result != null) return result;
+            if (exclude != null && child.gameObject == exclude) continue;
+            Destroy(child.gameObject);
         }
-        return null;
     }
 }

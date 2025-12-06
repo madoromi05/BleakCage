@@ -25,14 +25,14 @@ public class CardEntity : ScriptableObject
     [Header("ID情報")]
     public int ID;                          // カード固有ID
     public int OwnerID;                     // どの武器、キャラの専用カードなのか識別するID
-    public int ExclusiveID;                   // OwnerID内での識別ID
+    public int ExclusiveID;                 // OwnerID内での識別ID
 
     [Header("基本情報")]
     public string Name;                     // カード名
     public int CharacterID;                 // このカードを装備するキャラID
     public int EquipableWeaponID;           // このカードを装備する武器ID
     public Sprite Icon;                     // アイコン画像
-    [Multiline]public string Description;              // 説明文
+    [Multiline]public string Description;   // 説明文
 
     public CardTypeData Type;               // カードタイプ
     public AttributeType Attribute;         // 属性
