@@ -12,6 +12,12 @@ public class EnemyStatusUIController : MonoBehaviour
     [SerializeField] private Slider hpSlider;
     [SerializeField] private float hpAnimationDuration = 0.5f;
     [SerializeField] private Image background;
+
+    [Header("バフとデバフ用")]
+    [SerializeField] private Transform statusIconRowContainer;  // アイコンを並べる親オブジェクト
+    [SerializeField] private StatusIconUI statusIconPrefab;     // 作成したプレハブ
+    [SerializeField] private StatusIconDatabase iconDatabase;   // 作成したデータベース
+
     private Color originalBackgroundColor;
     private Coroutine hpAnimationCoroutine;
     private EnemyModel enemyModel;
@@ -50,6 +56,30 @@ public class EnemyStatusUIController : MonoBehaviour
         this.maxHP = enemy.EnemyHP;
         hpSlider.maxValue = enemy.EnemyHP;
         hpSlider.value = enemy.EnemyHP;
+    }
+
+    public void UpdateStatusIcons(StatusEffectHandler statusHandler)
+    {
+        // 既存のアイコンをすべて削除
+        foreach (Transform child in statusIconRowContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (statusHandler == null) return;
+
+        // 現在有効なステータス効果のリストを取得してループ
+        foreach (var effect in statusHandler.ActiveStatusEffects)
+        {
+            Sprite iconSprite = iconDatabase.GetIcon(effect.Type);
+
+            if (iconSprite != null)
+            {
+                // プレハブを生成
+                StatusIconUI newIcon = Instantiate(statusIconPrefab, statusIconRowContainer);
+                newIcon.Setup(iconSprite, effect.StackCount);
+            }
+        }
     }
 
     /// <summary>

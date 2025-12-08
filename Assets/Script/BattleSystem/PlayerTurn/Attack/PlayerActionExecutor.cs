@@ -24,7 +24,9 @@ public class PlayerActionExecutor
         List<CardRuntime> selectedCards,
         Dictionary<int, List<EnemyModel>> playerTargetSelections,
         List<EnemyStatusUIController> enemyStatusUIControllers,
+        List<PlayerStatusUIController> playerStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
+        List<EnemyRuntime> allEnemyRuntimes,
         DamageCalculator damageCalculator,
         System.Action onExecutionComplete)
     {
@@ -53,7 +55,9 @@ public class PlayerActionExecutor
                 // çUåÇëÆê´ÇÃèÍçá
                 if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
                 {
-                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageCalculator);
+                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets,
+                         enemyStatusUIControllers, playerStatusUIControllers,
+                         enemyControllers, allEnemyRuntimes, damageCalculator);
                 }
             }
             else
@@ -101,24 +105,35 @@ public class PlayerActionExecutor
         CardRuntime selectedCardRuntime,
         List<EnemyModel> targets,
         List<EnemyStatusUIController> enemyStatusUIControllers,
+        List<PlayerStatusUIController> playerStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
+        List<EnemyRuntime> allEnemyRuntimes,
         DamageCalculator damageCalculator
     )
     {
-        EnemyModel finalTarget = null;
-        foreach (var potentialTarget in targets)
+        PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == attackPlayer);
+
+        // óDêÊèáà ÉäÉXÉgÇ…äÓÇ√Ç¢ÇƒçUåÇëŒè€ÇåàíË
+        EnemyRuntime finalTargetRuntime = null;
+        EnemyModel finalTargetModel = null;
+
+        foreach (var potentialTargetModel in targets)
         {
-            if (potentialTarget.EnemyHP > 0)
+            // ModelÇ…ëŒâûÇ∑ÇÈRuntimeÇåüçıÇ∑ÇÈ
+            var runtime = allEnemyRuntimes.FirstOrDefault(r => r.EnemyModel == potentialTargetModel);
+
+            if (runtime != null && runtime.CurrentHP > 0)
             {
-                finalTarget = potentialTarget;
-                break;
+                finalTargetRuntime = runtime;
+                finalTargetModel = potentialTargetModel;
+                break; // ê∂Ç´ÇƒÇ¢ÇÈìGÇ™å©Ç¬Ç©Ç¡ÇΩÇÃÇ≈ämíË
             }
         }
 
-        if (finalTarget != null)
+        if (finalTargetRuntime != null)
         {
-            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == finalTarget);
-            if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTarget, out EnemyController targetEnemyController))
+            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == finalTargetModel);
+            if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTargetModel, out EnemyController targetEnemyController))
             {
                 Transform targetTransform = targetEnemyController.transform;
                 commandQueue.Enqueue(new AttackCommand(
@@ -126,14 +141,15 @@ public class PlayerActionExecutor
                 weaponRuntime,
                 selectedCardRuntime,
                 targetEnemyUI,
-                finalTarget,
+                attackerUI,
+                finalTargetRuntime,
                 targetTransform,
                 damageCalculator,
                 cardModelFactory));
             }
             else
             {
-                Debug.LogError($"çUåÇëŒè€ (ID: {finalTarget.EnemyID}) ÇÃ EnemyController Ç‹ÇΩÇÕ UI Ç™å©Ç¬Ç©ÇËÇ‹ÇπÇÒÅB");
+                Debug.LogError($"çUåÇëŒè€ (ID: {finalTargetRuntime.ID}) ÇÃ EnemyController Ç‹ÇΩÇÕ UI Ç™å©Ç¬Ç©ÇËÇ‹ÇπÇÒÅB");
             }
         }
         else

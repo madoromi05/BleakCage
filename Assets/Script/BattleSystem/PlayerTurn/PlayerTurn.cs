@@ -28,6 +28,7 @@ public class PlayerTurn : MonoBehaviour
     private CardModelFactory cardModelFactory;
     private CardRuntime cardRuntime;
     private EnemyStatusUIController enemyStatusUIController;
+    private List<PlayerStatusUIController> playerStatusUIControllers;
 
     private List<CardController> handCardControllers = new();                       // 手札のカード表示
     private List<CardRuntime> handCards = new();                                    // 手札のカードdata
@@ -36,6 +37,7 @@ public class PlayerTurn : MonoBehaviour
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>(); // 破棄されたカードのIDを保持
     private List<EnemyStatusUIController> enemyStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
+    private List<EnemyRuntime> allEnemyRuntimes;
     private List<Vector3> cardInitialPositions = new List<Vector3>();
 
     private bool isCounterTurn = false;
@@ -67,13 +69,17 @@ public class PlayerTurn : MonoBehaviour
                       List<PlayerRuntime> allPlayers,
                       BattleCardDeck battleDeck,
                       List<EnemyStatusUIController> enemyUIControllers,
-                      Dictionary<EnemyModel, EnemyController> enemyControllers)
+                      List<PlayerStatusUIController> playerUIControllers,
+                      Dictionary<EnemyModel, EnemyController> enemyControllers,
+                      List<EnemyRuntime> enemyRuntimes)
     {
         this.playerTargetSelections = playerSelections;
         this.allPlayers = allPlayers;
         this.battleDeck = battleDeck;
         this.enemyStatusUIControllers = enemyUIControllers;
+        this.playerStatusUIControllers = playerUIControllers;
         this.enemyControllers = enemyControllers;
+        this.allEnemyRuntimes = enemyRuntimes;
     }
 
     public void SetTutorialMode(bool mode)
@@ -116,7 +122,9 @@ public class PlayerTurn : MonoBehaviour
            selectedCardsThisTurn,
            playerTargetSelections,
            enemyStatusUIControllers,
+           playerStatusUIControllers,
            enemyControllers,
+           allEnemyRuntimes,
            damageCalculator,
            () => OnTurnFinished?.Invoke()
        ));
@@ -342,7 +350,9 @@ public class PlayerTurn : MonoBehaviour
            selectedCardsThisTurn,
            playerTargetSelections,
            enemyStatusUIControllers,
+           playerStatusUIControllers,
            enemyControllers,
+           allEnemyRuntimes,
            damageCalculator,
            () => OnTurnFinished?.Invoke()
        ));

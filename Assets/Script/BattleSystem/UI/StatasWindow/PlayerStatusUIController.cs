@@ -16,6 +16,12 @@ public class PlayerStatusUIController : MonoBehaviour
     [SerializeField] private Slider hpSlider;
     [SerializeField] private float hpAnimationDuration = 0.5f;
     [SerializeField] private Image background;
+
+    [Header("バフとデバフ用")]
+    [SerializeField] private Transform statusIconRowContainer;  // アイコンを並べる親
+    [SerializeField] private StatusIconUI statusIconPrefab;     // プレハブ
+    [SerializeField] private StatusIconDatabase iconDatabase;   // データベース
+
     private Color originalBackgroundColor;
     private Coroutine hpAnimationCoroutine;
     private PlayerRuntime playerRuntime;
@@ -58,6 +64,29 @@ public class PlayerStatusUIController : MonoBehaviour
         this.maxHP = model.PlayerHP;
         hpSlider.maxValue = model.PlayerHP;
         hpSlider.value = playerRuntime.CurrentHP;
+    }
+
+    public void UpdateStatusIcons(StatusEffectHandler statusHandler)
+    {
+        // 既存のアイコンをすべて削除
+        foreach (Transform child in statusIconRowContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (statusHandler == null) return;
+
+        // 有効なものを生成
+        foreach (var effect in statusHandler.ActiveStatusEffects)
+        {
+            Sprite iconSprite = iconDatabase.GetIcon(effect.Type);
+
+            if (iconSprite != null)
+            {
+                StatusIconUI newIcon = Instantiate(statusIconPrefab, statusIconRowContainer);
+                newIcon.Setup(iconSprite, effect.StackCount);
+            }
+        }
     }
 
     /// <summary>

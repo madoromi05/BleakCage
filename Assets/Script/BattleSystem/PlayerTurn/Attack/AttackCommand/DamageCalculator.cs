@@ -19,14 +19,14 @@ public class DamageCalculator : MonoBehaviour
     /// - 減衰率 = (k * Ca) / (k * Ca + (D / Cp))
     /// - 相性倍率 = R^P
     /// </summary>
-    public float CalculateFinalDamage(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyModel enemy)
+    public float CalculateFinalDamage(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyRuntime enemy)
     {
         float A = player.Level;
         float O = weapon.attackPower;
         float Co = card.GetOutput();
-        float D = enemy.EnemyDefensePower;
+        float D = enemy.EnemyModel.EnemyDefensePower;
         float Cp = card.DefensePenetration;
-        float R = GetRelationCoefficient(weapon.Attribute, enemy.EnemyDefensAttribute);
+        float R = GetRelationCoefficient(weapon.Attribute, enemy.EnemyModel.EnemyDefensAttribute);
         float P = weapon.PeakyCoefficient;
         float baseAttack = (A + O) * Co;
 

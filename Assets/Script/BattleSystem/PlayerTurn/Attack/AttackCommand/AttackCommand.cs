@@ -7,18 +7,21 @@ using System.Collections;
 public class AttackCommand : ICommand
 {
     private PlayerRuntime player;
-    private EnemyModel targetEnemy;
+    private EnemyRuntime targetEnemy;
     private CardRuntime card;
     private WeaponRuntime weapon;
     private EnemyStatusUIController enemyStatusUIController;
+    private PlayerStatusUIController playerStatusUIController;
     private CardModelFactory cardModelFactory;
     private Transform targetTransform;
     private DamageCalculator damageCalculator;
 
-    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyStatusUIController enemyStatusUIController,
-                            EnemyModel enemy, Transform targetTransform, DamageCalculator damageCalculator, CardModelFactory cardModelFactory)
+    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, 
+                            EnemyStatusUIController enemyStatusUIController, PlayerStatusUIController playerStatusUIController,
+                            EnemyRuntime enemy, Transform targetTransform, DamageCalculator damageCalculator, CardModelFactory cardModelFactory)
     {
         this.targetEnemy = enemy;
+        this.playerStatusUIController = playerStatusUIController;
         this.player = player;
         this.card = card;
         this.weapon = weapon;
@@ -30,7 +33,7 @@ public class AttackCommand : ICommand
 
     public IEnumerator Do()
     {
-        Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.EnemyID}");
+        Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.ID}");
 
         PlayerController controller = player.PlayerController;
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
@@ -43,10 +46,10 @@ public class AttackCommand : ICommand
         attackedSoundEffect(card.attribute);
         // ターゲットのHPを減算
         targetEnemy.HPHandler.TakeDamage(damage);
-        enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
+        enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
         // ターゲットに状態異常を付与
         ApplyStatusEffectToEnemy(cardModel, targetEnemy);
-        Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
+        Debug.Log($" EnemyID： {targetEnemy.ID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.CurrentHP:F2}");
 
         // アニメーション後の硬直時間
         yield return new WaitForSeconds(0.1f);
@@ -68,14 +71,8 @@ public class AttackCommand : ICommand
     /// <summary>
     /// カードに設定されたステータス効果を敵に適用する
     /// </summary>
-    private void ApplyStatusEffectToEnemy(CardModel cardModel, EnemyModel enemy)
+    private void ApplyStatusEffectToEnemy(CardModel cardModel, EnemyRuntime enemy)
     {
-        if (cardModel == null || cardModel.StatusEffect.Type == StatusEffectType.None)
-        {
-            Debug.Log("[AttackCommand]カードに状態異常効果が設定されていないため、適用をスキップ。");
-            return;
-        }
-
         StatusEffect newEffect = new StatusEffect(
             cardModel.StatusEffect.Type,            // 破砕、熔鉄など
             cardModel.StatusEffect.Value,           // 効果値
@@ -83,15 +80,36 @@ public class AttackCommand : ICommand
             cardModel.StatusEffect.InflictStacks    // 付与するスタック数
         );
 
-        // 敵のStatusHandlerに適用（ここでスタックが加算される）
-        if (enemy.StatusHandler != null)
+        switch (newEffect.Type)
         {
-            enemy.StatusHandler.ApplyStatus(newEffect);
+            // --- 敵 (EnemyRuntime) に付与する異常状態 ---
+            case StatusEffectType.Fracture:     // 【破砕】: 防御貫通UP
+            case StatusEffectType.Laceration:   // 【損傷】: ターン終了時ダメージ
+            case StatusEffectType.Meltdown:     // 【熔鉄】: 攻防ダウン
+                if (targetEnemy.StatusHandler != null)
+                {
+                    targetEnemy.StatusHandler.ApplyStatus(newEffect);
+                    enemyStatusUIController.UpdateStatusIcons(targetEnemy.StatusHandler);
+                    Debug.Log($"[Debuff] 敵(ID:{targetEnemy.ID})に {newEffect.Type} を付与");
+                }
+                break;
 
-            // UI更新が必要な場合はここで呼ぶ
-            // enemyStatusUIController.UpdateStatusIcons(enemy.StatusHandler); 
+            // --- 自分 (PlayerRuntime) に付与するバフ/状態 ---
+            case StatusEffectType.Cover:        // 【援護】: ダメージ無効化
+            case StatusEffectType.Target:       // 【目標】: 命中率UP
+            case StatusEffectType.DefenceUp:    // 【防御力UP】
+            case StatusEffectType.AttackUp:     // 【攻撃力UP】       
+                if (player.StatusHandler != null)
+                {
+                    player.StatusHandler.ApplyStatus(newEffect);
+                    playerStatusUIController.UpdateStatusIcons(player.StatusHandler);
+                    Debug.Log($"[Buff] プレイヤー(ID:{player.ID})に {newEffect.Type} を付与");
+                }
+                break;
 
-            Debug.Log($"敵にデバフ付与: {newEffect.Type} を {newEffect.StackCount} スタック");
+            default:
+                Debug.LogWarning($"[AttackCommand] 未対応のステータスタイプです: {newEffect.Type}");
+                break;
         }
     }
 }

@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class EnemyHPHandler
 {
-    private readonly EnemyModel ownerModel;
+    private readonly EnemyRuntime ownerRuntime;
 
-    public EnemyHPHandler(EnemyModel ownerModel)
+    public EnemyHPHandler(EnemyRuntime ownerRuntime)
     {
-        this.ownerModel = ownerModel;
+        this.ownerRuntime = ownerRuntime;
     }
 
     /// <summary>
@@ -14,19 +14,21 @@ public class EnemyHPHandler
     /// </summary>
     public void TakeDamage(float damage)
     {
-        if (ownerModel.EnemyHP <= 0) return;
-
-        // 【援護】チェック
-        // スタックがあれば消費してダメージを0にする
-        if (ownerModel.StatusHandler.GetStackCount(StatusEffectType.Cover) > 0)
+        // 【援護(Cover)】チェック
+        if (ownerRuntime.CurrentHP <= 0) return;
+        if (ownerRuntime.StatusHandler.GetStackCount(StatusEffectType.Cover) > 0)
         {
-            Debug.Log($"[{ownerModel.EnemyName}] 【援護】発動！ダメージ無効化。");
-            ownerModel.StatusHandler.ConsumeStack(StatusEffectType.Cover, 1);
+            Debug.Log($"[{ownerRuntime.EnemyModel.EnemyName}] 【援護】発動！ダメージ無効化。");
+
+            // スタックを消費してダメージを0にする
+            ownerRuntime.StatusHandler.ConsumeStack(StatusEffectType.Cover, 1);
             return;
         }
 
         // 通常ダメージ処理
-        ownerModel.EnemyHP -= damage;
-        if (ownerModel.EnemyHP < 0) ownerModel.EnemyHP = 0;
+        // RuntimeのCurrentHPを減算する
+        ownerRuntime.CurrentHP -= damage;
+
+        if (ownerRuntime.CurrentHP < 0) ownerRuntime.CurrentHP = 0;
     }
 }

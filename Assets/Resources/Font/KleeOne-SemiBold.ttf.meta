@@ -10,7 +10,8 @@ TrueTypeFontImporter:
   includeFontData: 1
   fontNames:
   - Klee One
-  fallbackFontReferences: []
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: de7423f7478051446b0da6978a1ee01c, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1

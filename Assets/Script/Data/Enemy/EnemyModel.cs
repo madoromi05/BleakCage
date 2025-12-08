@@ -18,8 +18,6 @@ public class EnemyModel
     public EnemyAnimatorSet EnemyAnimator { get; private set; }   // アニメーションセット
     public GameObject CharacterPrefab { get; private set; }
     public Vector3 InitialRotation { get; private set; }   // 初期回転
-    public StatusEffectHandler StatusHandler { get; private set; }
-    public EnemyHPHandler HPHandler { get; private set; }
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
@@ -45,42 +43,5 @@ public class EnemyModel
 
         CharacterPrefab = Entity.CharacterPrefab;
         InitialRotation = Entity.InitialRotation;
-        StatusHandler = new StatusEffectHandler(EnemyName);
-        HPHandler = new EnemyHPHandler(this);
-    }
-
-    // <summary>
-    /// 現在の攻撃力を取得（【熔鉄】などの補正込み）
-    /// </summary>
-    public float GetCurrentAttackPower()
-    {
-        float multiplier = 1.0f;
-
-        // 【熔鉄】チェック: 1スタックにつき10%ダウン
-        int meltdown = StatusHandler.GetStackCount(StatusEffectType.Meltdown);
-        if (meltdown > 0)
-        {
-            multiplier -= (0.10f * meltdown);
-        }
-
-        // 0未満にならないようにする
-        return Mathf.Max(0, EnemyAttackPower * multiplier);
-    }
-
-    /// <summary>
-    /// 現在の防御力を取得（【熔鉄】などの補正込み）
-    /// </summary>
-    public float GetCurrentDefensePower()
-    {
-        float multiplier = 1.0f;
-
-        // 【熔鉄】チェック: 1スタックにつき5%ダウン
-        int meltdown = StatusHandler.GetStackCount(StatusEffectType.Meltdown);
-        if (meltdown > 0)
-        {
-            multiplier -= (0.05f * meltdown);
-        }
-
-        return Mathf.Max(0, EnemyDefensePower * multiplier);
     }
 }

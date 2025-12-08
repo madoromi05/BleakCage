@@ -18,17 +18,6 @@ public class EnemyAttackDamage : IEnemyAttackStrategy
         // 2. 状態異常【熔鉄】による攻撃力ダウンの適用
         float currentAttackPower = attacker.EnemyAttackPower;
 
-        if (attacker.StatusHandler != null)
-        {
-            // 1スタックにつき10%攻撃力ダウン
-            int meltdown = attacker.StatusHandler.GetStackCount(StatusEffectType.Meltdown);
-            if (meltdown > 0)
-            {
-                float multiplier = Mathf.Max(0, 1.0f - (0.10f * meltdown));
-                currentAttackPower *= multiplier;
-            }
-        }
-
         // 効率ηを計算
         float efficiency = CalculateEfficiency(
             currentAttackPower,
@@ -37,7 +26,7 @@ public class EnemyAttackDamage : IEnemyAttackStrategy
 
         // 最終ダメージを計算
         float finalDamage = currentAttackPower * efficiency;
-        return finalDamage;
+        return Mathf.Max(1f, finalDamage);
     }
 
     /// <summary>

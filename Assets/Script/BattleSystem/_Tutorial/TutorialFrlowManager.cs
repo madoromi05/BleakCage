@@ -26,6 +26,7 @@ public class TutorialFlowManager : MonoBehaviour
     private List<EnemyModel> _enemies;
     private List<PlayerStatusUIController> _playerStatusUIs;
     private List<EnemyStatusUIController> _enemyStatusUIs;
+    private List<EnemyRuntime> _enemyRuntimes;
 
     private SelectTurn _selectTurn;
     private PlayerTurn _playerTurn;
@@ -39,7 +40,8 @@ public class TutorialFlowManager : MonoBehaviour
         List<PlayerRuntime> players, List<EnemyModel> enemies,
         List<PlayerStatusUIController> playerStatusUIs, List<EnemyStatusUIController> enemyStatusUIs,
         SelectTurn selectTurn, PlayerTurn playerTurn,
-        BattleCardDeck battleCardDeck)
+        BattleCardDeck battleCardDeck,
+        List<EnemyRuntime> enemyRuntimes)
     {
         // --- 参照の保持 ---
         _battleManager = battleManager;
@@ -52,6 +54,7 @@ public class TutorialFlowManager : MonoBehaviour
         _selectTurn = selectTurn;
         _playerTurn = playerTurn;
         _battleCardDeck = battleCardDeck;
+        _enemyRuntimes = enemyRuntimes;
 
         // --- BattlePhaseManager の Init から持ってきたロジック ---
         if (_tutorialObjectsParent != null)
@@ -65,7 +68,15 @@ public class TutorialFlowManager : MonoBehaviour
         _tutorialManager.Initialize(battleManager, _tortrialInputReader, enemyStatusUIs, _entitiesManager.EnemyControllers, selectTurn);
         _enemyTurnTutorialManager.Initialize(_tortrialInputReader);
         playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(selectTurn.PlayerSelections, _players, battleCardDeck, enemyStatusUIs, _entitiesManager.EnemyControllers);
+        playerTurn.Setup(
+            selectTurn.PlayerSelections,
+            entitiesManager.Players,
+            battleCardDeck,
+            entitiesManager.EnemyStatusUIs,
+            entitiesManager.PlayerStatusUIs,
+            entitiesManager.EnemyControllers,
+            enemyRuntimes
+        );
     }
 
     // チュートリアルフローを開始する

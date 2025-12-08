@@ -36,7 +36,7 @@ public class BattleManager : MonoBehaviour
     private float playerTurnDuration = 10f; // PhaseManager ‚ÉˆÚ“®‚µ‚Ä‚à—Ç‚¢
     private float turnTime = 10f; // PlayerTurnWithTimer ‚Åg—p
     private Coroutine feedbackCoroutine;
-
+    private List<EnemyRuntime> enemyRuntimes = new List<EnemyRuntime>();
     void Start()
     {
         if (targetMarkerPrefab != null)
@@ -81,6 +81,17 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        enemyRuntimes.Clear();
+        if (entitiesManager.Enemies != null)
+        {
+            foreach (var enemyModel in entitiesManager.Enemies)
+            {
+                // GUID‚ÆRuntime‚ğ¶¬
+                EnemyRuntime newRuntime = new EnemyRuntime(enemyModel, System.Guid.NewGuid().ToString());
+                enemyRuntimes.Add(newRuntime);
+            }
+        }
+
         enemyTurn.EnemySetup(
             entitiesManager.Players,
             entitiesManager.Enemies,
@@ -105,7 +116,8 @@ public class BattleManager : MonoBehaviour
                 entitiesManager.EnemyStatusUIs,
                 selectTurn,
                 playerTurn,
-                battleCardDeck
+                battleCardDeck,
+                enemyRuntimes
             );
 
             tutorialFlowManager.StartTutorialFlow();
@@ -146,7 +158,9 @@ public class BattleManager : MonoBehaviour
             entitiesManager.Players,
             battleCardDeck,
             entitiesManager.EnemyStatusUIs,
-            entitiesManager.EnemyControllers
+            entitiesManager.PlayerStatusUIs,
+            entitiesManager.EnemyControllers,
+            enemyRuntimes
         );
 
         playerTurn.StartPlayerTurn();
