@@ -49,10 +49,14 @@ public class PlayerTurn : MonoBehaviour
     private PlayerActionExecutor actionExecutor;
     private List<PlayerRuntime> allPlayers;
 
-    // private AudioSource audioSource;
-    // public AudioClip disposecard;
-    // public AudioClip check;
-
+    [SerializeField] private Transform keyplayerHandTransform;
+    [SerializeField] private GameObject EnterUI;
+    [SerializeField] private GameObject key1UI;
+    [SerializeField] private GameObject key2UI;
+    [SerializeField] private GameObject key3UI;
+    private Dictionary<int, GameObject> keyUI;
+    private GameObject EnterKey;
+    private List<GameObject> activeKeyUIObjects = new List<GameObject>();
     private void Awake()
     {
         inputReader.CardSelectEvent += OnCardSelect;
@@ -62,7 +66,13 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
 
         actionExecutor = new PlayerActionExecutor(this);
-        // audioSource = GetComponent<AudioSource>();
+
+        keyUI = new Dictionary<int, GameObject>();
+        keyUI[0] = key1UI;
+        keyUI[1] = key2UI;
+        keyUI[2] = key3UI;
+        EnterKey = Instantiate(EnterUI, new Vector3(1470, 320, 0), Quaternion.identity);
+        EnterKey.SetActive(false);
     }
 
     public void Setup(Dictionary<int, List<EnemyModel>> playerSelections,
@@ -95,6 +105,7 @@ public class PlayerTurn : MonoBehaviour
         battleDeck.ResetBattleDeck(battleDeck.battleCardDeck);
         inputEnabled = true;
         DrawHandCards();
+        EnterKey.SetActive(false);
     }
 
     // ターン終わりにCardの効果処理
@@ -103,7 +114,6 @@ public class PlayerTurn : MonoBehaviour
         if (isTurnFinished) return;
         isTurnFinished = true;
         inputEnabled = false;
-
         // 手札のカード表示をdestory
         foreach (var contCard in handCardControllers)
         {
@@ -113,6 +123,11 @@ public class PlayerTurn : MonoBehaviour
             }
         }
         handCardControllers.Clear();
+        foreach (var keyObj in activeKeyUIObjects)
+        {
+            if (keyObj != null) Destroy(keyObj);
+        }
+        activeKeyUIObjects.Clear();
 
         StartCoroutine(actionExecutor.ExecuteActions(
            selectedCardsThisTurn,
@@ -135,6 +150,12 @@ public class PlayerTurn : MonoBehaviour
         }
 
         handCardControllers.Clear();
+
+        foreach (var keyObj in activeKeyUIObjects)
+        {
+            if (keyObj != null) Destroy(keyObj);
+        }
+        activeKeyUIObjects.Clear();
         handCards.Clear();
         isCardSelected = new bool[3];
         int drawnCardCount = 0;
@@ -145,10 +166,13 @@ public class PlayerTurn : MonoBehaviour
             if (battleDeck.TryDrawCard(out CardRuntime drawnCard))
             {
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
+                var keyObject = Instantiate(keyUI[i], keyplayerHandTransform, false);
+                StartCoroutine(AdjustKeyPosNextFrame(keyObject));
                 CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
                 cardObject.Init(cardModel);
                 handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
+                activeKeyUIObjects.Add(keyObject);
                 drawnCardCount++;
             }
         }
@@ -232,7 +256,6 @@ public class PlayerTurn : MonoBehaviour
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
-            // audioSource.PlayOneShot(disposecard);
         }
         else
         {
@@ -412,6 +435,8 @@ public class PlayerTurn : MonoBehaviour
         // 2枚（最大数）選択されているか
         bool maxCardsSelected = (selectedCount >= 2);
 
+        EnterKey.SetActive(maxCardsSelected);
+
         for (int i = 0; i < handCardControllers.Count; i++)
         {
             if (handCardControllers[i] == null) continue;
@@ -443,5 +468,13 @@ public class PlayerTurn : MonoBehaviour
                 visualRoot.localPosition = Vector3.zero;
             }
         }
+    }
+
+    private IEnumerator AdjustKeyPosNextFrame(GameObject keyObj)
+    {
+        yield return null;
+
+        RectTransform rt = keyObj.GetComponent<RectTransform>();
+        rt.anchoredPosition += new Vector2(0, 190);
     }
 }

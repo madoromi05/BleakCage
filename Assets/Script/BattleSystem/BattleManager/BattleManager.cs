@@ -30,6 +30,11 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
 
+    [SerializeField] private GameObject iIconkey;
+    [SerializeField] private GameObject SelectTurnKeyUI;
+    private GameObject SelectTurnKey;
+    private GameObject iIcon;
+
     public bool TrySpendGuardGauge(float amount) => guardGaugeSystem.TrySpendGuardGauge(amount);
     public void AddGuardGauge(float amount) => guardGaugeSystem.AddGuardGauge(amount);
     public void IncrementCounterCount() => guardGaugeSystem.IncrementCounterCount();
@@ -55,9 +60,8 @@ public class BattleManager : MonoBehaviour
             MarkerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, Quaternion.identity, this.transform);
             MarkerInstance.SetActive(false);
         }
-
         selectionChoicePanel.SetActive(false);
-
+        SetUpUI();
         guardGaugeSystem.Init();
         entitiesManager.Setup();
 
@@ -106,6 +110,8 @@ public class BattleManager : MonoBehaviour
                 battleCardDeck
             );
 
+            iIcon.SetActive(true);
+
             tutorialFlowManager.StartTutorialFlow();
         }
         else
@@ -139,6 +145,8 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
 
+        SelectTurnKey.SetActive(true);
+
         playerTurn.Setup(
             selectTurn.PlayerSelections,
             entitiesManager.Players,
@@ -166,5 +174,14 @@ public class BattleManager : MonoBehaviour
         turnTime = 0f;
         timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
         playerTurn.FinishPlayerTurn();
+    }
+
+    private void SetUpUI()
+    {
+        SelectTurnKey = Instantiate(SelectTurnKeyUI, new Vector3(1820, 470, 0), Quaternion.identity);
+        iIcon = Instantiate(iIconkey, new Vector3(100, 1000, 0), Quaternion.identity);
+
+        SelectTurnKey.SetActive(false);
+        iIcon.SetActive(false);
     }
 }

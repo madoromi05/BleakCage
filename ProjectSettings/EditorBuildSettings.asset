@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SelectStage.unity
+    path: Assets/ResourcesAsset/Scenes/SelectStage.unity
     guid: 30c604fd75e96834c8a990476e525ed0
   - enabled: 1
-    path: Assets/Scenes/BattleScene.unity
+    path: Assets/ResourcesAsset/Scenes/BattleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
     path: Assets/Scenes/Tutorial.unity
