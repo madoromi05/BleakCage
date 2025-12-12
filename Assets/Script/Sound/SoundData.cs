@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 /// <summary>
 ///SE再生用リストデータ
 ///</summary>

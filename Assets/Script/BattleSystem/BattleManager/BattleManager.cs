@@ -30,10 +30,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
 
-    [SerializeField] private GameObject iIconkey;
-    [SerializeField] private GameObject SelectTurnKeyUI;
-    private GameObject SelectTurnKey;
-    private GameObject iIcon;
+    [SerializeField] private GameObject iIcon;
+    [SerializeField] private GameObject SelectTurnKey;
 
     public bool TrySpendGuardGauge(float amount) => guardGaugeSystem.TrySpendGuardGauge(amount);
     public void AddGuardGauge(float amount) => guardGaugeSystem.AddGuardGauge(amount);
@@ -178,9 +176,6 @@ public class BattleManager : MonoBehaviour
 
     private void SetUpUI()
     {
-        SelectTurnKey = Instantiate(SelectTurnKeyUI, new Vector3(1820, 470, 0), Quaternion.identity);
-        iIcon = Instantiate(iIconkey, new Vector3(100, 1000, 0), Quaternion.identity);
-
         SelectTurnKey.SetActive(false);
         iIcon.SetActive(false);
     }

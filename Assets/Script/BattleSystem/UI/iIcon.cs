@@ -11,15 +11,21 @@ public class iIcon : MonoBehaviour
 
     private void Start()
     {
-        if (infoText != null)
+        if (infoText != null && infoPanel != null)
+        {
             infoText.SetActive(false);
             infoPanel.SetActive(false);
+        }
     }
 
     public void ToggleInfo()
     {
-        if (infoText != null)
-            infoText.SetActive(!infoText.activeSelf);
-            infoPanel.SetActive(!infoText.activeSelf);
+        if (infoText != null && infoPanel != null)
+        {
+            bool nextState = !infoText.activeSelf;
+
+            infoText.SetActive(nextState);
+            infoPanel.SetActive(nextState);
+        }
     }
 }

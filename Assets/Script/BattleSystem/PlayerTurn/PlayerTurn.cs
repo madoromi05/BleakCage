@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 public class PlayerTurn : MonoBehaviour
 {
@@ -49,13 +50,11 @@ public class PlayerTurn : MonoBehaviour
     private PlayerActionExecutor actionExecutor;
     private List<PlayerRuntime> allPlayers;
 
-    [SerializeField] private Transform keyplayerHandTransform;
     [SerializeField] private GameObject EnterUI;
     [SerializeField] private GameObject key1UI;
     [SerializeField] private GameObject key2UI;
     [SerializeField] private GameObject key3UI;
     private Dictionary<int, GameObject> keyUI;
-    private GameObject EnterKey;
     private List<GameObject> activeKeyUIObjects = new List<GameObject>();
     private void Awake()
     {
@@ -71,8 +70,7 @@ public class PlayerTurn : MonoBehaviour
         keyUI[0] = key1UI;
         keyUI[1] = key2UI;
         keyUI[2] = key3UI;
-        EnterKey = Instantiate(EnterUI, new Vector3(1470, 320, 0), Quaternion.identity);
-        EnterKey.SetActive(false);
+        EnterUI.SetActive(false);
     }
 
     public void Setup(Dictionary<int, List<EnemyModel>> playerSelections,
@@ -105,7 +103,7 @@ public class PlayerTurn : MonoBehaviour
         battleDeck.ResetBattleDeck(battleDeck.battleCardDeck);
         inputEnabled = true;
         DrawHandCards();
-        EnterKey.SetActive(false);
+        EnterUI.SetActive(false);
     }
 
     // ターン終わりにCardの効果処理
@@ -166,14 +164,24 @@ public class PlayerTurn : MonoBehaviour
             if (battleDeck.TryDrawCard(out CardRuntime drawnCard))
             {
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
-                var keyObject = Instantiate(keyUI[i], keyplayerHandTransform, false);
-                StartCoroutine(AdjustKeyPosNextFrame(keyObject));
                 CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
                 cardObject.Init(cardModel);
                 handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
-                activeKeyUIObjects.Add(keyObject);
                 drawnCardCount++;
+                if (keyUI.ContainsKey(i))
+                {
+                    GameObject keyObj = Instantiate(keyUI[i], cardObject.transform, false);
+                    keyObj.SetActive(true);
+
+                    RectTransform rt = keyObj.GetComponent<RectTransform>();
+                    rt.anchoredPosition = new Vector2(0, 0);
+
+                    activeKeyUIObjects.Add(keyObj);
+                    rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.pivot = new Vector2(0.5f, 0.5f);
+                    rt.anchoredPosition = new Vector2(0, 190);
+                }
             }
         }
 
@@ -233,6 +241,7 @@ public class PlayerTurn : MonoBehaviour
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
 
+        keyUI[inputNumber].gameObject.SetActive(false);
         // audioSource.PlayOneShot(check);
         if (isTutorialMode)
         {
@@ -435,13 +444,18 @@ public class PlayerTurn : MonoBehaviour
         // 2枚（最大数）選択されているか
         bool maxCardsSelected = (selectedCount >= 2);
 
-        EnterKey.SetActive(maxCardsSelected);
+        EnterUI.SetActive(maxCardsSelected);
 
         for (int i = 0; i < handCardControllers.Count; i++)
         {
             if (handCardControllers[i] == null) continue;
 
             CardController cardObject = handCardControllers[i];
+
+            if (i < activeKeyUIObjects.Count && activeKeyUIObjects[i] != null)
+            {
+                activeKeyUIObjects[i].SetActive(!isCardSelected[i]);
+            }
 
             bool shouldBeInteractable = true;
             if (!isCardSelected[i] && maxCardsSelected)
@@ -468,13 +482,5 @@ public class PlayerTurn : MonoBehaviour
                 visualRoot.localPosition = Vector3.zero;
             }
         }
-    }
-
-    private IEnumerator AdjustKeyPosNextFrame(GameObject keyObj)
-    {
-        yield return null;
-
-        RectTransform rt = keyObj.GetComponent<RectTransform>();
-        rt.anchoredPosition += new Vector2(0, 190);
     }
 }

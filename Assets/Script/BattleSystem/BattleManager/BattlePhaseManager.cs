@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 /// <summary>
 /// バトルのフェーズ（Select/Player/Enemy）の切り替えと、エクストラターンなどのフローロジックを管理する
@@ -113,6 +114,7 @@ public class BattlePhaseManager : MonoBehaviour
             currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
         }
         Debug.Log("【攻撃対象選択ターン終了】");
+
 
         StartCoroutine(StartPlayerTurnCoroutine());
     }
