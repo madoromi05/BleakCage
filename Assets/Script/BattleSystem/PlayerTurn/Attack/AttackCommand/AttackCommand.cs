@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 /// <summary>
 /// 選択したカードが敵に攻撃するコマンド
@@ -38,20 +39,40 @@ public class AttackCommand : ICommand
         PlayerController controller = player.PlayerController;
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
 
+        // 攻撃ヒット時の処理を定義（ローカル関数）
+        int hitCount = 0;
+        Action onHitAction = () =>
+        {
+            // 敵が生きていればダメージ処理
+            if (targetEnemy.CurrentHP > 0)
+            {
+                hitCount++;
+
+                // ダメージ計算
+                float damage = damageCalculator.CalculateFinalDamage(player, weapon, card, targetEnemy);
+
+                // 効果音
+                attackedSoundEffect(card.attribute);
+
+                // ターゲットのHPを減算
+                targetEnemy.HPHandler.TakeDamage(damage);
+                enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
+
+                // 状態異常の付与
+                ApplyStatusEffectToEnemy(cardModel, targetEnemy);
+
+                Debug.Log($"[{hitCount}ヒット目] EnemyID：{targetEnemy.ID} に {damage:F2} ダメージ");
+            }
+        };
+
+        // イベントを購読 (Subscribe)
+        controller.OnAttackHitTriggered += onHitAction;
+
+        // アニメーションシーケンスの実行
         yield return controller.AttackSequence(cardModel, weapon, targetTransform);
 
-        float damage = damageCalculator.CalculateFinalDamage(player, weapon, card, targetEnemy);
-
-        //Card属性ごとの効果音s
-        attackedSoundEffect(card.attribute);
-        // ターゲットのHPを減算
-        targetEnemy.HPHandler.TakeDamage(damage);
-        enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
-        // ターゲットに状態異常を付与
-        ApplyStatusEffectToEnemy(cardModel, targetEnemy);
-        Debug.Log($" EnemyID： {targetEnemy.ID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.CurrentHP:F2}");
-
-        // アニメーション後の硬直時間
+        controller.OnAttackHitTriggered -= onHitAction;
+        Debug.Log("攻撃コマンド終了");
         yield return new WaitForSeconds(0.1f);
     }
 

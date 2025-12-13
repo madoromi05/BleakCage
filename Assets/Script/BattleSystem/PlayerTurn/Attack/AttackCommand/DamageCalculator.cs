@@ -32,14 +32,14 @@ public class DamageCalculator : MonoBehaviour
 
         if (enemy.StatusHandler != null)
         {
-            // 1. 【破砕】: 1スタックにつき貫通(Cp) +0.2
+            //【破砕】: 1スタックにつき貫通(Cp) +0.2
             int fracture = enemy.StatusHandler.GetStackCount(StatusEffectType.Fracture);
             if (fracture > 0)
             {
                 Cp += (fracture * 0.2f);
             }
 
-            // 2. 【熔鉄】: 1スタックにつき防御(D) -5%
+            //【熔鉄】: 1スタックにつき防御(D) -5%
             int meltdown = enemy.StatusHandler.GetStackCount(StatusEffectType.Meltdown);
             if (meltdown > 0)
             {
@@ -89,11 +89,11 @@ public class DamageCalculator : MonoBehaviour
         // 念のため 0..1 の範囲にクランプ
         attenuationRate = Mathf.Clamp01(attenuationRate);
 
-        // --- 3. 相性倍率 (R^P) の計算 ---
+        // 相性倍率 (R^P) の計算
         float affinityMultiplier = Mathf.Pow(R, P);
 
 
-        // --- 4. 最終ダメージ (E) の計算 ---
+        // 最終ダメージ (E) の計算
         // E = 基礎攻撃力 * 減衰率 * 相性倍率
         float finalDamage = baseAttack * attenuationRate * affinityMultiplier;
 

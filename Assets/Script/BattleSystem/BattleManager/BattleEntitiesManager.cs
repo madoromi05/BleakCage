@@ -71,12 +71,12 @@ public class BattleEntitiesManager : MonoBehaviour
             string sceneName = SceneManager.GetActiveScene().name;
             if (sceneName.Contains("Tutorial"))
             {
-                currentStageID = 0; // チュートリアル
+                currentStageID = 0;
                 Debug.LogWarning($"シーン名'{sceneName}'のため、エディタ専用フォールバックとしてID '0' (チュートリアル) を使用します。");
             }
-            else
+            else if (sceneName.Contains("BattleScene"))
             {
-                currentStageID = 1; // 通常ステージ
+                currentStageID = 1;
                 Debug.LogWarning($"シーン名'{sceneName}'のため、エディタ専用フォールバックとしてID '1' (通常) を使用します。");
             }
 #endif

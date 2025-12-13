@@ -21,6 +21,7 @@ public class CardView : MonoBehaviour
 
     private Dictionary<AttributeType, AttributeSpriteMapping> attributeData
             = new Dictionary<AttributeType, AttributeSpriteMapping>();
+
     [System.Serializable]
     public class AttributeSpriteMapping
     {
@@ -28,6 +29,7 @@ public class CardView : MonoBehaviour
         public Sprite sprite;
         public Color TextOutlineColor;
     }
+
     private void Awake()
     {
         foreach (var mapping in attributeIconMappings)
@@ -53,6 +55,7 @@ public class CardView : MonoBehaviour
             string csvDescription = cardModel.Description;
             Description.text = GenerateFormattedDescription(csvDescription, cardModel);
         }
+
         // 属性に応じてアイコン画像を切り替える
         if (IconImage != null)
         {
@@ -68,7 +71,7 @@ public class CardView : MonoBehaviour
             {
                 // 属性に対応するアイコンがない場合は、CardEntityに設定されているデフォルトのアイコンを使用
                 IconImage.sprite = cardModel.CardSprite;
-                Debug.LogWarning($"No specific icon found for attribute: {cardModel.Attribute}. Using default icon for card ID: {cardModel.ID}");
+                // Debug.LogWarning($"No specific icon found for attribute: {cardModel.Attribute}. Using default icon for card ID: {cardModel.ID}");
 
                 if (NameOutline != null)
                 {
@@ -113,11 +116,17 @@ public class CardView : MonoBehaviour
                     descriptionBuilder.AppendLine($"攻撃回数 {model.AttackCount}回");
                 }
 
-                // 攻撃対象 (2体以上のみ表示)
-                if (model.TargetCount > 1)
+                if (model.TargetScope == CardTargetScope.Random)
                 {
-                    descriptionBuilder.AppendLine($"攻撃対象 {model.TargetCount}体");
+                    // ランダムの時だけ「体数」を表示
+                    descriptionBuilder.AppendLine($"攻撃対象 ランダム{model.TargetCount}体");
                 }
+                else if (model.TargetScope == CardTargetScope.All)
+                {
+                    // 全体の時は「全体」と表示
+                    descriptionBuilder.AppendLine("攻撃対象 全体");
+                }
+                // Single (単体) の場合は何も表示しない
 
                 // 命中率 (100%未満のみ表示)
                 if (model.HitRate < 1.0f)
@@ -126,6 +135,7 @@ public class CardView : MonoBehaviour
                 }
                 break;
         }
+
         if (model.StatusEffect.Type != StatusEffectType.None)
         {
             string statusName = GetStatusEffectName(model.StatusEffect.Type);
@@ -135,6 +145,7 @@ public class CardView : MonoBehaviour
         }
         return descriptionBuilder.ToString();
     }
+
     private string ReplacePlaceholders(string input, CardModel model)
     {
         return input
@@ -169,6 +180,7 @@ public class CardView : MonoBehaviour
             default: return "援";
         }
     }
+
     private string GetStatusEffectName(StatusEffectType type)
     {
         switch (type)

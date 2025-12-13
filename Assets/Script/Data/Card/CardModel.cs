@@ -12,8 +12,6 @@ public class CardModel
     public int CharacterID { get; private set; }
     public CardTypeData Type { get; private set; }
     public AttributeType Attribute { get; private set; }
-    public int AttackCount { get; private set; }                            // 攻撃回数
-    public int TargetCount { get; private set; }                            // 攻撃対象数
     public bool IsPassive { get; private set; }                             // パッシブ効果なのかどうか
     public float HitRate { get; private set; }                              // 命中率(1～0)
     public float OutputModifier { get; private set; }                       // 出力調整
@@ -24,6 +22,9 @@ public class CardModel
     public StatusEffectData StatusEffect { get; private set; }
     public HandPosition WeaponHand { get; private set; }
     public bool IsMelee { get; private set; }
+    public CardTargetScope TargetScope { get; private set; }
+    public int TargetCount { get; private set; }
+    public float AttackCount { get; private set; }
     /// <summary>
     /// CardEntity からデータを読み取って CardModel を生成する
     /// 読み取り専用にしている
@@ -45,8 +46,6 @@ public class CardModel
         Description = entity.Description;
         Type = entity.Type;
         Attribute = entity.Attribute;
-        AttackCount = entity.AttackCount;
-        TargetCount = entity.TargetCount;
         IsPassive = entity.Passive;
         HitRate = entity.HitRate;
         OutputModifier = entity.OutputModifier;
@@ -55,5 +54,7 @@ public class CardModel
         AttackAnimation = entity.AttackAnimation;
         WeaponHand = entity.WeaponHand;
         IsMelee = entity.IsMelee;
+        TargetScope = entity.TargetScope;
+        TargetCount = entity.TargetCount;
     }
 }

@@ -12,7 +12,6 @@ public class CardDataImporter : AssetPostprocessor
     private const string CSV_FILE_NAME = "CardEntityData.csv";
 
     // CSVが置かれているフォルダのパス（部分一致検索用）
-    // Windowsのパス区切り '\' はUnity内では '/' として扱われます
     private const string CSV_TARGET_FOLDER = "Script/Data/CardEccelData";
 
     // 生成されたCardEntityの保存先
@@ -167,40 +166,54 @@ public class CardDataImporter : AssetPostprocessor
     // --- CSVの値をCardEntityに流し込む ---
     private static void PopulateCardEntity(CardEntity card, string[] values)
     {
-        // 列が足りない場合は異常状態なしとして処理
-        if (values.Length < 17)
+        // 列数チェック（新しいCSVは18列あるはず）
+        if (values.Length < 18)
         {
-            Debug.LogWarning($"[CardImporter] 列数が足りません。デフォルト値を設定します。 ID:{card.ID}");
-            card.StatusEffect = new StatusEffectData { Type = StatusEffectType.None };
+            Debug.LogWarning($"[CardImporter] 列数が足りません (Data Length: {values.Length})。デフォルト値を設定します。 ID:{card.ID}");
+            // 必要に応じてデフォルト処理
         }
 
         int categoryId = int.Parse(values[0]); // 1=キャラ, 2=武器
-        int ownerId    = int.Parse(values[1]);
-        int exclusiveId  = int.Parse(values[2]);
+        int ownerId = int.Parse(values[1]);
+        int exclusiveId = int.Parse(values[2]);
 
-        // 計算式: カテゴリ(1桁) + Owner(3桁) + Variant(2桁)
         card.ID = (categoryId * 100) + (ownerId * 10) + exclusiveId;
-
-        // 分割したIDも便利なのでセットしておく
         card.OwnerID = ownerId;
         card.ExclusiveID = exclusiveId;
         card.Name = values[3];
+
+        // Enumパース
         card.Type = (CardTypeData)System.Enum.Parse(typeof(CardTypeData), values[4]);
         card.Attribute = (AttributeType)System.Enum.Parse(typeof(AttributeType), values[5]);
+
         card.AttackCount = int.Parse(values[6]);
         card.TargetCount = int.Parse(values[7]);
-        card.Passive = bool.Parse(values[8]);
-        card.HitRate = float.Parse(values[9]);
-        card.OutputModifier = float.Parse(values[10]);
-        card.DefensePenetration = float.Parse(values[11]);
-        card.IsMelee = bool.Parse(values[12]);
 
-        // 異常状態データの読み込み
-        if (values.Length >= 17)
+        // ★追加: TargetScope の読み込み (8列目)
+        if (System.Enum.TryParse(values[8], out CardTargetScope scope))
+        {
+            card.TargetScope = scope;
+        }
+        else
+        {
+            Debug.LogWarning($"TargetScope Parse Failed: {values[8]}. Defaulting to Single.");
+            card.TargetScope = CardTargetScope.Single;
+        }
+
+        // 列インデックスが1つずつずれるので注意
+        card.Passive = bool.Parse(values[9]);
+        card.HitRate = float.Parse(values[10]);
+        card.OutputModifier = float.Parse(values[11]);
+        card.DefensePenetration = float.Parse(values[12]);
+        card.IsMelee = bool.Parse(values[13]);
+
+        // 異常状態データの読み込み (列位置が変わっています)
+        // StatusTypeは 14列目
+        if (values.Length >= 18)
         {
             StatusEffectData statusData = new StatusEffectData();
 
-            if (System.Enum.TryParse(values[13], out StatusEffectType statType))
+            if (System.Enum.TryParse(values[14], out StatusEffectType statType))
             {
                 statusData.Type = statType;
             }
@@ -209,13 +222,13 @@ public class CardDataImporter : AssetPostprocessor
                 statusData.Type = StatusEffectType.None;
             }
 
-            statusData.Value = float.Parse(values[14]);         // 効果値
-            statusData.Duration = int.Parse(values[15]);        // 持続ターン
-            statusData.InflictStacks = int.Parse(values[16]);   // 付与スタック
+            statusData.Value = float.Parse(values[15]);         // 効果値
+            statusData.Duration = int.Parse(values[16]);        // 持続ターン
+            statusData.InflictStacks = int.Parse(values[17]);   // 付与スタック
 
             card.StatusEffect = statusData;
         }
-        // アセット名の更新
+
         card.name = $"Card_{card.ID}";
     }
 

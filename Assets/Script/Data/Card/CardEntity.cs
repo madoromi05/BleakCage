@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -23,28 +21,29 @@ public struct StatusEffectData
 public class CardEntity : ScriptableObject
 {
     [Header("ID情報")]
-    public int ID;                          // カード固有ID
-    public int OwnerID;                     // どの武器、キャラの専用カードなのか識別するID
-    public int ExclusiveID;                 // OwnerID内での識別ID
+    public int ID;                                                  // カード固有ID
+    public int OwnerID;                                             // どの武器、キャラの専用カードなのか識別するID
+    public int ExclusiveID;                                         // OwnerID内での識別ID
 
     [Header("基本情報")]
-    public string Name;                     // カード名
-    public int CharacterID;                 // このカードを装備するキャラID
-    public int EquipableWeaponID;           // このカードを装備する武器ID
-    public Sprite Icon;                     // アイコン画像
-    [Multiline]public string Description;   // 説明文
+    public string Name;                                             // カード名
+    public int CharacterID;                                         // このカードを装備するキャラID
+    public int EquipableWeaponID;                                   // このカードを装備する武器ID
+    public Sprite Icon;                                             // アイコン画像
+    [Multiline]public string Description;                           // 説明文
 
-    public CardTypeData Type;               // カードタイプ
-    public AttributeType Attribute;         // 属性
+    public CardTypeData Type;                                       // カードタイプ
+    public AttributeType Attribute;                                 // 属性
 
     [Header("戦闘パラメータ")]
-    public int AttackCount;                 // 攻撃回数
-    public int TargetCount;                 // 攻撃体数
-    public bool Passive;                    // パッシブ効果判定
-    public float HitRate;                   // 命中率
-    public float OutputModifier;            // 出力調整
-    public float DefensePenetration;        // 防御貫通 
-    public bool IsMelee;
+    public bool Passive;                                            // パッシブ効果判定
+    public float HitRate;                                           // 命中率
+    public float OutputModifier;                                    // 出力調整
+    public float DefensePenetration;                                // 防御貫通 
+    public CardTargetScope TargetScope = CardTargetScope.Single;    // 攻撃体数
+    public bool IsMelee;                                            // 近接攻撃判定
+    public int AttackCount;                                         // 攻撃回数
+    public int TargetCount = 1;                                     // ランダム攻撃の対象数
 
     [Header("付与する異常状態")]
     public StatusEffectData StatusEffect;

@@ -22,13 +22,14 @@ MonoBehaviour:
   Description: 
   Type: 1
   Attribute: 1
-  AttackCount: 4
-  TargetCount: 1
   Passive: 0
   HitRate: 0.8
   OutputModifier: 0.5
   DefensePenetration: 0
+  TargetScope: 0
   IsMelee: 0
+  AttackCount: 4
+  TargetCount: 1
   StatusEffect:
     Type: 5
     Value: 0

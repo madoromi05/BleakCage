@@ -113,48 +113,70 @@ public class PlayerActionExecutor
     {
         PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == attackPlayer);
 
-        // 優先順位リストに基づいて攻撃対象を決定
-        EnemyRuntime finalTargetRuntime = null;
-        EnemyModel finalTargetModel = null;
+        List<EnemyRuntime> actualTargets = new List<EnemyRuntime>();                            // 攻撃対象リスト
+        CardModel cardModel = cardModelFactory.CreateFromID(selectedCardRuntime.ID);            // 攻撃範囲(TargetScope)を確認する
 
-        foreach (var potentialTargetModel in targets)
+        if (cardModel.TargetScope == CardTargetScope.All)
         {
-            // Modelに対応するRuntimeを検索する
-            var runtime = allEnemyRuntimes.FirstOrDefault(r => r.EnemyModel == potentialTargetModel);
+            // --- 全体攻撃 ---
+            // 生存している敵全員をリストに入れる
+            actualTargets = allEnemyRuntimes.Where(r => r.CurrentHP > 0).ToList();
 
-            if (runtime != null && runtime.CurrentHP > 0)
+            if (actualTargets.Count == 0)
             {
-                finalTargetRuntime = runtime;
-                finalTargetModel = potentialTargetModel;
-                break; // 生きている敵が見つかったので確定
-            }
-        }
-
-        if (finalTargetRuntime != null)
-        {
-            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == finalTargetModel);
-            if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTargetModel, out EnemyController targetEnemyController))
-            {
-                Transform targetTransform = targetEnemyController.transform;
-                commandQueue.Enqueue(new AttackCommand(
-                attackPlayer,
-                weaponRuntime,
-                selectedCardRuntime,
-                targetEnemyUI,
-                attackerUI,
-                finalTargetRuntime,
-                targetTransform,
-                damageCalculator,
-                cardModelFactory));
-            }
-            else
-            {
-                Debug.LogError($"攻撃対象 (ID: {finalTargetRuntime.ID}) の EnemyController または UI が見つかりません。");
+                Debug.LogWarning("全体攻撃ですが、生存している敵がいません。");
             }
         }
         else
         {
-            Debug.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象 (優先順位リスト) は全員倒されています。攻撃をスキップします。");
+            // --- 単体攻撃 (従来のロジック) ---
+            // 選択されたターゲットリストから、生存している最初の1体を探す
+            EnemyRuntime targetRuntime = null;
+            foreach (var potentialTargetModel in targets)
+            {
+                var runtime = allEnemyRuntimes.FirstOrDefault(r => r.EnemyModel == potentialTargetModel);
+                if (runtime != null && runtime.CurrentHP > 0)
+                {
+                    targetRuntime = runtime;
+                    break; // 1体見つかったら確定
+                }
+            }
+            if (targetRuntime != null)
+            {
+                actualTargets.Add(targetRuntime);
+            }
+        }
+
+        // 各ターゲットに対して攻撃コマンドを実行
+        foreach (var targetRuntime in actualTargets)
+        {
+            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == targetRuntime.EnemyModel);
+
+            if (targetEnemyUI != null && enemyControllers.TryGetValue(targetRuntime.EnemyModel, out EnemyController targetEnemyController))
+            {
+                Transform targetTransform = targetEnemyController.transform;
+
+                // コマンド生成
+                commandQueue.Enqueue(new AttackCommand(
+                    attackPlayer,
+                    weaponRuntime,
+                    selectedCardRuntime,
+                    targetEnemyUI,
+                    attackerUI,
+                    targetRuntime,
+                    targetTransform,
+                    damageCalculator,
+                    cardModelFactory));
+            }
+            else
+            {
+                Debug.LogError($"Target UI or Controller not found for EnemyID: {targetRuntime.ID}");
+            }
+        }
+
+        if (actualTargets.Count == 0)
+        {
+            Debug.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象がいません。");
         }
     }
 
