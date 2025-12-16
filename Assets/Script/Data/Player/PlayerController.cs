@@ -6,17 +6,14 @@ using System;
 [RequireComponent(typeof(PlayerMovementController))]
 public class PlayerController : MonoBehaviour
 {
+    public void SetStatusUI(PlayerStatusUIController ui) => this.statusUI = ui;
     // コンポーネント参照
     private PlayerAnimationController animCtrl;
     private PlayerMovementController moveCtrl;
     private PlayerStatusUIController statusUI;
 
-    // イベント中継 (Command側からはこれが見える)
-    public event Action OnAttackHitTriggered
-    {
-        add => animCtrl.OnAttackHitTriggered += value;
-        remove => animCtrl.OnAttackHitTriggered -= value;
-    }
+    // イベント中継
+    public event Action OnAttackHitTriggered;
 
     private Transform rightHandSocket;
     private Transform leftHandSocket;
@@ -40,11 +37,8 @@ public class PlayerController : MonoBehaviour
             Animator anim = instance.GetComponent<Animator>();
             CharacterBoneHolder boneHolder = instance.GetComponent<CharacterBoneHolder>();
 
-            if (boneHolder != null)
-            {
-                rightHandSocket = boneHolder.RightHandTransform;
-                leftHandSocket = boneHolder.LeftHandTransform;
-            }
+            rightHandSocket = boneHolder.RightHandTransform;
+            leftHandSocket = boneHolder.LeftHandTransform;
 
             // アニメコントローラー初期化
             animCtrl.Init(anim, model.PlayerAnimator);
@@ -63,24 +57,59 @@ public class PlayerController : MonoBehaviour
             yield return moveCtrl.MoveToTarget(targetEnemy.position);
         }
 
+        bool isHitProcessed = false;
+
+        Action hitHandler = () =>
+        {
+            // 近接攻撃の場合
+            if (cardModel.IsMelee)
+            {
+                OnAttackHitTriggered?.Invoke();
+            }
+            // 遠距離攻撃
+            else
+            {
+                if (cardModel.ProjectilePrefab != null)
+                {
+                    SpawnAndFireProjectile(cardModel.ProjectilePrefab, targetEnemy, () =>
+                    {
+                        OnAttackHitTriggered?.Invoke();
+                    });
+                }
+                else
+                {
+                    // 弾の設定がない
+                    Debug.LogError($"Card {cardModel.Name} は遠距離ですが ProjectilePrefab がありません。");
+                }
+            }
+            isHitProcessed = true;
+        };
+
+        animCtrl.OnAttackHitTriggered += hitHandler;
+
         // アニメーション
         AnimationClip clip = cardModel.AttackAnimation;
         if (clip != null)
         {
             animCtrl.PlayAttackAnimation(clip);
-            // クリップの長さ分待機
             yield return new WaitForSeconds(clip.length);
-        }
-        else
-        {
-            yield return new WaitForSeconds(0.5f);
-            animCtrl.OnAnimationHit(); // フォールバック
+            //遠距離攻撃が終わってなかったら2s待つ
+            float waitTimer = 0f;
+            while (!isHitProcessed && waitTimer < 2.0f)
+            {
+                waitTimer += Time.deltaTime;
+                yield return null;
+            }
+        } else {
+            Debug.LogError($"Card {cardModel.Name} に AttackAnimation が設定されていません。");
         }
 
-        // 4. 武器削除
+        animCtrl.OnAttackHitTriggered -= hitHandler;
+
+        // 武器削除
         if (weaponObj != null) Destroy(weaponObj);
 
-        // 5. 戻る
+        // 戻る
         if (cardModel.IsMelee)
         {
             yield return moveCtrl.ReturnToOriginalPosition();
@@ -108,12 +137,16 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-    public float GetGuardAnimationLength()
-    {
-        return (animCtrl != null) ? animCtrl.GetGuardAnimationLength() : 0.5f;
-    }
 
-    // UI系
-    public void SetStatusUI(PlayerStatusUIController ui) => this.statusUI = ui;
-    public void UpdateHealthUI(float hp) => statusUI?.UpdateHP(hp);
+    // 弾を生成、発射する関数
+    private void SpawnAndFireProjectile(ProjectileMove prefab, Transform target, Action onHit)
+    {
+        Vector3 spawnPosition = transform.position + Vector3.up * 1.2f + transform.forward * 0.5f;
+        ProjectileMove projectile = Instantiate(prefab, spawnPosition, Quaternion.identity);
+
+        if (projectile != null)
+        {
+            projectile.Fire(target, onHit);
+        }
+    }
 }

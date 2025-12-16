@@ -45,6 +45,9 @@ public class CardEntity : ScriptableObject
     public int AttackCount;                                         // UŒ‚‰ñ”
     public int TargetCount = 1;                                     // ƒ‰ƒ“ƒ_ƒ€UŒ‚‚Ì‘ÎÛ”
 
+    [Header("‰“‹——£UŒ‚—p“Š±•¨")]
+    public ProjectileMove ProjectilePrefab;
+
     [Header("•t—^‚·‚éˆÙíó‘Ô")]
     public StatusEffectData StatusEffect;
 

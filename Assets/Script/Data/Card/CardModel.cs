@@ -25,6 +25,7 @@ public class CardModel
     public CardTargetScope TargetScope { get; private set; }
     public int TargetCount { get; private set; }
     public float AttackCount { get; private set; }
+    public ProjectileMove ProjectilePrefab { get; private set; }
     /// <summary>
     /// CardEntity からデータを読み取って CardModel を生成する
     /// 読み取り専用にしている
@@ -56,5 +57,6 @@ public class CardModel
         IsMelee = entity.IsMelee;
         TargetScope = entity.TargetScope;
         TargetCount = entity.TargetCount;
+        ProjectilePrefab = entity.ProjectilePrefab;
     }
 }

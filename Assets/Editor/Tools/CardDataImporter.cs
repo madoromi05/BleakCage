@@ -163,14 +163,13 @@ public class CardDataImporter : AssetPostprocessor
         }
     }
 
-    // --- CSVの値をCardEntityに流し込む ---
+    // CSVの値をCardEntityにコピー
     private static void PopulateCardEntity(CardEntity card, string[] values)
     {
-        // 列数チェック（新しいCSVは18列あるはず）
+        // 列数チェック
         if (values.Length < 18)
         {
             Debug.LogWarning($"[CardImporter] 列数が足りません (Data Length: {values.Length})。デフォルト値を設定します。 ID:{card.ID}");
-            // 必要に応じてデフォルト処理
         }
 
         int categoryId = int.Parse(values[0]); // 1=キャラ, 2=武器
@@ -189,7 +188,6 @@ public class CardDataImporter : AssetPostprocessor
         card.AttackCount = int.Parse(values[6]);
         card.TargetCount = int.Parse(values[7]);
 
-        // ★追加: TargetScope の読み込み (8列目)
         if (System.Enum.TryParse(values[8], out CardTargetScope scope))
         {
             card.TargetScope = scope;
