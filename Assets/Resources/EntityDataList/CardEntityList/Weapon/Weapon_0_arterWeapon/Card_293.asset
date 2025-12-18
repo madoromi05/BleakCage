@@ -30,6 +30,7 @@ MonoBehaviour:
   IsMelee: 1
   AttackCount: 2
   TargetCount: 99
+  ProjectilePrefab: {fileID: 0}
   StatusEffect:
     Type: 4
     Value: 0

@@ -69,18 +69,7 @@ public class PlayerController : MonoBehaviour
             // ‰“‹——£UŒ‚
             else
             {
-                if (cardModel.ProjectilePrefab != null)
-                {
-                    SpawnAndFireProjectile(cardModel.ProjectilePrefab, targetEnemy, () =>
-                    {
-                        OnAttackHitTriggered?.Invoke();
-                    });
-                }
-                else
-                {
-                    // ’e‚Ìİ’è‚ª‚È‚¢
-                    Debug.LogError($"Card {cardModel.Name} ‚Í‰“‹——£‚Å‚·‚ª ProjectilePrefab ‚ª‚ ‚è‚Ü‚¹‚ñB");
-                }
+                Debug.Log("‰“‹——£UŒ‚");
             }
             isHitProcessed = true;
         };
@@ -101,7 +90,7 @@ public class PlayerController : MonoBehaviour
                 yield return null;
             }
         } else {
-            Debug.LogError($"Card {cardModel.Name} ‚É AttackAnimation ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            Debug.LogWarning($"Card {cardModel.Name} ‚É AttackAnimation ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
         }
 
         animCtrl.OnAttackHitTriggered -= hitHandler;
@@ -136,17 +125,5 @@ public class PlayerController : MonoBehaviour
             animCtrl.SetGuard(isGuarding);
         }
 
-    }
-
-    // ’e‚ğ¶¬A”­Ë‚·‚éŠÖ”
-    private void SpawnAndFireProjectile(ProjectileMove prefab, Transform target, Action onHit)
-    {
-        Vector3 spawnPosition = transform.position + Vector3.up * 1.2f + transform.forward * 0.5f;
-        ProjectileMove projectile = Instantiate(prefab, spawnPosition, Quaternion.identity);
-
-        if (projectile != null)
-        {
-            projectile.Fire(target, onHit);
-        }
     }
 }

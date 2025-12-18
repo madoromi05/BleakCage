@@ -32,8 +32,12 @@ public class BattleEntitiesManager : MonoBehaviour
     public DeckSetupRepository LoadedDeckData { get; private set; }
     public bool IsTutorialMode { get; private set; } = false;
     public List<PlayerRuntime> Players => LoadedDeckData?.Party;
-    public void Setup()
+
+    private BattleManager battleManager;
+
+    public void Setup(BattleManager manager)
     {
+        this.battleManager = manager;
         LoadGameData();
         SetupStageAndCharacters();
         IsTutorialMode = Enemies.Count > 0 && Enemies[0].EnemyID == 0;
@@ -45,7 +49,7 @@ public class BattleEntitiesManager : MonoBehaviour
     private void LoadGameData()
     {
         var dataLoader = new PlayerDataLoader();
-        DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
+        //DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
         LoadedDeckData = dataLoader.LoadPlayerPartyAndCards();
     }
 
@@ -148,6 +152,12 @@ public class BattleEntitiesManager : MonoBehaviour
             Transform spawnPoint = playerPositions[i];
 
             SpawnPlayerCharacter(targetPlayer, spawnPoint);
+
+            // プレイヤーのHPHandlerのイベントを購読
+            if (targetPlayer.HPHandler != null)
+            {
+                targetPlayer.HPHandler.OnDead += battleManager.OnPlayerDead;
+            }
         }
     }
 

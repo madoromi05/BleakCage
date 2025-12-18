@@ -32,7 +32,8 @@ public class BattleManager : MonoBehaviour
 
     public void ShowDefenseFeedback(string message, Color color) => defenseFeedbackUI.ShowDefenseFeedback(message, color);
 
-    public GameObject MarkerInstance { get; private set; } // マーカーインスタンスを公開
+    public GameObject MarkerInstance { get; private set; }
+    public bool IsBattleEnded { get; private set; } = false;
     private float playerTurnDuration = 10f; // PhaseManager に移動しても良い
     private float turnTime = 10f; // PlayerTurnWithTimer で使用
     private Coroutine feedbackCoroutine;
@@ -48,7 +49,7 @@ public class BattleManager : MonoBehaviour
         selectionChoicePanel.SetActive(false);
 
         guardGaugeSystem.Init();
-        entitiesManager.Setup();
+        entitiesManager.Setup(this);
 
         InitializeBattleFlow();
     }
@@ -89,6 +90,11 @@ public class BattleManager : MonoBehaviour
                 // GUIDとRuntimeを生成
                 EnemyRuntime newRuntime = new EnemyRuntime(enemyModel, System.Guid.NewGuid().ToString());
                 enemyRuntimes.Add(newRuntime);
+
+                if (newRuntime.HPHandler != null)
+                {
+                    newRuntime.HPHandler.OnDead += OnEnemyDead;
+                }
             }
         }
 
@@ -146,9 +152,69 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    public void OnEnemyDead(EnemyRuntime enemy)
+    {
+        if (IsBattleEnded) return;
+
+        Debug.Log($"敵撃破: {enemy.EnemyModel.EnemyName}");
+
+        // 敵のGameObjectを消す、または死亡アニメーションを再生する処理をここに記述
+        // 例: entitiesManager.EnemyControllers[enemy.EnemyModel].PlayDeadAnimation();
+
+        // 勝利判定: 全ての敵のHPが0以下か？
+        bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
+        if (allEnemiesDead)
+        {
+            StartCoroutine(BattleWinProcess());
+        }
+    }
+
+    public void OnPlayerDead(PlayerRuntime player)
+    {
+        if (IsBattleEnded) return;
+
+        Debug.Log($"味方死亡: {player.PlayerModel.PlayerName}");
+
+        // 敗北判定: 全てのプレイヤーのHPが0以下か？
+        bool allPlayersDead = entitiesManager.Players.All(p => p.CurrentHP <= 0);
+        if (allPlayersDead)
+        {
+            StartCoroutine(BattleLoseProcess());
+        }
+    }
+
+    private IEnumerator BattleWinProcess()
+    {
+        IsBattleEnded = true;
+        Debug.Log("【BATTLE WIN】");
+        yield return new WaitForSeconds(1.5f); // 余韻
+
+        // チュートリアルの場合は終了処理
+        if (entitiesManager.IsTutorialMode)
+        {
+            SceneManager.LoadScene("TitleScene"); // またはStageSelect
+            yield break;
+        }
+
+        // 戦闘後フラグを立ててシナリオシーンへ
+        StageManager.IsPostBattle = true;
+        SceneManager.LoadScene("ScenarioScene");
+    }
+
+    private IEnumerator BattleLoseProcess()
+    {
+        IsBattleEnded = true;
+        Debug.Log("【BATTLE LOSE】");
+        yield return new WaitForSeconds(1.5f);
+
+        // ゲームオーバー画面などへ
+        SceneManager.LoadScene("StageSelectScene"); // 仮でステージ選択に戻す
+    }
 
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")
     {
+        if (IsBattleEnded) yield break;
+
         yield return StartCoroutine(normalPhaseManager.ShowPhaseUI(phaseName));
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
@@ -167,9 +233,9 @@ public class BattleManager : MonoBehaviour
 
         turnTime = playerTurnDuration;
         float soundTime = 1f;
-        while (turnTime >= 0 && !playerTurn.isTurnFinished)
+        while (turnTime >= 0 && !playerTurn.isTurnFinished && !IsBattleEnded)
         {
-            if(soundTime <= 0f)
+            if (soundTime <= 0f)
             {
                 SoundManager.Instance.PlaySE(SEType.CountDown);
                 soundTime = 1f;
@@ -181,6 +247,9 @@ public class BattleManager : MonoBehaviour
         }
         turnTime = 0f;
         timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
-        playerTurn.FinishPlayerTurn();
+        if (!IsBattleEnded)
+        {
+            playerTurn.FinishPlayerTurn();
+        }
     }
 }
