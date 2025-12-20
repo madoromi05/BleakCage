@@ -24,7 +24,8 @@ public class CardModel
     public bool IsMelee { get; private set; }
     public CardTargetScope TargetScope { get; private set; }
     public int TargetCount { get; private set; }
-    public float AttackCount { get; private set; }
+    public int AttackCount { get; private set; }
+    public GameObject EffectPrefab { get; private set; }
     /// <summary>
     /// CardEntity からデータを読み取って CardModel を生成する
     /// 読み取り専用にしている
@@ -56,5 +57,6 @@ public class CardModel
         IsMelee = entity.IsMelee;
         TargetScope = entity.TargetScope;
         TargetCount = entity.TargetCount;
+        EffectPrefab = entity.EffectPrefab;
     }
 }

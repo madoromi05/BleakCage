@@ -22,6 +22,8 @@ public class BattleEntitiesManager : MonoBehaviour
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
+    [Header("ステージごとのプレイヤー編成")]
+    [SerializeField] private List<StagePlayerSetup> stagePlayerPresets;
 
     public List<EnemyModel> Enemies { get; private set; } = new List<EnemyModel>();
     public List<PlayerStatusUIController> PlayerStatusUIs { get; private set; } = new List<PlayerStatusUIController>();
@@ -44,13 +46,35 @@ public class BattleEntitiesManager : MonoBehaviour
     }
 
     /// <summary>
-    /// プレイヤーデータとカードデッキをロード・初期化
+    /// ステージIDに対応したプレイヤーデータをロード・初期化
     /// </summary>
     private void LoadGameData()
     {
+        int currentStageID = StageManager.SelectedStageID;
+
+#if UNITY_EDITOR
+        if (currentStageID == -1)
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName.Contains("Tutorial")) currentStageID = 0;
+            else currentStageID = 1;
+        }
+#endif
+        if (stagePlayerPresets == null || currentStageID < 0 || currentStageID >= stagePlayerPresets.Count)
+        {
+            Debug.LogError($"StageID {currentStageID} に対応する PlayerPreset が設定されていません！ Stage 1 (Index 1) のデータを使用します。");
+            if (stagePlayerPresets != null && stagePlayerPresets.Count > 1)
+                currentStageID = 1;
+            else
+            {
+                return;
+            }
+        }
+        StagePlayerSetup targetPreset = stagePlayerPresets[currentStageID];
         var dataLoader = new PlayerDataLoader();
-        //DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-        LoadedDeckData = dataLoader.LoadPlayerPartyAndCards();
+        LoadedDeckData = dataLoader.LoadFromPreset(targetPreset);
+
+        Debug.Log($"ステージ {currentStageID} 用の編成 ({targetPreset.name}) をロードしました。");
     }
 
     /// <summary>

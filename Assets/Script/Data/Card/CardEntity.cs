@@ -45,13 +45,11 @@ public class CardEntity : ScriptableObject
     public int AttackCount;                                         // 攻撃回数
     public int TargetCount = 1;                                     // ランダム攻撃の対象数
 
-    [Header("演出")]
-    public GameObject EffectPrefab;
-
     [Header("付与する異常状態")]
     public StatusEffectData StatusEffect;
 
     [Header("演出・挙動")]
     public AnimationClip AttackAnimation;
     public HandPosition WeaponHand;
+    public GameObject EffectPrefab;
 }

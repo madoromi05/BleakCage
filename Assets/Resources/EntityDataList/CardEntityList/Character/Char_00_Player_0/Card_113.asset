@@ -30,7 +30,6 @@ MonoBehaviour:
   IsMelee: 1
   AttackCount: 1
   TargetCount: 99
-  ProjectilePrefab: {fileID: 0}
   StatusEffect:
     Type: 7
     Value: 0
@@ -38,3 +37,4 @@ MonoBehaviour:
     InflictStacks: 2
   AttackAnimation: {fileID: 0}
   WeaponHand: 0
+  EffectPrefab: {fileID: 3079769987515116661, guid: b8a7f05956d8a824984e9fd32dce606a, type: 3}
