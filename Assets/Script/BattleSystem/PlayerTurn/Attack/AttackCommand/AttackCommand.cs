@@ -74,9 +74,25 @@ public class AttackCommand : ICommand
     }
     private void attackedSoundEffect(AttributeType attribute)
     {
-        if(attribute == AttributeType.Slash)  SoundManager.Instance.PlaySE(SEType.SlashAttack);
-        else if(attribute == AttributeType.Blunt)  SoundManager.Instance.PlaySE(SEType.BluntAttack);
-        else if(attribute == AttributeType.Bullet)  SoundManager.Instance.PlaySE(SEType.BulletAttack);
-        else if(attribute == AttributeType.Pierce)  SoundManager.Instance.PlaySE(SEType.PierceAttack);
+        if(attribute == AttributeType.Slash)
+        {
+            SoundManager.Instance.PlaySE(SEType.SlashAttack);
+            SoundManager.Instance.PlaySE(SEType.damagedSlashEnemy);
+        }
+        else if(attribute == AttributeType.Blunt)
+        {
+            SoundManager.Instance.PlaySE(SEType.BluntAttack);
+            SoundManager.Instance.PlaySE(SEType.damagedBluntEnemy);
+        }
+        else if(attribute == AttributeType.Bullet)
+        {
+            SoundManager.Instance.PlaySE(SEType.BulletAttack);
+            SoundManager.Instance.PlaySE(SEType.damagedBulletEnemy);
+        }
+        else if(attribute == AttributeType.Pierce) 
+        {
+            SoundManager.Instance.PlaySE(SEType.PierceAttack);
+            SoundManager.Instance.PlaySE(SEType.damagedPierceEnemy);
+        }
     }
 }

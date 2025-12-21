@@ -12,6 +12,7 @@ public enum SEType
     SwitchingPhases,
     CountDown,
 
+
     checkedSkillCard,
     startedSelectCard,
 
@@ -25,11 +26,15 @@ public enum SEType
     //SpecialSkill
     Defence,
     Heal,
-    //damagedEnemy SEÇ©ÇÁÇ±Ç§ÇµÇΩÇ™êÀóÕÇ∆Ç©ÇÃÇ∆ÍíÍóÇ™î≠ê∂Ç∑ÇÈÇÃÇ≈ï€óØ
+    //damagedEnemy
     damagedBulletEnemy,
     damagedPierceEnemy,
     damagedBluntEnemy,
     damagedSlashEnemy,
+
+    EnterStory,
+    MetalExplosion,
+    GunpowderExplosion,
 }
 public class SoundManager : MonoBehaviour
 {
@@ -39,6 +44,7 @@ public class SoundManager : MonoBehaviour
     private Dictionary<SEType, AudioClip> seDict;
     private AudioSource audioSource;
 
+    private float seVolume = 1f;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -50,11 +56,24 @@ public class SoundManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         seDict = new();
         foreach (var data in seList)  seDict[data.type] = data.clip;
+        audioSource.volume = seVolume;
     }
 
     public void PlaySE(SEType type)
     {
         if (seDict.TryGetValue(type, out var clip))
-            audioSource.PlayOneShot(clip);
+            audioSource.PlayOneShot(clip, seVolume);
+    }
+    /// <summary>
+    /// BGMÇÃVolumeí≤êÆ
+    /// </summary>
+    public void SetSEVolume(float volume)
+    {
+        audioSource.volume = Mathf.Clamp01(volume);
+        audioSource.volume = seVolume;
+    }
+    public float GetSEVolume()
+    {
+        return seVolume;
     }
 }
