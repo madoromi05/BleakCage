@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum EnemyAttackType
+{
+    Melee,  // 近距離（直接攻撃）
+    Ranged  // 遠距離（魔法や飛び道具）
+}
+
 /// <summary>
 /// 実行時に使用される敵キャラクターのモデルクラス
 /// </summary>
@@ -7,6 +13,7 @@ public class EnemyModel
 {
     public int EnemyID { get; private set; }                 // 敵のID
     public string EnemyName { get; private set; }             // 敵の名前
+    public EnemyAttackType AttackType;
     public float EnemyHP { get; set; }                       // 敵のHP
     public float MaxHP { get; private set; }
     public float EnemyAttackPower { get; private set; }      // 攻撃力

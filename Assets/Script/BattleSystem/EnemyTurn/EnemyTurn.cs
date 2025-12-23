@@ -159,7 +159,7 @@ public class EnemyTurn : MonoBehaviour
             yield return null;
         }
 
-        // 10. ターン終了処理
+        // ターン終了処理
         defenseHandler.DisableDefenseInput();
         TurnFinished?.Invoke();
     }

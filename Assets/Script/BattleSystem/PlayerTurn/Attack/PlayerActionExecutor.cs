@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class PlayerActionExecutor
 {
-    private Queue<ICommand> commandQueue = new();
+    private Queue<(ICommand command, CardRuntime card)> commandQueue = new();
     private CardModelFactory cardModelFactory;
     private MonoBehaviour coroutineRunner;
 
@@ -28,6 +28,8 @@ public class PlayerActionExecutor
         Dictionary<EnemyModel, EnemyController> enemyControllers,
         List<EnemyRuntime> allEnemyRuntimes,
         DamageCalculator damageCalculator,
+        System.Action<CardRuntime> onShowCard,
+        System.Action onHideCard,
         System.Action onExecutionComplete)
     {
         commandQueue.Clear();
@@ -65,10 +67,26 @@ public class PlayerActionExecutor
         // 順に実行
         while (commandQueue.Count > 0)
         {
-            var command = commandQueue.Dequeue();
-            yield return coroutineRunner.StartCoroutine(command.Do());
-        }
+            var item = commandQueue.Dequeue();
+            ICommand currentCommand = item.command;
+            CardRuntime currentCard = item.card;
 
+            onShowCard?.Invoke(currentCard);
+            yield return coroutineRunner.StartCoroutine(currentCommand.Do());
+            bool isNextSameCard = false;
+            if (commandQueue.Count > 0)
+            {
+                var nextItem = commandQueue.Peek();
+                if (nextItem.card == currentCard)
+                {
+                    isNextSameCard = true;
+                }
+            }
+            if (!isNextSameCard)
+            {
+                onHideCard?.Invoke();
+            }
+        }
         Debug.Log("カード効果の実行完了");
         onExecutionComplete?.Invoke();
     }
@@ -152,9 +170,7 @@ public class PlayerActionExecutor
             if (targetEnemyUI != null && enemyControllers.TryGetValue(targetRuntime.EnemyModel, out EnemyController targetEnemyController))
             {
                 Transform targetTransform = targetEnemyController.transform;
-
-                // コマンド生成
-                commandQueue.Enqueue(new AttackCommand(
+                var command = new AttackCommand(
                     attackPlayer,
                     weaponRuntime,
                     selectedCardRuntime,
@@ -163,7 +179,8 @@ public class PlayerActionExecutor
                     targetRuntime,
                     targetTransform,
                     damageCalculator,
-                    cardModelFactory));
+                    cardModelFactory);
+                commandQueue.Enqueue((command, selectedCardRuntime));
             }
             else
             {
@@ -184,16 +201,22 @@ public class PlayerActionExecutor
     {
         PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == player);
         CardModel cardModel = cardModelFactory.CreateFromID(selectedCardRuntime.ID);
-
+        ICommand command = null;
         switch (selectedCardRuntime.attribute)
         {
             case AttributeType.Heal:
-                commandQueue.Enqueue(new HealCommand(player, selectedCardRuntime, attackerUI, cardModel));
+                command = new HealCommand(player, selectedCardRuntime, attackerUI, cardModel);
                 break;
             case AttributeType.AttackBuff:  // 攻撃バフ
             case AttributeType.DefenseBuff: // 防御バフ
-                commandQueue.Enqueue(new BuffCommand(player, selectedCardRuntime, attackerUI, cardModel));
+                command = new BuffCommand(player, selectedCardRuntime, attackerUI, cardModel);
                 break;
+        }
+
+        if (command != null)
+        {
+            // ★変更: コマンドとカードをセットでキューに入れる
+            commandQueue.Enqueue((command, selectedCardRuntime));
         }
     }
 }

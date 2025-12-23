@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Enemy_1
   m_EditorClassIdentifier: 
   EnemyID: 1
-  EnemyName: Enemy_1
+  EnemyName: CRUSTACEAN
   EnemyAttribute: 0
   EnemyDefensAttribute: 1
-  EnemySprite: {fileID: -2015333617, guid: 77eb5f6454af20a439335a0a923065dd, type: 3}
+  EnemySprite: {fileID: 21300000, guid: 5dccac4f957129047ab1f0a89ad2fb4b, type: 3}
   EnemyDescription: 
   EnemyHP: 500
   EnemyAttackPower: 10

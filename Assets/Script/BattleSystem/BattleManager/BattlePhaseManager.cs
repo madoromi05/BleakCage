@@ -229,6 +229,7 @@ public class BattlePhaseManager : MonoBehaviour
 
     public void OnKeepSelections()
     {
+        Debug.Log("選択を保持して続行が選択されました。");
         selectionChoicePanel.SetActive(false);
         if (selectionChoiceCoroutine != null)
         {
@@ -240,6 +241,7 @@ public class BattlePhaseManager : MonoBehaviour
 
     public void OnChangeSelections()
     {
+        Debug.Log("選択を変更して続行が選択されました。");
         selectionChoicePanel.SetActive(false);
         if (selectionChoiceCoroutine != null)
         {

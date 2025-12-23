@@ -21,10 +21,5 @@ MonoBehaviour:
   PlayerIcon: {fileID: 0}
   PlayerLevel: 1
   PlayerHP: 100
-  PlayerDefensePower: 5
-  AnimationSet: {fileID: 11400000, guid: f188cc49f67d3224c9d7ccb6d404e557, type: 2}
+  PlayerDefensePower: 2
   PlayerWeapon: {fileID: -8653719598885068355, guid: 397a137e336d11c48b99c3bb7a0ff1de, type: 3}
-  DefaultCards:
-  - {fileID: 11400000, guid: 9330ca3865d67d24aa31e5a0d79a7cc6, type: 2}
-  - {fileID: 11400000, guid: 2319224838fc27742be07c4b29dd9f79, type: 2}
-  - {fileID: 11400000, guid: ce19b8a0dcf75e84ca4c1cb7c7214059, type: 2}

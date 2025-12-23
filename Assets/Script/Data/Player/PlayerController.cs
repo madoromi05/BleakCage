@@ -85,4 +85,17 @@ public class PlayerController : MonoBehaviour
             animCtrl.SetGuard(isGuarding);
         }
     }
+
+    /// <summary>
+    /// 死亡アニメーションを再生する
+    /// </summary>
+    public void PlayDeadAnimation()
+    {
+        if (animCtrl != null)
+        {
+            GetComponentInChildren<Animator>()?.SetTrigger("IsDead");
+        }
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+    }
 }

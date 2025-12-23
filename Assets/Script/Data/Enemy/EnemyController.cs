@@ -5,16 +5,22 @@ using UnityEngine;
 
 /// <summary>
 /// UI、データをゲームにsetするクラス
+///　敵キャラの共通親クラス
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
+    [Header("Effects")]
+    [SerializeField] private GameObject meleeHitEffectPrefab;   // 近接ヒットエフェクト
+    [SerializeField] private GameObject rangedShootEffectPrefab; // 遠距離の発射エフェクト
+    [SerializeField] private GameObject rangedHitEffectPrefab;   // 遠距離の着弾エフェクト
+
     public event System.Action OnAttackHitMoment;
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
     private Animator animator;
     private AnimatorOverrideController overrideController;
-    private Vector3 originalPosition; // 攻撃前の元の位置
-    private Transform playerTransform; // 攻撃対象（プレイヤー）のTransform
+    private Vector3 originalPosition;
+    private Transform playerTransform;
 
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
     private static readonly int AttackIDHash = Animator.StringToHash("AttackID");
@@ -23,9 +29,9 @@ public class EnemyController : MonoBehaviour
     private static readonly List<string> AnimatorAttackSlotNames = new List<string>
     {
         //攻撃アニメーションの最大数分作る
-        "Attack001",
-        "Attack002",
-        "Attack003",
+        "Attack1",
+        "Attack2",
+        "Attack3",
     };
 
     /// <summary>
@@ -43,7 +49,8 @@ public class EnemyController : MonoBehaviour
             Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
             // プレハブを生成し、その参照(instance)を保持する
             GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
-
+            var receiver = instance.AddComponent<EnemyAnimationReceiver>();
+            receiver.Setup(this);
             this.animator = instance.GetComponent<Animator>();
             if (this.animator == null)
             {
@@ -80,39 +87,6 @@ public class EnemyController : MonoBehaviour
     }
 
     /// <summary>
-    /// 攻撃シーケンスを開始する
-    /// </summary>
-    public IEnumerator AttackSequence()
-    {
-        // 1. 相手の懐（例: 1.5ユニット手前）まで移動する
-        Vector3 targetPosition = playerTransform.position + (transform.position - playerTransform.position).normalized * 1.5f;
-        float moveDuration = 0.3f; // 0.3秒かけて移動
-
-        transform.DOMove(targetPosition, moveDuration).SetEase(Ease.OutCubic);
-
-        // 移動が終わるまで待機
-        yield return new WaitForSeconds(moveDuration);
-
-        // 2. 攻撃アニメーションを再生
-        animator.SetTrigger("Attack"); // 仮のアニメーショントリガー
-
-        // 3. アニメーション再生が完了するまで待機（ここは後述の「アニメーションイベント」で制御するのがベスト）
-        // とりあえず固定時間待機する場合
-        float attackAnimLength = 1.0f; // アニメの長さに合わせる
-        yield return new WaitForSeconds(attackAnimLength);
-
-        // 4. 元の位置に戻る
-        float returnDuration = 0.5f;
-        transform.DOMove(originalPosition, returnDuration).SetEase(Ease.InOutQuad);
-
-        // 戻るまで待機
-        yield return new WaitForSeconds(returnDuration);
-
-        // これで攻撃シーケンス完了
-        Debug.Log("攻撃完了、元の位置に戻りました");
-    }
-
-    /// <summary>
     /// OverrideControllerに設定されたクリップの長さを取得する
     /// </summary>
     private float GetAnimationClipLength(string clipNameKey)
@@ -146,6 +120,35 @@ public class EnemyController : MonoBehaviour
 
         string clipSlotName = AnimatorAttackSlotNames[randomAttackID];
         return GetAnimationClipLength(clipSlotName);
+    }
+
+    /// <summary>
+    /// 攻撃タイプに応じたエフェクトを再生するメソッド
+    /// </summary>
+    /// <param name="type">敵の攻撃タイプ (Melee/Ranged)</param>
+    /// <param name="targetPosition">攻撃対象（プレイヤー）の位置</param>
+    public void PlayAttackEffect(EnemyAttackType type, Vector3 targetPosition)
+    {
+        switch (type)
+        {
+            case EnemyAttackType.Melee:
+                // 近接攻撃の場合
+                if (meleeHitEffectPrefab != null)
+                {
+                    // 少し位置を上げる(Vector3.up)と足元ではなく体に当たったように見える
+                    Instantiate(meleeHitEffectPrefab, targetPosition + Vector3.up, Quaternion.identity);
+                }
+                break;
+
+            case EnemyAttackType.Ranged:
+                // 遠距離攻撃の場合
+                // ターゲットの位置に「着弾エフェクト（爆発）」を出す
+                if (rangedHitEffectPrefab != null)
+                {
+                    Instantiate(rangedHitEffectPrefab, targetPosition + Vector3.up, Quaternion.identity);
+                }
+                break;
+        }
     }
 
     public void SetStatusUI(EnemyStatusUIController ui)

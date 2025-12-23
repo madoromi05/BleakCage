@@ -14,6 +14,7 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private BattleInputReader inputReader;
     [SerializeField] private GuardGaugeSystem guardGaugeSystem;
     [SerializeField] private DamageCalculator damageCalculator;
+    [SerializeField] private BattleCardPresenter battleCardPresenter;
     [SerializeField] private float cardSelectionYOffset = 30.0f;
 
     public event System.Action OnTurnFinished;
@@ -63,6 +64,13 @@ public class PlayerTurn : MonoBehaviour
         cardModelFactory = new CardModelFactory();
         actionExecutor = new PlayerActionExecutor(this);
         audioSource = GetComponent<AudioSource>();
+        if (battleCardPresenter != null)
+        {
+            battleCardPresenter.Setup(cardModelFactory, playerHandTransform, cardPrefab);}
+        else
+        {
+            Debug.LogError("BattleCardPresenter がインスペクターで設定されていません！");
+        }
     }
 
     public void Setup(Dictionary<int, List<EnemyModel>> playerSelections,
@@ -126,6 +134,8 @@ public class PlayerTurn : MonoBehaviour
            enemyControllers,
            allEnemyRuntimes,
            damageCalculator,
+           battleCardPresenter.ShowCard,
+           battleCardPresenter.HideCard,
            () => OnTurnFinished?.Invoke()
        ));
     }
@@ -355,6 +365,8 @@ public class PlayerTurn : MonoBehaviour
            enemyControllers,
            allEnemyRuntimes,
            damageCalculator,
+           battleCardPresenter.ShowCard,
+           battleCardPresenter.HideCard,
            () => OnTurnFinished?.Invoke()
        ));
         }

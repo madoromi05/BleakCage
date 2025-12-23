@@ -28,7 +28,7 @@ public class EnemyAttackCommand : ICommand
     {
         Debug.Log($"攻撃実行: Enemy='{Attacker.EnemyID}' が Player='{PlayerTarget.PlayerModel.PlayerID}' に攻撃開始！");
 
-        // 1. 敵の攻撃アニメーションを再生し、その長さを取得する
+        // 敵の攻撃アニメーションを再生し、その長さを取得する
         // (このアニメーションの途中で 'OnAttackHitMoment' イベントが発火する)
         float attackAnimTime = 0.5f;
         if (_enemyController != null)
@@ -36,10 +36,10 @@ public class EnemyAttackCommand : ICommand
             attackAnimTime = _enemyController.PlayRandomAttackAnimation();
         }
 
-        // 2. アニメーションが終了するまで待機する
+        // アニメーションが終了するまで待機する
         yield return new WaitForSeconds(attackAnimTime);
 
-        // 3. アニメーション再生後 (ダメージ処理は EnemyTurn が行う)
+        // アニメーション再生後 (ダメージ処理は EnemyTurn が行う)
         Debug.Log($"攻撃アニメ終了: Enemy='{Attacker.EnemyID}'");
     }
 
@@ -48,13 +48,19 @@ public class EnemyAttackCommand : ICommand
     /// </summary>
     public void ApplyDamageAfterJudgement()
     {
+        if (PlayerTarget == null || PlayerTarget.HPHandler == null) return;
         // ダメージを計算する
         float damage = calculator.CalculateFinalDamage(
             Attacker,
             PlayerTarget.PlayerModel
         );
 
-        // 2. HPを減算する
+        if (_enemyController != null && PlayerTarget.PlayerController != null)
+        {
+            Vector3 targetPos = PlayerTarget.PlayerController.transform.position;
+            _enemyController.PlayAttackEffect(Attacker.AttackType, targetPos);
+        }
+        // HPを減算する
         SoundManager.Instance.PlaySE(SEType.damagedPlayer);
         PlayerTarget.HPHandler.TakeDamage(damage);
         _playerStatusUIController.UpdateHP(PlayerTarget.CurrentHP);

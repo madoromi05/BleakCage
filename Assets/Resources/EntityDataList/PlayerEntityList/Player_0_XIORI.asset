@@ -18,7 +18,7 @@ MonoBehaviour:
   CharacterPrefab: {fileID: 4973782963207966706, guid: 692152dd7821e5547ab56e3006112281, type: 3}
   InitialRotation: {x: 0, y: 0, z: 0}
   PlayerDescription: 
-  PlayerIcon: {fileID: 21300000, guid: 383cd00b3429d32419165b62d9a40e47, type: 3}
+  PlayerIcon: {fileID: 21300000, guid: efdccce54db339346931b341d09e0221, type: 3}
   PlayerLevel: 1
   PlayerHP: 100
   PlayerDefensePower: 2
