@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// インスペクターで設定できる、キャラクター1体分の初期装備データ
+/// インスペクター上でStageごとのデッキを設定するためのデータセット
 /// </summary>
 [System.Serializable]
 public class CharacterSetupData
@@ -10,9 +10,6 @@ public class CharacterSetupData
     [Header("基本設定")]
     public int CharacterID;
     public int Level;
-
-    [Header("キャラクターカード")]
-    public List<int> DirectCardIDs = new List<int>();
 
     [Header("装備武器")]
     public List<WeaponSetupData> Weapons = new List<WeaponSetupData>();
@@ -25,7 +22,6 @@ public class CharacterSetupData
 public class WeaponSetupData
 {
     public int WeaponID;
-    public List<int> SlottedCardIDs = new List<int>();
 }
 
 /// <summary>

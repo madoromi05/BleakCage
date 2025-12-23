@@ -35,8 +35,16 @@ public class PlayerController : MonoBehaviour
 
         if (model.CharacterPrefab != null)
         {
-            Quaternion rot = this.transform.rotation * Quaternion.Euler(model.InitialRotation);
-            GameObject instance = Instantiate(model.CharacterPrefab, transform.position, rot, transform);
+            GameObject instance = Instantiate(model.CharacterPrefab, transform);
+
+            // Prefabのローカル座標・スケールを適用
+            instance.transform.localPosition = model.CharacterPrefab.transform.localPosition;
+            instance.transform.localScale = model.CharacterPrefab.transform.localScale;
+
+            // 回転の適用: Prefabの回転 × Entityで設定した初期回転(InitialRotation)
+            Quaternion prefabRot = model.CharacterPrefab.transform.localRotation;
+            Quaternion adjustRot = Quaternion.Euler(model.InitialRotation);
+            instance.transform.localRotation = prefabRot * adjustRot;
 
             Animator anim = instance.GetComponent<Animator>();
             CharacterBoneHolder boneHolder = instance.GetComponent<CharacterBoneHolder>();
@@ -46,14 +54,28 @@ public class PlayerController : MonoBehaviour
 
             if (anim != null)
             {
-                animCtrl.Init(anim, model.PlayerAnimator);
+                animCtrl.Init(anim);
             }
             combatCtrl.Init(animCtrl, moveCtrl, rightHandSocket, leftHandSocket);
         }
     }
+
+    public void SetInitialWeapon(WeaponRuntime weaponRuntime)
+    {
+        if (combatCtrl != null && weaponRuntime != null)
+        {
+            combatCtrl.EquipMainWeapon(weaponRuntime);
+        }
+    }
+
     public IEnumerator AttackSequence(CardModel cardModel, WeaponRuntime weaponRuntime, Transform target)
     {
         yield return combatCtrl.ExecuteAttackSequence(cardModel, weaponRuntime, target);
+    }
+
+    public IEnumerator SupportEffect(CardModel cardModel)
+    {
+        yield return combatCtrl.ExecuteSupportEffect(cardModel);
     }
 
     public void SetGuardAnimation(bool isGuarding)

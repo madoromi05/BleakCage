@@ -29,7 +29,6 @@ public class CardEntity : ScriptableObject
     public string Name;                                             // カード名
     public int CharacterID;                                         // このカードを装備するキャラID
     public int EquipableWeaponID;                                   // このカードを装備する武器ID
-    public Sprite Icon;                                             // アイコン画像
     [Multiline]public string Description;                           // 説明文
 
     public CardTypeData Type;                                       // カードタイプ

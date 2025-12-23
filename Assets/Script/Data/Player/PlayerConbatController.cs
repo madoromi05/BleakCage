@@ -13,6 +13,9 @@ public class PlayerCombatController : MonoBehaviour
     private Transform rightHandSocket;
     private Transform leftHandSocket;
 
+    private GameObject _currentMainWeaponObj;
+    private WeaponRuntime _currentMainWeaponRuntime;
+
     public event Action OnAttackHitTriggered;
 
     /// <summary>
@@ -20,6 +23,7 @@ public class PlayerCombatController : MonoBehaviour
     /// </summary>
     public void Init(PlayerAnimationController anim, PlayerMovementController move, Transform rightHand, Transform leftHand)
     {
+        Debug.Log("PlayerCombatController Init");
         this.animCtrl = anim;
         this.moveCtrl = move;
         this.rightHandSocket = rightHand;
@@ -27,40 +31,63 @@ public class PlayerCombatController : MonoBehaviour
     }
 
     /// <summary>
+    /// 戦闘開始時にメイン武器を装備するメソッド
+    /// </summary>
+    public void EquipMainWeapon(WeaponRuntime weaponRuntime)
+    {
+        // 既に持っているなら消す
+        if (_currentMainWeaponObj != null) Destroy(_currentMainWeaponObj);
+
+        _currentMainWeaponRuntime = weaponRuntime;
+        _currentMainWeaponObj = CreateWeapon(weaponRuntime, weaponRuntime.Model.HoldHandType);
+    }
+
+    /// <summary>
     /// 攻撃シーケンスの実行
     /// </summary>
     public IEnumerator ExecuteAttackSequence(CardModel cardModel, WeaponRuntime weaponRuntime, Transform target)
     {
-        // 1. 武器生成
-        GameObject weaponObj = CreateWeapon(weaponRuntime, cardModel.WeaponHand);
+        GameObject attackWeaponObj = null;
+        bool isTemporaryWeapon = false;
 
-        // 2. 移動 (近接のみ)
+        // 使う武器が「今装備しているもの」と同じならそれを使う
+        if (_currentMainWeaponRuntime != null && weaponRuntime.Prefab == _currentMainWeaponRuntime.Prefab)
+        {
+            attackWeaponObj = _currentMainWeaponObj;
+            isTemporaryWeapon = false;
+        }
+        else
+        {
+            // 違う武器（武器カードなど）なら、一時的に生成する
+            if (_currentMainWeaponObj != null) _currentMainWeaponObj.SetActive(false);
+
+            attackWeaponObj = CreateWeapon(weaponRuntime, weaponRuntime.Model.HoldHandType); 
+            isTemporaryWeapon = true;
+        }
+
+        // 移動 (近接のみ)
         if (cardModel.IsMelee)
         {
             yield return moveCtrl.MoveToTarget(target.position);
         }
 
         bool isHitProcessed = false;
-
-        // 攻撃ヒット時の処理（エフェクト表示 & イベント発火）
         Action hitHandler = () =>
         {
-            SpawnEffect(cardModel, target);
+            PlayEffect(cardModel.EffectPrefab, target.position + Vector3.up * 2.0f);
             OnAttackHitTriggered?.Invoke();
             isHitProcessed = true;
         };
 
-        // アニメーションイベント購読
         animCtrl.OnAttackHitTriggered += hitHandler;
 
-        // 3. アニメーション再生
+        // アニメーション再生
         AnimationClip clip = cardModel.AttackAnimation;
         if (clip != null)
         {
             animCtrl.PlayAttackAnimation(clip);
             yield return new WaitForSeconds(clip.length);
 
-            // 安全策：イベントが来なかった場合の待機
             float waitTimer = 0f;
             while (!isHitProcessed && waitTimer < 2.0f)
             {
@@ -70,38 +97,42 @@ public class PlayerCombatController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"Card {cardModel.Name} に AttackAnimation が設定されていません。");
             hitHandler.Invoke();
             yield return new WaitForSeconds(0.5f);
         }
 
-        // 購読解除
         animCtrl.OnAttackHitTriggered -= hitHandler;
 
-        // 4. 武器削除
-        if (weaponObj != null) Destroy(weaponObj);
+        if (isTemporaryWeapon)
+        {
+            if (attackWeaponObj != null) Destroy(attackWeaponObj);
+            if (_currentMainWeaponObj != null) _currentMainWeaponObj.SetActive(true);
+        }
 
-        // 5. 元の位置に戻る (近接のみ)
         if (cardModel.IsMelee)
         {
             yield return moveCtrl.ReturnToOriginalPosition();
         }
     }
-
-    // エフェクト生成処理
-    private void SpawnEffect(CardModel cardModel, Transform target)
+    /// <summary>
+    /// 支援・回復時の演出（自分自身にエフェクトを出す）
+    /// </summary>
+    public IEnumerator ExecuteSupportEffect(CardModel cardModel)
     {
-        if (cardModel.EffectPrefab != null && target != null)
-        {
-            Debug.Log($"Combat: Instantiate Effect at {target.position}");
+        PlayEffect(cardModel.EffectPrefab, transform.position + Vector3.up * 1.0f);
+        yield return new WaitForSeconds(0.5f);
+    }
 
-            // EffectOffset を加算して位置を決定
-            Vector3 effectPos = target.position + Vector3.up * 2.0f;
+    /// <summary>
+    /// 【共通メソッド】エフェクトを生成して自動で削除する
+    /// </summary>
+    private void PlayEffect(GameObject prefab, Vector3 position)
+    {
+        if (prefab == null) return;
 
-            // プレハブの回転を維持して生成
-            GameObject effect = Instantiate(cardModel.EffectPrefab, effectPos, cardModel.EffectPrefab.transform.rotation);
-            Destroy(effect, 2.0f);
-        }
+        // プレハブの回転値をそのまま使って生成
+        GameObject effect = Instantiate(prefab, position, prefab.transform.rotation);
+        Destroy(effect, 2.0f);
     }
 
     // 武器生成処理
@@ -113,8 +144,10 @@ public class PlayerCombatController : MonoBehaviour
         if (socket == null) return null;
 
         GameObject obj = Instantiate(weaponRuntime.Prefab, socket);
-        obj.transform.localPosition = Vector3.zero;
-        obj.transform.localRotation = Quaternion.identity;
+        obj.name = weaponRuntime.Prefab.name;
+        obj.transform.localPosition = weaponRuntime.Prefab.transform.localPosition;
+        obj.transform.localRotation = weaponRuntime.Prefab.transform.localRotation;
+        obj.transform.localScale = weaponRuntime.Prefab.transform.localScale;
         return obj;
     }
 }

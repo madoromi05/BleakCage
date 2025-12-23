@@ -35,12 +35,12 @@ public class StatusEffectHandler
             // 既に存在する場合はスタックを加算し、効果時間を延長
             existing.AddStack(newEffect.StackCount);
             existing.DurationTurns = Mathf.Max(existing.DurationTurns, newEffect.DurationTurns);
-            Debug.Log($"[{ownerName}] {newEffect.Type} Stack Updated: {existing.StackCount}");
+            // Debug.Log($"[{ownerName}] {newEffect.Type} Stack Updated: {existing.StackCount}");
         }
         else
         {
             ActiveStatusEffects.Add(newEffect);
-            Debug.Log($"[{ownerName}] {newEffect.Type} Applied. Stack: {newEffect.StackCount}");
+            // Debug.Log($"[{ownerName}] {newEffect.Type} Applied. Stack: {newEffect.StackCount}");
         }
     }
 
@@ -62,12 +62,11 @@ public class StatusEffectHandler
         if (effect != null)
         {
             effect.StackCount -= amount;
-            Debug.Log($"[{ownerName}] {type} Stack Consumed. Remaining: {effect.StackCount}");
+            // Debug.Log($"[{ownerName}] {type} Stack Consumed. Remaining: {effect.StackCount}");
 
             if (effect.StackCount <= 0)
             {
                 ActiveStatusEffects.Remove(effect);
-                Debug.Log($"[{ownerName}] {type} Removed.");
             }
         }
     }
@@ -84,7 +83,6 @@ public class StatusEffectHandler
             if (buff.DurationTurns <= 0)
             {
                 ActiveStatusEffects.RemoveAt(i);
-                Debug.Log($"[{ownerName}] {buff.Type} Expired.");
             }
         }
     }

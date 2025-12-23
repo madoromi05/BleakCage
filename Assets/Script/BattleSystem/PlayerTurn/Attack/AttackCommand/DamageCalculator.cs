@@ -6,18 +6,12 @@
 public class DamageCalculator : MonoBehaviour
 {
     [Header("属性相性")]
-    [SerializeField] private float attributeMultiplier = 1.5f;      // 属性倍率
-    [Tooltip("減衰率のスケーリング係数 (k)")]
+    [SerializeField] private float attributeMultiplier = 1.5f;
     [SerializeField] private float k = 1.0f;
-    [Tooltip("減衰定数 (Ca)。この値が実質的防御力と等しい時、減衰率が50%になる")]
     [SerializeField] private float attenuationConstant = 100f;
 
     /// <summary>
-    /// ダメージ計算を実行
-    /// 計算式: E = (基礎攻撃力) * (減衰率) * (相性倍率)
-    /// - 基礎攻撃力 = (A + O) * Co
-    /// - 減衰率 = (k * Ca) / (k * Ca + (D / Cp))
-    /// - 相性倍率 = R^P
+    /// 最終的なダメージを計算して返すメインメソッド
     /// </summary>
     public float CalculateFinalDamage(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, EnemyRuntime enemy)
     {
@@ -26,107 +20,112 @@ public class DamageCalculator : MonoBehaviour
         float Co = card.GetOutput();
         float D = enemy.EnemyModel.EnemyDefensePower;
         float Cp = card.DefensePenetration;
+
+        float attackMultiplier = GetPlayerAttackMultiplier(player);
+        float baseAttack = (A + O) * Co * attackMultiplier;
+
+        // 敵の状態異常（防御・貫通補正）を適用
+        // D と Cp は参照渡し (ref) で書き換える
+        ApplyDefenseModifiers(enemy, ref D, ref Cp);
+
+        // 減衰率を計算
+        float attenuationRate = CalculateAttenuationRate(D, Cp);
+
+        // 属性相性倍率を取得
         float R = GetRelationCoefficient(weapon.Attribute, enemy.EnemyModel.EnemyDefensAttribute);
         float P = weapon.PeakyCoefficient;
-        float baseAttack = (A + O) * Co;
-
-        if (enemy.StatusHandler != null)
-        {
-            //【破砕】: 1スタックにつき貫通(Cp) +0.2
-            int fracture = enemy.StatusHandler.GetStackCount(StatusEffectType.Fracture);
-            if (fracture > 0)
-            {
-                Cp += (fracture * 0.2f);
-            }
-
-            //【熔鉄】: 1スタックにつき防御(D) -5%
-            int meltdown = enemy.StatusHandler.GetStackCount(StatusEffectType.Meltdown);
-            if (meltdown > 0)
-            {
-                // 1.0 - (0.05 * stack) を掛ける
-                float multiplier = Mathf.Max(0, 1.0f - (0.05f * meltdown));
-                D *= multiplier;
-            }
-        }
-
-        // --- 2. 減衰率 ((k * Ca) / (k * Ca + (D / Cp))) の計算 ---
-
-        // (D / Cp) (実質的防御力)
-        float effectiveDefense;
-        if (Mathf.Approximately(Cp, 0))
-        {
-            effectiveDefense = D;
-        }
-        else
-        {
-            effectiveDefense = D / Cp;
-        }
-
-        // (k * Ca)
-        float kCa = k * attenuationConstant;
-
-        // 分母 (k * Ca + 実質的防御力)
-        float denominator = kCa + effectiveDefense;
-
-        // 減衰率の計算
-        float attenuationRate;
-        if (effectiveDefense == float.MaxValue)
-        {
-            attenuationRate = 0f; // 分母が無限大
-        }
-        else if (Mathf.Approximately(denominator, 0))
-        {
-            // kCaとeffectiveDefenseが両方0の場合など
-            Debug.LogWarning("減衰率の分母が0です。");
-            attenuationRate = 0f;
-        }
-        else
-        {
-            // 減衰率 = (k * Ca) / (k * Ca + D / Cp)
-            attenuationRate = kCa / denominator;
-        }
-
-        // 念のため 0..1 の範囲にクランプ
-        attenuationRate = Mathf.Clamp01(attenuationRate);
-
-        // 相性倍率 (R^P) の計算
         float affinityMultiplier = Mathf.Pow(R, P);
 
-
-        // 最終ダメージ (E) の計算
-        // E = 基礎攻撃力 * 減衰率 * 相性倍率
-        float finalDamage = baseAttack * attenuationRate * affinityMultiplier;
-
-        return finalDamage;
+        // 最終計算
+        return baseAttack * attenuationRate * affinityMultiplier;
     }
 
     /// <summary>
-    /// 攻撃属性と敵の種類から相性係数を取得
+    /// プレイヤーのステータス効果から攻撃力倍率を算出
+    /// </summary>
+    private float GetPlayerAttackMultiplier(PlayerRuntime player)
+    {
+        if (player.StatusHandler == null) return 1.0f;
+
+        float multiplier = 1.0f;
+
+        // 【攻撃力UP】: 1スタックにつき +10%
+        int atkStacks = player.StatusHandler.GetStackCount(StatusEffectType.AttackUp);
+        multiplier += (atkStacks * 0.1f);
+
+        return multiplier;
+    }
+
+    /// <summary>
+    /// 敵のステータス効果に基づいて防御力(D)と貫通力(Cp)を補正する
+    /// </summary>
+    private void ApplyDefenseModifiers(EnemyRuntime enemy, ref float D, ref float Cp)
+    {
+        if (enemy.StatusHandler == null) return;
+
+        // 【防御力UP】: 1スタックにつき防御力 +20%
+        int defStacks = enemy.StatusHandler.GetStackCount(StatusEffectType.DefenceUp);
+        if (defStacks > 0)
+        {
+            D *= (1.0f + defStacks * 0.2f);
+        }
+
+        // 【破砕】: 1スタックにつき貫通(Cp) +0.2
+        int fracture = enemy.StatusHandler.GetStackCount(StatusEffectType.Fracture);
+        if (fracture > 0)
+        {
+            Cp += (fracture * 0.2f);
+        }
+
+        // 【熔鉄】: 1スタックにつき防御(D) -5%
+        int meltdown = enemy.StatusHandler.GetStackCount(StatusEffectType.Meltdown);
+        if (meltdown > 0)
+        {
+            D *= Mathf.Max(0, 1.0f - (0.05f * meltdown));
+        }
+    }
+
+    /// <summary>
+    /// 減衰率の計算ロジック
+    /// </summary>
+    private float CalculateAttenuationRate(float D, float Cp)
+    {
+        // 実質的防御力の計算 (ゼロ除算回避)
+        float effectiveDefense = Mathf.Approximately(Cp, 0) ? D : D / Cp;
+
+        float kCa = k * attenuationConstant;
+        float denominator = kCa + effectiveDefense;
+
+        if (Mathf.Approximately(denominator, 0)) return 0f;
+
+        return Mathf.Clamp01(kCa / denominator);
+    }
+
+    /// <summary>
+    /// 属性相性係数の取得（既存処理）
     /// </summary>
     private float GetRelationCoefficient(AttributeType attackAttr, DefensAttributeType enemyAttr)
     {
-        // 相性係数のデフォルト値 (普通の場合)
         float coefficient = 1f;
 
         switch (attackAttr)
         {
             case AttributeType.Slash:
-                if (enemyAttr == DefensAttributeType.Repulsive) coefficient = attributeMultiplier;        // 斥力:有利
-                else if (enemyAttr == DefensAttributeType.Hardness) coefficient = 1f / attributeMultiplier;  // 堅牢:不利
+                if (enemyAttr == DefensAttributeType.Repulsive) coefficient = attributeMultiplier;
+                else if (enemyAttr == DefensAttributeType.Hardness) coefficient = 1f / attributeMultiplier;
                 break;
 
             case AttributeType.Blunt:
-                if (enemyAttr == DefensAttributeType.Softness) coefficient = attributeMultiplier;      // 軟体:有利
-                else if (enemyAttr == DefensAttributeType.Repulsive) coefficient = 1f / attributeMultiplier; // 斥力:不利
+                if (enemyAttr == DefensAttributeType.Softness) coefficient = attributeMultiplier;
+                else if (enemyAttr == DefensAttributeType.Repulsive) coefficient = 1f / attributeMultiplier;
                 break;
 
             case AttributeType.Pierce:
-                if (enemyAttr == DefensAttributeType.Hardness) coefficient = attributeMultiplier;       // 堅牢:有利
-                else if (enemyAttr == DefensAttributeType.Softness) coefficient = 1f / attributeMultiplier;  // 軟体:不利
+                if (enemyAttr == DefensAttributeType.Hardness) coefficient = attributeMultiplier;
+                else if (enemyAttr == DefensAttributeType.Softness) coefficient = 1f / attributeMultiplier;
                 break;
 
             case AttributeType.Bullet:
-                // 弾属性は全て普通 (デフォルト値)
                 break;
         }
 

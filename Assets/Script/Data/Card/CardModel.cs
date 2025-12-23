@@ -10,13 +10,11 @@ public class CardModel
     public string Name { get; private set; }
     public int EquipableWeaponID { get; private set; }
     public int CharacterID { get; private set; }
-    public CardTypeData Type { get; private set; }
     public AttributeType Attribute { get; private set; }
     public bool IsPassive { get; private set; }                             // パッシブ効果なのかどうか
     public float HitRate { get; private set; }                              // 命中率(1～0)
     public float OutputModifier { get; private set; }                       // 出力調整
     public float DefensePenetration { get; private set; }                   // 防御貫通率
-    public Sprite CardSprite{ get; private set; }                           // CardのIcon
     public string Description { get; private set; }                         // Cardの説明文
     public AnimationClip AttackAnimation { get; private set; }
     public StatusEffectData StatusEffect { get; private set; }
@@ -41,11 +39,9 @@ public class CardModel
 
         ID = entity.ID;
         Name = entity.Name;
-        CardSprite = entity.Icon;
         EquipableWeaponID = entity.EquipableWeaponID;
         CharacterID = entity.CharacterID;
         Description = entity.Description;
-        Type = entity.Type;
         Attribute = entity.Attribute;
         IsPassive = entity.Passive;
         HitRate = entity.HitRate;

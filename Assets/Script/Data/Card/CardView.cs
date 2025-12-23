@@ -1,12 +1,10 @@
 using System.Collections.Generic;
-using System.Data;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
 /// UIで表示させるものを決める
-/// 効果等は関係ない
 /// </summary>
 public class CardView : MonoBehaviour
 {
@@ -16,6 +14,7 @@ public class CardView : MonoBehaviour
     [SerializeField] private Outline AttackAttributeOutline;
     [SerializeField] private Text Description;
     [SerializeField] private Image IconImage;
+
     [Header("Attribute Icons")]
     [SerializeField] private List<AttributeSpriteMapping> attributeIconMappings;
 
@@ -41,22 +40,22 @@ public class CardView : MonoBehaviour
         }
     }
 
-    public void Show(CardModel cardModel)
+    public void Show(CardModel cardModel, float playerBasePower = 10f)
     {
         if (Name != null) Name.text = cardModel.Name;
 
-        // 属性名（日本語）だけを表示
+        // 属性名表示
         if (attackAttribute != null)
             attackAttribute.text = GetAttributeName(cardModel.Attribute);
 
-        // 説明文テンプレートを置換
+        // 説明文生成
         if (Description != null)
         {
             string csvDescription = cardModel.Description;
-            Description.text = GenerateFormattedDescription(csvDescription, cardModel);
+            Description.text = GenerateFormattedDescription(csvDescription, cardModel, playerBasePower);
         }
 
-        // 属性に応じてアイコン画像を切り替える
+        // アイコン・色設定
         if (IconImage != null)
         {
             if (attributeData.TryGetValue(cardModel.Attribute, out AttributeSpriteMapping mapping))
@@ -69,10 +68,7 @@ public class CardView : MonoBehaviour
             }
             else
             {
-                // 属性に対応するアイコンがない場合は、CardEntityに設定されているデフォルトのアイコンを使用
-                IconImage.sprite = cardModel.CardSprite;
-                // Debug.LogWarning($"No specific icon found for attribute: {cardModel.Attribute}. Using default icon for card ID: {cardModel.ID}");
-
+                // マッピングがない場合のデフォルト（黒など）
                 if (NameOutline != null)
                 {
                     NameOutline.effectColor = Color.black;
@@ -84,49 +80,46 @@ public class CardView : MonoBehaviour
     /// <summary>
     /// CardModelのデータに基づいて、フォーマットされた説明文を生成する
     /// </summary>
-    private string GenerateFormattedDescription(string csvInput, CardModel model)
+    private string GenerateFormattedDescription(string csvInput, CardModel model, float basePower)
     {
         StringBuilder descriptionBuilder = new StringBuilder();
-
-        // OutputModifierをパーセンテージに変換
-        float outputValue = model.OutputModifier * 100;
+        float baseValue = model.OutputModifier * 100;
+        float damageValue = basePower * model.OutputModifier;
 
         switch (model.Attribute)
         {
-            // --- 援属性の場合 ---
+            // 支援・回復・バフ
             case AttributeType.Heal:
-                descriptionBuilder.AppendLine($"自身に {outputValue:F0}% 回復");
+                descriptionBuilder.AppendLine($"自身に {baseValue:F0}% 回復");
+                break;
+            case AttributeType.DefenseBuff:
+                descriptionBuilder.AppendLine($"自身の防御力を {baseValue:F0}% アップ");
                 break;
 
-            case AttributeType.Defence:
-                descriptionBuilder.AppendLine($"自身の防御力を {outputValue:F0}% アップ");
+            case AttributeType.AttackBuff:
+                descriptionBuilder.AppendLine($"自身の攻撃力を {baseValue:F0}% アップ");
                 break;
 
-            // --- 攻撃属性の場合 ---
-            case AttributeType.Slash:
-            case AttributeType.Blunt:
-            case AttributeType.Pierce:
-            case AttributeType.Bullet:
-            default: // デフォルトは攻撃として扱う
-                descriptionBuilder.AppendLine($"出力 {outputValue:F0}%");
-
-                // 攻撃回数 (2回以上のみ表示)
+            // 攻撃属性
+            default:
                 if (model.AttackCount > 1)
                 {
-                    descriptionBuilder.AppendLine($"攻撃回数 {model.AttackCount}回");
+                    descriptionBuilder.AppendLine($"ダメージ {damageValue:F0} × {model.AttackCount}");
+                }
+                else
+                {
+                    descriptionBuilder.AppendLine($"ダメージ {damageValue:F0}");
                 }
 
+                // 範囲攻撃の補足
                 if (model.TargetScope == CardTargetScope.Random)
                 {
-                    // ランダムの時だけ「体数」を表示
-                    descriptionBuilder.AppendLine($"攻撃対象 ランダム{model.TargetCount}体");
+                    descriptionBuilder.AppendLine($"(対象: ランダム{model.TargetCount}体)");
                 }
                 else if (model.TargetScope == CardTargetScope.All)
                 {
-                    // 全体の時は「全体」と表示
-                    descriptionBuilder.AppendLine("攻撃対象 全体");
+                    descriptionBuilder.AppendLine("(対象: 全体)");
                 }
-                // Single (単体) の場合は何も表示しない
 
                 // 命中率 (100%未満のみ表示)
                 if (model.HitRate < 1.0f)
@@ -136,6 +129,7 @@ public class CardView : MonoBehaviour
                 break;
         }
 
+        // 状態異常,バフ効果の表示
         if (model.StatusEffect.Type != StatusEffectType.None)
         {
             string statusName = GetStatusEffectName(model.StatusEffect.Type);
@@ -143,30 +137,8 @@ public class CardView : MonoBehaviour
             int turn = model.StatusEffect.Duration;
             descriptionBuilder.AppendLine($"【{statusName}】{stack} ({turn}ターン)");
         }
+
         return descriptionBuilder.ToString();
-    }
-
-    private string ReplacePlaceholders(string input, CardModel model)
-    {
-        return input
-            .Replace("{Type}", GetCardTypeName(model.Type))
-            .Replace("{Attribute}", GetAttributeName(model.Attribute))
-            .Replace("{HitRate}", Mathf.RoundToInt(model.HitRate * 100).ToString() + "%")
-            .Replace("{AttackCount}", model.AttackCount.ToString())
-            .Replace("{TargetCount}", model.TargetCount.ToString())
-            .Replace("{Passive}", model.IsPassive ? "常時発動" : "使用型")
-            .Replace("{OutputMod}", model.OutputModifier.ToString("F2"));
-    }
-
-    private string GetCardTypeName(CardTypeData type)
-    {
-        switch (type)
-        {
-            case CardTypeData.Character: return "キャラ";
-            case CardTypeData.Weapon: return "武器";
-            case CardTypeData.Universal: return "汎用";
-            default: return type.ToString();
-        }
     }
 
     private string GetAttributeName(AttributeType attr)
@@ -177,7 +149,10 @@ public class CardView : MonoBehaviour
             case AttributeType.Blunt: return "鈍";
             case AttributeType.Pierce: return "突";
             case AttributeType.Bullet: return "弾";
-            default: return "援";
+            case AttributeType.Heal: return "癒";
+            case AttributeType.AttackBuff: return "攻強";
+            case AttributeType.DefenseBuff: return "守強";
+            default: return "他";
         }
     }
 

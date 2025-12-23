@@ -30,16 +30,14 @@ public class PlayerActionExecutor
         DamageCalculator damageCalculator,
         System.Action onExecutionComplete)
     {
-        Debug.Log("実行するカード: " + string.Join(",", selectedCards.Select(c => c.ID)));
         commandQueue.Clear();
 
         foreach (var selectedCardRuntime in selectedCards)
         {
             // このカードがアタッチされている特定の武器を取得する
             WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
-
-            // その武器を所持しているプレイヤーを取得する
             PlayerRuntime player = weaponRuntime.ParentPlayer;
+
             if (player == null || weaponRuntime == null)
             {
                 Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
@@ -47,9 +45,7 @@ public class PlayerActionExecutor
                 continue;
             }
 
-            // カードの属性に応じて処理を振り分け
             AttributeType attribute = selectedCardRuntime.attribute;
-
             if (IsAttackAttribute(attribute))
             {
                 // 攻撃属性の場合
@@ -62,7 +58,7 @@ public class PlayerActionExecutor
             }
             else
             {
-                HandleSupportAction(player, selectedCardRuntime);
+                HandleSupportAction(player, selectedCardRuntime, playerStatusUIControllers);
             }
         }
 
@@ -90,7 +86,8 @@ public class PlayerActionExecutor
             case AttributeType.Bullet:
                 return true;
             case AttributeType.Heal:
-            case AttributeType.Defence:
+            case AttributeType.AttackBuff:
+            case AttributeType.DefenseBuff:
             default:
                 return false;
         }
@@ -183,21 +180,20 @@ public class PlayerActionExecutor
     /// <summary>
     /// 援属性カードの処理（コマンドをキューに追加）
     /// </summary>
-    private void HandleSupportAction(PlayerRuntime player, CardRuntime selectedCardRuntime)
+    private void HandleSupportAction(PlayerRuntime player, CardRuntime selectedCardRuntime, List<PlayerStatusUIController> playerStatusUIControllers)
     {
-        if (selectedCardRuntime.attribute == AttributeType.Heal)
+        PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == player);
+        CardModel cardModel = cardModelFactory.CreateFromID(selectedCardRuntime.ID);
+
+        switch (selectedCardRuntime.attribute)
         {
-            // --- 回復コマンドの処理 ---
-            Debug.Log($"{player.PlayerModel.PlayerName} が回復カードを使用。");
-            SoundManager.Instance.PlaySE(SEType.Heal);
-            // commandQueue.Enqueue(new HealCommand(player, 0.2f)); // 例：最大HPの20%回復
-        }
-        else if (selectedCardRuntime.attribute == AttributeType.Defence)
-        {
-            // --- 防御コマンドの処理 ---
-            Debug.Log($"{player.PlayerModel.PlayerName} が防御カードを使用。");
-            SoundManager.Instance.PlaySE(SEType.Defence);
-            // commandQueue.Enqueue(new DefenceCommand(player, ...)); // 将来的な実装
+            case AttributeType.Heal:
+                commandQueue.Enqueue(new HealCommand(player, selectedCardRuntime, attackerUI, cardModel));
+                break;
+            case AttributeType.AttackBuff:  // 攻撃バフ
+            case AttributeType.DefenseBuff: // 防御バフ
+                commandQueue.Enqueue(new BuffCommand(player, selectedCardRuntime, attackerUI, cardModel));
+                break;
         }
     }
 }

@@ -48,47 +48,51 @@ public class PlayerDataLoader
             }
 
             PlayerRuntime playerRuntime = new PlayerRuntime(model, System.Guid.NewGuid().ToString(), charData.Level);
-
-            // 直持ちカードの生成 & 追加
-            foreach (int cardId in charData.DirectCardIDs)
+            if (model.PlayerWeapon == null)
             {
-                CardModel cModel = cardFactory.CreateFromID(cardId);
-                if (cModel != null)
-                {
-                    CardRuntime cRuntime = new CardRuntime(cModel, System.Guid.NewGuid().ToString());
-                    playerRuntime.CaracterCardWeapon.AddCard(cRuntime);
-                }
-                else
-                {
-                    Debug.LogWarning($"PlayerDataLoader: CardID {cardId} が見つかりません。");
-                }
+                Debug.LogError($"[異常] PlayerModelに武器が入っていません！ ID: {model.PlayerID}, Name: {model.PlayerName}");
             }
-
-            // 武器の生成 & 装備
+            else
+            {
+                Debug.Log($"[正常] PlayerModelは武器を持っています: {model.PlayerWeapon.Name}");
+            }
+            // Playerについている武器
             foreach (var weaponData in charData.Weapons)
             {
                 WeaponModel wModel = weaponFactory.CreateFromId(weaponData.WeaponID);
                 if (wModel != null)
                 {
                     WeaponRuntime wRuntime = new WeaponRuntime(wModel, System.Guid.NewGuid().ToString());
-
-                    // 武器スロットのカード生成
-                    foreach (int cardId in weaponData.SlottedCardIDs)
+                    if (wModel.DefaultCards != null)
                     {
-                        CardModel cModel = cardFactory.CreateFromID(cardId);
-                        if (cModel != null)
+                        foreach (CardEntity cardEntity in wModel.DefaultCards)
                         {
+                            CardModel cModel = new CardModel(cardEntity);
                             CardRuntime cRuntime = new CardRuntime(cModel, System.Guid.NewGuid().ToString());
                             wRuntime.AddCard(cRuntime);
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"PlayerDataLoader: CardID {cardId} が見つかりません。");
                         }
                     }
                     playerRuntime.EquipWeapon(wRuntime);
                 }
             }
+            if (model.PlayerWeapon != null)
+            {
+                WeaponModel defaultWModel = new WeaponModel(model.PlayerWeapon);
+                WeaponRuntime defaultWRuntime = new WeaponRuntime(defaultWModel, System.Guid.NewGuid().ToString());
+
+                if (defaultWModel.DefaultCards != null)
+                {
+                    foreach (CardEntity cardEntity in defaultWModel.DefaultCards)
+                    {
+                        CardModel cModel = new CardModel(cardEntity);
+                        CardRuntime cRuntime = new CardRuntime(cModel, System.Guid.NewGuid().ToString());
+                        defaultWRuntime.AddCard(cRuntime);
+                    }
+                }
+                playerRuntime.EquipWeapon(defaultWRuntime);
+                Debug.Log($"メイン武器装備: {defaultWModel.Name}");
+            }
+
             party.Add(playerRuntime);
         }
 

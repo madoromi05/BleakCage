@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -17,37 +18,34 @@ public class PlayerModel
     public GameObject CharacterPrefab { get; private set; }
     public Vector3 InitialRotation { get; private set; }
     public string PlayerDescription { get; private set; }
-    public AnimatorSet PlayerAnimator { get; private set; }
     public Sprite PlayerIcon { get; private set; }
-    public WeaponModel PlayerWeapon { get; private set; }
+    public WeaponEntity PlayerWeapon { get; private set; }
     /// <summary>
     /// コンストラクタ：IDからScriptableObjectを読み込んでモデルを生成
     /// </summary>
-    public PlayerModel(PlayerEntity playerEntity)
+    public PlayerModel(PlayerEntity entity)
     {
-        if (playerEntity == null)
+        if (entity == null)
         {
             Debug.LogError("PlayerEntity is null");
             return;
         }
 
-        PlayerID = playerEntity.PlayerId;
-        PlayerName = playerEntity.PlayerName;
-        PlayerLevel = playerEntity.PlayerLevel;
-        PlayerIcon = playerEntity.PlayerIcon;
-        PlayerHP = playerEntity.PlayerHP;
-        MaxHP = playerEntity.PlayerHP;
-        PlayerDefensePower = playerEntity.PlayerDefensePower;
-
-        PlayerAttribute = playerEntity.PlayerAttribute;
-
-        PlayerDescription = playerEntity.PlayerDescription;
-        PlayerAnimator = playerEntity.AnimationSet;
-        CharacterPrefab = playerEntity.CharacterPrefab;
-        InitialRotation = playerEntity.InitialRotation;
-        if (playerEntity.PlayerWeapon != null)
+        PlayerID = entity.PlayerId;
+        PlayerName = entity.PlayerName;
+        PlayerLevel = entity.PlayerLevel;
+        PlayerIcon = entity.PlayerIcon;
+        PlayerHP = entity.PlayerHP;
+        MaxHP = entity.PlayerHP;
+        PlayerDefensePower = entity.PlayerDefensePower;
+        PlayerAttribute = entity.PlayerAttribute;
+        PlayerDescription = entity.PlayerDescription;
+        //PlayerAnimator = entity.AnimationSet;
+        CharacterPrefab = entity.CharacterPrefab;
+        InitialRotation = entity.InitialRotation;
+        if (entity.PlayerWeapon != null)
         {
-            PlayerWeapon = new WeaponModel(playerEntity.PlayerWeapon);
+            PlayerWeapon = entity.PlayerWeapon;
         }
     }
 }

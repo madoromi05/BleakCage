@@ -21,6 +21,5 @@ public class PlayerEntity : ScriptableObject
 
     public float PlayerHP;                        // PlayerHp
     public float PlayerDefensePower;              // キャラ防御力
-    public AnimatorSet AnimationSet;              // アニメーションセット
-    public WeaponEntity PlayerWeapon;             // キャラカード用の武器
+    public WeaponEntity PlayerWeapon;               // キャラカード用の武器
 }

@@ -35,7 +35,10 @@ public class AttackCommand : ICommand
     public IEnumerator Do()
     {
         Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.ID}");
-
+        if (weapon == null)
+        {
+            Debug.LogWarning("[AttackCommand] WeaponRuntime is null. Using default or aborting.");
+        }
         PlayerController controller = player.PlayerController;
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
 
@@ -103,6 +106,9 @@ public class AttackCommand : ICommand
 
         switch (newEffect.Type)
         {
+            case StatusEffectType.None:
+                return;
+
             // --- 敵 (EnemyRuntime) に付与する異常状態 ---
             case StatusEffectType.Fracture:     // 【破砕】: 防御貫通UP
             case StatusEffectType.Laceration:   // 【損傷】: ターン終了時ダメージ

@@ -16,7 +16,7 @@ public class PlayerMovementController : MonoBehaviour
     public IEnumerator MoveToTarget(Vector3 targetPos)
     {
         // ターゲットの手前まで移動
-        Vector3 dest = targetPos + (transform.position - targetPos).normalized * 1.5f;
+        Vector3 dest = targetPos + (transform.position - targetPos).normalized * 2.0f;
 
         // DOTweenの完了を待つ
         yield return transform.DOMove(dest, moveDuration).SetEase(Ease.OutCubic).WaitForCompletion();

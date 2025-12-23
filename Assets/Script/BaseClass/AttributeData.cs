@@ -8,7 +8,9 @@ public enum AttributeType
     Pierce,  // 突[有利(堅牢), 不利(軟体), 普通(斥力)]
     Bullet,  // 弾[相性無]
     Heal,    // 回復
-    Defence  // 防御
+    //Defence,  // 防御
+    AttackBuff,  // 攻撃力アップ
+    DefenseBuff  // 防御力アップ
 }
 
 public enum DefensAttributeType
@@ -23,4 +25,5 @@ public enum CardTypeData
     Character,  // キャラ付き
     Weapon,     // 武器付き
     Universal   // 汎用
+
 }

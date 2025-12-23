@@ -6,7 +6,7 @@ public class CardRuntime : IAttackComponent
 {
     public int ID { get; private set; }
     public System.Guid InstanceID { get; private set; }
-    public WeaponRuntime weaponRuntime { get; private set; }
+    public WeaponRuntime weaponRuntime { get; set; }
     public AttributeType attribute { get; private set; }
     public float DefensePenetration { get; private set; }
     private readonly float _outputModifier;

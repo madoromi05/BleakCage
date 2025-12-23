@@ -6,25 +6,32 @@ using System.Collections;
 public class HealCommand : ICommand
 {
     private readonly PlayerRuntime player;
-    private readonly CardRuntime card;
+    private readonly CardRuntime cardRuntime;
+    private readonly PlayerStatusUIController uiController;
+    private readonly CardModel cardModel;
 
-    public HealCommand(PlayerRuntime player, CardRuntime card)
+    public HealCommand(PlayerRuntime player, CardRuntime cardRuntime, PlayerStatusUIController ui, CardModel model)
     {
         this.player = player;
-        this.card = card;
+        this.cardRuntime = cardRuntime;
+        this.uiController = ui;
+        this.cardModel = model;
     }
 
     public IEnumerator Do()
     {
-        float healAmount = card.GetOutput();
+        Debug.Log($"{player.PlayerModel.PlayerName} の回復実行");
 
-        //player.StatsHandler.ApplyHeal(healAmount);
-        yield break;
+        //  エフェクト再生
+        yield return player.PlayerController.SupportEffect(cardModel);
+
+        //  回復処理 (基礎値 * 出力倍率)
+        float healAmount = player.Level * 10 * cardRuntime.GetOutput();
+        player.HPHandler.Heal(healAmount);
+
+        uiController.UpdateHP(player.CurrentHP);
+        SoundManager.Instance.PlaySE(SEType.Heal);
     }
 
-    public bool Undo()
-    {
-        Debug.Log("[HealCommand] Undo not implemented.");
-        return false;
-    }
+    public bool Undo() => false;
 }

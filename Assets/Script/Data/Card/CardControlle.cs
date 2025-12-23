@@ -17,18 +17,15 @@ public class CardController : MonoBehaviour
         canvasGroup = GetComponent<CanvasGroup>();
         view = GetComponent<CardView>();
     }
-
-    // CardModelから直接初期化するメソッドを追加
-    public void Init(CardModel cardModel)
+    public void Init(CardModel cardModel, float basePower)
     {
         model = cardModel;
-        view.Show(model);
+        view.Show(model, basePower);
     }
 
     /// <summary>
     /// カードを選択可能か（暗くしないか）を設定する
     /// </summary>
-    /// <param name="interactable">true: 通常表示 (Alpha=1), false: 暗くする (Alpha=0.5)</param>
     public void SetInteractable(bool interactable)
     {
         if (canvasGroup == null)

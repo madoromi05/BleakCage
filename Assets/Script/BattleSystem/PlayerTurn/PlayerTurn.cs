@@ -152,7 +152,8 @@ public class PlayerTurn : MonoBehaviour
             {
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
                 CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
-                cardObject.Init(cardModel);
+                float basePower = drawnCard.weaponRuntime.ParentPlayer.Level + drawnCard.weaponRuntime.attackPower;
+                cardObject.Init(cardModel,basePower);
                 handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
                 drawnCardCount++;
@@ -238,7 +239,7 @@ public class PlayerTurn : MonoBehaviour
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
-            // audioSource.PlayOneShot(disposecard);
+            audioSource.PlayOneShot(disposecard);
         }
         else
         {

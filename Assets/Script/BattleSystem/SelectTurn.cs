@@ -85,7 +85,7 @@ public class SelectTurn : MonoBehaviour, IPhase
     public void StartPhase(bool keepSelections)
     {
         isKeepingSelections = keepSelections;
-        StartPhase(); // IPhase の StartPhase を呼び出す
+        StartPhase();
     }
     /// <summary>
     /// 通常の選択処理を行うコルーチン
@@ -115,7 +115,7 @@ public class SelectTurn : MonoBehaviour, IPhase
             // 優先順位分の選択ループ
             for (int priority = 1; priority <= _currentPlayers.Count; priority++)
             {
-                Debug.Log($"Player {pIndex + 1} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
+                //Debug.Log($"Player {pIndex + 1} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
                 // 敵の生存数をチェックする変数
                 livingEnemyCount = _currentEnemies.Count(e => e.EnemyHP > 0);
                 if (livingEnemyCount == 0)
@@ -133,7 +133,7 @@ public class SelectTurn : MonoBehaviour, IPhase
 
                 yield return StartCoroutine(SelectOneTargetCoroutine(currentPlayer, priority, (selectedEnemy) =>
                 {
-                    Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {selectedEnemy.EnemyName} を選択");
+                    // Debug.Log($"Player {currentPlayer.PlayerModel.PlayerName} が 優先度{priority} で {selectedEnemy.EnemyName} を選択");
                 }, keepSelections));
             }
             _playerUIs[pIndex].ResetHighlight();
@@ -156,7 +156,7 @@ public class SelectTurn : MonoBehaviour, IPhase
     /// </summary>
     public IEnumerator SelectOneTargetCoroutine(PlayerRuntime player, int priority, System.Action<EnemyModel> onSelected, bool keepSelections = false)
     {
-        Debug.Log($"Player {player.PlayerModel.PlayerName} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
+        //Debug.Log($"Player {player.PlayerModel.PlayerName} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
 
         var livingEnemies = _currentEnemies.Where(e => e.EnemyHP > 0).ToList();
         int livingEnemyCount = livingEnemies.Count;

@@ -3,10 +3,10 @@ using System;
 
 public class PlayerAnimationController : MonoBehaviour
 {
-    [SerializeField] private Animator animator;
-    public event Action OnAttackHitTriggered; // 攻撃判定イベント
+    [SerializeField] private Animator _animator;
+    public event Action OnAttackHitTriggered;
+    private AnimatorOverrideController _overrideController;
 
-    private AnimatorOverrideController overrideController;
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
     private static readonly int IsGuardingHash = Animator.StringToHash("IsGuarding");
 
@@ -14,26 +14,17 @@ public class PlayerAnimationController : MonoBehaviour
     private const string GuardClipName = "Guard";
     private const string AttackClipName = "DummyAttack";
 
-    public void Init(Animator anim, AnimatorSet animSet)
+    public void Init(Animator anim)
     {
-        this.animator = anim;
-
-        // Relayのセットアップ (AnimationEventを受け取るため)
+        _animator = anim;
         var relay = anim.gameObject.GetComponent<AnimationEventRelay>();
         if (relay == null) relay = anim.gameObject.AddComponent<AnimationEventRelay>();
         relay.Setup(this);
 
-        // OverrideController設定
         if (anim.runtimeAnimatorController != null)
         {
-            overrideController = new AnimatorOverrideController(anim.runtimeAnimatorController);
-            anim.runtimeAnimatorController = overrideController;
-
-            if (animSet != null)
-            {
-                overrideController[IdleClipName] = animSet.Idle;
-                overrideController[GuardClipName] = animSet.Guard;
-            }
+            _overrideController = new AnimatorOverrideController(anim.runtimeAnimatorController);
+            anim.runtimeAnimatorController = _overrideController;
         }
     }
 
@@ -41,27 +32,39 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void PlayAttackAnimation(AnimationClip clip)
     {
-        if (clip != null && overrideController != null)
+        if (clip == null)
         {
-            overrideController[AttackClipName] = clip;
-            animator.SetTrigger(AttackTriggerHash);
+            Debug.LogError("再生しようとしたクリップが null です！ 武器データにアニメーションは設定されていますか？");
+            return;
+        }
+
+        if (_overrideController == null)
+        {
+            Debug.LogError("OverrideController が null です！ Init は呼ばれていますか？");
+            return;
+        }
+
+        if (clip != null && _overrideController != null)
+        {
+            _overrideController[AttackClipName] = clip;
+            _animator.SetTrigger(AttackTriggerHash);
         }
     }
 
     public void SetGuard(bool isGuarding)
     {
-        if (animator != null)
+        if (_animator != null)
         {
-            animator.SetBool(IsGuardingHash, isGuarding);
+            _animator.SetBool(IsGuardingHash, isGuarding);
         }
     }
 
     public float GetGuardAnimationLength()
     {
-        if (overrideController != null && overrideController[GuardClipName] != null)
+        if (_overrideController != null && _overrideController[GuardClipName] != null)
         {
-            return overrideController[GuardClipName].length;
+            return _overrideController[GuardClipName].length;
         }
-        return 0.5f; // デフォルト値
+        return 0.5f;
     }
 }
