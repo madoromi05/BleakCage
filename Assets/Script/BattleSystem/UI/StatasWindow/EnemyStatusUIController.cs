@@ -100,6 +100,11 @@ public class EnemyStatusUIController : MonoBehaviour
         {
             StopCoroutine(hpAnimationCoroutine);
         }
+        if (!this.gameObject.activeInHierarchy)
+        {
+            hpSlider.value = currentHP;
+            return;
+        }
 
         hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(currentHP));
     }

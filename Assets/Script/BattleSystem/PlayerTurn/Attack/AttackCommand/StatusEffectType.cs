@@ -18,7 +18,7 @@ public enum StatusEffectType
 
 public class StatusEffect
 {
-    public const int MAX_STACK = 5;               // 最大蓄積数
+    public const int MAX_STACK = 5;                 // 最大蓄積数
     public StatusEffectType Type { get; private set; }
     public float Value { get; private set; }        // 効果値
     public int DurationTurns { get; set; }          // 残り持続ターン

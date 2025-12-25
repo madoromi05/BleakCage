@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SelectStage.unity
+    path: Assets/Scenes/StageSelectScene.unity
     guid: 30c604fd75e96834c8a990476e525ed0
   - enabled: 1
     path: Assets/Scenes/BattleScene.unity
@@ -14,6 +14,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Tutorial.unity
     guid: a66bd6c61a9ac274287b4f28414949a7
+  - enabled: 1
+    path: Assets/Scenes/DeckEditing.unity
+    guid: ec0debeb07e6f444d8406d3bee1a66ce
+  - enabled: 1
+    path: Assets/Scenes/ScenarioScene.unity
+    guid: 0efa801538bceb545a347592787b99a1
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 2b7566e7945485744bb12830c54f861a, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 0caf57c063bbe4f449e08c9f1f40f810, type: 3}

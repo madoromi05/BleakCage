@@ -14,7 +14,7 @@ public class BattleManager : MonoBehaviour
     [Header("コアコンポーネント参照")]
     [SerializeField] public BattleCardDeck battleCardDeck;
     [SerializeField] public GuardGaugeSystem guardGaugeSystem;
-
+    [SerializeField] private GameObject gameOverUIPanel;
     [SerializeField] private BattlePhaseManager normalPhaseManager;
     [SerializeField] private TutorialFlowManager tutorialFlowManager;
     [SerializeField] private BattleEntitiesManager entitiesManager;
@@ -157,9 +157,16 @@ public class BattleManager : MonoBehaviour
         if (IsBattleEnded) return;
 
         Debug.Log($"敵撃破: {enemy.EnemyModel.EnemyName}");
-
-        // 敵のGameObjectを消す、または死亡アニメーションを再生する処理をここに記述
-        // 例: entitiesManager.EnemyControllers[enemy.EnemyModel].PlayDeadAnimation();
+        if (entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
+        {
+            StartCoroutine(controller.DeadSequence());
+            var ui = entitiesManager.EnemyStatusUIs.FirstOrDefault(u => u.GetEnemyModel() == enemy.EnemyModel);
+            if (ui != null)
+            {
+                // UIを即座に消すか、フェードアウトさせる
+                ui.gameObject.SetActive(false);
+            }
+        }
 
         // 勝利判定: 全ての敵のHPが0以下か？
         bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
@@ -174,6 +181,11 @@ public class BattleManager : MonoBehaviour
         if (IsBattleEnded) return;
 
         Debug.Log($"味方死亡: {player.PlayerModel.PlayerName}");
+
+        if (entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out PlayerController controller))
+        {
+            controller.PlayDeadAnimation();
+        }
 
         // 敗北判定: 全てのプレイヤーのHPが0以下か？
         bool allPlayersDead = entitiesManager.Players.All(p => p.CurrentHP <= 0);
@@ -206,9 +218,13 @@ public class BattleManager : MonoBehaviour
         IsBattleEnded = true;
         Debug.Log("【BATTLE LOSE】");
         yield return new WaitForSeconds(1.5f);
+        if (gameOverUIPanel != null)
+        {
+            gameOverUIPanel.SetActive(true);
+        }
 
-        // ゲームオーバー画面などへ
-        SceneManager.LoadScene("StageSelectScene"); // 仮でステージ選択に戻す
+        yield return new WaitForSeconds(3.0f);
+        SceneManager.LoadScene("StageSelectScene");
     }
 
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")

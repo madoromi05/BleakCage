@@ -12,7 +12,6 @@ public class EnemyRuntime
     public Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
     public float MaxHP => EnemyModel.MaxHP;
-
     public EnemyModel EnemyModel { get; private set; }
     public StatusEffectHandler StatusHandler { get; private set; }
     public EnemyHPHandler HPHandler { get; private set; }

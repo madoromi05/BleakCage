@@ -10,8 +10,9 @@ using UnityEngine;
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
+    [SerializeField] private float deadMoveDuration = 1.0f;
+    [SerializeField] private Vector3 deadTargetPosition = new Vector3(-30f, 0f, 10f);
     public event System.Action OnAttackHitMoment;
-
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
     private Animator animator;
@@ -19,6 +20,7 @@ public class EnemyController : MonoBehaviour
     private Vector3 originalPosition;
     private EnemyHeightAdjuster heightAdjuster;
     private EnemyMeleeMovement meleeMovement;
+    private bool isDead = false;
 
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
     private static readonly int AttackIDHash = Animator.StringToHash("AttackID");
@@ -180,5 +182,26 @@ public class EnemyController : MonoBehaviour
     public void TriggerAttackHit()
     {
         OnAttackHitMoment?.Invoke();
+    }
+
+    /// <summary>
+    /// 死亡時の演出：画面外へ平行移動して消える
+    /// </summary>
+    public IEnumerator DeadSequence()
+    {
+        if (isDead) yield break;
+        isDead = true;
+        var collider = GetComponent<Collider>();
+        if (collider != null) collider.enabled = false;
+        Sequence seq = DOTween.Sequence();
+        seq.Join(transform.DOMove(deadTargetPosition, deadMoveDuration).SetEase(Ease.InBack));
+        var sprite = GetComponentInChildren<SpriteRenderer>();
+        if (sprite != null)
+        {
+            seq.Join(sprite.DOFade(0f, deadMoveDuration));
+        }
+
+        yield return seq.WaitForCompletion();
+        gameObject.SetActive(false);
     }
 }

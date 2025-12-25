@@ -33,29 +33,26 @@ public class PlayerActionExecutor
         System.Action onExecutionComplete)
     {
         commandQueue.Clear();
-
         foreach (var selectedCardRuntime in selectedCards)
         {
-            // このカードがアタッチされている特定の武器を取得する
             WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
             PlayerRuntime player = weaponRuntime.ParentPlayer;
 
             if (player == null || weaponRuntime == null)
             {
-                Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
-                Debug.LogError($"武器 {weaponRuntime.ID} ({weaponRuntime.InstanceID}) はどのプレイヤーにも所持されていません！");
+                Debug.LogError($"カード情報エラー: ID={selectedCardRuntime.ID}");
                 continue;
             }
 
+            // この時点での最新状況（敵の生死など）を元に、コマンドを作成する
             AttributeType attribute = selectedCardRuntime.attribute;
-
             bool isAttack = IsAttackAttribute(attribute);
-            Debug.Log($"[Check] CardID: {selectedCardRuntime.ID}, Attribute: {attribute}, IsAttackAttribute? : {isAttack}");
+
             if (isAttack)
             {
-                // 攻撃属性の場合
                 if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
                 {
+                    // ここでターゲットを計算
                     HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets,
                          enemyStatusUIControllers, playerStatusUIControllers,
                          enemyControllers, allEnemyRuntimes, damageCalculator);
@@ -65,32 +62,33 @@ public class PlayerActionExecutor
             {
                 HandleSupportAction(player, selectedCardRuntime, playerStatusUIControllers);
             }
-        }
 
-        // 順に実行
-        while (commandQueue.Count > 0)
-        {
-            var item = commandQueue.Dequeue();
-            ICommand currentCommand = item.command;
-            CardRuntime currentCard = item.card;
-
-            onShowCard?.Invoke(currentCard);
-            yield return coroutineRunner.StartCoroutine(currentCommand.Do());
-            bool isNextSameCard = false;
-            if (commandQueue.Count > 0)
+            // 作成されたコマンドを即座に実行する
+            while (commandQueue.Count > 0)
             {
-                var nextItem = commandQueue.Peek();
-                if (nextItem.card == currentCard)
+                var item = commandQueue.Dequeue();
+                ICommand currentCommand = item.command;
+                CardRuntime currentCard = item.card;
+
+                onShowCard?.Invoke(currentCard);
+
+                // コマンド実行（攻撃アニメーション～ダメージ処理完了まで待機）
+                yield return coroutineRunner.StartCoroutine(currentCommand.Do());
+                bool isNextSameCard = false;
+                if (commandQueue.Count > 0)
                 {
-                    isNextSameCard = true;
+                    var nextItem = commandQueue.Peek();
+                    if (nextItem.card == currentCard)
+                    {
+                        isNextSameCard = true;
+                    }
+                }
+                if (!isNextSameCard)
+                {
+                    onHideCard?.Invoke();
                 }
             }
-            if (!isNextSameCard)
-            {
-                onHideCard?.Invoke();
-            }
         }
-        Debug.Log("カード効果の実行完了");
         onExecutionComplete?.Invoke();
     }
 
@@ -130,20 +128,13 @@ public class PlayerActionExecutor
     )
     {
         PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == attackPlayer);
-
         List<EnemyRuntime> actualTargets = new List<EnemyRuntime>();                            // 攻撃対象リスト
         CardModel cardModel = cardModelFactory.CreateFromID(selectedCardRuntime.ID);            // 攻撃範囲(TargetScope)を確認する
 
         if (cardModel.TargetScope == CardTargetScope.All)
         {
             // --- 全体攻撃 ---
-            // 生存している敵全員をリストに入れる
             actualTargets = allEnemyRuntimes.Where(r => r.CurrentHP > 0).ToList();
-
-            if (actualTargets.Count == 0)
-            {
-                Debug.LogWarning("全体攻撃ですが、生存している敵がいません。");
-            }
         }
         else
         {
