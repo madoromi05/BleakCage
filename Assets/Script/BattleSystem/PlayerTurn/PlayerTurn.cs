@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.UI;
+using UnityEngine.UI; // UI操作のために追加
 
 public class PlayerTurn : MonoBehaviour
 {
@@ -14,6 +14,8 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private BattleInputReader inputReader;
     [SerializeField] private GuardGaugeSystem guardGaugeSystem;
+    [SerializeField] private DamageCalculator damageCalculator;
+    [SerializeField] private BattleCardPresenter battleCardPresenter;
     [SerializeField] private float cardSelectionYOffset = 30.0f;
 
     public event System.Action OnTurnFinished;
@@ -22,12 +24,13 @@ public class PlayerTurn : MonoBehaviour
 
     // チュートリアル用のイベント
     public event System.Action<int, bool> OnCardSelectedForTutorial;  // カード選択時
-    public event System.Action OnConfirmSelectionForTutorial;        // 選択確定時
+    public event System.Action OnConfirmSelectionForTutorial;         // 選択確定時
 
     private BattleCardDeck battleDeck;
     private CardModelFactory cardModelFactory;
     private CardRuntime cardRuntime;
     private EnemyStatusUIController enemyStatusUIController;
+    private List<PlayerStatusUIController> playerStatusUIControllers;
 
     private List<CardController> handCardControllers = new();                       // 手札のカード表示
     private List<CardRuntime> handCards = new();                                    // 手札のカードdata
@@ -36,6 +39,7 @@ public class PlayerTurn : MonoBehaviour
     private List<System.Guid> excludedCardInstancesThisTurn = new List<System.Guid>(); // 破棄されたカードのIDを保持
     private List<EnemyStatusUIController> enemyStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
+    private List<EnemyRuntime> allEnemyRuntimes;
     private List<Vector3> cardInitialPositions = new List<Vector3>();
 
     private bool isCounterTurn = false;
@@ -46,44 +50,63 @@ public class PlayerTurn : MonoBehaviour
     private bool isTutorialMode = false;
     private float lastInputTime = 0f;
     private float inputCooldown = 0.1f;
-    private IAttackStrategy damageStrategy;
     private PlayerActionExecutor actionExecutor;
     private List<PlayerRuntime> allPlayers;
 
+    private AudioSource audioSource;
+    public AudioClip disposecard;
+    public AudioClip check;
+
+    // --- UI追加 ---
     [SerializeField] private GameObject EnterUI;
     [SerializeField] private GameObject key1UI;
     [SerializeField] private GameObject key2UI;
     [SerializeField] private GameObject key3UI;
     private Dictionary<int, GameObject> keyUI;
     private List<GameObject> activeKeyUIObjects = new List<GameObject>();
+    // --------------
+
     private void Awake()
     {
         inputReader.CardSelectEvent += OnCardSelect;
         inputReader.DisCardEvent += OnConfirmSelectionAndRedraw;
 
-        damageStrategy = new AttributeWeakness();
         cardModelFactory = new CardModelFactory();
-
         actionExecutor = new PlayerActionExecutor(this);
+        audioSource = GetComponent<AudioSource>();
+        if (battleCardPresenter != null)
+        {
+            battleCardPresenter.Setup(cardModelFactory, playerHandTransform, cardPrefab);
+        }
+        else
+        {
+            Debug.LogError("BattleCardPresenter がインスペクターで設定されていません！");
+        }
 
+        // --- UI初期化 ---
         keyUI = new Dictionary<int, GameObject>();
         keyUI[0] = key1UI;
         keyUI[1] = key2UI;
         keyUI[2] = key3UI;
-        EnterUI.SetActive(false);
+        if (EnterUI != null) EnterUI.SetActive(false);
+        // ----------------
     }
 
     public void Setup(Dictionary<int, List<EnemyModel>> playerSelections,
                       List<PlayerRuntime> allPlayers,
                       BattleCardDeck battleDeck,
                       List<EnemyStatusUIController> enemyUIControllers,
-                      Dictionary<EnemyModel, EnemyController> enemyControllers)
+                      List<PlayerStatusUIController> playerUIControllers,
+                      Dictionary<EnemyModel, EnemyController> enemyControllers,
+                      List<EnemyRuntime> enemyRuntimes)
     {
         this.playerTargetSelections = playerSelections;
         this.allPlayers = allPlayers;
         this.battleDeck = battleDeck;
         this.enemyStatusUIControllers = enemyUIControllers;
+        this.playerStatusUIControllers = playerUIControllers;
         this.enemyControllers = enemyControllers;
+        this.allEnemyRuntimes = enemyRuntimes;
     }
 
     public void SetTutorialMode(bool mode)
@@ -95,15 +118,16 @@ public class PlayerTurn : MonoBehaviour
     {
         isCounterTurn = false;
         isTurnFinished = false;
-        isTurnFinished = false;
         selectedCardsThisTurn.Clear();
         excludedCardInstancesThisTurn.Clear();
         cardInitialPositions.Clear();
         TickDownAllPlayerBuffs();
         battleDeck.ResetBattleDeck(battleDeck.battleCardDeck);
         inputEnabled = true;
+
+        if (EnterUI != null) EnterUI.SetActive(false); // UI非表示
+
         DrawHandCards();
-        EnterUI.SetActive(false);
     }
 
     // ターン終わりにCardの効果処理
@@ -112,6 +136,7 @@ public class PlayerTurn : MonoBehaviour
         if (isTurnFinished) return;
         isTurnFinished = true;
         inputEnabled = false;
+
         // 手札のカード表示をdestory
         foreach (var contCard in handCardControllers)
         {
@@ -121,18 +146,25 @@ public class PlayerTurn : MonoBehaviour
             }
         }
         handCardControllers.Clear();
+
+        // --- キーガイドUIの削除 ---
         foreach (var keyObj in activeKeyUIObjects)
         {
             if (keyObj != null) Destroy(keyObj);
         }
         activeKeyUIObjects.Clear();
+        // ------------------------
 
         StartCoroutine(actionExecutor.ExecuteActions(
            selectedCardsThisTurn,
            playerTargetSelections,
            enemyStatusUIControllers,
+           playerStatusUIControllers,
            enemyControllers,
-           damageStrategy,
+           allEnemyRuntimes,
+           damageCalculator,
+           battleCardPresenter.ShowCard,
+           battleCardPresenter.HideCard,
            () => OnTurnFinished?.Invoke()
        ));
     }
@@ -149,11 +181,14 @@ public class PlayerTurn : MonoBehaviour
 
         handCardControllers.Clear();
 
+        // --- キーガイドUIのリセット ---
         foreach (var keyObj in activeKeyUIObjects)
         {
             if (keyObj != null) Destroy(keyObj);
         }
         activeKeyUIObjects.Clear();
+        // ----------------------------
+
         handCards.Clear();
         isCardSelected = new bool[3];
         int drawnCardCount = 0;
@@ -165,23 +200,27 @@ public class PlayerTurn : MonoBehaviour
             {
                 var cardObject = Instantiate(cardPrefab, playerHandTransform, false);
                 CardModel cardModel = cardModelFactory.CreateFromID(drawnCard.ID);
-                cardObject.Init(cardModel);
+                float basePower = drawnCard.weaponRuntime.ParentPlayer.Level + drawnCard.weaponRuntime.attackPower;
+                cardObject.Init(cardModel, basePower);
                 handCards.Add(drawnCard);
                 handCardControllers.Add(cardObject);
                 drawnCardCount++;
+
+                // --- キーガイドUIの生成と配置 ---
                 if (keyUI.ContainsKey(i))
                 {
                     GameObject keyObj = Instantiate(keyUI[i], cardObject.transform, false);
                     keyObj.SetActive(true);
 
                     RectTransform rt = keyObj.GetComponent<RectTransform>();
-                    rt.anchoredPosition = new Vector2(0, 0);
-
-                    activeKeyUIObjects.Add(keyObj);
+                    // 位置調整 (カードの上部に表示するよう設定)
                     rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
                     rt.pivot = new Vector2(0.5f, 0.5f);
-                    rt.anchoredPosition = new Vector2(0, 190);
+                    rt.anchoredPosition = new Vector2(0, 190); // 必要に応じてY座標を調整
+
+                    activeKeyUIObjects.Add(keyObj);
                 }
+                // --------------------------------
             }
         }
 
@@ -189,7 +228,6 @@ public class PlayerTurn : MonoBehaviour
         {
             if (!isCounterTurn)
             {
-                Debug.Log("デッキが空のため、ターンを終了します。");
                 FinishPlayerTurn();
             }
             return;
@@ -241,7 +279,13 @@ public class PlayerTurn : MonoBehaviour
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
 
-        keyUI[inputNumber].gameObject.SetActive(false);
+        // --- 選択したキーのUIを非表示にする (トグルで戻す処理はCardSelect/Visualsで行う) ---
+        // if (inputNumber < activeKeyUIObjects.Count && activeKeyUIObjects[inputNumber] != null)
+        // {
+        //     activeKeyUIObjects[inputNumber].SetActive(!isCardSelected[inputNumber]);
+        // }
+        // -----------------------------------------------------------------------------
+
         // audioSource.PlayOneShot(check);
         if (isTutorialMode)
         {
@@ -265,6 +309,7 @@ public class PlayerTurn : MonoBehaviour
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
+            if (audioSource != null && disposecard != null) audioSource.PlayOneShot(disposecard);
         }
         else
         {
@@ -347,7 +392,7 @@ public class PlayerTurn : MonoBehaviour
             }
             else
             {
-                Debug.Log($"破棄するカード番号: {i} (ID: {cardInstance.ID})");
+                // Debug.Log($"破棄するカード番号: {i} (ID: {cardInstance.ID})");
                 excludedCardInstancesThisTurn.Add(cardInstance.InstanceID);
             }
         }
@@ -360,7 +405,7 @@ public class PlayerTurn : MonoBehaviour
 
         if (isCounterTurn)
         {
-            // === カウンターアクションの場合 ===
+            // カウンターアクションの場合
             isCounterTurn = false; // アクション終了
             inputEnabled = false;
 
@@ -370,18 +415,31 @@ public class PlayerTurn : MonoBehaviour
                 if (contCard != null) Destroy(contCard.gameObject);
             }
             handCardControllers.Clear();
+
+            // UI破棄
+            foreach (var keyObj in activeKeyUIObjects)
+            {
+                if (keyObj != null) Destroy(keyObj);
+            }
+            activeKeyUIObjects.Clear();
+
             handCards.Clear();
 
             StartCoroutine(actionExecutor.ExecuteActions(
                 cardsToExecute,
                 playerTargetSelections,
                 enemyStatusUIControllers,
+                playerStatusUIControllers,
                 enemyControllers,
-                damageStrategy,
+                allEnemyRuntimes,
+                damageCalculator,
+                battleCardPresenter.ShowCard,
+                battleCardPresenter.HideCard,
                 () =>
                 {
                     onCounterActionFinishedCallback?.Invoke();
                     onCounterActionFinishedCallback = null;
+                    OnTurnFinished?.Invoke(); // カウンター終了時もターン終了扱いにするなら必要
                 }
             ));
         }
@@ -409,7 +467,7 @@ public class PlayerTurn : MonoBehaviour
         {
             if (player != null)
             {
-                player.BuffHandler.TickDownBuffDurations();
+                //player.BuffHandler.TickDownBuffDurations();
             }
         }
     }
@@ -422,7 +480,7 @@ public class PlayerTurn : MonoBehaviour
     {
         Debug.Log("カウンターアクションを開始します");
         isCounterTurn = true;    // カウンターモードをON
-        isTurnFinished = false; // ターン実行中
+        isTurnFinished = false;  // ターン実行中
         inputEnabled = true;
         isInputLocked = false;
 
@@ -438,13 +496,16 @@ public class PlayerTurn : MonoBehaviour
     /// </summary>
     private void UpdateAllCardVisuals()
     {
-        // 現在の選択枚数をカウント
         int selectedCount = isCardSelected.Count(x => x);
 
         // 2枚（最大数）選択されているか
         bool maxCardsSelected = (selectedCount >= 2);
 
-        EnterUI.SetActive(maxCardsSelected);
+        // --- Enter UIの表示制御 ---
+        if (EnterUI != null)
+        {
+            EnterUI.SetActive(selectedCount > 0);
+        }
 
         for (int i = 0; i < handCardControllers.Count; i++)
         {
@@ -452,6 +513,7 @@ public class PlayerTurn : MonoBehaviour
 
             CardController cardObject = handCardControllers[i];
 
+            // --- キーガイドの表示制御 ---
             if (i < activeKeyUIObjects.Count && activeKeyUIObjects[i] != null)
             {
                 activeKeyUIObjects[i].SetActive(!isCardSelected[i]);
