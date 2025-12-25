@@ -18,8 +18,8 @@ MonoBehaviour:
   Icon: {fileID: 0}
   Description: 
   HoldHandType: 0
-  AttackPower: 10
-  PeakyCoefficient: 0
+  AttackPower: 30
+  PeakyCoefficient: 1
   WeaponPrefab: {fileID: 3508136266559725065, guid: 0c8592a7d9d8e784380bddb6c64cebb1, type: 3}
   DefaultCards:
   - {fileID: 11400000, guid: 8fb68b9b41d19e94cab02ee12461e25c, type: 2}

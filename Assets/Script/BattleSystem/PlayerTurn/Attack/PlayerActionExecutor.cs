@@ -218,7 +218,6 @@ public class PlayerActionExecutor
 
         if (command != null)
         {
-            // ★変更: コマンドとカードをセットでキューに入れる
             commandQueue.Enqueue((command, selectedCardRuntime));
         }
     }

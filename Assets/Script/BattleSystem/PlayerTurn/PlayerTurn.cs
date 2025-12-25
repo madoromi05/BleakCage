@@ -174,7 +174,6 @@ public class PlayerTurn : MonoBehaviour
         {
             if (!isCounterTurn)
             {
-                Debug.Log("デッキが空のため、ターンを終了します。");
                 FinishPlayerTurn();
             }
             return;

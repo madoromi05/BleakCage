@@ -10,7 +10,6 @@ public class EnemyAnimationEventBridge : MonoBehaviour
 
     private void Awake()
     {
-        // 自分の親オブジェクトから EnemyController を探して保持しておく
         _parentController = GetComponentInParent<EnemyController>();
 
         if (_parentController == null)

@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a47308e8001a4ed428ce8cb189e8f141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugStageID: 2
+  debugStageID: 1
   enemyBasePrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
   playerBasePrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
   playerPositions:
@@ -4955,8 +4955,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 120127625}
-        m_TargetAssemblyTypeName: BattleManager, Assembly-CSharp
+      - m_Target: {fileID: 120127635}
+        m_TargetAssemblyTypeName: BattlePhaseManager, Assembly-CSharp
         m_MethodName: OnKeepSelections
         m_Mode: 1
         m_Arguments:
@@ -5692,8 +5692,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 120127625}
-        m_TargetAssemblyTypeName: BattleManager, Assembly-CSharp
+      - m_Target: {fileID: 120127635}
+        m_TargetAssemblyTypeName: BattlePhaseManager, Assembly-CSharp
         m_MethodName: OnChangeSelections
         m_Mode: 1
         m_Arguments:

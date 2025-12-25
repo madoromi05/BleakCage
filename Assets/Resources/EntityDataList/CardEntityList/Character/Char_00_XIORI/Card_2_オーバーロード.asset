@@ -34,6 +34,6 @@ MonoBehaviour:
     Value: 0
     Duration: 3
     InflictStacks: 1
-  AttackAnimation: {fileID: 7400000, guid: 7dbfe28cfedc92e43a71bc9d4480cea0, type: 2}
+  AttackAnimation: {fileID: 7400000, guid: 149c96913f2a8ba47b7fa39d65673132, type: 2}
   WeaponHand: 0
   EffectPrefab: {fileID: 4715644581087614247, guid: 137d9a9791747a442b039dd22ad3e7f5, type: 3}

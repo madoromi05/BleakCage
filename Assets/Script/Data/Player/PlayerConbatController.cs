@@ -114,12 +114,30 @@ public class PlayerCombatController : MonoBehaviour
         }
     }
     /// <summary>
-    /// 支援・回復時の演出（自分自身にエフェクトを出す）
+    /// 支援・回復時の演出
+    /// ★修正: PlayAttackAnimation を再利用して、回復モーションを再生する
     /// </summary>
     public IEnumerator ExecuteSupportEffect(CardModel cardModel)
     {
-        PlayEffect(cardModel.EffectPrefab, transform.position + Vector3.up * 2.0f);
-        yield return new WaitForSeconds(0.5f);
+        if (cardModel.EffectPrefab != null)
+        {
+            PlayEffect(cardModel.EffectPrefab, transform.position + Vector3.up * 2.0f);
+        }
+        AnimationClip clip = cardModel.AttackAnimation;
+
+        if (clip != null && animCtrl != null)
+        {
+            // 回復モーションをセットして再生！
+            animCtrl.PlayAttackAnimation(clip);
+
+            // アニメーションの長さ分待機
+            yield return new WaitForSeconds(clip.length);
+        }
+        else
+        {
+            // クリップがない場合は一瞬待つだけ
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 
     /// <summary>
@@ -128,10 +146,6 @@ public class PlayerCombatController : MonoBehaviour
     private void PlayEffect(GameObject prefab, Vector3 position)
     {
         if (prefab == null) return;
-        Debug.Log($"[PlayEffect] Name: {prefab.name}\n" +
-                  $"Spawn Pos: {position}\n" +
-                  $"My Pos (Player): {transform.position}");
-        // プレハブの回転値をそのまま使って生成
         GameObject effect = Instantiate(prefab, position, prefab.transform.rotation);
         Destroy(effect, 2.0f);
     }

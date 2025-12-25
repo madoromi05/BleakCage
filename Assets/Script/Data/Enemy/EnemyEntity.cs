@@ -12,6 +12,7 @@ public class EnemyEntity : ScriptableObject
     public string EnemyName;                // Enemy–¼
     public AttributeType EnemyAttribute;    // UŒ‚‘®«
     public DefensAttributeType EnemyDefensAttribute; // –hŒä‘®«
+    public EnemyAttackType AttackType;      // UŒ‚‚ª‹ß‹——£‚©‰“‹——£‚© 
     public Sprite EnemySprite;              // ‰æ‘œ
     public string EnemyDescription;         // à–¾•¶
 

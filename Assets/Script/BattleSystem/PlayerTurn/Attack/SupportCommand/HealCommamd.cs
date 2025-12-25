@@ -1,7 +1,9 @@
 using UnityEngine;
 using System.Collections;
+
 /// <summary>
 /// プレイヤーを回復するコマンド
+/// BuffCommandと同様の構成に修正
 /// </summary>
 public class HealCommand : ICommand
 {
@@ -20,16 +22,17 @@ public class HealCommand : ICommand
 
     public IEnumerator Do()
     {
-        Debug.Log($"{player.PlayerModel.PlayerName} の回復実行");
-
-        //  エフェクト再生
         yield return player.PlayerController.SupportEffect(cardModel);
 
-        //  回復処理 (基礎値 * 出力倍率)
-        float healAmount = player.Level * 10 * cardRuntime.GetOutput();
-        player.HPHandler.Heal(healAmount);
+        // 防御力 * カードの出力値 / 10 分回復
+        float healAmount = player.PlayerModel.PlayerDefensePower * cardRuntime.GetOutput()/10;
+        if (player.HPHandler != null)
+        {
+            player.HPHandler.Heal(healAmount);
+            uiController.UpdateHP(player.CurrentHP);
+        }
 
-        uiController.UpdateHP(player.CurrentHP);
+        // サウンド再生
         SoundManager.Instance.PlaySE(SEType.Heal);
     }
 

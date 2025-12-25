@@ -55,7 +55,5 @@ public class CardModelFactory
                 Debug.LogWarning($"ID重複エラー: ID {card.ID} が複数のファイルで使われています: {card.name}");
             }
         }
-
-        Debug.Log($"カード図鑑のロード完了: 全 {cardCache.Count} 枚を読み込みました。");
     }
 }

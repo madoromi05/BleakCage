@@ -40,7 +40,6 @@ public class EnemyController : MonoBehaviour
 
         if (model.CharacterPrefab != null)
         {
-            // モデル（子オブジェクト）の生成
             Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
             Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
             GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);

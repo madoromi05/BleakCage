@@ -17,8 +17,9 @@ MonoBehaviour:
   Attribute: 2
   Icon: {fileID: 0}
   Description: 
-  AttackPower: 10
-  PeakyCoefficient: 10
+  HoldHandType: 0
+  AttackPower: 30
+  PeakyCoefficient: 1
   WeaponPrefab: {fileID: 2474608423771620109, guid: c0a789d68f653c24fa35d09ef25d7cb5, type: 3}
   DefaultCards:
   - {fileID: 11400000, guid: e858ad0dc86fc2d4d9d81a1c2f92ad92, type: 2}

@@ -13,7 +13,7 @@ public class EnemyModel
 {
     public int EnemyID { get; private set; }                 // “G‚ÌID
     public string EnemyName { get; private set; }             // “G‚Ì–¼‘O
-    public EnemyAttackType AttackType;
+    public EnemyAttackType AttackType { get; private set; }     // ‰“‹——£‚©‹ß‹——£‚©
     public float EnemyHP { get; set; }                       // “G‚ÌHP
     public float MaxHP { get; private set; }
     public float EnemyAttackPower { get; private set; }      // UŒ‚—Í
@@ -46,6 +46,8 @@ public class EnemyModel
         EnemyAttribute = Entity.EnemyAttribute;
         EnemyDefensAttribute = Entity.EnemyDefensAttribute;
         EnemySprite = Entity.EnemySprite;
+        AttackType = Entity.AttackType;
+
         EnemyDescription = Entity.EnemyDescription;
         AttackHeightOffset = Entity.EnemyAttackOffset;
         CharacterPrefab = Entity.CharacterPrefab;
