@@ -14,7 +14,7 @@ public class PlayerDefenseHandler : MonoBehaviour
     [SerializeField] private PlayerTurn _playerTurn;
 
     public event System.Action<string, Color> OnDefenseResultFeedback;
-    public event System.Action<PlayerModel> OnDamageToPlayer; // ダメージ発生時に通知
+    public event System.Action<PlayerRuntime> OnDamageToPlayer; // ダメージ発生時に通知
 
     // --- ゲージと入力の定数 ---
     private const float GUARD_RECOVERY_SMALL = 10f;
@@ -27,13 +27,13 @@ public class PlayerDefenseHandler : MonoBehaviour
     private const int NORMAL_GUARD_WINDOW_DURATION = 3;
 
     // --- 状態変数 ---
-    private List<PlayerModel> _players;
-    private Dictionary<PlayerModel, PlayerController> _playerControllers;
+    private List<PlayerRuntime> _players;
+    private Dictionary<PlayerRuntime, PlayerController> _playerControllers;
     private int _defenseInput = 0;
     private int _defenseInputCanceled = 0;
     private bool[] _isDefending;
     private bool _isDefenseWindowOpen = false;
-    private PlayerModel _currentPlayerTarget;
+    private PlayerRuntime _currentPlayerTarget;
 
     private System.Action _currentDefenseResolutionCallback;
     private Coroutine _defenseMonitoringCoroutine;
@@ -43,7 +43,7 @@ public class PlayerDefenseHandler : MonoBehaviour
     private bool _pressedDuringNormalWindow = false;
     private bool _counterSuccess = false;
 
-    public void Init(List<PlayerModel> players, Dictionary<PlayerModel, PlayerController> playerControllers)
+    public void Init(List<PlayerRuntime> players, Dictionary<PlayerRuntime, PlayerController> playerControllers)
     {
         _players = players;
         _playerControllers = playerControllers;
@@ -154,7 +154,7 @@ public class PlayerDefenseHandler : MonoBehaviour
     /// (EnemyControllerのアニメーションイベントから) 攻撃が当たる瞬間に呼ばれる
     /// ジャストガード/通常ガードの受付と判定を行うコルーチン
     /// </summary>
-    public IEnumerator StartDefenseWindowCoroutine(PlayerModel target, System.Action onResolved)
+    public IEnumerator StartDefenseWindowCoroutine(PlayerRuntime target, System.Action onResolved)
     {
         if (_isDefenseWindowOpen)
         {
@@ -189,7 +189,7 @@ public class PlayerDefenseHandler : MonoBehaviour
         int justGuardFrameCounter = JUST_GUARD_DURATION;
         int normalGuardFrameCounter = NORMAL_GUARD_WINDOW_DURATION;
 
-        Debug.Log($"★防御受付開始 (ジャスト: {justGuardFrameCounter}F, 通常: {normalGuardFrameCounter}F)");
+        Debug.Log($"防御受付開始 (ジャスト: {justGuardFrameCounter}F, 通常: {normalGuardFrameCounter}F)");
 
         // ----------------------------------------------------
         // 1. ジャストガード (カウンター) 判定フェーズ

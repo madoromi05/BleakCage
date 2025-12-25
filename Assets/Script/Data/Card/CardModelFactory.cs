@@ -6,7 +6,6 @@ public class CardModelFactory
 {
     private static Dictionary<int, CardEntity> cardCache;
 
-    // ★ここより下のフォルダをすべて自動で探します
     private const string BaseLoadPath = "EntityDataList/CardEntityList";
 
     public CardModelFactory()
@@ -56,7 +55,5 @@ public class CardModelFactory
                 Debug.LogWarning($"ID重複エラー: ID {card.ID} が複数のファイルで使われています: {card.name}");
             }
         }
-
-        Debug.Log($"カード図鑑のロード完了: 全 {cardCache.Count} 枚を読み込みました。");
     }
 }

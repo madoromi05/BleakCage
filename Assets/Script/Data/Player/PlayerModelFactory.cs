@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -13,29 +14,19 @@ public class PlayerModelFactory
     /// <returns>PlayerModel。生成に失敗した場合はnull</returns>
     public PlayerModel CreateFromId(int playerId)
     {
-        PlayerEntity playerEntity = LoadPlayerEntity(playerId);
-        if (playerEntity == null)
+        string folderPath = "EntityDataList/PlayerEntityList";
+        PlayerEntity[] allEntities = Resources.LoadAll<PlayerEntity>(folderPath);
+        string searchPrefix = $"Player_{playerId}";
+
+        PlayerEntity targetEntity = allEntities
+            .FirstOrDefault(e => e.name.StartsWith(searchPrefix));
+
+        if (targetEntity == null)
         {
-            Debug.LogError($"PlayerEntity not found for ID: {playerId}");
+            Debug.LogError($"ID: {playerId} (検索名: {searchPrefix}...) に一致するファイルが見つかりません。");
             return null;
         }
-        return new PlayerModel(playerEntity);
-    }
 
-    /// <summary>
-    /// PlayerEntityを読み込む
-    /// </summary>
-    /// <param name="playerId">プレイヤーID</param>
-    /// <returns>PlayerEntity。見つからない場合はnull</returns>
-    private PlayerEntity LoadPlayerEntity(int playerId)
-    {
-        string path = $"EntityDataList/PlayerEntityList/Player_{playerId}";
-        PlayerEntity playerEntity = Resources.Load<PlayerEntity>(path);
-
-        if (playerEntity == null)
-        {
-            Debug.LogError($"★★ ロード失敗: playerEntityオブジェクト自体がNULLです！ Path: {path}");
-        }
-        return playerEntity;
+        return new PlayerModel(targetEntity);
     }
 }

@@ -86,6 +86,7 @@ public class BattlePhaseManager : MonoBehaviour
     // --- ターン進行 ---
     public void StartSelectionPhase()
     {
+        if (battleManager.IsBattleEnded) return;
         Debug.Log("【攻撃対象選択ターン開始】");
         SoundManager.Instance.PlaySE(SEType.startedSelectCard);
 
@@ -109,6 +110,7 @@ public class BattlePhaseManager : MonoBehaviour
     /// </summary>
     private void OnSelectionPhaseFinished()
     {
+        if (battleManager.IsBattleEnded) return;
         if (currentPhase != null)
         {
             currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
@@ -127,6 +129,7 @@ public class BattlePhaseManager : MonoBehaviour
 
     private void OnPlayerTurnFinished()
     {
+        if (battleManager.IsBattleEnded) return;
         Debug.Log("【カード選択ターン終了】");
         StartCoroutine(EnemyTurnCoroutine());
     }
@@ -142,6 +145,7 @@ public class BattlePhaseManager : MonoBehaviour
 
     private void OnEnemyTurnFinished()
     {
+        if (battleManager.IsBattleEnded) return;
         Debug.Log("【敵ターン終了】");
         currentTurn++;
 
@@ -227,6 +231,7 @@ public class BattlePhaseManager : MonoBehaviour
 
     public void OnKeepSelections()
     {
+        Debug.Log("選択を保持して続行が選択されました。");
         selectionChoicePanel.SetActive(false);
         if (selectionChoiceCoroutine != null)
         {
@@ -238,6 +243,7 @@ public class BattlePhaseManager : MonoBehaviour
 
     public void OnChangeSelections()
     {
+        Debug.Log("選択を変更して続行が選択されました。");
         selectionChoicePanel.SetActive(false);
         if (selectionChoiceCoroutine != null)
         {

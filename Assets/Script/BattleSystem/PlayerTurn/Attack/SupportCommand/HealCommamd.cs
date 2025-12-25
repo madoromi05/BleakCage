@@ -1,30 +1,40 @@
 using UnityEngine;
 using System.Collections;
+
 /// <summary>
 /// プレイヤーを回復するコマンド
+/// BuffCommandと同様の構成に修正
 /// </summary>
 public class HealCommand : ICommand
 {
     private readonly PlayerRuntime player;
-    private readonly CardRuntime card;
+    private readonly CardRuntime cardRuntime;
+    private readonly PlayerStatusUIController uiController;
+    private readonly CardModel cardModel;
 
-    public HealCommand(PlayerRuntime player, CardRuntime card)
+    public HealCommand(PlayerRuntime player, CardRuntime cardRuntime, PlayerStatusUIController ui, CardModel model)
     {
         this.player = player;
-        this.card = card;
+        this.cardRuntime = cardRuntime;
+        this.uiController = ui;
+        this.cardModel = model;
     }
 
     public IEnumerator Do()
     {
-        float healAmount = card.GetOutput();
+        yield return player.PlayerController.SupportEffect(cardModel);
 
-        player.StatsHandler.ApplyHeal(healAmount);
-        yield break;
+        // 防御力 * カードの出力値 / 10 分回復
+        float healAmount = player.PlayerModel.PlayerDefensePower * cardRuntime.GetOutput()/10;
+        if (player.HPHandler != null)
+        {
+            player.HPHandler.Heal(healAmount);
+            uiController.UpdateHP(player.CurrentHP);
+        }
+
+        // サウンド再生
+        SoundManager.Instance.PlaySE(SEType.Heal);
     }
 
-    public bool Undo()
-    {
-        Debug.Log("[HealCommand] Undo not implemented.");
-        return false;
-    }
+    public bool Undo() => false;
 }

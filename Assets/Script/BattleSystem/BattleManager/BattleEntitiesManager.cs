@@ -8,6 +8,12 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class BattleEntitiesManager : MonoBehaviour
 {
+#if UNITY_EDITOR
+    [Header("デバッグ設定 (Editor Only)")]
+    [Tooltip("テストしたいステージID")]
+    [SerializeField] private int debugStageID;
+#endif
+
     [Header("プレファブ と キャラ出現地点")]
     [SerializeField] private GameObject enemyBasePrefab;
     [SerializeField] private GameObject playerBasePrefab;
@@ -22,6 +28,8 @@ public class BattleEntitiesManager : MonoBehaviour
 
     [Header("ゲーム内データ")]
     [SerializeField] private List<StageEnemyData> allStageEnemyData;
+    [Header("ステージごとのプレイヤー編成")]
+    [SerializeField] private List<StagePlayerSetup> stagePlayerPresets;
 
     public List<EnemyModel> Enemies { get; private set; } = new List<EnemyModel>();
     public List<PlayerStatusUIController> PlayerStatusUIs { get; private set; } = new List<PlayerStatusUIController>();
@@ -32,60 +40,75 @@ public class BattleEntitiesManager : MonoBehaviour
     public DeckSetupRepository LoadedDeckData { get; private set; }
     public bool IsTutorialMode { get; private set; } = false;
     public List<PlayerRuntime> Players => LoadedDeckData?.Party;
-    public void Setup()
-    {
-        LoadGameData();
-        SetupStageAndCharacters();
-        IsTutorialMode = Enemies.Count > 0 && Enemies[0].EnemyID == 0;
-    }
 
-    /// <summary>
-    /// プレイヤーデータとカードデッキをロード・初期化
-    /// </summary>
-    private void LoadGameData()
-    {
-        var dataLoader = new PlayerDataLoader();
-        DeckSetupRepository setupData = dataLoader.LoadPlayerPartyAndCards();
-        LoadedDeckData = dataLoader.LoadPlayerPartyAndCards();
-    }
+    private BattleManager battleManager;
 
-    /// <summary>
-    /// ステージデータをロードし、プレイヤーと敵を生成・配置
-    /// </summary>
-    private void SetupStageAndCharacters()
+    public void Setup(BattleManager manager)
     {
-        stageSet();
+        this.battleManager = manager;
+
+        // 今回使用するステージIDをここで一元管理して決定する
+        int targetStageID = ResolveStageID();
+        Debug.Log($"BattleEntitiesManager: Stage ID {targetStageID} でバトルを開始します。");
+
+        // 決定したIDを渡してロードを実行
+        LoadPlayerGameData(targetStageID);
+        SetupStageEnemies(targetStageID);
         enemyView();
         playerView();
+        IsTutorialMode = (targetStageID == 0);
     }
 
-    private void stageSet()
+    /// <summary>
+    /// 最終的にどのステージIDを使うか決定するメソッド
+    /// </summary>
+    private int ResolveStageID()
     {
-        // 挑戦する敵のデータをステージIDから取得
-        int currentStageID = StageManager.SelectedStageID;
-
-        if (currentStageID == -1)
-        {
-            Debug.LogError("ステージIDが設定されていません！StageManager.SelectedStageIDを確認してください。");
 #if UNITY_EDITOR
-            string sceneName = SceneManager.GetActiveScene().name;
-            if (sceneName.Contains("Tutorial"))
-            {
-                currentStageID = 0; // チュートリアル
-                Debug.LogWarning($"シーン名'{sceneName}'のため、エディタ専用フォールバックとしてID '0' (チュートリアル) を使用します。");
-            }
-            else
-            {
-                currentStageID = 1; // 通常ステージ
-                Debug.LogWarning($"シーン名'{sceneName}'のため、エディタ専用フォールバックとしてID '1' (通常) を使用します。");
-            }
+        Debug.Log($"<color=yellow>【Debug】Inspector指定の StageID: {debugStageID} を使用します。</color>");
+        return debugStageID;
+#else
+    if (StageManager.SelectedStageID != -1)
+    {
+        return StageManager.SelectedStageID;
+    }
+    return -1;
 #endif
+    }
+
+
+    /// <summary>
+    /// ステージIDに対応したプレイヤーデータをロード・初期化
+    /// </summary>
+    private void LoadPlayerGameData(int stageID)
+    {
+        if (stagePlayerPresets == null || stagePlayerPresets.Count == 0)
+        {
+            Debug.LogError("PlayerPresets が設定されていません！");
+            return;
         }
-        CurrentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == currentStageID);
+
+        if (stageID < 0 || stageID >= stagePlayerPresets.Count)
+        {
+            Debug.LogError($"StageID {stageID} に対応する PlayerPreset がありません。Stage 1 (Index 1) を使用します。");
+            stageID = (stagePlayerPresets.Count > 1) ? 1 : 0;
+        }
+
+        StagePlayerSetup targetPreset = stagePlayerPresets[stageID];
+        var dataLoader = new PlayerDataLoader();
+        LoadedDeckData = dataLoader.LoadFromPreset(targetPreset);
+    }
+
+    /// <summary>
+    /// 指定されたIDで敵ステージデータをセット
+    /// </summary>
+    private void SetupStageEnemies(int stageID)
+    {
+        CurrentStage = allStageEnemyData.FirstOrDefault(stage => stage.stageEnemyID == stageID);
 
         if (CurrentStage == null)
         {
-            Debug.LogError($"ID {currentStageID} に一致する StageEnemyData が見つかりません！");
+            Debug.LogError($"ID {stageID} に一致する StageEnemyData が見つかりません！");
             return;
         }
     }
@@ -112,7 +135,6 @@ public class BattleEntitiesManager : MonoBehaviour
 
             EnemyControllers.Add(enemy, enemyController);
 
-            // 敵のStatusUI生成
             var statusUIObject = Instantiate(enemyStatusUIPrefab, enemyStatusBarTransform, false);
             EnemyStatusUIController uiController = statusUIObject.GetComponent<EnemyStatusUIController>();
             uiController.SetEnemyStatus(enemy);
@@ -123,19 +145,14 @@ public class BattleEntitiesManager : MonoBehaviour
 
     private void playerView()
     {
-        if (Players == null || Players.Count == 0)
-        {
-            Debug.LogError("プレイヤーデータがありません！ PlayerDataLoaderを確認してください。");
-            return;
-        }
+        if (Players == null || Players.Count == 0) return;
 
         if (playerPositions == null || playerPositions.Count == 0)
         {
-            Debug.LogError("プレイヤーの出現位置(playerPositions)が設定されていません！");
+            Debug.LogError("プレイヤーの出現位置が設定されていません！");
             return;
         }
 
-        // ロードされたプレイヤー全員をループ処理
         for (int i = 0; i < Players.Count; i++)
         {
             if (i >= playerPositions.Count || playerPositions[i] == null)
@@ -146,8 +163,12 @@ public class BattleEntitiesManager : MonoBehaviour
 
             PlayerRuntime targetPlayer = Players[i];
             Transform spawnPoint = playerPositions[i];
-
             SpawnPlayerCharacter(targetPlayer, spawnPoint);
+
+            if (targetPlayer.HPHandler != null)
+            {
+                targetPlayer.HPHandler.OnDead += battleManager.OnPlayerDead;
+            }
         }
     }
 
@@ -162,10 +183,18 @@ public class BattleEntitiesManager : MonoBehaviour
         }
 
         playerController.Init(runtime.PlayerModel);
+        if (runtime.EquippedWeapon != null)
+        {
+            playerController.SetInitialWeapon(runtime.EquippedWeapon);
+            Debug.Log($"[View] 初期武器を表示しました: {runtime.EquippedWeapon.Model.Name}");
+        }
+        else
+        {
+            Debug.LogWarning($"[View] {runtime.PlayerModel.PlayerName} は装備武器(EquippedWeapon)を持っていません。");
+        }
         runtime.PlayerController = playerController;
         PlayerControllers.Add(runtime.PlayerModel, playerController);
 
-        // PlayerのStatusUI生成
         var statusUIObject = Instantiate(playerStatusUIPrefab, playerStatusBarTransform, false);
         PlayerStatusUIController playerUiController = statusUIObject.GetComponent<PlayerStatusUIController>();
         if (playerUiController == null) return;
@@ -183,8 +212,6 @@ public class BattleEntitiesManager : MonoBehaviour
         if (markerInstance == null || playerIndex < 0 || playerIndex >= playerPositions.Count) return;
 
         Transform playerBase = playerPositions[playerIndex];
-
-        // マーカーを適切な位置に移動・表示
         markerInstance.transform.position = playerBase.position + new Vector3(0, 5, 0);
         markerInstance.transform.rotation = Quaternion.Euler(0, 0, 180);
         markerInstance.SetActive(true);

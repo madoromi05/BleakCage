@@ -14,7 +14,7 @@ public class BattleManager : MonoBehaviour
     [Header("コアコンポーネント参照")]
     [SerializeField] public BattleCardDeck battleCardDeck;
     [SerializeField] public GuardGaugeSystem guardGaugeSystem;
-
+    [SerializeField] private GameObject gameOverUIPanel;
     [SerializeField] private BattlePhaseManager normalPhaseManager;
     [SerializeField] private TutorialFlowManager tutorialFlowManager;
     [SerializeField] private BattleEntitiesManager entitiesManager;
@@ -30,27 +30,14 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button changeSelectionsButton;
     [SerializeField] private GameObject targetMarkerPrefab;
 
-    [SerializeField] private GameObject iIcon;
-    [SerializeField] private GameObject SelectTurnKey;
-
-    public bool TrySpendGuardGauge(float amount) => guardGaugeSystem.TrySpendGuardGauge(amount);
-    public void AddGuardGauge(float amount) => guardGaugeSystem.AddGuardGauge(amount);
-    public void IncrementCounterCount() => guardGaugeSystem.IncrementCounterCount();
     public void ShowDefenseFeedback(string message, Color color) => defenseFeedbackUI.ShowDefenseFeedback(message, color);
 
-    // --- マーカー表示 (EntitiesManagerへの委譲) ---
-    public void ShowTargetMarkerOnPlayer(int playerIndex) => entitiesManager.ShowTargetMarkerOnPlayer(MarkerInstance, playerIndex);
-    public void HideTargetMarker() => entitiesManager.HideTargetMarker(MarkerInstance);
-
-    // --- UIコールバック ---
-    public void OnKeepSelections() => normalPhaseManager.OnKeepSelections();
-    public void OnChangeSelections() => normalPhaseManager.OnChangeSelections();
-
-    public GameObject MarkerInstance { get; private set; } // マーカーインスタンスを公開
+    public GameObject MarkerInstance { get; private set; }
+    public bool IsBattleEnded { get; private set; } = false;
     private float playerTurnDuration = 10f; // PhaseManager に移動しても良い
     private float turnTime = 10f; // PlayerTurnWithTimer で使用
     private Coroutine feedbackCoroutine;
-
+    private List<EnemyRuntime> enemyRuntimes = new List<EnemyRuntime>();
     void Start()
     {
         if (targetMarkerPrefab != null)
@@ -58,10 +45,11 @@ public class BattleManager : MonoBehaviour
             MarkerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, Quaternion.identity, this.transform);
             MarkerInstance.SetActive(false);
         }
+
         selectionChoicePanel.SetActive(false);
-        SetUpUI();
+
         guardGaugeSystem.Init();
-        entitiesManager.Setup();
+        entitiesManager.Setup(this);
 
         InitializeBattleFlow();
     }
@@ -85,9 +73,38 @@ public class BattleManager : MonoBehaviour
         }
         battleCardDeck.InitFromCardList(allCards);
 
-        List<PlayerModel> playerModels = entitiesManager.Players.Select(p => p.PlayerModel).ToList();
-        enemyTurn.EnemySetup(playerModels, entitiesManager.Enemies, entitiesManager.EnemyControllers, entitiesManager.PlayerControllers, entitiesManager.PlayerStatusUIs);
+        Dictionary<PlayerRuntime, PlayerController> runtimeControllerMap = new Dictionary<PlayerRuntime, PlayerController>();
+        foreach (var runtime in entitiesManager.Players)
+        {
+            if (entitiesManager.PlayerControllers.TryGetValue(runtime.PlayerModel, out var controller))
+            {
+                runtimeControllerMap[runtime] = controller;
+            }
+        }
 
+        enemyRuntimes.Clear();
+        if (entitiesManager.Enemies != null)
+        {
+            foreach (var enemyModel in entitiesManager.Enemies)
+            {
+                // GUIDとRuntimeを生成
+                EnemyRuntime newRuntime = new EnemyRuntime(enemyModel, System.Guid.NewGuid().ToString());
+                enemyRuntimes.Add(newRuntime);
+
+                if (newRuntime.HPHandler != null)
+                {
+                    newRuntime.HPHandler.OnDead += OnEnemyDead;
+                }
+            }
+        }
+
+        enemyTurn.EnemySetup(
+            entitiesManager.Players,
+            entitiesManager.Enemies,
+            entitiesManager.EnemyControllers,
+            runtimeControllerMap,
+            entitiesManager.PlayerStatusUIs
+        );
         // === フローの分岐 ===
         bool isTutorial = entitiesManager.IsTutorialMode;
 
@@ -105,10 +122,9 @@ public class BattleManager : MonoBehaviour
                 entitiesManager.EnemyStatusUIs,
                 selectTurn,
                 playerTurn,
-                battleCardDeck
+                battleCardDeck,
+                enemyRuntimes
             );
-
-            iIcon.SetActive(true);
 
             tutorialFlowManager.StartTutorialFlow();
         }
@@ -136,30 +152,106 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    public void OnEnemyDead(EnemyRuntime enemy)
+    {
+        if (IsBattleEnded) return;
+
+        Debug.Log($"敵撃破: {enemy.EnemyModel.EnemyName}");
+        if (entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
+        {
+            StartCoroutine(controller.DeadSequence());
+            var ui = entitiesManager.EnemyStatusUIs.FirstOrDefault(u => u.GetEnemyModel() == enemy.EnemyModel);
+            if (ui != null)
+            {
+                // UIを即座に消すか、フェードアウトさせる
+                ui.gameObject.SetActive(false);
+            }
+        }
+
+        // 勝利判定: 全ての敵のHPが0以下か？
+        bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
+        if (allEnemiesDead)
+        {
+            StartCoroutine(BattleWinProcess());
+        }
+    }
+
+    public void OnPlayerDead(PlayerRuntime player)
+    {
+        if (IsBattleEnded) return;
+
+        Debug.Log($"味方死亡: {player.PlayerModel.PlayerName}");
+
+        if (entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out PlayerController controller))
+        {
+            controller.PlayDeadAnimation();
+        }
+
+        // 敗北判定: 全てのプレイヤーのHPが0以下か？
+        bool allPlayersDead = entitiesManager.Players.All(p => p.CurrentHP <= 0);
+        if (allPlayersDead)
+        {
+            StartCoroutine(BattleLoseProcess());
+        }
+    }
+
+    private IEnumerator BattleWinProcess()
+    {
+        IsBattleEnded = true;
+        Debug.Log("【BATTLE WIN】");
+        yield return new WaitForSeconds(1.5f); // 余韻
+
+        // チュートリアルの場合は終了処理
+        if (entitiesManager.IsTutorialMode)
+        {
+            SceneManager.LoadScene("TitleScene"); // またはStageSelect
+            yield break;
+        }
+
+        // 戦闘後フラグを立ててシナリオシーンへ
+        StageManager.IsPostBattle = true;
+        SceneManager.LoadScene("ScenarioScene");
+    }
+
+    private IEnumerator BattleLoseProcess()
+    {
+        IsBattleEnded = true;
+        Debug.Log("【BATTLE LOSE】");
+        yield return new WaitForSeconds(1.5f);
+        if (gameOverUIPanel != null)
+        {
+            gameOverUIPanel.SetActive(true);
+        }
+
+        yield return new WaitForSeconds(3.0f);
+        SceneManager.LoadScene("StageSelectScene");
+    }
 
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")
     {
+        if (IsBattleEnded) yield break;
+
         yield return StartCoroutine(normalPhaseManager.ShowPhaseUI(phaseName));
         Debug.Log("【カード選択ターン開始】");
         timeText.enabled = true;
-
-        SelectTurnKey.SetActive(true);
 
         playerTurn.Setup(
             selectTurn.PlayerSelections,
             entitiesManager.Players,
             battleCardDeck,
             entitiesManager.EnemyStatusUIs,
-            entitiesManager.EnemyControllers
+            entitiesManager.PlayerStatusUIs,
+            entitiesManager.EnemyControllers,
+            enemyRuntimes
         );
 
         playerTurn.StartPlayerTurn();
 
         turnTime = playerTurnDuration;
         float soundTime = 1f;
-        while (turnTime >= 0 && !playerTurn.isTurnFinished)
+        while (turnTime >= 0 && !playerTurn.isTurnFinished && !IsBattleEnded)
         {
-            if(soundTime <= 0f)
+            if (soundTime <= 0f)
             {
                 SoundManager.Instance.PlaySE(SEType.CountDown);
                 soundTime = 1f;
@@ -171,12 +263,9 @@ public class BattleManager : MonoBehaviour
         }
         turnTime = 0f;
         timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
-        playerTurn.FinishPlayerTurn();
-    }
-
-    private void SetUpUI()
-    {
-        SelectTurnKey.SetActive(false);
-        iIcon.SetActive(false);
+        if (!IsBattleEnded)
+        {
+            playerTurn.FinishPlayerTurn();
+        }
     }
 }

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
+  m_Name: "Card_203_\u6BB2\u6EC5\u3078\u81F3\u308B\u9023\u74B0"
+  m_EditorClassIdentifier: 
+  ID: 203
+  OwnerID: 2
+  ExclusiveID: 0
+  Name: "\u6BB2\u6EC5\u3078\u81F3\u308B\u9023\u74B0"
+  CharacterID: 2
+  EquipableWeaponID: 0
+  Description: 
+  Type: 0
+  Attribute: 3
+  Passive: 0
+  HitRate: 0.6
+  OutputModifier: 1.3
+  DefensePenetration: 1
+  TargetScope: 2
+  IsMelee: 0
+  AttackCount: 3
+  TargetCount: 3
+  StatusEffect:
+    Type: 0
+    Value: 0
+    Duration: 0
+    InflictStacks: 0
+  AttackAnimation: {fileID: 7400000, guid: 4cccf1f1370d7b24990bad0e77b116cc, type: 2}
+  WeaponHand: 1
+  EffectPrefab: {fileID: 3079769987515116661, guid: b8a7f05956d8a824984e9fd32dce606a, type: 3}

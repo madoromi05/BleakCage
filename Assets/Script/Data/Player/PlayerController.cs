@@ -1,189 +1,101 @@
 using UnityEngine;
 using System.Collections;
-using DG.Tweening;
+using System;
 
-/// <summary>
-/// UI、データをゲームにsetするクラス
-/// </summary>
+[RequireComponent(typeof(PlayerAnimationController))]
+[RequireComponent(typeof(PlayerMovementController))]
+[RequireComponent(typeof(PlayerCombatController))]
 public class PlayerController : MonoBehaviour
 {
-    private PlayerModel playerModel;
+    public void SetStatusUI(PlayerStatusUIController ui) => this.statusUI = ui;
+
+    // コンポーネント参照
+    private PlayerAnimationController animCtrl;
+    private PlayerMovementController moveCtrl;
+    private PlayerCombatController combatCtrl;
     private PlayerStatusUIController statusUI;
-    private Animator animator;
-    private AnimatorOverrideController overrideController;
-    private Vector3 originalPosition;
-    private Transform rightHandSocket;
-    private Transform leftHandSocket;
-    private float moveDuration = 0.3f;   // 接近にかかる時間
-    private float returnDuration = 0.5f; // 戻るにかかる時間
 
-    // アニメーターのパラメータハッシュ
-    private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
-    private static readonly int IsGuardingHash = Animator.StringToHash("IsGuarding");
+    // イベント中継
+    public event Action OnAttackHitTriggered
+    {
+        add => combatCtrl.OnAttackHitTriggered += value;
+        remove => combatCtrl.OnAttackHitTriggered -= value;
+    }
 
-    // Animatorのステート名（画像のもの）に合わせる ---
-    private const string IdleClipName = "Idle";
-    private const string GuardClipName = "Guard";
-    private const string AttackClipName = "DummyAttack";
+    private void Awake()
+    {
+        animCtrl = GetComponent<PlayerAnimationController>();
+        moveCtrl = GetComponent<PlayerMovementController>();
+        combatCtrl = GetComponent<PlayerCombatController>();
+    }
 
     public void Init(PlayerModel model)
     {
-        this.playerModel = model;
-        this.originalPosition = transform.localPosition;
+        moveCtrl.Init(transform.localPosition);
 
-        // 1. 3Dモデルのプレハブを生成
         if (model.CharacterPrefab != null)
         {
-            Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
-            Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
-            GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
+            GameObject instance = Instantiate(model.CharacterPrefab, transform);
 
-            this.animator = instance.GetComponent<Animator>();
+            // Prefabのローカル座標・スケールを適用
+            instance.transform.localPosition = model.CharacterPrefab.transform.localPosition;
+            instance.transform.localScale = model.CharacterPrefab.transform.localScale;
+
+            // 回転の適用: Prefabの回転 × Entityで設定した初期回転(InitialRotation)
+            Quaternion prefabRot = model.CharacterPrefab.transform.localRotation;
+            Quaternion adjustRot = Quaternion.Euler(model.InitialRotation);
+            instance.transform.localRotation = prefabRot * adjustRot;
+
+            Animator anim = instance.GetComponent<Animator>();
             CharacterBoneHolder boneHolder = instance.GetComponent<CharacterBoneHolder>();
-            if (boneHolder != null)
-            {
-                this.rightHandSocket = boneHolder.RightHandTransform;
-                this.leftHandSocket = boneHolder.LeftHandTransform;
-            }
-            else
-            {
-                Debug.LogError($"キャラクタープレハブ {instance.name} に 'CharacterBoneHolder' が付いていません！ 武器を持たせられません。");
-            }
-        }
-        else
-        {
-            Debug.LogError($"PlayerModel.CharacterPrefabが設定されていません！ (PlayerID: {model.PlayerID})", this.gameObject);
-            return; // Animatorがないのでここで処理終了
-        }
 
-        if (animator.runtimeAnimatorController == null)
-        {
-            Debug.LogError("キャラクターのAnimatorにベースとなるAnimator Controllerが設定されていません！", this.animator.gameObject);
-            return;
-        }
-        overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-        animator.runtimeAnimatorController = overrideController;
+            Transform rightHandSocket = boneHolder != null ? boneHolder.RightHandTransform : null;
+            Transform leftHandSocket = boneHolder != null ? boneHolder.LeftHandTransform : null;
 
-        if (model.PlayerAnimator != null)
-        {
-            overrideController[IdleClipName] = model.PlayerAnimator.Idle;
-            overrideController[GuardClipName] = model.PlayerAnimator.Guard;
-        }
-        else
-        {
-            Debug.LogError($"PlayerModel (ID: {model.PlayerID}) に PlayerAnimator (ScriptableObject) が設定されていません。", this.gameObject);
+            if (anim != null)
+            {
+                animCtrl.Init(anim);
+            }
+            combatCtrl.Init(animCtrl, moveCtrl, rightHandSocket, leftHandSocket);
         }
     }
 
-    /// <summary>
-    /// 敵に接近し、攻撃アニメーションを再生して、元の位置に戻る
-    /// </summary>
-    /// <param name="cardModel">使用するカードのデータ（ここを修正！）</param>
-    /// <param name="targetEnemy">攻撃対象のTransform</param>
-    public IEnumerator AttackSequence(CardModel cardModel, Transform targetEnemy)
+    public void SetInitialWeapon(WeaponRuntime weaponRuntime)
     {
-        AnimationClip cardAttackClip = cardModel.AttackAnimation;
-        GameObject currentWeaponInstance = null;
-
-        if (cardModel.WeaponPrefab != null)
+        if (combatCtrl != null && weaponRuntime != null)
         {
-            Transform handTransform = (cardModel.WeaponHand == HandPosition.RightHand)
-                                      ? this.rightHandSocket
-                                      : this.leftHandSocket;
-
-            if (handTransform != null)
-            {
-                // 武器生成
-                currentWeaponInstance = Instantiate(cardModel.WeaponPrefab, handTransform);
-
-                // 名前からクローンを削除してアニメーションに認識されるようにする
-                currentWeaponInstance.name = cardModel.WeaponPrefab.name;
-                // 攻撃対象との位置合わせ
-                currentWeaponInstance.transform.localPosition = Vector3.zero;
-                currentWeaponInstance.transform.localRotation = Quaternion.identity;
-            }
-            else
-            {
-                Debug.LogWarning($"武器を装備しようとしましたが、{(cardModel.WeaponHand == HandPosition.RightHand ? "右手" : "左手")}のTransformが取得できていません。CharacterBoneHolderの設定を確認してください。");
-            }
-        }
-
-        if (cardModel.IsMelee)
-        {
-            Vector3 targetPosition = targetEnemy.position + (transform.position - targetEnemy.position).normalized * 1.5f;
-
-            transform.DOMove(targetPosition, moveDuration).SetEase(Ease.OutCubic);
-            yield return new WaitForSeconds(moveDuration);
-        }
-
-        if (cardAttackClip != null)
-        {
-            overrideController[AttackClipName] = cardAttackClip;
-            animator.SetTrigger(AttackTriggerHash);
-            yield return new WaitForSeconds(cardAttackClip.length);
-        }
-        else
-        {
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        Debug.Log("[PlayerController] アニメーション待機完了。元の位置に戻ります。");
-
-        if (currentWeaponInstance != null)
-        {
-            Destroy(currentWeaponInstance);
-        }
-
-        if (cardModel.IsMelee)
-        {
-            transform.DOLocalMove(originalPosition, returnDuration).SetEase(Ease.InOutQuad);
-            yield return new WaitForSeconds(returnDuration);
+            combatCtrl.EquipMainWeapon(weaponRuntime);
         }
     }
-    /// <summary>
-    /// 防御アニメーションの再生状態を設定する
-    /// </summary>
-    /// <param name="isGuarding">防御中なら true</param>
+
+    public IEnumerator AttackSequence(CardModel cardModel, WeaponRuntime weaponRuntime, Transform target)
+    {
+        yield return combatCtrl.ExecuteAttackSequence(cardModel, weaponRuntime, target);
+    }
+
+    public IEnumerator SupportEffect(CardModel cardModel)
+    {
+        yield return combatCtrl.ExecuteSupportEffect(cardModel);
+    }
+
     public void SetGuardAnimation(bool isGuarding)
     {
-        if (animator != null)
+        if (animCtrl != null)
         {
-            animator.SetBool(IsGuardingHash, isGuarding);
+            animCtrl.SetGuard(isGuarding);
         }
     }
 
     /// <summary>
-    /// OverrideControllerに設定されたクリップの長さを取得する（汎用）
+    /// 死亡アニメーションを再生する
     /// </summary>
-    private float GetAnimationClipLength(string clipNameKey)
+    public void PlayDeadAnimation()
     {
-        if (overrideController != null && overrideController[clipNameKey] != null)
+        if (animCtrl != null)
         {
-            return overrideController[clipNameKey].length;
+            GetComponentInChildren<Animator>()?.SetTrigger("IsDead");
         }
-
-        Debug.LogWarning($"PlayerのOverrideControllerに '{clipNameKey}' のクリップが見つかりません。デフォルトの0.5秒を使用します。", this);
-        return 0.5f;
-    }
-
-    /// <summary>
-    /// ガードアニメーションの長さを取得する
-    /// </summary>
-    public float GetGuardAnimationLength()
-    {
-        return GetAnimationClipLength(GuardClipName);
-    }
-
-    public void SetStatusUI(PlayerStatusUIController ui)
-    {
-        this.statusUI = ui;
-    }
-
-    public void UpdateHealthUI(float currentHP)
-    {
-        if (statusUI != null)
-        {
-            statusUI.UpdateHP(currentHP);
-        }
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
     }
 }

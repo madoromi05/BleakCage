@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d27d474f917e344babb8dd1c8a7cd12, type: 3}
+  m_Name: Weapon_11__ArtelWeapon
+  m_EditorClassIdentifier: 
+  ID: 11
+  Name: Shield
+  Attribute: 1
+  Icon: {fileID: 0}
+  Description: 
+  HoldHandType: 0
+  AttackPower: 30
+  PeakyCoefficient: 1
+  WeaponPrefab: {fileID: 3508136266559725065, guid: 0c8592a7d9d8e784380bddb6c64cebb1, type: 3}
+  DefaultCards:
+  - {fileID: 11400000, guid: 8fb68b9b41d19e94cab02ee12461e25c, type: 2}
+  - {fileID: 11400000, guid: 47bb81e2b3dcbf94b8b0037abab37d96, type: 2}
+  - {fileID: 11400000, guid: 2db8b2191c6fa51488b6e9c58c0dea7c, type: 2}

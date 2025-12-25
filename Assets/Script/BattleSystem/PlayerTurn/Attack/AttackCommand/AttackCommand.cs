@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 /// <summary>
 /// 選択したカードが敵に攻撃するコマンド
@@ -7,63 +8,74 @@ using System.Collections;
 public class AttackCommand : ICommand
 {
     private PlayerRuntime player;
-    private EnemyModel targetEnemy;
+    private EnemyRuntime targetEnemy;
     private CardRuntime card;
     private WeaponRuntime weapon;
-    private IAttackStrategy damageStrategy;
     private EnemyStatusUIController enemyStatusUIController;
+    private PlayerStatusUIController playerStatusUIController;
     private CardModelFactory cardModelFactory;
     private Transform targetTransform;
+    private DamageCalculator damageCalculator;
 
-    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card,EnemyStatusUIController enemyStatusUIController,
-                            EnemyModel enemy, Transform targetTransform, IAttackStrategy strategy, CardModelFactory cardModelFactory)
+    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, 
+                            EnemyStatusUIController enemyStatusUIController, PlayerStatusUIController playerStatusUIController,
+                            EnemyRuntime enemy, Transform targetTransform, DamageCalculator damageCalculator, CardModelFactory cardModelFactory)
     {
-        this.damageStrategy = strategy;
         this.targetEnemy = enemy;
+        this.playerStatusUIController = playerStatusUIController;
         this.player = player;
         this.card = card;
         this.weapon = weapon;
         this.enemyStatusUIController = enemyStatusUIController;
         this.cardModelFactory = cardModelFactory;
         this.targetTransform = targetTransform;
+        this.damageCalculator = damageCalculator;
     }
 
     public IEnumerator Do()
     {
-        Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.EnemyID}");
-        if (targetEnemy.EnemyHP <= 0)
+        Debug.Log($"[AttackCommand] 実行開始。 CardID: {card.ID}, Attribute: {card.attribute} (これがBuffなら設定ミスです)");
+        if (weapon == null)
         {
-            Debug.Log($" EnemyID： {targetEnemy.EnemyID} は既に倒されているため、攻撃をスキップしました。");
-            yield break;
+            Debug.LogWarning("[AttackCommand] WeaponRuntime is null. Using default or aborting.");
         }
-
-        // 1. PlayerRuntime から PlayerController の実体を取得
         PlayerController controller = player.PlayerController;
-        if (controller == null)
-        {
-            Debug.LogError($"Player (ID: {player.ID}) の PlayerController が null です！");
-            yield break;
-        }
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
-        if (cardModel.AttackAnimation == null)
+
+        // 攻撃ヒット時の処理を定義（ローカル関数）
+        int hitCount = 0;
+        Action onHitAction = () =>
         {
-            Debug.LogError($"[AttackCommand] CardModel (ID: {card.ID}) の AttackAnimation が NULL です！ CardEntityに設定されていますか？");
-            yield break; // アニメがないなら中断
-        }
+            // 敵が生きていればダメージ処理
+            if (targetEnemy.CurrentHP > 0)
+            {
+                hitCount++;
 
-        yield return controller.AttackSequence(cardModel, targetTransform);
+                // ダメージ計算
+                float damage = damageCalculator.CalculateFinalDamage(player, weapon, card, targetEnemy);
 
-        float damage = damageStrategy.CalculateFinalDamage(player, weapon, card , targetEnemy);
+                // 効果音
+                attackedSoundEffect(card.attribute);
 
-        //Card属性ごとの効果音
-        attackedSoundEffect(card.attribute);
-        // ターゲットのHPを減算
-        targetEnemy.EnemyHP -= damage;
-        enemyStatusUIController.UpdateHP(targetEnemy.EnemyHP);
+                // ターゲットのHPを減算
+                targetEnemy.HPHandler.TakeDamage(damage);
+                enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
 
-        Debug.Log($" EnemyID： {targetEnemy.EnemyID} に player;{player.ID}がweapon:{weapon.ID}とcard:{card.ID}で{damage:F2} ダメージを与えた。残りHP: {targetEnemy.EnemyHP:F2}");
+                // 状態異常の付与
+                ApplyStatusEffectToEnemy(cardModel, targetEnemy);
 
-        // アニメーション後の硬直時間
+                Debug.Log($"[{hitCount}ヒット目] EnemyID：{targetEnemy.ID} に {damage:F2} ダメージ");
+            }
+        };
+
+        // イベントを購読 (Subscribe)
+        controller.OnAttackHitTriggered += onHitAction;
+
+        // アニメーションシーケンスの実行
+        yield return controller.AttackSequence(cardModel, weapon, targetTransform);
+
+        controller.OnAttackHitTriggered -= onHitAction;
+        Debug.Log("攻撃コマンド終了");
         yield return new WaitForSeconds(0.1f);
     }
 
@@ -74,25 +86,57 @@ public class AttackCommand : ICommand
     }
     private void attackedSoundEffect(AttributeType attribute)
     {
-        if(attribute == AttributeType.Slash)
+        if (attribute == AttributeType.Slash) SoundManager.Instance.PlaySE(SEType.SlashAttack);
+        else if (attribute == AttributeType.Blunt) SoundManager.Instance.PlaySE(SEType.BluntAttack);
+        else if (attribute == AttributeType.Bullet) SoundManager.Instance.PlaySE(SEType.BulletAttack);
+        else if (attribute == AttributeType.Pierce) SoundManager.Instance.PlaySE(SEType.PierceAttack);
+    }
+
+    /// <summary>
+    /// カードに設定されたステータス効果を敵に適用する
+    /// </summary>
+    private void ApplyStatusEffectToEnemy(CardModel cardModel, EnemyRuntime enemy)
+    {
+        StatusEffect newEffect = new StatusEffect(
+            cardModel.StatusEffect.Type,            // 破砕、熔鉄など
+            cardModel.StatusEffect.Value,           // 効果値
+            cardModel.StatusEffect.Duration,        // 持続ターン
+            cardModel.StatusEffect.InflictStacks    // 付与するスタック数
+        );
+
+        switch (newEffect.Type)
         {
-            SoundManager.Instance.PlaySE(SEType.SlashAttack);
-            SoundManager.Instance.PlaySE(SEType.damagedSlashEnemy);
-        }
-        else if(attribute == AttributeType.Blunt)
-        {
-            SoundManager.Instance.PlaySE(SEType.BluntAttack);
-            SoundManager.Instance.PlaySE(SEType.damagedBluntEnemy);
-        }
-        else if(attribute == AttributeType.Bullet)
-        {
-            SoundManager.Instance.PlaySE(SEType.BulletAttack);
-            SoundManager.Instance.PlaySE(SEType.damagedBulletEnemy);
-        }
-        else if(attribute == AttributeType.Pierce) 
-        {
-            SoundManager.Instance.PlaySE(SEType.PierceAttack);
-            SoundManager.Instance.PlaySE(SEType.damagedPierceEnemy);
+            case StatusEffectType.None:
+                return;
+
+            // --- 敵 (EnemyRuntime) に付与する異常状態 ---
+            case StatusEffectType.Fracture:     // 【破砕】: 防御貫通UP
+            case StatusEffectType.Laceration:   // 【損傷】: ターン終了時ダメージ
+            case StatusEffectType.Meltdown:     // 【熔鉄】: 攻防ダウン
+                if (targetEnemy.StatusHandler != null)
+                {
+                    targetEnemy.StatusHandler.ApplyStatus(newEffect);
+                    enemyStatusUIController.UpdateStatusIcons(targetEnemy.StatusHandler);
+                    Debug.Log($"[Debuff] 敵(ID:{targetEnemy.ID})に {newEffect.Type} を付与");
+                }
+                break;
+
+            // --- 自分 (PlayerRuntime) に付与するバフ/状態 ---
+            case StatusEffectType.Cover:        // 【援護】: ダメージ無効化
+            case StatusEffectType.Target:       // 【目標】: 命中率UP
+            case StatusEffectType.DefenceUp:    // 【防御力UP】
+            case StatusEffectType.AttackUp:     // 【攻撃力UP】       
+                if (player.StatusHandler != null)
+                {
+                    player.StatusHandler.ApplyStatus(newEffect);
+                    playerStatusUIController.UpdateStatusIcons(player.StatusHandler);
+                    Debug.Log($"[Buff] プレイヤー(ID:{player.ID})に {newEffect.Type} を付与");
+                }
+                break;
+
+            default:
+                Debug.LogWarning($"[AttackCommand] 未対応のステータスタイプです: {newEffect.Type}");
+                break;
         }
     }
 }

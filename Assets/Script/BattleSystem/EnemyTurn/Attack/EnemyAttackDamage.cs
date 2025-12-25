@@ -5,7 +5,7 @@ using UnityEngine;
 /// 攻撃する側 -> Attacker
 /// 攻撃を受ける側 -> Defender
 /// </summary>
-public class EnemyAttackDamage : IEnemyAttackStrategy
+public class EnemyAttackDamage
 {
     [Header("難易度によって変わる値")]
     private float decayAdjustment = 1.0f;
@@ -15,15 +15,18 @@ public class EnemyAttackDamage : IEnemyAttackStrategy
     /// </summary>
     public float CalculateFinalDamage(EnemyModel attacker, PlayerModel target)
     {
-        // 1. 効率ηを計算
+        // 2. 状態異常【熔鉄】による攻撃力ダウンの適用
+        float currentAttackPower = attacker.EnemyAttackPower;
+
+        // 効率ηを計算
         float efficiency = CalculateEfficiency(
-            attacker.EnemyAttackPower, // 攻撃側のパワー
+            currentAttackPower,
             target.PlayerDefensePower
         );
 
-        // 2. 最終ダメージを計算
-        float finalDamage = attacker.EnemyAttackPower * efficiency;
-        return finalDamage;
+        // 最終ダメージを計算
+        float finalDamage = currentAttackPower * efficiency;
+        return Mathf.Max(1f, finalDamage);
     }
 
     /// <summary>

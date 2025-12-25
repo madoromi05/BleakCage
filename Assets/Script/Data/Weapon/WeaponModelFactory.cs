@@ -1,16 +1,14 @@
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
 /// WeaponModelを生成するファクトリクラス
-/// 責任：WeaponEntityの読み込みとWeaponModelの生成
 /// </summary>
 public class WeaponModelFactory
 {
     /// <summary>
     /// IDからWeaponModelを生成
     /// </summary>
-    /// <param name="weaponId">武器ID</param>
-    /// <returns>WeaponModel。生成に失敗した場合はnull</returns>
     public WeaponModel CreateFromId(int weaponId)
     {
         WeaponEntity weaponEntity = LoadWeaponEntity(weaponId);
@@ -24,19 +22,26 @@ public class WeaponModelFactory
 
     /// <summary>
     /// WeaponEntityを読み込む
+    /// フォルダ全体をロードし、名前が一致するものを検索する
     /// </summary>
-    /// <param name="weaponId">武器ID</param>
-    /// <returns>WeaponEntity。見つからない場合はnull</returns>
     private WeaponEntity LoadWeaponEntity(int weaponId)
     {
-        string path = $"EntityDataList/WeaponEntityList/Weapon_{weaponId}";
-        WeaponEntity weaponEntity = Resources.Load<WeaponEntity>(path);
+        // ファイル個別のパスではなく、フォルダのパスを指定
+        string folderPath = "EntityDataList/WeaponEntityList";
 
-        if (weaponEntity == null)
+        // フォルダ内の全データをロード
+        WeaponEntity[] allWeapons = Resources.LoadAll<WeaponEntity>(folderPath);
+        string exactName = $"Weapon_{weaponId}";
+        string prefixName = $"Weapon_{weaponId}_";
+
+        WeaponEntity targetEntity = allWeapons.FirstOrDefault(w =>
+            w.name == exactName || w.name.StartsWith(prefixName));
+
+        if (targetEntity == null)
         {
-            Debug.LogWarning($"WeaponEntity not found at path: {path}");
+            Debug.LogWarning($"WeaponEntity not found in folder '{folderPath}' for ID: {weaponId} (Expected file name starting with 'Weapon_{weaponId}_...')");
         }
 
-        return weaponEntity;
+        return targetEntity;
     }
 }

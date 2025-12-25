@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class PlayerActionExecutor
 {
-    private Queue<ICommand> commandQueue = new();
+    private Queue<(ICommand command, CardRuntime card)> commandQueue = new();
     private CardModelFactory cardModelFactory;
     private MonoBehaviour coroutineRunner;
 
@@ -24,52 +24,71 @@ public class PlayerActionExecutor
         List<CardRuntime> selectedCards,
         Dictionary<int, List<EnemyModel>> playerTargetSelections,
         List<EnemyStatusUIController> enemyStatusUIControllers,
+        List<PlayerStatusUIController> playerStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
-        IAttackStrategy damageStrategy,
+        List<EnemyRuntime> allEnemyRuntimes,
+        DamageCalculator damageCalculator,
+        System.Action<CardRuntime> onShowCard,
+        System.Action onHideCard,
         System.Action onExecutionComplete)
     {
-        Debug.Log("実行するカード: " + string.Join(",", selectedCards.Select(c => c.ID)));
         commandQueue.Clear();
-
         foreach (var selectedCardRuntime in selectedCards)
         {
-            // 1. このカードがアタッチされている特定の武器を取得する
             WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
-
-            // 2. その武器を所持しているプレイヤーを取得する
             PlayerRuntime player = weaponRuntime.ParentPlayer;
+
             if (player == null || weaponRuntime == null)
             {
-                Debug.LogError($"カード {selectedCardRuntime.ID} ({selectedCardRuntime.InstanceID}) はどの武器にもアタッチされていません！");
-                Debug.LogError($"武器 {weaponRuntime.ID} ({weaponRuntime.InstanceID}) はどのプレイヤーにも所持されていません！");
+                Debug.LogError($"カード情報エラー: ID={selectedCardRuntime.ID}");
                 continue;
             }
 
-            // 3. カードの属性に応じて処理を振り分け
+            // この時点での最新状況（敵の生死など）を元に、コマンドを作成する
             AttributeType attribute = selectedCardRuntime.attribute;
+            bool isAttack = IsAttackAttribute(attribute);
 
-            if (IsAttackAttribute(attribute))
+            if (isAttack)
             {
-                // 攻撃属性の場合
                 if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
                 {
-                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets, enemyStatusUIControllers, enemyControllers, damageStrategy);
+                    // ここでターゲットを計算
+                    HandleAttackAction(player, weaponRuntime, selectedCardRuntime, targets,
+                         enemyStatusUIControllers, playerStatusUIControllers,
+                         enemyControllers, allEnemyRuntimes, damageCalculator);
                 }
             }
             else
             {
-                HandleSupportAction(player, selectedCardRuntime);
+                HandleSupportAction(player, selectedCardRuntime, playerStatusUIControllers);
+            }
+
+            // 作成されたコマンドを即座に実行する
+            while (commandQueue.Count > 0)
+            {
+                var item = commandQueue.Dequeue();
+                ICommand currentCommand = item.command;
+                CardRuntime currentCard = item.card;
+
+                onShowCard?.Invoke(currentCard);
+
+                // コマンド実行（攻撃アニメーション～ダメージ処理完了まで待機）
+                yield return coroutineRunner.StartCoroutine(currentCommand.Do());
+                bool isNextSameCard = false;
+                if (commandQueue.Count > 0)
+                {
+                    var nextItem = commandQueue.Peek();
+                    if (nextItem.card == currentCard)
+                    {
+                        isNextSameCard = true;
+                    }
+                }
+                if (!isNextSameCard)
+                {
+                    onHideCard?.Invoke();
+                }
             }
         }
-
-        // 順に実行
-        while (commandQueue.Count > 0)
-        {
-            var command = commandQueue.Dequeue();
-            yield return coroutineRunner.StartCoroutine(command.Do());
-        }
-
-        Debug.Log("カード効果の実行完了");
         onExecutionComplete?.Invoke();
     }
 
@@ -86,7 +105,8 @@ public class PlayerActionExecutor
             case AttributeType.Bullet:
                 return true;
             case AttributeType.Heal:
-            case AttributeType.Defence:
+            case AttributeType.AttackBuff:
+            case AttributeType.DefenseBuff:
             default:
                 return false;
         }
@@ -101,59 +121,95 @@ public class PlayerActionExecutor
         CardRuntime selectedCardRuntime,
         List<EnemyModel> targets,
         List<EnemyStatusUIController> enemyStatusUIControllers,
+        List<PlayerStatusUIController> playerStatusUIControllers,
         Dictionary<EnemyModel, EnemyController> enemyControllers,
-        IAttackStrategy damageStrategy)
+        List<EnemyRuntime> allEnemyRuntimes,
+        DamageCalculator damageCalculator
+    )
     {
-        EnemyModel finalTarget = null;
-        foreach (var potentialTarget in targets)
-        {
-            if (potentialTarget.EnemyHP > 0)
-            {
-                finalTarget = potentialTarget;
-                break;
-            }
-        }
+        PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == attackPlayer);
+        List<EnemyRuntime> actualTargets = new List<EnemyRuntime>();                            // 攻撃対象リスト
+        CardModel cardModel = cardModelFactory.CreateFromID(selectedCardRuntime.ID);            // 攻撃範囲(TargetScope)を確認する
 
-        if (finalTarget != null)
+        if (cardModel.TargetScope == CardTargetScope.All)
         {
-            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == finalTarget);
-            if (targetEnemyUI != null && enemyControllers.TryGetValue(finalTarget, out EnemyController targetEnemyController))
-            {
-                Transform targetTransform = targetEnemyController.transform;
-                commandQueue.Enqueue(new AttackCommand(attackPlayer, weaponRuntime, selectedCardRuntime,
-                                                      targetEnemyUI, finalTarget,
-                                                      targetTransform,
-                                                      damageStrategy, cardModelFactory));
-            }
-            else
-            {
-                Debug.LogError($"攻撃対象 (ID: {finalTarget.EnemyID}) の EnemyController または UI が見つかりません。");
-            }
+            // --- 全体攻撃 ---
+            actualTargets = allEnemyRuntimes.Where(r => r.CurrentHP > 0).ToList();
         }
         else
         {
-            Debug.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象 (優先順位リスト) は全員倒されています。攻撃をスキップします。");
+            // --- 単体攻撃 (従来のロジック) ---
+            // 選択されたターゲットリストから、生存している最初の1体を探す
+            EnemyRuntime targetRuntime = null;
+            foreach (var potentialTargetModel in targets)
+            {
+                var runtime = allEnemyRuntimes.FirstOrDefault(r => r.EnemyModel == potentialTargetModel);
+                if (runtime != null && runtime.CurrentHP > 0)
+                {
+                    targetRuntime = runtime;
+                    break; // 1体見つかったら確定
+                }
+            }
+            if (targetRuntime != null)
+            {
+                actualTargets.Add(targetRuntime);
+            }
+        }
+
+        // 各ターゲットに対して攻撃コマンドを実行
+        foreach (var targetRuntime in actualTargets)
+        {
+            EnemyStatusUIController targetEnemyUI = enemyStatusUIControllers.FirstOrDefault(ui => ui.GetEnemyModel() == targetRuntime.EnemyModel);
+
+            if (targetEnemyUI != null && enemyControllers.TryGetValue(targetRuntime.EnemyModel, out EnemyController targetEnemyController))
+            {
+                Transform targetTransform = targetEnemyController.transform;
+                var command = new AttackCommand(
+                    attackPlayer,
+                    weaponRuntime,
+                    selectedCardRuntime,
+                    targetEnemyUI,
+                    attackerUI,
+                    targetRuntime,
+                    targetTransform,
+                    damageCalculator,
+                    cardModelFactory);
+                commandQueue.Enqueue((command, selectedCardRuntime));
+            }
+            else
+            {
+                Debug.LogError($"Target UI or Controller not found for EnemyID: {targetRuntime.ID}");
+            }
+        }
+
+        if (actualTargets.Count == 0)
+        {
+            Debug.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象がいません。");
         }
     }
 
     /// <summary>
     /// 援属性カードの処理（コマンドをキューに追加）
     /// </summary>
-    private void HandleSupportAction(PlayerRuntime player, CardRuntime selectedCardRuntime)
+    private void HandleSupportAction(PlayerRuntime player, CardRuntime selectedCardRuntime, List<PlayerStatusUIController> playerStatusUIControllers)
     {
-        if (selectedCardRuntime.attribute == AttributeType.Heal)
+        PlayerStatusUIController attackerUI = playerStatusUIControllers.FirstOrDefault(ui => ui.GetPlayerRuntime() == player);
+        CardModel cardModel = cardModelFactory.CreateFromID(selectedCardRuntime.ID);
+        ICommand command = null;
+        switch (selectedCardRuntime.attribute)
         {
-            // --- 回復コマンドの処理 ---
-            Debug.Log($"{player.PlayerModel.PlayerName} が回復カードを使用。");
-            SoundManager.Instance.PlaySE(SEType.Heal);
-            // commandQueue.Enqueue(new HealCommand(player, 0.2f)); // 例：最大HPの20%回復
+            case AttributeType.Heal:
+                command = new HealCommand(player, selectedCardRuntime, attackerUI, cardModel);
+                break;
+            case AttributeType.AttackBuff:  // 攻撃バフ
+            case AttributeType.DefenseBuff: // 防御バフ
+                command = new BuffCommand(player, selectedCardRuntime, attackerUI, cardModel);
+                break;
         }
-        else if (selectedCardRuntime.attribute == AttributeType.Defence)
+
+        if (command != null)
         {
-            // --- 防御コマンドの処理 ---
-            Debug.Log($"{player.PlayerModel.PlayerName} が防御カードを使用。");
-            SoundManager.Instance.PlaySE(SEType.Defence);
-            // commandQueue.Enqueue(new DefenceCommand(player, ...)); // 将来的な実装
+            commandQueue.Enqueue((command, selectedCardRuntime));
         }
     }
 }
