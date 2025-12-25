@@ -35,7 +35,6 @@ public class BuffCommand : ICommand
         if (player.StatusHandler != null)
         {
             player.StatusHandler.ApplyStatus(newEffect);
-            // UIにマーカー（アイコン）を表示
             uiController.UpdateStatusIcons(player.StatusHandler);
         }
 

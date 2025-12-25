@@ -17,10 +17,10 @@ public class EnemyEntity : ScriptableObject
 
     public float EnemyHP;                   // EnemyのHP
     public float EnemyAttackPower;          // キャラ攻撃力
-    public float EnemyDefensePower;         // キャラ防御力
-    public EnemyAnimatorSet AnimationSet;        // アニメーションセット
+    public float EnemyDefensePower;         // キャラ防御
+    public float EnemyAttackOffset;         // Enemy1の攻撃アニメーション位置がおかしいため追加
 
-    // --- PlayerEntityに合わせて追加 ---
     public GameObject CharacterPrefab;      // キャラクタープレハブ
     public Vector3 InitialRotation;         // 初期回転
+    public GameObject AttackEffectPrefab;   // 攻撃エフェクトプレハブ
 }

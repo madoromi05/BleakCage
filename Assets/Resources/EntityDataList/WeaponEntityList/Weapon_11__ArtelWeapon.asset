@@ -17,6 +17,7 @@ MonoBehaviour:
   Attribute: 1
   Icon: {fileID: 0}
   Description: 
+  HoldHandType: 0
   AttackPower: 10
   PeakyCoefficient: 0
   WeaponPrefab: {fileID: 3508136266559725065, guid: 0c8592a7d9d8e784380bddb6c64cebb1, type: 3}

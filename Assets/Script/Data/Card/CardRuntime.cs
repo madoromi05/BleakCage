@@ -20,6 +20,7 @@ public class CardRuntime : IAttackComponent
         ID = model.ID;
         _outputModifier = model.OutputModifier;
         DefensePenetration = model.DefensePenetration;
+        this.attribute = model.Attribute;
     }
     public float GetOutput()
     {

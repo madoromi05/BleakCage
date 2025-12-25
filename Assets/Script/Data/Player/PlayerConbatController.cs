@@ -23,7 +23,6 @@ public class PlayerCombatController : MonoBehaviour
     /// </summary>
     public void Init(PlayerAnimationController anim, PlayerMovementController move, Transform rightHand, Transform leftHand)
     {
-        Debug.Log("PlayerCombatController Init");
         this.animCtrl = anim;
         this.moveCtrl = move;
         this.rightHandSocket = rightHand;
@@ -119,7 +118,7 @@ public class PlayerCombatController : MonoBehaviour
     /// </summary>
     public IEnumerator ExecuteSupportEffect(CardModel cardModel)
     {
-        PlayEffect(cardModel.EffectPrefab, transform.position + Vector3.up * 1.0f);
+        PlayEffect(cardModel.EffectPrefab, transform.position + Vector3.up * 2.0f);
         yield return new WaitForSeconds(0.5f);
     }
 
@@ -129,7 +128,9 @@ public class PlayerCombatController : MonoBehaviour
     private void PlayEffect(GameObject prefab, Vector3 position)
     {
         if (prefab == null) return;
-
+        Debug.Log($"[PlayEffect] Name: {prefab.name}\n" +
+                  $"Spawn Pos: {position}\n" +
+                  $"My Pos (Player): {transform.position}");
         // プレハブの回転値をそのまま使って生成
         GameObject effect = Instantiate(prefab, position, prefab.transform.rotation);
         Destroy(effect, 2.0f);

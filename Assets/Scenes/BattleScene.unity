@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a47308e8001a4ed428ce8cb189e8f141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugStageID: 1
+  debugStageID: 2
   enemyBasePrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
   playerBasePrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
   playerPositions:
@@ -308,13 +308,15 @@ MonoBehaviour:
   playerStatusBarTransform: {fileID: 334436847}
   enemyStatusBarTransform: {fileID: 727143522}
   allStageEnemyData:
+  - {fileID: 11400000, guid: 9d954007fbb42714fbe8efc6ce3953f1, type: 2}
   - {fileID: 11400000, guid: 98c8e5cd5013a994ba6f6a9752b6d896, type: 2}
   - {fileID: 11400000, guid: 216c6be24867f3945a8031f797c8d1f6, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
   stagePlayerPresets:
+  - {fileID: 11400000, guid: f20665b3f8a85b24ea42ecd537d244ea, type: 2}
   - {fileID: 11400000, guid: 380242edaba581542bd64538b74f3932, type: 2}
   - {fileID: 11400000, guid: 43318904ac21ed34591c6de3903aab4c, type: 2}
-  - {fileID: 11400000, guid: f20665b3f8a85b24ea42ecd537d244ea, type: 2}
+  - {fileID: 11400000, guid: 2ecc3c8ff157f884e997d40827c4a7e1, type: 2}
 --- !u!114 &120127635
 MonoBehaviour:
   m_ObjectHideFlags: 0

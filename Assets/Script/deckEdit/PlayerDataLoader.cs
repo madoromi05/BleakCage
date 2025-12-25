@@ -52,10 +52,6 @@ public class PlayerDataLoader
             {
                 Debug.LogError($"[ˆÙí] PlayerModel‚É•Ší‚ª“ü‚Á‚Ä‚¢‚Ü‚¹‚ñI ID: {model.PlayerID}, Name: {model.PlayerName}");
             }
-            else
-            {
-                Debug.Log($"[³í] PlayerModel‚Í•Ší‚ğ‚Á‚Ä‚¢‚Ü‚·: {model.PlayerWeapon.Name}");
-            }
             // Player‚É‚Â‚¢‚Ä‚¢‚é•Ší
             foreach (var weaponData in charData.Weapons)
             {
@@ -90,7 +86,6 @@ public class PlayerDataLoader
                     }
                 }
                 playerRuntime.EquipWeapon(defaultWRuntime);
-                Debug.Log($"ƒƒCƒ“•Ší‘•”õ: {defaultWModel.Name}");
             }
 
             party.Add(playerRuntime);

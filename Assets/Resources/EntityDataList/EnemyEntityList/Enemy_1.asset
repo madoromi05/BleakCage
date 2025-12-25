@@ -21,6 +21,7 @@ MonoBehaviour:
   EnemyHP: 500
   EnemyAttackPower: 10
   EnemyDefensePower: 5
-  AnimationSet: {fileID: 11400000, guid: 3f207724620337c4e928c5bf0f1e81ba, type: 2}
+  EnemyAttackOffset: 1
   CharacterPrefab: {fileID: 719641742962210556, guid: b9e500f66f5bd0141a6095e40a914451, type: 3}
   InitialRotation: {x: 0, y: 180, z: 0}
+  AttackEffectPrefab: {fileID: 4379223018328130358, guid: 2299ad34717d8b842b7682acee282ce8, type: 3}

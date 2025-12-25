@@ -332,7 +332,7 @@ public class PlayerTurn : MonoBehaviour
             }
             else
             {
-                Debug.Log($"破棄するカード番号: {i} (ID: {cardInstance.ID})");
+                // Debug.Log($"破棄するカード番号: {i} (ID: {cardInstance.ID})");
                 excludedCardInstancesThisTurn.Add(cardInstance.InstanceID);
             }
         }

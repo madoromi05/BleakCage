@@ -34,7 +34,7 @@ public class AttackCommand : ICommand
 
     public IEnumerator Do()
     {
-        Debug.Log($"[AttackCommand] Do() 実行開始。 CardID: {card.ID}, TargetEnemy: {targetEnemy.ID}");
+        Debug.Log($"[AttackCommand] 実行開始。 CardID: {card.ID}, Attribute: {card.attribute} (これがBuffなら設定ミスです)");
         if (weapon == null)
         {
             Debug.LogWarning("[AttackCommand] WeaponRuntime is null. Using default or aborting.");

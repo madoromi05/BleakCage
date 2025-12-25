@@ -1,56 +1,64 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// UI、データをゲームにsetするクラス
-///　敵キャラの共通親クラス
+/// 敵キャラのコントローラー
+/// アニメーション、エフェクト、および単純な移動制御を行う
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
-    [Header("Effects")]
-    [SerializeField] private GameObject meleeHitEffectPrefab;   // 近接ヒットエフェクト
-    [SerializeField] private GameObject rangedShootEffectPrefab; // 遠距離の発射エフェクト
-    [SerializeField] private GameObject rangedHitEffectPrefab;   // 遠距離の着弾エフェクト
-
     public event System.Action OnAttackHitMoment;
+
     private EnemyModel model;
     private EnemyStatusUIController statusUI;
     private Animator animator;
-    private AnimatorOverrideController overrideController;
+    private Dictionary<string, float> clipLengthCache = new Dictionary<string, float>();
     private Vector3 originalPosition;
-    private Transform playerTransform;
+    private EnemyHeightAdjuster heightAdjuster;
+    private EnemyMeleeMovement meleeMovement;
 
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
     private static readonly int AttackIDHash = Animator.StringToHash("AttackID");
 
-    private const string IdleClipName = "Idle";
-    private static readonly List<string> AnimatorAttackSlotNames = new List<string>
+    private static readonly List<string> AnimatorAttackStateNames = new List<string>
     {
-        //攻撃アニメーションの最大数分作る
         "Attack1",
         "Attack2",
         "Attack3",
     };
 
     /// <summary>
-    /// 敵のデータを初期化し、表示とアニメーションを設定する
+    /// 初期化処理
     /// </summary>
     public void Init(EnemyModel enemyModel, Transform targetPlayer)
     {
         this.model = enemyModel;
-        this.playerTransform = targetPlayer;
         this.originalPosition = transform.position;
 
         if (model.CharacterPrefab != null)
         {
+            // モデル（子オブジェクト）の生成
             Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
             Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
-            // プレハブを生成し、その参照(instance)を保持する
             GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
+
+            // 高さ調整が必要ならコンポーネント追加
+            if (Mathf.Abs(model.AttackHeightOffset) > 0.001f)
+            {
+                this.heightAdjuster = instance.AddComponent<EnemyHeightAdjuster>();
+            }
+
+            // アニメーションイベント受信
             var receiver = instance.AddComponent<EnemyAnimationReceiver>();
             receiver.Setup(this);
+
+            if (model.AttackType == EnemyAttackType.Melee)
+            {
+                this.meleeMovement = instance.AddComponent<EnemyMeleeMovement>();
+            }
             this.animator = instance.GetComponent<Animator>();
             if (this.animator == null)
             {
@@ -59,95 +67,101 @@ public class EnemyController : MonoBehaviour
             }
         }
 
-        overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-        animator.runtimeAnimatorController = overrideController;
-
-        // クリップの上書き (model.EnemyAnimator は "EnemyAnimatorSet" 型)
-        if (model.EnemyAnimator != null)
-        {
-            overrideController[IdleClipName] = model.EnemyAnimator.Idle;
-            var clipsFromSet = model.EnemyAnimator.AttackAnimations;
-            int clipsToAssign = Mathf.Min(clipsFromSet.Count, AnimatorAttackSlotNames.Count);
-
-            if (clipsFromSet.Count != AnimatorAttackSlotNames.Count)
-            {
-                Debug.LogWarning($"EnemyAnimatorSet ({model.EnemyAnimator.name}) には {clipsFromSet.Count} 個のアニメが設定されていますが、" +
-                                 $"EnemyController の Animator スロットは {AnimatorAttackSlotNames.Count} 個です。" +
-                                 $"{clipsToAssign} 個分だけ割り当てます。", this);
-            }
-
-            for (int i = 0; i < clipsToAssign; i++)
-            {
-                if (clipsFromSet[i] != null)
-                {
-                    overrideController[AnimatorAttackSlotNames[i]] = clipsFromSet[i];
-                }
-            }
-        }
+        CacheAnimationLengths();
     }
 
     /// <summary>
-    /// OverrideControllerに設定されたクリップの長さを取得する
+    /// Animator内の全クリップ長をキャッシュする
     /// </summary>
-    private float GetAnimationClipLength(string clipNameKey)
+    private void CacheAnimationLengths()
     {
-        if (overrideController != null && overrideController[clipNameKey] != null)
+        if (animator == null || animator.runtimeAnimatorController == null) return;
+
+        clipLengthCache.Clear();
+        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
         {
-            return overrideController[clipNameKey].length;
+            if (!clipLengthCache.ContainsKey(clip.name))
+            {
+                clipLengthCache.Add(clip.name, clip.length);
+            }
         }
-        Debug.LogWarning($"EnemyのOverrideControllerに '{clipNameKey}' のクリップが見つかりません。デフォルトの0.5秒を使用します。", this);
-        return 0.5f;
     }
 
     /// <summary>
-    /// ランダムな攻撃アニメーションを再生し、その長さを返す
-    /// (EnemyAttackCommand から呼ばれる)
+    /// ステート名からクリップの長さを取得する
     /// </summary>
-    /// <returns>再生したアニメーションの長さ(秒)</returns>
+    private float GetAnimationLengthByStateName(string stateName)
+    {
+        if (clipLengthCache.TryGetValue(stateName, out float length))
+        {
+            return length;
+        }
+
+        var match = clipLengthCache.Keys.FirstOrDefault(k => k.Contains(stateName));
+        if (match != null)
+        {
+            return clipLengthCache[match];
+        }
+
+        Debug.LogWarning($"EnemyController: クリップが見つからないためデフォルト値を使用します (State: {stateName})", this);
+        return 1.0f;
+    }
+
+    /// <summary>
+    /// 攻撃アニメーションを再生する
+    /// </summary>
     public float PlayRandomAttackAnimation()
     {
-        int availableAttackCount = Mathf.Min(
-            model.EnemyAnimator.AttackAnimations.Count,
-            AnimatorAttackSlotNames.Count
-        );
-
+        int availableAttackCount = AnimatorAttackStateNames.Count;
         int randomAttackID = Random.Range(0, availableAttackCount);
 
-        Debug.Log($"[EnemyController] アニメーション再生: AttackID = {randomAttackID} (利用可能な数: {availableAttackCount})");
+        Debug.Log($"[EnemyController] アニメーション再生: AttackID = {randomAttackID}");
 
         animator.SetInteger(AttackIDHash, randomAttackID);
         animator.SetTrigger(AttackTriggerHash);
 
-        string clipSlotName = AnimatorAttackSlotNames[randomAttackID];
-        return GetAnimationClipLength(clipSlotName);
+        string stateName = AnimatorAttackStateNames[randomAttackID];
+        float clipLength = GetAnimationLengthByStateName(stateName);
+
+        // 高さ調整
+        if (heightAdjuster != null)
+        {
+            heightAdjuster.ApplyHeightOffset(clipLength, model.AttackHeightOffset);
+        }
+
+        return clipLength;
     }
 
     /// <summary>
-    /// 攻撃タイプに応じたエフェクトを再生するメソッド
+    /// 攻撃エフェクト再生
     /// </summary>
-    /// <param name="type">敵の攻撃タイプ (Melee/Ranged)</param>
-    /// <param name="targetPosition">攻撃対象（プレイヤー）の位置</param>
     public void PlayAttackEffect(EnemyAttackType type, Vector3 targetPosition)
     {
-        switch (type)
+        if (model.AttackEffectPrefab != null)
         {
-            case EnemyAttackType.Melee:
-                // 近接攻撃の場合
-                if (meleeHitEffectPrefab != null)
-                {
-                    // 少し位置を上げる(Vector3.up)と足元ではなく体に当たったように見える
-                    Instantiate(meleeHitEffectPrefab, targetPosition + Vector3.up, Quaternion.identity);
-                }
-                break;
+            Instantiate(model.AttackEffectPrefab, targetPosition + Vector3.up, Quaternion.identity);
+        }
+    }
 
-            case EnemyAttackType.Ranged:
-                // 遠距離攻撃の場合
-                // ターゲットの位置に「着弾エフェクト（爆発）」を出す
-                if (rangedHitEffectPrefab != null)
-                {
-                    Instantiate(rangedHitEffectPrefab, targetPosition + Vector3.up, Quaternion.identity);
-                }
-                break;
+    /// <summary>
+    /// ターゲットへ移動する（コンポーネントに委譲）
+    /// </summary>
+    public IEnumerator MoveToTarget(Vector3 targetPosition)
+    {
+        if (meleeMovement != null)
+        {
+            yield return meleeMovement.MoveToTarget(targetPosition);
+        }
+    }
+
+    /// <summary>
+    /// 元の位置へ戻る（コンポーネントに委譲）
+    /// </summary>
+    public IEnumerator ReturnToOriginalPosition()
+    {
+        if (meleeMovement != null)
+        {
+            yield return meleeMovement.ReturnToPosition();
         }
     }
 
@@ -164,12 +178,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 攻撃が当たる瞬間のアニメーションイベント
-    /// </summary>
     public void TriggerAttackHit()
     {
-        // 攻撃が当たる瞬間にイベントを発火させる
         OnAttackHitMoment?.Invoke();
     }
 }

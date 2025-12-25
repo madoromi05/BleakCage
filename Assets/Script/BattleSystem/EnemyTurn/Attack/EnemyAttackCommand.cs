@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class EnemyAttackCommand : ICommand
@@ -7,6 +8,7 @@ public class EnemyAttackCommand : ICommand
     public EnemyModel Attacker { get; }
     private EnemyAttackDamage calculator = new EnemyAttackDamage();
     private EnemyController _enemyController;
+    private PlayerController _playerController;
     private PlayerStatusUIController _playerStatusUIController;
 
     public EnemyAttackCommand(PlayerRuntime player, EnemyModel enemy,
@@ -18,6 +20,7 @@ public class EnemyAttackCommand : ICommand
         this.Attacker = enemy;
         _enemyController = enemyController;
         _playerStatusUIController = playerStatusUIController;
+        _playerController = playerController;
     }
 
     /// <summary>
@@ -26,10 +29,16 @@ public class EnemyAttackCommand : ICommand
     /// </summary>
     public IEnumerator Do()
     {
+        EnemyAttackType attackType = Attacker.AttackType;
+        bool isMelee = (attackType == EnemyAttackType.Melee);
+        if (isMelee)
+        {
+            if (_enemyController != null && _playerController != null)
+            {
+                yield return _enemyController.MoveToTarget(_playerController.transform.position);
+            }
+        }
         Debug.Log($"攻撃実行: Enemy='{Attacker.EnemyID}' が Player='{PlayerTarget.PlayerModel.PlayerID}' に攻撃開始！");
-
-        // 敵の攻撃アニメーションを再生し、その長さを取得する
-        // (このアニメーションの途中で 'OnAttackHitMoment' イベントが発火する)
         float attackAnimTime = 0.5f;
         if (_enemyController != null)
         {
@@ -38,9 +47,13 @@ public class EnemyAttackCommand : ICommand
 
         // アニメーションが終了するまで待機する
         yield return new WaitForSeconds(attackAnimTime);
-
-        // アニメーション再生後 (ダメージ処理は EnemyTurn が行う)
-        Debug.Log($"攻撃アニメ終了: Enemy='{Attacker.EnemyID}'");
+        if (isMelee)
+        {
+            if (_enemyController != null)
+            {
+                yield return _enemyController.ReturnToOriginalPosition();
+            }
+        }
     }
 
     /// <summary>
@@ -49,7 +62,6 @@ public class EnemyAttackCommand : ICommand
     public void ApplyDamageAfterJudgement()
     {
         if (PlayerTarget == null || PlayerTarget.HPHandler == null) return;
-        // ダメージを計算する
         float damage = calculator.CalculateFinalDamage(
             Attacker,
             PlayerTarget.PlayerModel
@@ -60,7 +72,6 @@ public class EnemyAttackCommand : ICommand
             Vector3 targetPos = PlayerTarget.PlayerController.transform.position;
             _enemyController.PlayAttackEffect(Attacker.AttackType, targetPos);
         }
-        // HPを減算する
         SoundManager.Instance.PlaySE(SEType.damagedPlayer);
         PlayerTarget.HPHandler.TakeDamage(damage);
         _playerStatusUIController.UpdateHP(PlayerTarget.CurrentHP);

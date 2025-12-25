@@ -5,7 +5,7 @@ using UnityEngine;
 /// UŒ‚‚·‚é‘¤ -> Attacker
 /// UŒ‚‚ðŽó‚¯‚é‘¤ -> Defender
 /// </summary>
-public class EnemyAttackDamage : IEnemyAttackStrategy
+public class EnemyAttackDamage
 {
     [Header("“ïˆÕ“x‚É‚æ‚Á‚Ä•Ï‚í‚é’l")]
     private float decayAdjustment = 1.0f;

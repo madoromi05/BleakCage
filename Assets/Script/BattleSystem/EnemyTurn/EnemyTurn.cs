@@ -128,7 +128,7 @@ public class EnemyTurn : MonoBehaviour
                 continue;
             }
 
-            // 1. この攻撃のコンテキストをセット
+            // この攻撃のコンテキストをセット
             this.currentPlayerTarget = attackCmd.PlayerTarget;
             this.currentAttackCommand = attackCmd;
             this.attackHasBeenResolved = false;
@@ -140,13 +140,13 @@ public class EnemyTurn : MonoBehaviour
             }
             yield return new WaitForSeconds(0.5f);
 
-            // 4. 攻撃コマンドを実行 (アニメ再生 + 待機)
+            // 攻撃コマンドを実行 (アニメ再生 + 待機)
             yield return StartCoroutine(command.Do());
 
-            // 5. BattleManagerにマーカー非表示を依頼
+            // BattleManagerにマーカー非表示を依頼
             entitiesManager.HideTargetMarker(battleManager.MarkerInstance);
 
-            // 6. アニメーションイベントが発火しなかった場合のフォールバック
+            // アニメーションイベントが発火しなかった場合のフォールバック
             if (!attackHasBeenResolved)
             {
                 Debug.LogWarning($"P{targetPlayerIndex + 1}: アニメーションイベント不発のため強制実行");
@@ -154,12 +154,10 @@ public class EnemyTurn : MonoBehaviour
             }
 
             yield return new WaitUntil(() => attackHasBeenResolved == true);
-
-            // 次の攻撃の前に1フレーム待機
             yield return null;
         }
 
-        // ターン終了処理
+        yield return new WaitForSeconds(1.0f);
         defenseHandler.DisableDefenseInput();
         TurnFinished?.Invoke();
     }

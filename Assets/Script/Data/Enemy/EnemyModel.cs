@@ -22,9 +22,10 @@ public class EnemyModel
     public DefensAttributeType EnemyDefensAttribute { get; private set; } // 防御属性
     public Sprite EnemySprite { get; private set; }           // 表示アイコン
     public string EnemyDescription { get; private set; }      // 説明文
-    public EnemyAnimatorSet EnemyAnimator { get; private set; }   // アニメーションセット
     public GameObject CharacterPrefab { get; private set; }
-    public Vector3 InitialRotation { get; private set; }   // 初期回転
+    public Vector3 InitialRotation { get; private set; }   // 初期回転ko-dodesuka 
+    public float AttackHeightOffset = 0f;
+    public GameObject AttackEffectPrefab { get; private set; }
 
     /// <summary>
     /// ScriptableObject(EnemyEntity)からデータを読み込んでモデルに反映
@@ -46,9 +47,9 @@ public class EnemyModel
         EnemyDefensAttribute = Entity.EnemyDefensAttribute;
         EnemySprite = Entity.EnemySprite;
         EnemyDescription = Entity.EnemyDescription;
-        EnemyAnimator = Entity.AnimationSet;
-
+        AttackHeightOffset = Entity.EnemyAttackOffset;
         CharacterPrefab = Entity.CharacterPrefab;
         InitialRotation = Entity.InitialRotation;
+        AttackEffectPrefab = Entity.AttackEffectPrefab;
     }
 }

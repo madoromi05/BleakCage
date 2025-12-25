@@ -48,7 +48,10 @@ public class PlayerActionExecutor
             }
 
             AttributeType attribute = selectedCardRuntime.attribute;
-            if (IsAttackAttribute(attribute))
+
+            bool isAttack = IsAttackAttribute(attribute);
+            Debug.Log($"[Check] CardID: {selectedCardRuntime.ID}, Attribute: {attribute}, IsAttackAttribute? : {isAttack}");
+            if (isAttack)
             {
                 // UŒ‚‘®«‚Ìê‡
                 if (playerTargetSelections.TryGetValue(player.ID, out List<EnemyModel> targets))
