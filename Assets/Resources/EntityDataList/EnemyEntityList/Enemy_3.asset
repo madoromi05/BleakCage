@@ -19,9 +19,9 @@ MonoBehaviour:
   AttackType: 0
   EnemySprite: {fileID: 21300000, guid: 3003a976abd839b4696a84eac8fc3b82, type: 3}
   EnemyDescription: "\u65B0\u3057\u3044\u6575\u306E\u8AAC\u660E\u6587"
-  EnemyHP: 500
-  EnemyAttackPower: 30
-  EnemyDefensePower: 10
+  EnemyHP: 1500
+  EnemyAttackPower: 60
+  EnemyDefensePower: 20
   EnemyAttackOffset: 0
   CharacterPrefab: {fileID: 4631455459323643022, guid: acfeb9622e5b6b24283833ab0471db53, type: 3}
   InitialRotation: {x: 0, y: 180, z: 0}

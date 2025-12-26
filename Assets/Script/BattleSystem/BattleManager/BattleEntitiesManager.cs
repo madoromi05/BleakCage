@@ -225,7 +225,6 @@ public class BattleEntitiesManager : MonoBehaviour
 
         Transform playerBase = playerPositions[playerIndex];
         markerInstance.transform.position = playerBase.position + new Vector3(0, 5, 0);
-        markerInstance.transform.rotation = Quaternion.Euler(0, 0, 180);
         markerInstance.SetActive(true);
     }
 

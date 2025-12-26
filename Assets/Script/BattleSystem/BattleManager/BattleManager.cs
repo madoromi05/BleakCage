@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -42,7 +41,7 @@ public class BattleManager : MonoBehaviour
     {
         if (targetMarkerPrefab != null)
         {
-            MarkerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, Quaternion.identity, this.transform);
+            MarkerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, targetMarkerPrefab.transform.rotation, this.transform);
             MarkerInstance.SetActive(false);
         }
 

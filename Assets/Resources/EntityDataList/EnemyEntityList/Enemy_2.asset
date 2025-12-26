@@ -19,9 +19,9 @@ MonoBehaviour:
   AttackType: 1
   EnemySprite: {fileID: 21300000, guid: 48bbd3e1c3c970b4cb6d08487e4c2b27, type: 3}
   EnemyDescription: 
-  EnemyHP: 500
-  EnemyAttackPower: 10
-  EnemyDefensePower: 20
+  EnemyHP: 1500
+  EnemyAttackPower: 40
+  EnemyDefensePower: 30
   EnemyAttackOffset: 0
   CharacterPrefab: {fileID: 8909415315788679611, guid: 215d27aee7402e541a046fbb646c47bd, type: 3}
   InitialRotation: {x: 0, y: 180, z: 0}

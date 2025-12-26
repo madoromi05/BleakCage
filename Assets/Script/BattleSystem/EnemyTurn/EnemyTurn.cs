@@ -172,7 +172,6 @@ public class EnemyTurn : MonoBehaviour
     {
         if (currentAttackCommand != null)
         {
-            Debug.Log($"P{target.PlayerModel.PlayerID} にダメージを適用します。");
             currentAttackCommand.ApplyDamageAfterJudgement();
         }
     }
