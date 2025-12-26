@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Stage3_Setup
   m_EditorClassIdentifier: 
   PartyMembers:
-  - CharacterID: 1
+  - CharacterID: 0
     Level: 0
     Weapons: []
