@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa5da05d11580a4098ff3e40525460f, type: 3}
-  m_Name: Player_0_XIORI_Stage1
+  m_Name: Player_5_XIORI_Stage3
   m_EditorClassIdentifier: 
-  PlayerId: 0
+  PlayerId: 5
   PlayerName: XIORI
   PlayerAttribute: 3
   CharacterPrefab: {fileID: 3080054730939816206, guid: 5bd529762c8db0040a7e762870f3d927, type: 3}
   InitialRotation: {x: 0, y: 0, z: 0}
   PlayerDescription: 
   PlayerIcon: {fileID: 21300000, guid: efdccce54db339346931b341d09e0221, type: 3}
-  PlayerLevel: 5
+  PlayerLevel: 50
   PlayerHP: 100
   PlayerDefensePower: 5
   PlayerWeapon: {fileID: 11400000, guid: 67dd5983bc6bada428c22503602b20a4, type: 2}

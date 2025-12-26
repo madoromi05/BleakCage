@@ -816,8 +816,8 @@ MonoBehaviour:
   characterIcon: {fileID: 1705636894329588293}
   nameText: {fileID: 3623809741078121263}
   levelText: {fileID: 7298868090237728646}
-  attackText: {fileID: 9116673953773789508}
-  defenseText: {fileID: 1053162125035543869}
+  attackText: {fileID: 1053162125035543869}
+  defenseText: {fileID: 9116673953773789508}
   hpSlider: {fileID: 4884853998711249382}
   hpAnimationDuration: 0.5
   background: {fileID: 3639082112934953496}

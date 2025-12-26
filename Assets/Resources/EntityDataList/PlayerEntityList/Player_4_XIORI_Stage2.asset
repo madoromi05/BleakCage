@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa5da05d11580a4098ff3e40525460f, type: 3}
-  m_Name: Player_2_Nanthera
+  m_Name: Player_4_XIORI_Stage2
   m_EditorClassIdentifier: 
-  PlayerId: 2
-  PlayerName: Nanthera
-  PlayerAttribute: 0
-  CharacterPrefab: {fileID: 7323712652299439833, guid: 54f9d431be5d6ae49b2914d8049dc568, type: 3}
+  PlayerId: 4
+  PlayerName: XIORI
+  PlayerAttribute: 3
+  CharacterPrefab: {fileID: 3080054730939816206, guid: 5bd529762c8db0040a7e762870f3d927, type: 3}
   InitialRotation: {x: 0, y: 0, z: 0}
-  PlayerDescription: "\u65B0\u3057\u3044\u30D7\u30EC\u30A4\u30E4\u30FC\u306E\u8AAC\u660E\u6587"
-  PlayerIcon: {fileID: 21300000, guid: 6a80f9f59fa512b43b0587c031501117, type: 3}
+  PlayerDescription: 
+  PlayerIcon: {fileID: 21300000, guid: efdccce54db339346931b341d09e0221, type: 3}
   PlayerLevel: 30
   PlayerHP: 100
   PlayerDefensePower: 5
-  PlayerWeapon: {fileID: 11400000, guid: 3fe68ca2387901243bb406a0a6b3e969, type: 2}
-  GuardVisualYOffset: 0
+  PlayerWeapon: {fileID: 11400000, guid: 67dd5983bc6bada428c22503602b20a4, type: 2}
+  GuardVisualYOffset: 1.5

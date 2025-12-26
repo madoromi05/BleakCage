@@ -16,9 +16,12 @@ public class PlayerController : MonoBehaviour
     private PlayerStatusUIController statusUI;
 
     private Transform _characterRoot;
-    private Vector3 _characterBaseLocalPos;
     private float _guardVisualYOffset = 0f;
     private bool _isGuardVisualRaised = false;
+    private Coroutine _guardVisualCoroutine;
+    private float _guardHoldUntilTime = 0f;
+    private bool _isGuardHeld = false;
+    private Vector3 _guardBaseLocalPos; // ガード開始時の基準位置
 
     // イベント中継
     public event Action OnAttackHitTriggered
@@ -53,7 +56,7 @@ public class PlayerController : MonoBehaviour
             Quaternion adjustRot = Quaternion.Euler(model.InitialRotation);
             instance.transform.localRotation = prefabRot * adjustRot;
 
-            _characterBaseLocalPos = _characterRoot.localPosition;
+            _guardBaseLocalPos = _characterRoot.localPosition;
             _isGuardVisualRaised = false;
 
             Animator anim = instance.GetComponent<Animator>();
@@ -90,35 +93,91 @@ public class PlayerController : MonoBehaviour
 
     public void SetGuardAnimation(bool isGuarding)
     {
+        // アニメはあくまで見た目（無くても座標上げはしたい）
         if (animCtrl != null)
-        {
             animCtrl.SetGuard(isGuarding);
-        }
-        ApplyGuardVisualOffset(isGuarding);
-    }
+        if (_isGuardHeld == isGuarding) return;
 
-    private void ApplyGuardVisualOffset(bool isGuarding)
-    {
-        if (_characterRoot == null || Mathf.Approximately(_guardVisualYOffset, 0f))
-            return;
+        _isGuardHeld = isGuarding;
 
         if (isGuarding)
         {
-            if (_isGuardVisualRaised) return;
-
-            Vector3 p = _characterBaseLocalPos;
-            p.y += _guardVisualYOffset;
-            _characterRoot.localPosition = p;
-            _isGuardVisualRaised = true;
+            CaptureGuardBasePosition();
+            RaiseGuardVisualNow();
+            ExtendGuardVisualHold();
         }
         else
         {
-            if (!_isGuardVisualRaised) return;
-
-            _characterRoot.localPosition = _characterBaseLocalPos;
-            _isGuardVisualRaised = false;
+            ExtendGuardVisualHold();
         }
     }
+    private void CaptureGuardBasePosition()
+    {
+        if (_characterRoot == null) return;
+
+        // “いま”の見た目位置をガード用ベースにする
+        _guardBaseLocalPos = _characterRoot.localPosition;
+
+        // もしすでに上げていた状態で呼ばれた場合に備えて、ベースも補正しておく
+        if (_isGuardVisualRaised)
+        {
+            _guardBaseLocalPos.y -= _guardVisualYOffset;
+        }
+    }
+
+    private void RaiseGuardVisualNow()
+    {
+        if (_characterRoot == null || Mathf.Approximately(_guardVisualYOffset, 0f)) return;
+        if (_isGuardVisualRaised) return;
+
+        var p = _guardBaseLocalPos;
+        p.y += _guardVisualYOffset;
+        _characterRoot.localPosition = p;
+        _isGuardVisualRaised = true;
+    }
+
+    private void ExtendGuardVisualHold()
+    {
+        if (_characterRoot == null || Mathf.Approximately(_guardVisualYOffset, 0f)) return;
+
+        float len = (animCtrl != null) ? animCtrl.GetGuardAnimationLength() : 0.5f;
+        // “いまからlen秒”まで保持。すでに保持中なら延長。
+        _guardHoldUntilTime = Mathf.Max(_guardHoldUntilTime, Time.time + len);
+
+        if (_guardVisualCoroutine == null)
+            _guardVisualCoroutine = StartCoroutine(GuardVisualHoldCoroutine());
+    }
+
+    private IEnumerator GuardVisualHoldCoroutine()
+    {
+        while (true)
+        {
+            // ガード入力中は“絶対に下げない”
+            if (_isGuardHeld)
+            {
+                // 念のため上がってなければ上げる（ここでも二重上げはしない）
+                RaiseGuardVisualNow();
+                yield return null;
+                continue;
+            }
+
+            // 入力解除後：保持時間が切れるまで待つ
+            if (Time.time < _guardHoldUntilTime)
+            {
+                yield return null;
+                continue;
+            }
+
+            // 時間切れで戻す
+            if (_characterRoot != null)
+                _characterRoot.localPosition = _guardBaseLocalPos;
+
+            _isGuardVisualRaised = false;
+            _guardVisualCoroutine = null;
+            yield break;
+        }
+    }
+
 
     /// <summary>
     /// 死亡アニメーションを再生する
@@ -131,7 +190,7 @@ public class PlayerController : MonoBehaviour
         }
         if (_characterRoot != null)
         {
-            _characterRoot.localPosition = _characterBaseLocalPos;
+            _characterRoot.localPosition = _guardBaseLocalPos;
             _isGuardVisualRaised = false;
         }
         var col = GetComponent<Collider>();

@@ -16,11 +16,12 @@ MonoBehaviour:
   EnemyName: CRUSTACEAN
   EnemyAttribute: 0
   EnemyDefensAttribute: 1
+  AttackType: 0
   EnemySprite: {fileID: 21300000, guid: 5dccac4f957129047ab1f0a89ad2fb4b, type: 3}
   EnemyDescription: 
   EnemyHP: 500
-  EnemyAttackPower: 10
-  EnemyDefensePower: 5
+  EnemyAttackPower: 20
+  EnemyDefensePower: 10
   EnemyAttackOffset: 1
   CharacterPrefab: {fileID: 719641742962210556, guid: b9e500f66f5bd0141a6095e40a914451, type: 3}
   InitialRotation: {x: 0, y: 180, z: 0}
