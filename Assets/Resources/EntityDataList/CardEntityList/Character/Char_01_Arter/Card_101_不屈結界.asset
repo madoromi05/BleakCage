@@ -30,7 +30,7 @@ MonoBehaviour:
   AttackCount: 0
   TargetCount: 1
   StatusEffect:
-    Type: 1
+    Type: 0
     Value: 0
     Duration: 3
     InflictStacks: 1

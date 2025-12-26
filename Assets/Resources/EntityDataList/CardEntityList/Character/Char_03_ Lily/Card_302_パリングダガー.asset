@@ -30,8 +30,8 @@ MonoBehaviour:
   AttackCount: 1
   TargetCount: 1
   StatusEffect:
-    Type: 1
-    Value: 1
+    Type: 0
+    Value: 0
     Duration: 0
     InflictStacks: 0
   AttackAnimation: {fileID: 7400000, guid: e61addfd4631bf24c8394651c318b4ba, type: 2}

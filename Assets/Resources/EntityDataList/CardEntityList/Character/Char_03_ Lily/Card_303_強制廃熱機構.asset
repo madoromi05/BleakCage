@@ -10,27 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdfa6642918c0264fb1d12f08bf1760e, type: 3}
-  m_Name: "Card_303_\u5F37\u5236\u5EC3\u71B1"
+  m_Name: "Card_303_\u5F37\u5236\u5EC3\u71B1\u6A5F\u69CB"
   m_EditorClassIdentifier: 
   ID: 303
   OwnerID: 3
   ExclusiveID: 0
-  Name: "\u5F37\u5236\u5EC3\u71B1"
+  Name: "\u5F37\u5236\u5EC3\u71B1\u6A5F\u69CB"
   CharacterID: 3
   EquipableWeaponID: 0
   Description: 
   Type: 0
-  Attribute: 5
+  Attribute: 0
   Passive: 0
   HitRate: 1
   OutputModifier: 1
   DefensePenetration: 1
-  TargetScope: 0
-  IsMelee: 0
+  TargetScope: 2
+  IsMelee: 1
   AttackCount: 1
   TargetCount: 2
   StatusEffect:
-    Type: 2
+    Type: 5
     Value: 0
     Duration: 3
     InflictStacks: 1

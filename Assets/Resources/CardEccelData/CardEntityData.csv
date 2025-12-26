@@ -10,7 +10,7 @@ VScCardID,OwnerID,Name,Type,Attribute,AttackCount,TargetCount,TargetScope,Passiv
 203,2,殲滅へ至る連環,Character,Bullet,3,3,Random,FALSE,0.6,1.3,1,FALSE,None,0,0,0
 301,3,強制冷却機構,Character,Heal,0,1,Single,FALSE,1,1,1,FALSE,Heal,30,0,1
 302,3,パリングダガー,Character,Slash,1,1,Single,FALSE,1,1,1,TRUE,None,0,0,0
-303,3,瞬光連斬,Character,Slash,1,2,Random,FALSE,1,1,1,TRUE,Meltdown,0,3,1
+303,3,強制廃熱機構,Character,Slash,1,2,Random,FALSE,1,1,1,TRUE,Meltdown,0,3,1
 501,0,処刑人の識,Weapon,Bullet,2,1,Single,FALSE,1,0.7,1,FALSE,None,0,0,0
 502,0,デュアル・エクスキューション,Weapon,Slash,2,1,Single,FALSE,1,1.2,1,TRUE,Laceration,0,3,1
 503,0,ゼロ-三唱,Weapon,Bullet,3,1,Single,FALSE,1,1,1,FALSE,None,0,0,0
