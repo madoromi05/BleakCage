@@ -15,7 +15,7 @@ MonoBehaviour:
   PlayerId: 0
   PlayerName: XIORI
   PlayerAttribute: 3
-  CharacterPrefab: {fileID: 4973782963207966706, guid: 692152dd7821e5547ab56e3006112281, type: 3}
+  CharacterPrefab: {fileID: 3080054730939816206, guid: 5bd529762c8db0040a7e762870f3d927, type: 3}
   InitialRotation: {x: 0, y: 0, z: 0}
   PlayerDescription: 
   PlayerIcon: {fileID: 21300000, guid: efdccce54db339346931b341d09e0221, type: 3}
