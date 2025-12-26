@@ -84,7 +84,7 @@ public class ScenarioSceneManager : MonoBehaviour
         else
         {
             // 「戦闘後」だったので、次は「ステージ選択（またはエンディング）」へ
-            SceneManager.LoadScene("Home");
+            SceneManager.LoadScene("HomeScene");
         }
     }
 }

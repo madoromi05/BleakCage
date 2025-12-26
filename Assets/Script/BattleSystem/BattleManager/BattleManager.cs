@@ -199,17 +199,16 @@ public class BattleManager : MonoBehaviour
     {
         IsBattleEnded = true;
         Debug.Log("【BATTLE WIN】");
-        yield return new WaitForSeconds(1.5f); // 余韻
+        yield return new WaitForSeconds(1.5f);
 
         // チュートリアルの場合は終了処理
         if (entitiesManager.IsTutorialMode)
         {
-            SceneManager.LoadScene("TitleScene"); // またはStageSelect
+            SceneManager.LoadScene("HomeScene");
             yield break;
         }
         // 現在のステージをクリアしたので、セーブデータを更新する
         StageManager.OnStageCleared(StageManager.SelectedStageID);
-        // 戦闘後フラグを立ててシナリオシーンへ
         StageManager.IsPostBattle = true;
         SceneManager.LoadScene("ScenarioScene");
     }
@@ -217,7 +216,6 @@ public class BattleManager : MonoBehaviour
     private IEnumerator BattleLoseProcess()
     {
         IsBattleEnded = true;
-        Debug.Log("【BATTLE LOSE】");
         yield return new WaitForSeconds(1.5f);
         if (gameOverUIPanel != null)
         {
@@ -225,7 +223,7 @@ public class BattleManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(3.0f);
-        SceneManager.LoadScene("StageSelectScene");
+        SceneManager.LoadScene("HomeScene");
     }
 
     public IEnumerator StartPlayerTurnWithTimer(string phaseName = "Player Phase")

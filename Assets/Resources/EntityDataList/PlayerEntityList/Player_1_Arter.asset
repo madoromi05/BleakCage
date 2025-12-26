@@ -21,5 +21,5 @@ MonoBehaviour:
   PlayerIcon: {fileID: 21300000, guid: 4487b626860ebc0478112dcd5fa13387, type: 3}
   PlayerLevel: 1
   PlayerHP: 100
-  PlayerDefensePower: 2
+  PlayerDefensePower: 5
   PlayerWeapon: {fileID: 11400000, guid: a6ce77ba96bc4b344944f6a3ff0a1bc1, type: 2}

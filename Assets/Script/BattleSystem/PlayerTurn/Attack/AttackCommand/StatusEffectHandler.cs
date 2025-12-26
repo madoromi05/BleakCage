@@ -35,12 +35,10 @@ public class StatusEffectHandler
             // 既に存在する場合はスタックを加算し、効果時間を延長
             existing.AddStack(newEffect.StackCount);
             existing.DurationTurns = Mathf.Max(existing.DurationTurns, newEffect.DurationTurns);
-            // Debug.Log($"[{ownerName}] {newEffect.Type} Stack Updated: {existing.StackCount}");
         }
         else
         {
             ActiveStatusEffects.Add(newEffect);
-            // Debug.Log($"[{ownerName}] {newEffect.Type} Applied. Stack: {newEffect.StackCount}");
         }
     }
 

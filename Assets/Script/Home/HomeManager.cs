@@ -52,7 +52,7 @@ public class HomeManager : MonoBehaviour
 
         StageManager.SelectedStageID = 0;
         StageManager.IsPostBattle = false;
-        SceneManager.LoadScene("Tutorial");
+        SceneManager.LoadScene("BattleScene");
     }
 
     public void OnClickOption()
