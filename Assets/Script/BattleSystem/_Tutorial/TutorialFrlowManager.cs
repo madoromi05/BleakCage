@@ -43,7 +43,7 @@ public class TutorialFlowManager : MonoBehaviour
         BattleCardDeck battleCardDeck,
         List<EnemyRuntime> enemyRuntimes)
     {
-        // --- QÆ‚Ì•Û ---
+        Debug.Log($"[TutorialFlowManager] Init called.");
         _battleManager = battleManager;
         _normalPhaseManager = normalPhaseManager;
         _entitiesManager = entitiesManager;

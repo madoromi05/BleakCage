@@ -5,8 +5,8 @@ using UnityEngine.SceneManagement;
 public class ScenarioSceneManager : MonoBehaviour
 {
     [Header("UI参照")]
-    [SerializeField] private Text mainText;      // Contentの中にあるText
-    [SerializeField] private Button nextButton; // 画面全体を覆う透明ボタン（「次へ」用）
+    [SerializeField] private Text mainText;
+    [SerializeField] private Button nextButton;
 
     [Header("【デバッグ設定】(エディタ実行時のみ有効)")]
     [SerializeField] private bool useDebugSettings = false;
@@ -79,12 +79,12 @@ public class ScenarioSceneManager : MonoBehaviour
         if (!currentIsPost)
         {
             // 「戦闘前」だったので、次は「バトル」へ
-            SceneManager.LoadScene("BattleScene");
+            SceneManager.LoadScene("DeckViewScene");
         }
         else
         {
             // 「戦闘後」だったので、次は「ステージ選択（またはエンディング）」へ
-            SceneManager.LoadScene("StageSelectScene");
+            SceneManager.LoadScene("Home");
         }
     }
 }
