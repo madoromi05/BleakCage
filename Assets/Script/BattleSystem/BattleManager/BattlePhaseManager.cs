@@ -158,7 +158,6 @@ public class BattlePhaseManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("カウンターはありません。通常の選択フェーズに移行します。");
             StartSelectionPhase();
         }
     }

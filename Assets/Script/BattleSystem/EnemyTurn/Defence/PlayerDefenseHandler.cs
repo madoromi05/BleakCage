@@ -189,9 +189,7 @@ public class PlayerDefenseHandler : MonoBehaviour
         int justGuardFrameCounter = JUST_GUARD_DURATION;
         int normalGuardFrameCounter = NORMAL_GUARD_WINDOW_DURATION;
 
-        // ----------------------------------------------------
-        // 1. ジャストガード (カウンター) 判定フェーズ
-        // ----------------------------------------------------
+        // ジャストガード (カウンター) 判定フェーズ
         while (justGuardFrameCounter > 0)
         {
             justGuardFrameCounter--;
@@ -207,9 +205,7 @@ public class PlayerDefenseHandler : MonoBehaviour
             yield return null;
         }
 
-        // ----------------------------------------------------
-        // 2. 通常ガード判定フェーズ
-        // ----------------------------------------------------
+        // 通常ガード判定フェーズ
         while (normalGuardFrameCounter > 0)
         {
             normalGuardFrameCounter--;
@@ -217,9 +213,7 @@ public class PlayerDefenseHandler : MonoBehaviour
             yield return null;
         }
 
-        // ----------------------------------------------------
-        // 3. 最終判定
-        // ----------------------------------------------------
+        // 最終判定
         _isDefenseWindowOpen = false;
 
         ResolveFinalDefense(targetPlayerIndex);
@@ -236,7 +230,6 @@ public class PlayerDefenseHandler : MonoBehaviour
         // "押した" 瞬間を検知
         if (_defenseInput == targetPlayerNum)
         {
-            Debug.Log("ジャスト時間内に「押し」を検知");
             _pressedDuringJustWindow = true;
             _pressedDuringNormalWindow = true; // 通常ガードの条件も満たす
             _defenseInput = 0; // 入力を消費
@@ -245,7 +238,6 @@ public class PlayerDefenseHandler : MonoBehaviour
         // "離した" 瞬間を検知
         if (_defenseInputCanceled == targetPlayerNum)
         {
-            Debug.Log("ジャスト時間内に「離し」を検知");
             _defenseInputCanceled = 0; // 入力を消費
 
             // ジャスト時間内に「押して」かつ「離した」か？
@@ -263,7 +255,6 @@ public class PlayerDefenseHandler : MonoBehaviour
     {
         if (_defenseInput == targetPlayerNum)
         {
-            Debug.Log("通常ガード時間内に「押し」を検知");
             _pressedDuringNormalWindow = true; // 押したことを記録
             _defenseInput = 0; // 入力を消費
         }
@@ -303,19 +294,16 @@ public class PlayerDefenseHandler : MonoBehaviour
             // ガード入力はあった。ゲージを消費できるか？
             if (_gaugeSystem.TrySpendGuardGauge(GUARD_COST_ON_SUCCESS))
             {
-                Debug.Log($"P{targetPlayerIndex + 1}: ガード成功");
                 _gaugeSystem.AddGuardGauge(GUARD_RECOVERY_SMALL);
                 OnDefenseResultFeedback?.Invoke("GUARD", Color.cyan);
             }
             else
             {
-                Debug.Log($"P{targetPlayerIndex + 1}: ゲージ不足で被弾！");
                 TriggerHit(targetPlayerIndex);
             }
         }
         else
         {
-            Debug.Log($"P{targetPlayerIndex + 1}: 被弾！ (ガードしていない)");
             TriggerHit(targetPlayerIndex);
         }
     }

@@ -31,8 +31,8 @@ public class EnemyHPHandler
         // 通常ダメージ処理
         _ownerRuntime.CurrentHP -= damage;
 
-        // ★デバッグ用ログ2: HPが減ったか確認
-        Debug.Log($"[EnemyHPHandler] HP Updated: NewHP={_ownerRuntime.CurrentHP}");
+        //  HPが減ったか確認
+        // Debug.Log($"[EnemyHPHandler] HP Updated: NewHP={_ownerRuntime.CurrentHP}");
 
         if (_ownerRuntime.CurrentHP <= 0)
         {

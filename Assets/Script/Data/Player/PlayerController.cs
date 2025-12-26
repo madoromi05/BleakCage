@@ -115,13 +115,16 @@ public class PlayerController : MonoBehaviour
     {
         if (_characterRoot == null) return;
 
-        // “いま”の見た目位置をガード用ベースにする
+        Debug.Log(
+       $"[CaptureBase] frame={Time.frameCount} " +
+       $"before base={_guardBaseLocalPos} current={_characterRoot.localPosition} raised={_isGuardVisualRaised}"
+   );
         _guardBaseLocalPos = _characterRoot.localPosition;
 
-        // もしすでに上げていた状態で呼ばれた場合に備えて、ベースも補正しておく
         if (_isGuardVisualRaised)
         {
             _guardBaseLocalPos.y -= _guardVisualYOffset;
+            Debug.Log($"[CaptureBase] adjusted base={_guardBaseLocalPos}");
         }
     }
 
