@@ -10,7 +10,7 @@ public class BattleEntitiesManager : MonoBehaviour
 {
 #if UNITY_EDITOR
     [Header("デバッグ設定 (Editor Only)")]
-    [Tooltip("テストしたいステージID")]
+    [SerializeField] private bool useDebugSettings = false;　// ホーム遷移時はDebugmodeを無効化
     [SerializeField] private int debugStageID;
 #endif
 
@@ -65,6 +65,18 @@ public class BattleEntitiesManager : MonoBehaviour
     private int ResolveStageID()
     {
 #if UNITY_EDITOR
+        // Inspectorで「強制デバッグ」にチェックが入っている場合
+        if (useDebugSettings)
+        {
+            Debug.Log($"<color=yellow>【Debug (強制)】Inspector指定の StageID: {debugStageID} を使用します。</color>");
+            return debugStageID;
+        }
+
+        // ホーム画面などから正しく遷移してきて、IDがセットされている場合
+        if (StageManager.SelectedStageID != -1)
+        {
+            return StageManager.SelectedStageID;
+        }
         Debug.Log($"<color=yellow>【Debug】Inspector指定の StageID: {debugStageID} を使用します。</color>");
         return debugStageID;
 #else

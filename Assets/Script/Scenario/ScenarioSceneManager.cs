@@ -19,7 +19,12 @@ public class ScenarioSceneManager : MonoBehaviour
 
     void Start()
     {
-        if (Application.isEditor && useDebugSettings)
+        if (StageManager.SelectedStageID != -1)
+        {
+            currentStageID = StageManager.SelectedStageID;
+            currentIsPost = StageManager.IsPostBattle;
+        }
+        else if (Application.isEditor && useDebugSettings)
         {
             currentStageID = debugStageID;
             currentIsPost = debugIsPostBattle;
@@ -27,9 +32,7 @@ public class ScenarioSceneManager : MonoBehaviour
         }
         else
         {
-            // –{”ÔŠÂ‹«‚Å‚Í StageManager ‚©‚çŽæ“¾
-            currentStageID = StageManager.SelectedStageID;
-            currentIsPost = StageManager.IsPostBattle;
+            
         }
 
         if (currentStageID == 0 || (currentStageID == 1 && currentIsPost))

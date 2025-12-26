@@ -207,7 +207,8 @@ public class BattleManager : MonoBehaviour
             SceneManager.LoadScene("TitleScene"); // またはStageSelect
             yield break;
         }
-
+        // 現在のステージをクリアしたので、セーブデータを更新する
+        StageManager.OnStageCleared(StageManager.SelectedStageID);
         // 戦闘後フラグを立ててシナリオシーンへ
         StageManager.IsPostBattle = true;
         SceneManager.LoadScene("ScenarioScene");
