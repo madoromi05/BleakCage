@@ -58,8 +58,6 @@ public class PlayerTurn : MonoBehaviour
     private List<PlayerRuntime> allPlayers;
 
     private AudioSource audioSource;
-    public AudioClip disposecard;
-    public AudioClip check;
 
     // --- UI追加 ---
     private Dictionary<int, GameObject> keyUI;
@@ -278,7 +276,7 @@ public class PlayerTurn : MonoBehaviour
         isInputLocked = true;
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
-        audioSource.PlayOneShot(check);
+        SoundManager.Instance.PlaySE(SEType.Check);
         if (isTutorialMode)
         {
             OnCardSelectedForTutorial?.Invoke(inputNumber, isCardSelected[inputNumber]);
@@ -301,7 +299,7 @@ public class PlayerTurn : MonoBehaviour
         if (isCardSelected[inputNumber])
         {
             isCardSelected[inputNumber] = false;
-            if (audioSource != null && disposecard != null) audioSource.PlayOneShot(disposecard);
+            if (audioSource != null)SoundManager.Instance.PlaySE(SEType.checkedSkillCard); ;
         }
         else
         {

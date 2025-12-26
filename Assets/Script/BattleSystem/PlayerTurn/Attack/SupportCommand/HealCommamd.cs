@@ -24,7 +24,7 @@ public class HealCommand : ICommand
     {
         yield return player.PlayerController.SupportEffect(cardModel);
 
-        // 防御力 * カードの出力値 / 10 分回復
+        // 防御力 * カードの出力値 / 5
         float healAmount = player.PlayerModel.PlayerDefensePower * cardRuntime.GetOutput()/10;
         if (player.HPHandler != null)
         {

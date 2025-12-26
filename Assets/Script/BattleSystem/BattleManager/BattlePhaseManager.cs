@@ -222,7 +222,6 @@ public class BattlePhaseManager : MonoBehaviour
 
     private IEnumerator WaitForSelectionChoice()
     {
-        Debug.Log("優先順位の選択（継続/変更）を待機中...");
         yield return new WaitUntil(() => selectionChoicePanel.activeSelf == false);
         selectionChoiceCoroutine = null;
     }
@@ -236,10 +235,12 @@ public class BattlePhaseManager : MonoBehaviour
             StopCoroutine(selectionChoiceCoroutine);
             selectionChoiceCoroutine = null;
         }
+
         if (selectTurn != null)
         {
-            selectTurn.ClearSelections();
+            selectTurn.ValidateSelections();
         }
+
         StartCoroutine(ProcessSelectionPhase(keepSelections: true));
     }
 
@@ -252,6 +253,12 @@ public class BattlePhaseManager : MonoBehaviour
             StopCoroutine(selectionChoiceCoroutine);
             selectionChoiceCoroutine = null;
         }
+
+        if (selectTurn != null)
+        {
+            selectTurn.ClearSelections();
+        }
+
         StartCoroutine(ProcessSelectionPhase(keepSelections: false));
     }
 }

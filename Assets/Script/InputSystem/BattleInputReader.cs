@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 /// <summary>
 /// カード選択と防御アクションの入力を処理するコンポーネント
 /// </summary>
 public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActions, InputControls.IDefenseActionActions
 {
+    //[SerializeField] private Text debugText;
     public event Action<int> CardSelectEvent;
     public event Action DisCardEvent;
     public event Action<int> OnDefend;
@@ -61,26 +63,31 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     // --- BattleAction (カード選択) ---
     public void OnCardSelectOne(InputAction.CallbackContext context)
     {
-        if (!context.performed) { return; }
+        // 画面にログを出す
+        //if (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
+        if (!context.ReadValueAsButton()) { return; }
         CardSelectEvent?.Invoke(0);
     }
 
     public void OnCardSelectTwo(InputAction.CallbackContext context)
     {
+        //if (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
+
         if (!context.performed) { return; }
         CardSelectEvent?.Invoke(1);
     }
 
     public void OnCardSelectTree(InputAction.CallbackContext context)
     {
+        //if (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
+
         if (!context.performed) { return; }
         CardSelectEvent?.Invoke(2);
     }
 
-    public void OnCardSelect(InputAction.CallbackContext context) { /* 他のキー用 (もしあれば) */ }
-
     public void OnDisCard(InputAction.CallbackContext context)
     {
+        //f (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
         if (!context.performed) { return; }
         DisCardEvent?.Invoke();
     }
