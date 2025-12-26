@@ -199,7 +199,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   battleCardDeck: {fileID: 782690699}
   guardGaugeSystem: {fileID: 147126858}
-  gameOverUIPanel: {fileID: 0}
+  gameOverUIPanel: {fileID: 1177548476}
   normalPhaseManager: {fileID: 120127635}
   tutorialFlowManager: {fileID: 1655738824}
   entitiesManager: {fileID: 120127634}
@@ -252,6 +252,10 @@ MonoBehaviour:
   isTurnFinished: 0
   disposecard: {fileID: 0}
   check: {fileID: 0}
+  EnterUI: {fileID: 0}
+  key1UI: {fileID: 2209804418455305071, guid: 67435c19acd588e4fb819d5d1ecddb66, type: 3}
+  key2UI: {fileID: 6543906636060047022, guid: 7c78b4bf1ae21b340be19fabd87686f8, type: 3}
+  key3UI: {fileID: 4648013577742724883, guid: b83522bf74b180b46baf5430c97da127, type: 3}
 --- !u!114 &120127629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3374,7 +3378,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1177548477
 RectTransform:
   m_ObjectHideFlags: 0
