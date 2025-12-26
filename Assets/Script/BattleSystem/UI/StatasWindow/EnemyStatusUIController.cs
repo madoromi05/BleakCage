@@ -17,6 +17,8 @@ public class EnemyStatusUIController : MonoBehaviour
     [SerializeField] private Transform statusIconRowContainer;  // アイコンを並べる親オブジェクト
     [SerializeField] private StatusIconUI statusIconPrefab;     // 作成したプレハブ
     [SerializeField] private StatusIconDatabase iconDatabase;   // 作成したデータベース
+    [Header("選択キー表示位置")]
+    [SerializeField] private Transform keyUiAnchor;
 
     private Color originalBackgroundColor;
     private Coroutine hpAnimationCoroutine;
@@ -150,5 +152,14 @@ public class EnemyStatusUIController : MonoBehaviour
         {
             background.color = originalBackgroundColor;
         }
+    }
+
+    /// <summary>
+    /// キーUIを表示すべき親トランスフォームを取得する
+    /// Inspectorで設定されていない場合は、自分自身(this.transform)を返す
+    /// </summary>
+    public Transform GetKeyUiAnchor()
+    {
+        return keyUiAnchor != null ? keyUiAnchor : this.transform;
     }
 }
