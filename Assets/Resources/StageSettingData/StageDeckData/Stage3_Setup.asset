@@ -15,4 +15,5 @@ MonoBehaviour:
   PartyMembers:
   - CharacterID: 5
     Level: 0
-    Weapons: []
+    Weapons:
+    - WeaponID: 10
