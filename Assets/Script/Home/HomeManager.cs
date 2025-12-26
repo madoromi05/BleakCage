@@ -34,6 +34,7 @@ public class HomeManager : MonoBehaviour
         {
             if (btn != null) btn.Setup(this);
         }
+        SoundManager.Instance.PlayBGM(BGMType.Title);
     }
 
     public void OnClickStory()

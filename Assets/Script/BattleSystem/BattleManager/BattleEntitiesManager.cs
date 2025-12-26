@@ -49,14 +49,14 @@ public class BattleEntitiesManager : MonoBehaviour
 
         // 今回使用するステージIDをここで一元管理して決定する
         int targetStageID = ResolveStageID();
-        Debug.Log($"BattleEntitiesManager: Stage ID {targetStageID} でバトルを開始します。");
-
+        PlayStageBGM(targetStageID);
         // 決定したIDを渡してロードを実行
         LoadPlayerGameData(targetStageID);
         SetupStageEnemies(targetStageID);
         enemyView();
         playerView();
         IsTutorialMode = (targetStageID == 0);
+        Debug.Log($"BattleEntitiesManager: Stage ID {targetStageID} でバトルを開始します。");
     }
 
     /// <summary>
@@ -238,5 +238,26 @@ public class BattleEntitiesManager : MonoBehaviour
         {
             markerInstance.SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// ステージIDに応じてBGMを選んで再生する
+    /// </summary>
+    private void PlayStageBGM(int stageID)
+    {
+        BGMType bgmType = BGMType.Battle_Normal; // デフォルトは通常
+
+        // ボスステージのIDをここで定義（例: ID 3がボスなら）
+        if (stageID == 3)
+        {
+            bgmType = BGMType.Battle_Boss;
+        }
+        else
+        {
+            // ID 0(チュートリアル), 1, 2 などは全て通常戦闘
+            bgmType = BGMType.Battle_Normal;
+        }
+
+        SoundManager.Instance.PlayBGM(bgmType);
     }
 }

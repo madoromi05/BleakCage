@@ -43,10 +43,15 @@ public class SoundManager : MonoBehaviour
     public static SoundManager Instance { get; private set; }
 
     public List<SoundData> seList;
+    public List<BGMData> bgmList;
     private Dictionary<SEType, AudioClip> seDict;
-    private AudioSource audioSource;
+    private Dictionary<BGMType, BGMData> bgmDataDict;
+    private AudioSource seSource;
+    private AudioSource bgmSource;
 
-    private float seVolume = 1f;
+    private float seMasterVolume = 1f;
+    private float bgmMasterVolume = 1f;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -55,27 +60,70 @@ public class SoundManager : MonoBehaviour
             return;
         }
         Instance = this;
-        audioSource = GetComponent<AudioSource>();
-        seDict = new();
-        foreach (var data in seList)  seDict[data.type] = data.clip;
-        audioSource.volume = seVolume;
+        DontDestroyOnLoad(gameObject);
+
+        // --- SE初期化 ---
+        seSource = gameObject.AddComponent<AudioSource>();
+        seDict = new Dictionary<SEType, AudioClip>();
+        foreach (var data in seList) seDict[data.type] = data.clip;
+
+        // BGM初期化
+        bgmSource = gameObject.AddComponent<AudioSource>();
+        bgmSource.loop = true; // ループ再生
+        bgmDataDict = new Dictionary<BGMType, BGMData>();
+        foreach (var data in bgmList) bgmDataDict[data.type] = data;
+
+        seSource.volume = seMasterVolume;
+        bgmSource.volume = bgmMasterVolume;
     }
 
     public void PlaySE(SEType type)
     {
         if (seDict.TryGetValue(type, out var clip))
-            audioSource.PlayOneShot(clip, seVolume);
+            seSource.PlayOneShot(clip, seMasterVolume);
     }
-    /// <summary>
-    /// BGMのVolume調整
-    /// </summary>
+
+    public void PlayBGM(BGMType type)
+    {
+        // 定義がない、またはNoneなら停止
+        if (type == BGMType.None || !bgmDataDict.TryGetValue(type, out BGMData data))
+        {
+            StopBGM();
+            return;
+        }
+
+        if (bgmSource.isPlaying && bgmSource.clip == data.clip) return;
+
+        bgmSource.clip = data.clip;
+        bgmSource.volume = bgmMasterVolume * data.volumeScale;
+        bgmSource.Play();
+    }
+
+    public void StopBGM()
+    {
+        bgmSource.Stop();
+        bgmSource.clip = null;
+    }
+
     public void SetSEVolume(float volume)
     {
-        audioSource.volume = Mathf.Clamp01(volume);
-        audioSource.volume = seVolume;
+        seMasterVolume = Mathf.Clamp01(volume);
+        seSource.volume = seMasterVolume;
     }
-    public float GetSEVolume()
+
+    public void SetBGMVolume(float volume)
     {
-        return seVolume;
+        bgmMasterVolume = Mathf.Clamp01(volume);
+        if (bgmSource.isPlaying)
+        {
+            foreach (var kvp in bgmDataDict)
+            {
+                if (kvp.Value.clip == bgmSource.clip)
+                {
+                    bgmSource.volume = bgmMasterVolume * kvp.Value.volumeScale;
+                    break;
+                }
+            }
+        }
     }
 }
