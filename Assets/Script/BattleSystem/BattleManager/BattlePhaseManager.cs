@@ -149,7 +149,7 @@ public class BattlePhaseManager : MonoBehaviour
         Debug.Log("【敵ターン終了】");
         currentTurn++;
 
-        int counterCount = guardGaugeSystem.PopCounterCount(); // カウンター回数を取得・リセット
+        int counterCount = guardGaugeSystem.PopCounterCount();
 
         if (counterCount > 0)
         {
@@ -185,8 +185,6 @@ public class BattlePhaseManager : MonoBehaviour
             isExtraTurnSegmentFinished = false;
             // エクストラターン開始
             yield return battleManager.StartPlayerTurnWithTimer("Extra Turn");
-
-            // エクストラターンが完了するまで待機
             yield return new WaitUntil(() => isExtraTurnSegmentFinished == true);
         }
 
@@ -196,7 +194,7 @@ public class BattlePhaseManager : MonoBehaviour
         StartSelectionPhase();
     }
 
-    // --- 選択フェーズのロジック (BattleManagerから移動) ---
+    // 選択フェーズのロジック (BattleManagerから移動)
 
     private IEnumerator ProcessSelectionPhase(bool keepSelections)
     {
@@ -237,6 +235,10 @@ public class BattlePhaseManager : MonoBehaviour
         {
             StopCoroutine(selectionChoiceCoroutine);
             selectionChoiceCoroutine = null;
+        }
+        if (selectTurn != null)
+        {
+            selectTurn.ClearSelections();
         }
         StartCoroutine(ProcessSelectionPhase(keepSelections: true));
     }

@@ -17,6 +17,10 @@ public class PlayerTurn : MonoBehaviour
     [SerializeField] private DamageCalculator damageCalculator;
     [SerializeField] private BattleCardPresenter battleCardPresenter;
     [SerializeField] private float cardSelectionYOffset = 30.0f;
+    [SerializeField] private GameObject EnterUI;
+    [SerializeField] private GameObject key1UI;
+    [SerializeField] private GameObject key2UI;
+    [SerializeField] private GameObject key3UI;
 
     public event System.Action OnTurnFinished;
     public event System.Action<int> OnCardSelected;
@@ -58,10 +62,6 @@ public class PlayerTurn : MonoBehaviour
     public AudioClip check;
 
     // --- UI追加 ---
-    [SerializeField] private GameObject EnterUI;
-    [SerializeField] private GameObject key1UI;
-    [SerializeField] private GameObject key2UI;
-    [SerializeField] private GameObject key3UI;
     private Dictionary<int, GameObject> keyUI;
     private List<GameObject> activeKeyUIObjects = new List<GameObject>();
     // --------------
@@ -278,15 +278,7 @@ public class PlayerTurn : MonoBehaviour
         isInputLocked = true;
         CardSelect(inputNumber);
         OnCardSelected?.Invoke(inputNumber);
-
-        // --- 選択したキーのUIを非表示にする (トグルで戻す処理はCardSelect/Visualsで行う) ---
-        // if (inputNumber < activeKeyUIObjects.Count && activeKeyUIObjects[inputNumber] != null)
-        // {
-        //     activeKeyUIObjects[inputNumber].SetActive(!isCardSelected[inputNumber]);
-        // }
-        // -----------------------------------------------------------------------------
-
-        // audioSource.PlayOneShot(check);
+        audioSource.PlayOneShot(check);
         if (isTutorialMode)
         {
             OnCardSelectedForTutorial?.Invoke(inputNumber, isCardSelected[inputNumber]);
@@ -439,7 +431,7 @@ public class PlayerTurn : MonoBehaviour
                 {
                     onCounterActionFinishedCallback?.Invoke();
                     onCounterActionFinishedCallback = null;
-                    OnTurnFinished?.Invoke(); // カウンター終了時もターン終了扱いにするなら必要
+                    OnTurnFinished?.Invoke();
                 }
             ));
         }
@@ -526,7 +518,6 @@ public class PlayerTurn : MonoBehaviour
             }
 
             cardObject.SetInteractable(shouldBeInteractable);
-
 
             Transform visualRoot = cardObject.transform.Find("VisualRoot");
             if (visualRoot == null)

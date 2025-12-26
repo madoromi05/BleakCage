@@ -6,6 +6,11 @@ using UnityEngine;
 public class SelectTurn : MonoBehaviour, IPhase
 {
     [SerializeField] private SelectInputReader selectInputReader;
+    [SerializeField] private GameObject key1UI;
+    [SerializeField] private GameObject key2UI;
+    [SerializeField] private GameObject key3UI;
+    [SerializeField] private GameObject EnemySelectNumber;
+
     public Dictionary<int, List<EnemyModel>> PlayerSelections { get; private set; }
 
     public event System.Action SelectTurnFinished;
@@ -18,11 +23,11 @@ public class SelectTurn : MonoBehaviour, IPhase
     private int livingEnemyCount;
     private int currentTargetIndex;
     private int previousTargetIndex;
-
     private List<PlayerRuntime> _currentPlayers;
     private List<EnemyModel> _currentEnemies;
     private List<PlayerStatusUIController> _playerUIs;
     private List<EnemyStatusUIController> _enemyUIs;
+    private List<GameObject> _keyUIInstances;
     private bool upPressed = false;
     private bool downPressed = false;
     private bool confirmPressed = false;
@@ -34,6 +39,8 @@ public class SelectTurn : MonoBehaviour, IPhase
         _currentEnemies = enemies;
         _playerUIs = pUIs;
         _enemyUIs = eUIs;
+        SetupKeyUIInstances();
+        ResetKeyUIs();
 
         PlayerSelections = new Dictionary<int, List<EnemyModel>>();
         foreach (var player in _currentPlayers)
@@ -42,6 +49,53 @@ public class SelectTurn : MonoBehaviour, IPhase
         }
     }
 
+    /// <summary>
+    /// キーUIを全て非表示にし、必要であれば親をリセットする処理
+    /// </summary>
+    private void ResetKeyUIs()
+    {
+        if (_keyUIInstances == null) return;
+
+        foreach (var key in _keyUIInstances)
+        {
+            if (key != null)
+            {
+                key.SetActive(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// UIプレハブをインスタンス化し、管理リストに登録する
+    /// </summary>
+    private void SetupKeyUIInstances()
+    {
+        // 既に生成済みなら古いものを削除（再戦時などの重複防止）
+        if (_keyUIInstances != null)
+        {
+            foreach (var obj in _keyUIInstances)
+            {
+                if (obj != null) Destroy(obj);
+            }
+        }
+
+        _keyUIInstances = new List<GameObject>();
+
+        // ヘルパー関数: 生成してEnemySelectNumberの子にする
+        void CreateAndAdd(GameObject prefab)
+        {
+            if (prefab != null && EnemySelectNumber != null)
+            {
+                GameObject instance = Instantiate(prefab, EnemySelectNumber.transform);
+                instance.SetActive(false); // 最初は隠しておく
+                _keyUIInstances.Add(instance);
+            }
+        }
+
+        CreateAndAdd(key1UI);
+        CreateAndAdd(key2UI);
+        CreateAndAdd(key3UI);
+    }
     /// <summary>
     /// 保持している全てのプレイヤーの選択リストをクリアする
     /// </summary>
@@ -101,13 +155,13 @@ public class SelectTurn : MonoBehaviour, IPhase
 
             if (!keepSelections)
             {
+                ResetKeyUIs();
                 _playerUIs[pIndex].SetHighlight(new Color(0.5f, 0.8f, 1f));
             }
 
             int currentLivingEnemies = _currentEnemies.Count(e => e.EnemyHP > 0);
             if (currentLivingEnemies == 0)
             {
-                Debug.LogWarning("選択可能な敵がいないため、次のプレイヤーに進みます。");
                 _playerUIs[pIndex].ResetHighlight();
                 continue;
             }
@@ -156,8 +210,6 @@ public class SelectTurn : MonoBehaviour, IPhase
     /// </summary>
     public IEnumerator SelectOneTargetCoroutine(PlayerRuntime player, int priority, System.Action<EnemyModel> onSelected, bool keepSelections = false)
     {
-        //Debug.Log($"Player {player.PlayerModel.PlayerName} の 優先順位 {priority} を選択してください。(矢印キーで選択、Enterキーで決定)");
-
         var livingEnemies = _currentEnemies.Where(e => e.EnemyHP > 0).ToList();
         int livingEnemyCount = livingEnemies.Count;
 
@@ -233,6 +285,19 @@ public class SelectTurn : MonoBehaviour, IPhase
                 SoundManager.Instance.PlaySE(SEType.Check);
                 PlayerSelections[player.ID].Add(selectedEnemy);
                 onSelected?.Invoke(selectedEnemy);
+
+                int keyIndex = priority - 1;
+                if (_keyUIInstances != null && keyIndex >= 0 && keyIndex < _keyUIInstances.Count)
+                {
+                    GameObject targetKeyUI = _keyUIInstances[keyIndex];
+                    if (targetKeyUI != null && EnemySelectNumber != null)
+                    {
+                        // 親を設定
+                        targetKeyUI.transform.SetParent(EnemySelectNumber.transform);
+                        targetKeyUI.transform.localScale = Vector3.one;
+                        targetKeyUI.SetActive(true);
+                    }
+                }
 
                 foreach (var eUI in _enemyUIs) eUI.ResetHighlight();
 

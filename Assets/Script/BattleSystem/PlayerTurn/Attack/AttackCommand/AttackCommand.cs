@@ -17,7 +17,7 @@ public class AttackCommand : ICommand
     private Transform targetTransform;
     private DamageCalculator damageCalculator;
 
-    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card, 
+    public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card,
                             EnemyStatusUIController enemyStatusUIController, PlayerStatusUIController playerStatusUIController,
                             EnemyRuntime enemy, Transform targetTransform, DamageCalculator damageCalculator, CardModelFactory cardModelFactory)
     {
@@ -55,8 +55,8 @@ public class AttackCommand : ICommand
                 float damage = damageCalculator.CalculateFinalDamage(player, weapon, card, targetEnemy);
 
                 // 効果音
-                attackedSoundEffect(card.attribute);
-
+                attackedSoundEffect(card.attribute);        // 味方の攻撃音
+                PlayEnemyDamageSound(card.attribute);    // 敵の被弾音
                 // ターゲットのHPを減算
                 targetEnemy.HPHandler.TakeDamage(damage);
                 enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
@@ -136,6 +136,29 @@ public class AttackCommand : ICommand
 
             default:
                 Debug.LogWarning($"[AttackCommand] 未対応のステータスタイプです: {newEffect.Type}");
+                break;
+        }
+    }
+
+    private void PlayEnemyDamageSound(AttributeType attribute)
+    {
+        switch (attribute)
+        {
+            case AttributeType.Bullet:
+                SoundManager.Instance.PlaySE(SEType.damagedBulletEnemy);
+                break;
+            case AttributeType.Pierce:
+                SoundManager.Instance.PlaySE(SEType.damagedPierceEnemy);
+                break;
+            case AttributeType.Blunt:
+                SoundManager.Instance.PlaySE(SEType.damagedBluntEnemy);
+                break;
+            case AttributeType.Slash:
+                SoundManager.Instance.PlaySE(SEType.damagedSlashEnemy);
+                break;
+            default:
+                // デフォルトあるいは物理など
+                SoundManager.Instance.PlaySE(SEType.damagedBluntEnemy);
                 break;
         }
     }
