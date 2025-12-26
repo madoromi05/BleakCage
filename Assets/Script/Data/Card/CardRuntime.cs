@@ -8,6 +8,7 @@ public class CardRuntime : IAttackComponent
     public System.Guid InstanceID { get; private set; }
     public WeaponRuntime weaponRuntime { get; set; }
     public AttributeType attribute { get; private set; }
+    public CardModel Model { get; private set; }
     public float DefensePenetration { get; private set; }
     private readonly float _outputModifier;
 
@@ -18,6 +19,7 @@ public class CardRuntime : IAttackComponent
     {
         InstanceID = Guid.Parse(instanceID);
         ID = model.ID;
+        this.Model = model;
         _outputModifier = model.OutputModifier;
         DefensePenetration = model.DefensePenetration;
         this.attribute = model.Attribute;

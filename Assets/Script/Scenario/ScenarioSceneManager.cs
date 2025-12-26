@@ -35,6 +35,7 @@ public class ScenarioSceneManager : MonoBehaviour
             
         }
 
+        Debug.Log($"<color=cyan>現在のシナリオ: Stage {currentStageID} ({(currentIsPost ? "戦闘後" : "戦闘前")})</color>");
         if (currentStageID == 0 || (currentStageID == 1 && currentIsPost))
         {
             NavigateToNextScene();

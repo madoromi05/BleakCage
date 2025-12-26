@@ -20,7 +20,8 @@ public class PlayerRuntime : IAttackComponent
     public StatusEffectHandler StatusHandler { get; private set; }
     public PlayerHPHandler HPHandler { get; private set; }
     public WeaponRuntime EquippedWeapon { get; private set; }
-
+    public IReadOnlyList<WeaponRuntime> Weapons => equippedWeapons;
+    public List<CardModel> Deck { get; set; } = new List<CardModel>();
     private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
     private const float PlayerAttackPower = 10f;
 

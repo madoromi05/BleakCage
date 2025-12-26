@@ -17,7 +17,7 @@ public class CardController : MonoBehaviour
         canvasGroup = GetComponent<CanvasGroup>();
         view = GetComponent<CardView>();
     }
-    public void Init(CardModel cardModel, float basePower)
+    public void Init(CardModel cardModel, float basePower = 1.0f)
     {
         model = cardModel;
         view.Show(model, basePower);
