@@ -93,11 +93,9 @@ public class CardView : MonoBehaviour
                 descriptionBuilder.AppendLine($"自身に {baseValue:F0}% 回復");
                 break;
             case AttributeType.DefenseBuff:
-                descriptionBuilder.AppendLine($"自身の防御力を {baseValue:F0}% アップ");
                 break;
 
             case AttributeType.AttackBuff:
-                descriptionBuilder.AppendLine($"自身の攻撃力を {baseValue:F0}% アップ");
                 break;
 
             // 攻撃属性

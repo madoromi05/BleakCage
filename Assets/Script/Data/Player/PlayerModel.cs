@@ -20,6 +20,8 @@ public class PlayerModel
     public string PlayerDescription { get; private set; }
     public Sprite PlayerIcon { get; private set; }
     public WeaponEntity PlayerWeapon { get; private set; }
+    public float GuardVisualYOffset { get; private set; }
+
     /// <summary>
     /// コンストラクタ：IDからScriptableObjectを読み込んでモデルを生成
     /// </summary>
@@ -43,6 +45,8 @@ public class PlayerModel
         //PlayerAnimator = entity.AnimationSet;
         CharacterPrefab = entity.CharacterPrefab;
         InitialRotation = entity.InitialRotation;
+        GuardVisualYOffset = entity.GuardVisualYOffset;
+
         if (entity.PlayerWeapon != null)
         {
             PlayerWeapon = entity.PlayerWeapon;

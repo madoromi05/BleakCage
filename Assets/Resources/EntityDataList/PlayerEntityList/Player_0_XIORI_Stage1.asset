@@ -23,3 +23,4 @@ MonoBehaviour:
   PlayerHP: 100
   PlayerDefensePower: 5
   PlayerWeapon: {fileID: 11400000, guid: 67dd5983bc6bada428c22503602b20a4, type: 2}
+  GuardVisualYOffset: 1.2

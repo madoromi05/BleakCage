@@ -56,7 +56,7 @@ public class AttackCommand : ICommand
 
                 // 効果音
                 attackedSoundEffect(card.attribute);        // 味方の攻撃音
-                PlayEnemyDamageSound(card.attribute);    // 敵の被弾音
+                PlayEnemyDamageSound(card.attribute);       // 敵の被弾音
                 // ターゲットのHPを減算
                 targetEnemy.HPHandler.TakeDamage(damage);
                 enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
@@ -75,7 +75,7 @@ public class AttackCommand : ICommand
         yield return controller.AttackSequence(cardModel, weapon, targetTransform);
 
         controller.OnAttackHitTriggered -= onHitAction;
-        Debug.Log("攻撃コマンド終了");
+        // Debug.Log("攻撃コマンド終了");
         yield return new WaitForSeconds(0.1f);
     }
 
