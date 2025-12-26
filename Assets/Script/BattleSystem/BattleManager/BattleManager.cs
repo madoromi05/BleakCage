@@ -103,7 +103,8 @@ public class BattleManager : MonoBehaviour
             entitiesManager.Enemies,
             entitiesManager.EnemyControllers,
             runtimeControllerMap,
-            entitiesManager.PlayerStatusUIs
+            entitiesManager.PlayerStatusUIs,
+            enemyRuntimes
         );
         // === フローの分岐 ===
         bool isTutorial = entitiesManager.IsTutorialMode;
@@ -157,18 +158,25 @@ public class BattleManager : MonoBehaviour
         if (IsBattleEnded) return;
 
         Debug.Log($"敵撃破: {enemy.EnemyModel.EnemyName}");
+
+        if (enemyRuntimes.Contains(enemy))
+        {
+            enemyRuntimes.Remove(enemy);
+        }
+
+        if (selectTurn != null)
+        {
+            selectTurn.RemoveEnemyFromSelections(enemy.EnemyModel);
+        }
+
         if (entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
         {
             StartCoroutine(controller.DeadSequence());
             var ui = entitiesManager.EnemyStatusUIs.FirstOrDefault(u => u.GetEnemyModel() == enemy.EnemyModel);
-            if (ui != null)
-            {
-                // UIを即座に消すか、フェードアウトさせる
-                ui.gameObject.SetActive(false);
-            }
+            if (ui != null) ui.gameObject.SetActive(false);
         }
 
-        // 勝利判定: 全ての敵のHPが0以下か？
+        // 勝利判定
         bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
         if (allEnemiesDead)
         {

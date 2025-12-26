@@ -19,7 +19,6 @@ public class SelectTurn : MonoBehaviour, IPhase
     private void OnDownPressed() { downPressed = true; }
     private void OnConfirmPressed() { confirmPressed = true; }
 
-    private int livingEnemyCount;
     private int currentTargetIndex;
     private int previousTargetIndex;
     private List<PlayerRuntime> _currentPlayers;
@@ -35,9 +34,10 @@ public class SelectTurn : MonoBehaviour, IPhase
     public void Initialize(List<PlayerRuntime> players, List<EnemyModel> enemies, List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
     {
         _currentPlayers = players;
-        _currentEnemies = enemies;
+        // 生存している敵のみで初期化
+        _currentEnemies = enemies.Where(e => e != null && e.EnemyHP > 0).ToList();
         _playerUIs = pUIs;
-        _enemyUIs = eUIs;
+        _enemyUIs = eUIs.Where(ui => ui != null).ToList();
 
         SetupKeyUIInstances();
         ResetKeyUIs();
@@ -62,13 +62,26 @@ public class SelectTurn : MonoBehaviour, IPhase
 
         foreach (var key in _keyUIInstances)
         {
+            // ★修正: Key自体がDestroyされている可能性があるためnullチェック
             if (key != null)
             {
                 key.SetActive(false);
-                // ★修正: 待避先をこのオブジェクト自身に変更
                 key.transform.SetParent(this.transform);
+                key.transform.localScale = Vector3.one;
             }
         }
+    }
+
+    private void DestroyKeyUIs()
+    {
+        if (_keyUIInstances == null) return;
+
+        foreach (var key in _keyUIInstances)
+        {
+            if (key != null) Destroy(key);
+        }
+        _keyUIInstances.Clear();
+        _keyUIInstances = null;
     }
 
     private void SetupKeyUIInstances()
@@ -78,11 +91,13 @@ public class SelectTurn : MonoBehaviour, IPhase
             _keyUIInstances = new List<GameObject>();
         }
 
+        // 全て存在しているなら何もしない
         if (_keyUIInstances.Count >= 3 && _keyUIInstances.All(x => x != null))
         {
             return;
         }
 
+        // 欠損がある場合は作り直す
         foreach (var obj in _keyUIInstances)
         {
             if (obj != null) Destroy(obj);
@@ -93,7 +108,6 @@ public class SelectTurn : MonoBehaviour, IPhase
         {
             if (prefab != null)
             {
-                // ★修正: 親をこのオブジェクトにして生成
                 GameObject instance = Instantiate(prefab, this.transform);
                 instance.SetActive(false);
                 _keyUIInstances.Add(instance);
@@ -121,14 +135,26 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     public void ValidateSelections()
     {
-        if (PlayerSelections == null) return;
-
-        foreach (var player in _currentPlayers)
+        if (_currentEnemies != null)
         {
-            if (PlayerSelections.ContainsKey(player.ID))
+            _currentEnemies.RemoveAll(e => e == null || e.EnemyHP <= 0);
+        }
+
+        if (PlayerSelections != null)
+        {
+            foreach (var player in _currentPlayers)
             {
-                PlayerSelections[player.ID].RemoveAll(enemy => enemy == null || enemy.EnemyHP <= 0);
+                if (PlayerSelections.ContainsKey(player.ID))
+                {
+                    PlayerSelections[player.ID].RemoveAll(enemy => enemy == null || enemy.EnemyHP <= 0);
+                }
             }
+        }
+
+        // ★追加: UIリストからも死んだ敵のUIを掃除しておく
+        if (_enemyUIs != null)
+        {
+            _enemyUIs.RemoveAll(ui => ui == null);
         }
     }
 
@@ -146,7 +172,7 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     private IEnumerator SelectionProcessCoroutine(bool keepSelections)
     {
-        Debug.Log($"選択ターンのプレイヤー数: {_currentPlayers.Count}, 選択保持: {keepSelections}");
+        ValidateSelections();
 
         for (int pIndex = 0; pIndex < _currentPlayers.Count; pIndex++)
         {
@@ -159,39 +185,43 @@ public class SelectTurn : MonoBehaviour, IPhase
                 _playerUIs[pIndex].SetHighlight(new Color(0.5f, 0.8f, 1f));
             }
 
-            int currentLivingEnemies = _currentEnemies.Count(e => e.EnemyHP > 0);
-            if (currentLivingEnemies == 0)
+            if (_currentEnemies.Count == 0)
             {
                 _playerUIs[pIndex].ResetHighlight();
-                continue;
+                break;
             }
 
             for (int priority = 1; priority <= _currentPlayers.Count; priority++)
             {
-                livingEnemyCount = _currentEnemies.Count(e => e.EnemyHP > 0);
-                if (livingEnemyCount == 0) break;
+                if (_currentEnemies.Count == 0) break;
+
                 int currentSelectedCount = 0;
                 if (PlayerSelections.ContainsKey(currentPlayer.ID))
                 {
                     currentSelectedCount = PlayerSelections[currentPlayer.ID].Count;
                 }
 
-                if (currentSelectedCount >= livingEnemyCount)
+                if (currentSelectedCount >= _currentEnemies.Count)
                 {
-                    Debug.Log("これ以上選べる敵がいません（全敵選択済み）。次のプレイヤーへ進みます。");
+                    Debug.Log($"これ以上選べる敵がいません（全敵選択済み）。次のプレイヤーへ進みます。");
                     break;
                 }
+
                 bool hasValidSelection = false;
                 if (keepSelections && PlayerSelections.ContainsKey(currentPlayer.ID))
                 {
                     if (PlayerSelections[currentPlayer.ID].Count >= priority)
                     {
                         var target = PlayerSelections[currentPlayer.ID][priority - 1];
-                        if (target != null && target.EnemyHP > 0)
+                        if (target != null && _currentEnemies.Contains(target))
                         {
                             hasValidSelection = true;
-                            // ★修正: 選択保持時、敵の頭上にキーを表示
                             ShowKeyOnEnemy(priority, target);
+                        }
+                        else
+                        {
+                            PlayerSelections[currentPlayer.ID].RemoveAt(priority - 1);
+                            hasValidSelection = false;
                         }
                     }
                 }
@@ -212,9 +242,8 @@ public class SelectTurn : MonoBehaviour, IPhase
 
             _playerUIs[pIndex].ResetHighlight();
 
-            if (livingEnemyCount == 0)
+            if (_currentEnemies.Count == 0)
             {
-                Debug.Log("全ての敵が倒されました。");
                 break;
             }
         }
@@ -225,13 +254,12 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     public IEnumerator SelectOneTargetCoroutine(PlayerRuntime player, int priority, System.Action<EnemyModel> onSelected, bool keepSelections = false)
     {
-        var livingEnemies = _currentEnemies.Where(e => e.EnemyHP > 0).ToList();
-        if (livingEnemies.Count == 0) yield break;
+        if (_currentEnemies.Count == 0) yield break;
 
         currentTargetIndex = 0;
         previousTargetIndex = 0;
 
-        EnemyStatusUIController targetUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == livingEnemies[currentTargetIndex]);
+        EnemyStatusUIController targetUI = _enemyUIs.FirstOrDefault(ui => ui != null && ui.GetEnemyModel() == _currentEnemies[currentTargetIndex]);
         if (targetUI != null)
         {
             targetUI.SetHighlight(new Color(1f, 0.5f, 0.5f));
@@ -250,28 +278,42 @@ public class SelectTurn : MonoBehaviour, IPhase
         {
             yield return null;
 
+            if (_currentEnemies.Count == 0)
+            {
+                selectionMade = true;
+                break;
+            }
+
             bool selectionChanged = false;
             if (downPressed)
             {
-                currentTargetIndex = (currentTargetIndex + 1) % livingEnemies.Count;
+                currentTargetIndex = (currentTargetIndex + 1) % _currentEnemies.Count;
                 selectionChanged = true;
                 downPressed = false;
             }
             else if (upPressed)
             {
-                currentTargetIndex = (currentTargetIndex - 1 + livingEnemies.Count) % livingEnemies.Count;
+                currentTargetIndex = (currentTargetIndex - 1 + _currentEnemies.Count) % _currentEnemies.Count;
                 selectionChanged = true;
                 upPressed = false;
             }
 
             if (selectionChanged)
             {
-                EnemyModel prevModel = livingEnemies[previousTargetIndex];
-                EnemyStatusUIController prevUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == prevModel);
-                if (prevUI != null) prevUI.ResetHighlight();
+                if (previousTargetIndex < _currentEnemies.Count)
+                {
+                    EnemyModel prevModel = _currentEnemies[previousTargetIndex];
+                    EnemyStatusUIController prevUI = _enemyUIs.FirstOrDefault(ui => ui != null && ui.GetEnemyModel() == prevModel);
+                    if (prevUI != null) prevUI.ResetHighlight();
+                }
+                else
+                {
+                    // nullチェックを追加
+                    foreach (var ui in _enemyUIs) if (ui != null) ui.ResetHighlight();
+                }
 
-                EnemyModel currentModel = livingEnemies[currentTargetIndex];
-                EnemyStatusUIController currentUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == currentModel);
+                EnemyModel currentModel = _currentEnemies[currentTargetIndex];
+                EnemyStatusUIController currentUI = _enemyUIs.FirstOrDefault(ui => ui != null && ui.GetEnemyModel() == currentModel);
                 if (currentUI != null) currentUI.SetHighlight(new Color(1f, 0.5f, 0.5f));
 
                 previousTargetIndex = currentTargetIndex;
@@ -280,7 +322,7 @@ public class SelectTurn : MonoBehaviour, IPhase
             if (confirmPressed)
             {
                 confirmPressed = false;
-                EnemyModel selectedEnemy = livingEnemies[currentTargetIndex];
+                EnemyModel selectedEnemy = _currentEnemies[currentTargetIndex];
 
                 if (PlayerSelections[player.ID].Contains(selectedEnemy))
                 {
@@ -292,9 +334,8 @@ public class SelectTurn : MonoBehaviour, IPhase
                 onSelected?.Invoke(selectedEnemy);
                 ShowKeyOnEnemy(priority, selectedEnemy);
 
-                foreach (var eUI in _enemyUIs) eUI.ResetHighlight();
+                foreach (var eUI in _enemyUIs) if (eUI != null) eUI.ResetHighlight();
 
-                // ここで確実にtrueにする（遷移の鍵）
                 selectionMade = true;
             }
         }
@@ -306,8 +347,9 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     public void FinalizeSelectionsForTutorial()
     {
-        var livingEnemies = _currentEnemies.Where(e => e.EnemyHP > 0).ToList();
+        var livingEnemies = _currentEnemies.Where(e => e != null && e.EnemyHP > 0).ToList();
         if (livingEnemies.Count == 0) return;
+
         foreach (var player in _currentPlayers)
         {
             if (PlayerSelections.ContainsKey(player.ID) && PlayerSelections[player.ID].Count == 0)
@@ -319,6 +361,7 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     private void FinishSelectTurn()
     {
+        DestroyKeyUIs();
         SelectTurnFinished?.Invoke();
     }
 
@@ -328,10 +371,16 @@ public class SelectTurn : MonoBehaviour, IPhase
 
         if (_keyUIInstances == null || keyIndex < 0 || keyIndex >= _keyUIInstances.Count) return;
 
+        // ★追加: もしKeyUIが（敵UIと一緒に）消滅していたら作り直す
+        if (_keyUIInstances[keyIndex] == null)
+        {
+            SetupKeyUIInstances();
+        }
+
         GameObject targetKeyUI = _keyUIInstances[keyIndex];
         if (targetKeyUI == null) return;
 
-        EnemyStatusUIController targetEnemyUI = _enemyUIs.FirstOrDefault(ui => ui.GetEnemyModel() == targetEnemy);
+        EnemyStatusUIController targetEnemyUI = _enemyUIs.FirstOrDefault(ui => ui != null && ui.GetEnemyModel() == targetEnemy);
 
         if (targetEnemyUI != null)
         {
@@ -341,6 +390,40 @@ public class SelectTurn : MonoBehaviour, IPhase
             targetKeyUI.transform.localPosition = Vector3.zero;
             targetKeyUI.transform.localScale = Vector3.one;
             targetKeyUI.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// 指定された敵が死亡した場合、選択リストから完全に削除し、
+    /// UI（キー表示）も更新する
+    /// </summary>
+    public void RemoveEnemyFromSelections(EnemyModel deadEnemy)
+    {
+        // 1. 敵リストから削除
+        if (_currentEnemies != null)
+        {
+            _currentEnemies.Remove(deadEnemy);
+        }
+
+        // 2. ★修正: UIリストからも削除（nullまたは対象のUI）
+        if (_enemyUIs != null)
+        {
+            _enemyUIs.RemoveAll(ui => ui == null || ui.GetEnemyModel() == deadEnemy);
+        }
+
+        // 3. 選択済みリストから削除
+        if (PlayerSelections == null) return;
+
+        foreach (var playerID in PlayerSelections.Keys.ToList())
+        {
+            var selectionList = PlayerSelections[playerID];
+            if (selectionList.Contains(deadEnemy))
+            {
+                selectionList.RemoveAll(e => e == deadEnemy);
+
+                // ★修正: 敵UIが消えたことでKeyUIも消えている可能性があるため、再構築する
+                SetupKeyUIInstances();
+            }
         }
     }
 }

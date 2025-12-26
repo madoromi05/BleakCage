@@ -189,8 +189,6 @@ public class PlayerDefenseHandler : MonoBehaviour
         int justGuardFrameCounter = JUST_GUARD_DURATION;
         int normalGuardFrameCounter = NORMAL_GUARD_WINDOW_DURATION;
 
-        Debug.Log($"防御受付開始 (ジャスト: {justGuardFrameCounter}F, 通常: {normalGuardFrameCounter}F)");
-
         // ----------------------------------------------------
         // 1. ジャストガード (カウンター) 判定フェーズ
         // ----------------------------------------------------
@@ -212,7 +210,6 @@ public class PlayerDefenseHandler : MonoBehaviour
         // ----------------------------------------------------
         // 2. 通常ガード判定フェーズ
         // ----------------------------------------------------
-        Debug.Log("ジャストガード時間 終了。通常ガード判定へ移行。");
         while (normalGuardFrameCounter > 0)
         {
             normalGuardFrameCounter--;
@@ -223,7 +220,6 @@ public class PlayerDefenseHandler : MonoBehaviour
         // ----------------------------------------------------
         // 3. 最終判定
         // ----------------------------------------------------
-        Debug.Log("通常ガード受付 終了。最終判定へ。");
         _isDefenseWindowOpen = false;
 
         ResolveFinalDefense(targetPlayerIndex);

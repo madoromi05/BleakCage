@@ -17,6 +17,7 @@ public class EnemyTurn : MonoBehaviour
 
     private List<PlayerRuntime> players;
     private List<EnemyModel> enemies;
+    private List<EnemyRuntime> _enemyRuntimes;
     private Queue<ICommand> commandQueue = new();
     private List<PlayerStatusUIController> playerStatusUIControllers;
     private Dictionary<EnemyModel, EnemyController> enemyControllers;
@@ -35,13 +36,15 @@ public class EnemyTurn : MonoBehaviour
     public void EnemySetup(List<PlayerRuntime> players, List<EnemyModel> enemys,
                        Dictionary<EnemyModel, EnemyController> enemyControllers,
                        Dictionary<PlayerRuntime, PlayerController> playerControllers,
-                       List<PlayerStatusUIController> playerStatusUIControllers)
+                       List<PlayerStatusUIController> playerStatusUIControllers,
+                        List<EnemyRuntime> runtimeList)
     {
         this.players = players;
         this.enemies = enemys;
         this.enemyControllers = enemyControllers;
         this.playerControllers = playerControllers;
         this.playerStatusUIControllers = playerStatusUIControllers;
+        this._enemyRuntimes = runtimeList;
 
         defenseHandler.Init(players, playerControllers);
 
@@ -82,20 +85,21 @@ public class EnemyTurn : MonoBehaviour
 
     private void PrepareAttackCommands()
     {
-        foreach (var attacker in enemies)
+        foreach (var attackerRuntime in _enemyRuntimes)
         {
-            if (attacker == null || attacker.EnemyHP <= 0) continue;
-            PlayerRuntime targetRuntime = GetRandomLivingPlayer();
+            if (attackerRuntime == null || attackerRuntime.CurrentHP <= 0) continue;
 
+            PlayerRuntime targetRuntime = GetRandomLivingPlayer();
             if (targetRuntime != null)
             {
+                EnemyModel attackerModel = attackerRuntime.EnemyModel;
                 PlayerStatusUIController targetUIController = playerStatusUIControllers.FirstOrDefault(ui =>
                     ui.GetPlayerRuntime() == targetRuntime
                 );
-                enemyControllers.TryGetValue(attacker, out EnemyController attackerController);
+                enemyControllers.TryGetValue(attackerModel, out EnemyController attackerController);
                 playerControllers.TryGetValue(targetRuntime, out PlayerController targetController);
 
-                commandQueue.Enqueue(new EnemyAttackCommand(targetRuntime, attacker, attackerController, targetController, targetUIController));
+                commandQueue.Enqueue(new EnemyAttackCommand(targetRuntime, attackerModel, attackerController, targetController, targetUIController));
             }
         }
     }

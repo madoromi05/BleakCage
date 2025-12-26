@@ -312,6 +312,7 @@ MonoBehaviour:
   - {fileID: 1365322185}
   playerStatusUIPrefab: {fileID: 3674847010971381577, guid: 1f6773378f3553943b400135a3211d39, type: 3}
   enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
+  selectTurn: {fileID: 120127630}
   playerStatusBarTransform: {fileID: 334436847}
   enemyStatusBarTransform: {fileID: 727143522}
   allStageEnemyData:
