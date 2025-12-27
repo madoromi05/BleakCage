@@ -37,14 +37,11 @@ public class PlayerActionExecutor
         {
             WeaponRuntime weaponRuntime = selectedCardRuntime.weaponRuntime;
             PlayerRuntime player = weaponRuntime.ParentPlayer;
-
-            if (player == null || weaponRuntime == null)
+            if (player == null || player.CurrentHP <= 0)
             {
-                Debug.LogError($"カード情報エラー: ID={selectedCardRuntime.ID}");
+                Debug.LogWarning($"[Executor] dead player card skipped: playerID={player?.ID}");
                 continue;
             }
-
-            // この時点での最新状況（敵の生死など）を元に、コマンドを作成する
             AttributeType attribute = selectedCardRuntime.attribute;
             bool isAttack = IsAttackAttribute(attribute);
 

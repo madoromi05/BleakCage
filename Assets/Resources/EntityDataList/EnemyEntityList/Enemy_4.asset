@@ -19,7 +19,7 @@ MonoBehaviour:
   AttackType: 1
   EnemySprite: {fileID: 21300000, guid: d23fed80cd950ee4e875681fba68811a, type: 3}
   EnemyDescription: "\u65B0\u3057\u3044\u6575\u306E\u8AAC\u660E\u6587"
-  EnemyHP: 500
+  EnemyHP: 5000
   EnemyAttackPower: 60
   EnemyDefensePower: 20
   EnemyAttackOffset: 0

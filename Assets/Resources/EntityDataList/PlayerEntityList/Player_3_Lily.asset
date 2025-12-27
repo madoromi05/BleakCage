@@ -20,7 +20,7 @@ MonoBehaviour:
   PlayerDescription: "\u65B0\u3057\u3044\u30D7\u30EC\u30A4\u30E4\u30FC\u306E\u8AAC\u660E\u6587"
   PlayerIcon: {fileID: 21300000, guid: 23dcb4157eac9eb4bb89682aa7a09e83, type: 3}
   PlayerLevel: 30
-  PlayerHP: 100
+  PlayerHP: 150
   PlayerDefensePower: 5
   PlayerWeapon: {fileID: 11400000, guid: f48430a21607dfb46b73f4065add0206, type: 2}
   GuardVisualYOffset: 0

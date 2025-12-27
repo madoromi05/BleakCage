@@ -5,6 +5,7 @@ public class EnemyAttackCommand : ICommand
 {
     public PlayerRuntime PlayerTarget { get; }
     public EnemyModel Attacker { get; }
+    public int HitCount { get; }
     private EnemyAttackDamage calculator = new EnemyAttackDamage();
     private EnemyController _enemyController;
     private PlayerController _playerController;
@@ -20,6 +21,7 @@ public class EnemyAttackCommand : ICommand
         _enemyController = enemyController;
         _playerStatusUIController = playerStatusUIController;
         _playerController = playerController;
+        HitCount = (Attacker != null && Attacker.EnemyID == 4) ? 3 : 1;
     }
 
     /// <summary>

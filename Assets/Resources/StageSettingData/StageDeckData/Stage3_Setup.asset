@@ -17,3 +17,19 @@ MonoBehaviour:
     Level: 0
     Weapons:
     - WeaponID: 10
+  - CharacterID: 1
+    Level: 0
+    Weapons:
+    - WeaponID: 0
+    - WeaponID: 1
+    - WeaponID: 11
+  - CharacterID: 2
+    Level: 0
+    Weapons:
+    - WeaponID: 0
+    - WeaponID: 1
+    - WeaponID: 12
+  - CharacterID: 3
+    Level: 0
+    Weapons:
+    - WeaponID: 13

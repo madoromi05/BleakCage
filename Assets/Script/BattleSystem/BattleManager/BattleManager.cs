@@ -152,49 +152,35 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void OnEnemyDead(EnemyRuntime enemy)
-    {
-        if (IsBattleEnded) return;
-
-        Debug.Log($"“GŒ‚”j: {enemy.EnemyModel.EnemyName}");
-
-        if (enemyRuntimes.Contains(enemy))
-        {
-            enemyRuntimes.Remove(enemy);
-        }
-
-        if (selectTurn != null)
-        {
-            selectTurn.RemoveEnemyFromSelections(enemy.EnemyModel);
-        }
-
-        if (entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
-        {
-            StartCoroutine(controller.DeadSequence());
-            var ui = entitiesManager.EnemyStatusUIs.FirstOrDefault(u => u.GetEnemyModel() == enemy.EnemyModel);
-            if (ui != null) ui.gameObject.SetActive(false);
-        }
-
-        // Ÿ—˜”»’è
-        bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
-        if (allEnemiesDead)
-        {
-            StartCoroutine(BattleWinProcess());
-        }
-    }
-
     public void OnPlayerDead(PlayerRuntime player)
     {
         if (IsBattleEnded) return;
+        if (player == null) return;
 
         Debug.Log($"–¡•û€–S: {player.PlayerModel.PlayerName}");
 
-        if (entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out PlayerController controller))
+        // ‘I‘ğ‚©‚çœŠO
+        selectTurn?.RemovePlayerFromSelections(player);
+
+        // UI”ñ•\¦
+        var pui = entitiesManager.PlayerStatusUIs
+            .FirstOrDefault(u => u != null && u.GetPlayerRuntime() == player);
+        if (pui != null) pui.gameObject.SetActive(false);
+
+        // €–S‰‰oi“G‚Æ“¯“™‚ÌŠ®¬“x‚Öj
+        if (entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out var controller))
         {
-            controller.PlayDeadAnimation();
+            var death = controller.GetComponent<PlayerDeathController>();
+            if (death != null)
+            {
+                StartCoroutine(death.DeadSequence());
+            }
+            else
+            {
+                controller.PlayDeadAnimation();
+            }
         }
 
-        // ”s–k”»’è: ‘S‚Ä‚ÌƒvƒŒƒCƒ„[‚ÌHP‚ª0ˆÈ‰º‚©H
         bool allPlayersDead = entitiesManager.Players.All(p => p.CurrentHP <= 0);
         if (allPlayersDead)
         {
@@ -274,4 +260,38 @@ public class BattleManager : MonoBehaviour
             playerTurn.FinishPlayerTurn();
         }
     }
+    public void OnEnemyDead(EnemyRuntime enemy)
+    {
+        if (IsBattleEnded) return;
+        if (enemy == null) return;
+
+        Debug.Log($"“GŒ‚”j: {enemy.EnemyModel.EnemyName}");
+
+        if (enemyRuntimes.Contains(enemy))
+        {
+            enemyRuntimes.Remove(enemy);
+        }
+
+        if (selectTurn != null)
+        {
+            selectTurn.RemoveEnemyFromSelections(enemy.EnemyModel);
+        }
+
+        if (entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
+        {
+            StartCoroutine(controller.DeadSequence());
+
+            var ui = entitiesManager.EnemyStatusUIs
+                .FirstOrDefault(u => u != null && u.GetEnemyModel() == enemy.EnemyModel);
+            if (ui != null) ui.gameObject.SetActive(false);
+        }
+
+        // Ÿ—˜”»’è
+        bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
+        if (allEnemiesDead)
+        {
+            StartCoroutine(BattleWinProcess());
+        }
+    }
+
 }

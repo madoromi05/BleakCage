@@ -131,39 +131,60 @@ public class EnemyTurn : MonoBehaviour
                 continue;
             }
 
-            // この攻撃のコンテキストをセット
+            // この攻撃のコンテキストをセット（共通）
             this.currentPlayerTarget = attackCmd.PlayerTarget;
             this.currentAttackCommand = attackCmd;
-            this.attackHasBeenResolved = false;
 
             int targetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
-            if (targetPlayerIndex != -1)
+
+            int hitCount = Mathf.Max(1, attackCmd.HitCount);
+
+            for (int hit = 0; hit < hitCount; hit++)
             {
-                var markerUI = battleManager.MarkerInstance.GetComponent<TargetMarkerUI>();
-                if (markerUI != null)
+                // 既にターゲットが死んでたら中断
+                if (currentPlayerTarget == null || currentPlayerTarget.CurrentHP <= 0)
                 {
-                    markerUI.SetKeyNumber(targetPlayerIndex + 1);
+                    break;
                 }
 
-                entitiesManager.ShowTargetMarkerOnPlayer(battleManager.MarkerInstance, targetPlayerIndex);
+                this.attackHasBeenResolved = false;
 
+                // マーカー表示（毎ヒット表示したい場合）
+                if (targetPlayerIndex != -1)
+                {
+                    var markerUI = battleManager.MarkerInstance.GetComponent<TargetMarkerUI>();
+                    if (markerUI != null)
+                    {
+                        markerUI.SetKeyNumber(targetPlayerIndex + 1);
+                    }
+
+                    entitiesManager.ShowTargetMarkerOnPlayer(battleManager.MarkerInstance, targetPlayerIndex);
+                }
+
+                // 連撃の間隔：1発目は従来通り0.5、2発目以降は短め
+                yield return new WaitForSeconds(hit == 0 ? 0.5f : 0.2f);
+
+                // 攻撃コマンド実行（アニメ再生＋待機）
+                yield return StartCoroutine(attackCmd.Do());
+
+                // マーカー非表示
+                entitiesManager.HideTargetMarker(battleManager.MarkerInstance);
+
+                // アニメイベント不発フォールバック（毎ヒット分必要）
+                if (!attackHasBeenResolved)
+                {
+                    Debug.LogWarning($"P{targetPlayerIndex + 1}: アニメーションイベント不発のため強制実行 (hit {hit + 1}/{hitCount})");
+                    StartCoroutine(defenseHandler.StartDefenseWindowCoroutine(currentPlayerTarget, ResolveAttack));
+                }
+
+                yield return new WaitUntil(() => attackHasBeenResolved == true);
+                yield return null;
+
+                // 念のため：勝敗確定してたら終了（任意）
+                if (battleManager != null && battleManager.IsBattleEnded) yield break;
             }
-            yield return new WaitForSeconds(0.5f);
 
-            // 攻撃コマンドを実行 (アニメ再生 + 待機)
-            yield return StartCoroutine(command.Do());
-
-            // BattleManagerにマーカー非表示を依頼
-            entitiesManager.HideTargetMarker(battleManager.MarkerInstance);
-
-            // アニメーションイベントが発火しなかった場合のフォールバック
-            if (!attackHasBeenResolved)
-            {
-                Debug.LogWarning($"P{targetPlayerIndex + 1}: アニメーションイベント不発のため強制実行");
-                StartCoroutine(defenseHandler.StartDefenseWindowCoroutine(currentPlayerTarget, ResolveAttack));
-            }
-
-            yield return new WaitUntil(() => attackHasBeenResolved == true);
+            // 次の敵へ
             yield return null;
         }
 
@@ -171,6 +192,7 @@ public class EnemyTurn : MonoBehaviour
         defenseHandler.DisableDefenseInput();
         TurnFinished?.Invoke();
     }
+
 
     /// <summary>
     /// PlayerDefenseHandler からダメージ発生時に呼ばれる

@@ -15,7 +15,6 @@ public class EnemyHPHandler
 
     public void TakeDamage(float damage)
     {
-        // ★デバッグ用ログ1: メソッドが呼ばれたか確認
         Debug.Log($"[EnemyHPHandler] TakeDamage Called: Target={_ownerRuntime.EnemyModel.EnemyName}, Damage={damage}, CurrentHP={_ownerRuntime.CurrentHP}");
 
         if (_ownerRuntime.CurrentHP <= 0) return;
@@ -37,10 +36,7 @@ public class EnemyHPHandler
         if (_ownerRuntime.CurrentHP <= 0)
         {
             _ownerRuntime.CurrentHP = 0;
-
-            // ★デバッグ用ログ3: イベント発火直前
             Debug.Log($"[EnemyHPHandler] {_ownerRuntime.EnemyModel.EnemyName} is DEAD. Invoking OnDead event...");
-
             OnDead?.Invoke(_ownerRuntime);
         }
     }

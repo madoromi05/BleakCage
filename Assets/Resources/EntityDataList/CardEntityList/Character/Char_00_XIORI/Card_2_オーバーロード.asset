@@ -23,11 +23,11 @@ MonoBehaviour:
   Attribute: 5
   Passive: 0
   HitRate: 1
-  OutputModifier: 1
+  OutputModifier: 1.15
   DefensePenetration: 1
   TargetScope: 0
   IsMelee: 0
-  AttackCount: 1
+  AttackCount: 0
   TargetCount: 1
   StatusEffect:
     Type: 2

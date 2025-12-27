@@ -31,14 +31,13 @@ public class SelectTurn : MonoBehaviour, IPhase
     private bool confirmPressed = false;
     private bool isKeepingSelections = false;
 
-    public void Initialize(List<PlayerRuntime> players, List<EnemyModel> enemies, List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
+    public void Initialize(List<PlayerRuntime> players, List<EnemyModel> enemies,
+    List<PlayerStatusUIController> pUIs, List<EnemyStatusUIController> eUIs)
     {
-        _currentPlayers = players;
-        // 生存している敵のみで初期化
+        _currentPlayers = players.Where(p => p != null && p.CurrentHP > 0).ToList();
         _currentEnemies = enemies.Where(e => e != null && e.EnemyHP > 0).ToList();
         _playerUIs = pUIs;
         _enemyUIs = eUIs.Where(ui => ui != null).ToList();
-
         SetupKeyUIInstances();
         ResetKeyUIs();
 
@@ -62,7 +61,7 @@ public class SelectTurn : MonoBehaviour, IPhase
 
         foreach (var key in _keyUIInstances)
         {
-            // ★修正: Key自体がDestroyされている可能性があるためnullチェック
+            //Key自体がDestroyされている可能性があるためnullチェック
             if (key != null)
             {
                 key.SetActive(false);
@@ -71,19 +70,6 @@ public class SelectTurn : MonoBehaviour, IPhase
             }
         }
     }
-
-    private void DestroyKeyUIs()
-    {
-        if (_keyUIInstances == null) return;
-
-        foreach (var key in _keyUIInstances)
-        {
-            if (key != null) Destroy(key);
-        }
-        _keyUIInstances.Clear();
-        _keyUIInstances = null;
-    }
-
     private void SetupKeyUIInstances()
     {
         if (_keyUIInstances == null)
@@ -177,7 +163,7 @@ public class SelectTurn : MonoBehaviour, IPhase
         for (int pIndex = 0; pIndex < _currentPlayers.Count; pIndex++)
         {
             PlayerRuntime currentPlayer = _currentPlayers[pIndex];
-            if (pIndex >= _playerUIs.Count) continue;
+            if (currentPlayer == null || currentPlayer.CurrentHP <= 0) continue;
 
             if (!keepSelections)
             {
@@ -191,7 +177,8 @@ public class SelectTurn : MonoBehaviour, IPhase
                 break;
             }
 
-            for (int priority = 1; priority <= _currentPlayers.Count; priority++)
+            int livingCount = _currentPlayers.Count(p => p != null && p.CurrentHP > 0);
+            for (int priority = 1; priority <= livingCount; priority++)
             {
                 if (_currentEnemies.Count == 0) break;
 
@@ -361,17 +348,16 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     private void FinishSelectTurn()
     {
-        DestroyKeyUIs();
+        ResetKeyUIs();
         SelectTurnFinished?.Invoke();
     }
 
     private void ShowKeyOnEnemy(int priority, EnemyModel targetEnemy)
     {
         int keyIndex = priority - 1;
+        SetupKeyUIInstances();
 
         if (_keyUIInstances == null || keyIndex < 0 || keyIndex >= _keyUIInstances.Count) return;
-
-        // ★追加: もしKeyUIが（敵UIと一緒に）消滅していたら作り直す
         if (_keyUIInstances[keyIndex] == null)
         {
             SetupKeyUIInstances();
@@ -405,7 +391,8 @@ public class SelectTurn : MonoBehaviour, IPhase
             _currentEnemies.Remove(deadEnemy);
         }
 
-        // 2. ★修正: UIリストからも削除（nullまたは対象のUI）
+        //
+        // Iリストからも削除（nullまたは対象のUI）
         if (_enemyUIs != null)
         {
             _enemyUIs.RemoveAll(ui => ui == null || ui.GetEnemyModel() == deadEnemy);
@@ -421,9 +408,19 @@ public class SelectTurn : MonoBehaviour, IPhase
             {
                 selectionList.RemoveAll(e => e == deadEnemy);
 
-                // ★修正: 敵UIが消えたことでKeyUIも消えている可能性があるため、再構築する
                 SetupKeyUIInstances();
             }
         }
     }
+
+    public void RemovePlayerFromSelections(PlayerRuntime deadPlayer)
+    {
+        if (deadPlayer == null) return;
+
+        if (PlayerSelections != null && PlayerSelections.ContainsKey(deadPlayer.ID))
+        {
+            PlayerSelections.Remove(deadPlayer.ID);
+        }
+    }
+
 }
