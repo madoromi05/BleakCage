@@ -42,7 +42,7 @@ public class HomeManager : MonoBehaviour
         if (state != HomeState.Command) return;
 
         SoundManager.Instance.PlaySE(SEType.EnterStory);
-        StageManager.SelectedStageID = 1;
+        StageManager.SelectedStageID = StageManager.GetMaxReachedStage();
         StageManager.IsPostBattle = false;
         SceneManager.LoadScene("ScenarioScene");
     }

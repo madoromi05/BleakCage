@@ -253,5 +253,32 @@ public class DeckViewManager : MonoBehaviour
             bool canGoNext = (currentPlayerIndex < currentDeckData.Party.Count - 1);
             nextCharButton.gameObject.SetActive(canGoNext);
         }
+        LogButton(prevCharButton, "Prev");
+        LogButton(nextCharButton, "Next");
+
     }
+
+
+    private void LogButton(Button btn, string label)
+    {
+        if (btn == null)
+        {
+            Debug.Log($"[DeckView]{label} btn is NULL");
+            return;
+        }
+
+        var go = btn.gameObject;
+        var img = btn.GetComponent<Image>();                 // ButtonのターゲットGraphic想定
+        var cg = btn.GetComponent<CanvasGroup>();            // 付いてる場合あり
+        var rt = btn.GetComponent<RectTransform>();
+
+        Debug.Log(
+            $"[DeckView]{label} activeSelf={go.activeSelf} activeInHierarchy={go.activeInHierarchy} " +
+            $"interactable={btn.interactable} enabled={btn.enabled} " +
+            $"img={(img ? "Y" : "N")} imgEnabled={(img ? img.enabled : false)} imgAlpha={(img ? img.color.a : -1f)} " +
+            $"canvasGroup={(cg ? "Y" : "N")} cgAlpha={(cg ? cg.alpha : -1f)} cgInteract={(cg ? cg.interactable : false)} " +
+            $"rtPos={(rt ? rt.anchoredPosition.ToString() : "null")} rtScale={(rt ? rt.localScale.ToString() : "null")}"
+        );
+    }
+
 }

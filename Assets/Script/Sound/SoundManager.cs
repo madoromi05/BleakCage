@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 効果音（SE）の種類定義
@@ -49,8 +50,8 @@ public class SoundManager : MonoBehaviour
     private AudioSource seSource;
     private AudioSource bgmSource;
 
-    private float seMasterVolume = 1f;
-    private float bgmMasterVolume = 1f;
+    private float seMasterVolume = 0.5f;
+    private float bgmMasterVolume = 0.5f;
 
     private void Awake()
     {
@@ -73,10 +74,36 @@ public class SoundManager : MonoBehaviour
         bgmDataDict = new Dictionary<BGMType, BGMData>();
         foreach (var data in bgmList) bgmDataDict[data.type] = data;
 
-        seSource.volume = seMasterVolume;
-        bgmSource.volume = bgmMasterVolume;
+        SetSEVolume(0.5f);
+        SetBGMVolume(0.5f);
     }
 
+    private void OnEnable()
+    {
+        SceneManager.activeSceneChanged += OnSceneChanged;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.activeSceneChanged -= OnSceneChanged;
+    }
+
+    private void OnSceneChanged(Scene oldScene, Scene newScene)
+    {
+        switch (newScene.name)
+        {
+            case "HomeScene":
+            case "ScenarioScene":
+            case "DeckViewScene":
+                PlayBGM(BGMType.Title);
+                break;
+
+            case "BattleScene":
+                // StageID確定後に BattleEntitiesManager が上書きするので、ここは無音でOK
+                PlayBGM(BGMType.None);
+                break;
+        }
+    }
     public void PlaySE(SEType type)
     {
         if (seDict.TryGetValue(type, out var clip))
@@ -114,16 +141,21 @@ public class SoundManager : MonoBehaviour
     public void SetBGMVolume(float volume)
     {
         bgmMasterVolume = Mathf.Clamp01(volume);
-        if (bgmSource.isPlaying)
+        if (bgmSource != null)
         {
-            foreach (var kvp in bgmDataDict)
+            float scale = 1f;
+            if (bgmSource.clip != null)
             {
-                if (kvp.Value.clip == bgmSource.clip)
+                foreach (var kvp in bgmDataDict)
                 {
-                    bgmSource.volume = bgmMasterVolume * kvp.Value.volumeScale;
-                    break;
+                    if (kvp.Value.clip == bgmSource.clip)
+                    {
+                        scale = kvp.Value.volumeScale;
+                        break;
+                    }
                 }
             }
+            bgmSource.volume = bgmMasterVolume * scale;
         }
     }
 }

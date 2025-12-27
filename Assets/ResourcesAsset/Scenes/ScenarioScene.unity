@@ -150,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainText: {fileID: 809959782}
   nextButton: {fileID: 1508000998}
-  useDebugSettings: 1
+  useDebugSettings: 0
   debugStageID: 0
   debugIsPostBattle: 0
 --- !u!4 &38896227
@@ -388,7 +388,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 391.5, y: -57.722008}
+  m_AnchoredPosition: {x: 391.5, y: -57.708332}
   m_SizeDelta: {x: 683, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &809959782

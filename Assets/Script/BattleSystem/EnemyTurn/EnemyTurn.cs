@@ -139,7 +139,14 @@ public class EnemyTurn : MonoBehaviour
             int targetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
             if (targetPlayerIndex != -1)
             {
+                var markerUI = battleManager.MarkerInstance.GetComponent<TargetMarkerUI>();
+                if (markerUI != null)
+                {
+                    markerUI.SetKeyNumber(targetPlayerIndex + 1);
+                }
+
                 entitiesManager.ShowTargetMarkerOnPlayer(battleManager.MarkerInstance, targetPlayerIndex);
+
             }
             yield return new WaitForSeconds(0.5f);
 

@@ -5,10 +5,13 @@ using UnityEngine;
 /// </summary>
 public static class StageManager
 {
-    public static int SelectedStageID { get; set; } =-1;
+    public static int SelectedStageID { get; set; } = -1;
     public static bool IsPostBattle = false;
 
     private const string PREF_KEY_MAX_STAGE = "MaxReachedStage";
+    private const int MIN_STAGE = 1;
+    private const int MAX_STAGE = 3;
+
 
     /// <summary>
     /// プレイヤーが到達した最大のステージIDを取得する
@@ -16,31 +19,50 @@ public static class StageManager
     /// </summary>
     public static int GetMaxReachedStage()
     {
-        return PlayerPrefs.GetInt(PREF_KEY_MAX_STAGE, 1);
+        return PlayerPrefs.GetInt(PREF_KEY_MAX_STAGE, MIN_STAGE);
     }
 
     /// <summary>
-    /// ステージをクリアした時に呼び出す。
-    /// 次のステージを解放する（セーブする）。
+    /// ステージクリア時に呼ばれる
     /// </summary>
-    /// <param name="clearedStageID">クリアしたステージID</param>
     public static void OnStageCleared(int clearedStageID)
     {
-        int currentMax = GetMaxReachedStage();
-        int nextStage = clearedStageID + 1;
+        int nextStage = GetNextStageID(clearedStageID);
 
-        // もし新しいステージに進んだなら、セーブデータを更新する
-        if (nextStage > currentMax)
-        {
-            PlayerPrefs.SetInt(PREF_KEY_MAX_STAGE, nextStage);
-            PlayerPrefs.Save();
-            Debug.Log($"セーブ完了: Stage {nextStage} 解放");
-        }
+        PlayerPrefs.SetInt(PREF_KEY_MAX_STAGE, nextStage);
+        PlayerPrefs.Save();
+
+        Debug.Log($"セーブ完了: 次のStage = {nextStage}");
     }
 
     /// <summary>
-    /// デバッグ用: セーブデータをリセットする
+    /// 次に進むべきステージIDを返す
+    /// MAX_STAGE を超えたら MIN_STAGE に戻す
     /// </summary>
+    public static int GetNextStageID(int currentStageID)
+    {
+        if (currentStageID >= MAX_STAGE)
+        {
+            return MIN_STAGE; // ループ
+        }
+        return currentStageID + 1;
+    }
+
+    /// <summary>
+    /// Story開始時に使うステージID
+    /// </summary>
+    public static int GetStageForStoryStart()
+    {
+        int stage = GetMaxReachedStage();
+
+        // 念のためガード
+        if (stage < MIN_STAGE || stage > MAX_STAGE)
+        {
+            return MIN_STAGE;
+        }
+        return stage;
+    }
+
     public static void ResetProgress()
     {
         PlayerPrefs.DeleteKey(PREF_KEY_MAX_STAGE);

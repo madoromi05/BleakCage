@@ -16,5 +16,5 @@ public class BGMData
 {
     public BGMType type;
     public AudioClip clip;
-    [Range(0f, 1f)] public float volumeScale = 1f;
+    [Range(0f, 1f)] public float volumeScale = 0.5f;
 }
