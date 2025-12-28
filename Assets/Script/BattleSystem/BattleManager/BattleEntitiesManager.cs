@@ -177,9 +177,9 @@ public class BattleEntitiesManager : MonoBehaviour
             Transform spawnPoint = playerPositions[i];
             SpawnPlayerCharacter(targetPlayer, spawnPoint);
 
-            if (targetPlayer.HPHandler != null)
+            if (targetPlayer.playerHpHandler != null)
             {
-                targetPlayer.HPHandler.OnDead += battleManager.OnPlayerDead;
+                targetPlayer.playerHpHandler.OnDead += battleManager.OnPlayerDead;
             }
         }
     }

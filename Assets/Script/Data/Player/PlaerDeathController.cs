@@ -52,7 +52,7 @@ public class PlayerDeathController : MonoBehaviour
         // 1フレーム待って遷移を確定
         yield return null;
 
-        // ④ 最後の姿で固定 or 退場
+        // 最後の姿で固定 or 退場
         if (!vanishByMove)
         {
             // アニメを最後まで見せたいなら適当に待機（timeScaleの影響を受けない）
@@ -65,18 +65,10 @@ public class PlayerDeathController : MonoBehaviour
             yield break;
         }
 
-        // --- Enemyと同じ：移動して消す ---
+        // Enemyと同じ：移動して消す
         Sequence seq = DOTween.Sequence();
         seq.Join(transform.DOMove(deadTargetPosition, deadMoveDuration).SetEase(Ease.InBack));
-
-        // Spriteじゃない可能性が高いので Renderer をまとめてフェード（出来ない材質ならスキップ）
         var renderers = GetComponentsInChildren<Renderer>();
-        foreach (var r in renderers)
-        {
-            // マテリアルが Color/Alpha を持たないとフェード不可
-            // それでも move だけで消せるので無理に触らないのが安全
-        }
-
         yield return seq.WaitForCompletion();
         gameObject.SetActive(false);
     }

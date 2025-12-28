@@ -11,96 +11,106 @@ public class EnemyTurn : MonoBehaviour
     public event System.Action TurnFinished;
 
     [Header("Component References")]
-    [SerializeField] private BattleManager battleManager;
-    [SerializeField] private BattleEntitiesManager entitiesManager;
-    [SerializeField] private PlayerDefenseHandler defenseHandler;
+    [SerializeField] private BattleManager _battleManager;
+    [SerializeField] private BattleEntitiesManager _entitiesManager;
+    [SerializeField] private PlayerDefenseHandler _defenseHandler;
 
-    private List<PlayerRuntime> players;
-    private List<EnemyModel> enemies;
+    private List<PlayerRuntime> _players;
+    private List<EnemyModel> _enemies;
     private List<EnemyRuntime> _enemyRuntimes;
-    private Queue<ICommand> commandQueue = new();
-    private List<PlayerStatusUIController> playerStatusUIControllers;
-    private Dictionary<EnemyModel, EnemyController> enemyControllers;
-    private Dictionary<PlayerRuntime, PlayerController> playerControllers;
 
-    private PlayerRuntime currentPlayerTarget;
-    private EnemyAttackCommand currentAttackCommand;
-    private bool attackHasBeenResolved;
+    private readonly Queue<ICommand> _commandQueue = new Queue<ICommand>();
+
+    private List<PlayerStatusUIController> _playerStatusUiControllers;
+    private Dictionary<EnemyModel, EnemyController> _enemyControllers;
+    private Dictionary<PlayerRuntime, PlayerController> _playerControllers;
+
+    private PlayerRuntime _currentPlayerTarget;
+    private EnemyAttackCommand _currentAttackCommand;
+    private bool _attackHasBeenResolved;
 
     private void Awake()
     {
-        defenseHandler.OnDefenseResultFeedback += battleManager.ShowDefenseFeedback;
-        defenseHandler.OnDamageToPlayer += HandleDamageToPlayer;
+        if (_defenseHandler != null && _battleManager != null)
+        {
+            _defenseHandler.OnDefenseResultFeedback += _battleManager.ShowDefenseFeedback;
+            _defenseHandler.OnDamageToPlayer += HandleDamageToPlayer;
+        }
     }
 
-    public void EnemySetup(List<PlayerRuntime> players, List<EnemyModel> enemys,
-                       Dictionary<EnemyModel, EnemyController> enemyControllers,
-                       Dictionary<PlayerRuntime, PlayerController> playerControllers,
-                       List<PlayerStatusUIController> playerStatusUIControllers,
-                        List<EnemyRuntime> runtimeList)
+    public void EnemySetup(
+        List<PlayerRuntime> players,
+        List<EnemyModel> enemies,
+        Dictionary<EnemyModel, EnemyController> enemyControllers,
+        Dictionary<PlayerRuntime, PlayerController> playerControllers,
+        List<PlayerStatusUIController> playerStatusUiControllers,
+        List<EnemyRuntime> runtimeList)
     {
-        this.players = players;
-        this.enemies = enemys;
-        this.enemyControllers = enemyControllers;
-        this.playerControllers = playerControllers;
-        this.playerStatusUIControllers = playerStatusUIControllers;
-        this._enemyRuntimes = runtimeList;
+        _players = players;
+        _enemies = enemies;
+        _enemyControllers = enemyControllers;
+        _playerControllers = playerControllers;
+        _playerStatusUiControllers = playerStatusUiControllers;
+        _enemyRuntimes = runtimeList;
 
-        defenseHandler.Init(players, playerControllers);
+        _defenseHandler.Init(players, playerControllers);
 
-        foreach (var enemyController in this.enemyControllers.Values)
+        foreach (EnemyController enemyController in _enemyControllers.Values)
         {
-            if (enemyController != null)
+            if (enemyController == null) continue;
+
+            enemyController.OnAttackHitMoment += () =>
             {
-                // アニメーションイベントの購読を、DefenseHandlerのメソッドに繋ぎ直す
-                enemyController.OnAttackHitMoment += () =>
-                {
-                    // 攻撃がヒットする瞬間に、防御判定を開始し、完了時にResolveAttackを呼ぶコールバックを渡す
-                    StartCoroutine(defenseHandler.StartDefenseWindowCoroutine(currentPlayerTarget, ResolveAttack));
-                };
-            }
+                if (_defenseHandler == null) return;
+                StartCoroutine(_defenseHandler.StartDefenseWindowCoroutine(_currentPlayerTarget, ResolveAttack));
+            };
         }
     }
 
     public void StartEnemyTurn()
     {
-        commandQueue.Clear();
-        defenseHandler.EnableDefenseInput();
+        _commandQueue.Clear();
+        _defenseHandler.EnableDefenseInput();
         StartCoroutine(ProcessEnemyActions());
     }
-
     /// <summary>
     /// 攻撃対象となる生存プレイヤーをランダムに選択する
     /// </summary>
     private PlayerRuntime GetRandomLivingPlayer()
     {
-        var livingPlayers = players.Where(p => p != null && p.CurrentHP > 0).ToList();
-        if (livingPlayers.Any())
-        {
-            int choice = Random.Range(0, livingPlayers.Count);
-            return livingPlayers[choice];
-        }
-        return null;
+        List<PlayerRuntime> livingPlayers = _players.Where(p => p != null && p.CurrentHP > 0).ToList();
+        if (livingPlayers.Count <= 0) return null;
+
+        int choice = Random.Range(0, livingPlayers.Count);
+        return livingPlayers[choice];
     }
 
     private void PrepareAttackCommands()
     {
-        foreach (var attackerRuntime in _enemyRuntimes)
+        if (_enemyRuntimes == null) return;
+
+        foreach (EnemyRuntime attackerRuntime in _enemyRuntimes)
         {
             if (attackerRuntime == null || attackerRuntime.CurrentHP <= 0) continue;
 
             PlayerRuntime targetRuntime = GetRandomLivingPlayer();
-            if (targetRuntime != null)
-            {
-                EnemyModel attackerModel = attackerRuntime.EnemyModel;
-                PlayerStatusUIController targetUIController = playerStatusUIControllers.FirstOrDefault(ui =>
-                    ui.GetPlayerRuntime() == targetRuntime
-                );
-                enemyControllers.TryGetValue(attackerModel, out EnemyController attackerController);
-                playerControllers.TryGetValue(targetRuntime, out PlayerController targetController);
+            if (targetRuntime == null) continue;
 
-                commandQueue.Enqueue(new EnemyAttackCommand(targetRuntime, attackerModel, attackerController, targetController, targetUIController));
-            }
+            EnemyModel attackerModel = attackerRuntime.EnemyModel;
+
+            PlayerStatusUIController targetUiController = _playerStatusUiControllers
+                .FirstOrDefault(ui => ui != null && ui.GetPlayerRuntime() == targetRuntime);
+
+            _enemyControllers.TryGetValue(attackerModel, out EnemyController attackerController);
+            _playerControllers.TryGetValue(targetRuntime, out PlayerController targetController);
+
+            _commandQueue.Enqueue(new EnemyAttackCommand(
+                targetRuntime,
+                attackerModel,
+                attackerController,
+                targetController,
+                targetUiController
+            ));
         }
     }
 
@@ -109,7 +119,7 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void ResolveAttack()
     {
-        attackHasBeenResolved = true;
+        _attackHasBeenResolved = true;
     }
 
 
@@ -120,11 +130,10 @@ public class EnemyTurn : MonoBehaviour
     {
         PrepareAttackCommands();
 
-        while (commandQueue.Count > 0)
+        while (_commandQueue.Count > 0)
         {
-            var command = commandQueue.Dequeue();
-            var attackCmd = command as EnemyAttackCommand;
-
+            ICommand command = _commandQueue.Dequeue();
+            EnemyAttackCommand attackCmd = command as EnemyAttackCommand;
             if (attackCmd == null)
             {
                 yield return new WaitForSeconds(0.3f);
@@ -132,64 +141,37 @@ public class EnemyTurn : MonoBehaviour
             }
 
             // この攻撃のコンテキストをセット（共通）
-            this.currentPlayerTarget = attackCmd.PlayerTarget;
-            this.currentAttackCommand = attackCmd;
+            _currentPlayerTarget = attackCmd.PlayerTarget;
+            _currentAttackCommand = attackCmd;
+            _attackHasBeenResolved = false;
 
-            int targetPlayerIndex = players.FindIndex(p => p == currentPlayerTarget);
+            int targetPlayerIndex = _players.FindIndex(p => p == _currentPlayerTarget);
 
-            int hitCount = Mathf.Max(1, attackCmd.HitCount);
-
-            for (int hit = 0; hit < hitCount; hit++)
+            if (targetPlayerIndex != -1 && _entitiesManager != null && _battleManager != null)
             {
-                // 既にターゲットが死んでたら中断
-                if (currentPlayerTarget == null || currentPlayerTarget.CurrentHP <= 0)
-                {
-                    break;
-                }
-
-                this.attackHasBeenResolved = false;
-
-                // マーカー表示（毎ヒット表示したい場合）
-                if (targetPlayerIndex != -1)
-                {
-                    var markerUI = battleManager.MarkerInstance.GetComponent<TargetMarkerUI>();
-                    if (markerUI != null)
-                    {
-                        markerUI.SetKeyNumber(targetPlayerIndex + 1);
-                    }
-
-                    entitiesManager.ShowTargetMarkerOnPlayer(battleManager.MarkerInstance, targetPlayerIndex);
-                }
-
-                // 連撃の間隔：1発目は従来通り0.5、2発目以降は短め
-                yield return new WaitForSeconds(hit == 0 ? 0.5f : 0.2f);
-
-                // 攻撃コマンド実行（アニメ再生＋待機）
-                yield return StartCoroutine(attackCmd.Do());
-
-                // マーカー非表示
-                entitiesManager.HideTargetMarker(battleManager.MarkerInstance);
-
-                // アニメイベント不発フォールバック（毎ヒット分必要）
-                if (!attackHasBeenResolved)
-                {
-                    Debug.LogWarning($"P{targetPlayerIndex + 1}: アニメーションイベント不発のため強制実行 (hit {hit + 1}/{hitCount})");
-                    StartCoroutine(defenseHandler.StartDefenseWindowCoroutine(currentPlayerTarget, ResolveAttack));
-                }
-
-                yield return new WaitUntil(() => attackHasBeenResolved == true);
-                yield return null;
-
-                // 念のため：勝敗確定してたら終了（任意）
-                if (battleManager != null && battleManager.IsBattleEnded) yield break;
+                _entitiesManager.ShowTargetMarkerOnPlayer(_battleManager.MarkerInstance, targetPlayerIndex);
             }
 
-            // 次の敵へ
+            yield return new WaitForSeconds(0.5f);
+
+            yield return StartCoroutine(command.Do());
+
+            if (_entitiesManager != null && _battleManager != null)
+            {
+                _entitiesManager.HideTargetMarker(_battleManager.MarkerInstance);
+            }
+
+            if (!_attackHasBeenResolved)
+            {
+                StartCoroutine(_defenseHandler.StartDefenseWindowCoroutine(_currentPlayerTarget, ResolveAttack));
+            }
+
+            yield return new WaitUntil(() => _attackHasBeenResolved);
             yield return null;
         }
 
         yield return new WaitForSeconds(1.0f);
-        defenseHandler.DisableDefenseInput();
+        _defenseHandler.DisableDefenseInput();
         TurnFinished?.Invoke();
     }
 
@@ -199,15 +181,15 @@ public class EnemyTurn : MonoBehaviour
     /// </summary>
     private void HandleDamageToPlayer(PlayerRuntime target)
     {
-        if (currentAttackCommand != null)
-        {
-            currentAttackCommand.ApplyDamageAfterJudgement();
-        }
+        _currentAttackCommand?.ApplyDamageAfterJudgement();
     }
 
     private void OnDestroy()
     {
-        defenseHandler.OnDefenseResultFeedback -= battleManager.ShowDefenseFeedback;
-        defenseHandler.OnDamageToPlayer -= HandleDamageToPlayer;
+        if (_defenseHandler != null && _battleManager != null)
+        {
+            _defenseHandler.OnDefenseResultFeedback -= _battleManager.ShowDefenseFeedback;
+            _defenseHandler.OnDamageToPlayer -= HandleDamageToPlayer;
+        }
     }
 }

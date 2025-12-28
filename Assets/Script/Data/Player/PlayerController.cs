@@ -7,8 +7,8 @@ using System;
 [RequireComponent(typeof(PlayerCombatController))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Debug")]
-    [SerializeField] private bool logDeathDebug = true;
+    [Header("Death Debug")]
+    [SerializeField] private bool logDeathDebug = false;
     [SerializeField] private float deathLogDuration = 3.0f;
 
 
@@ -234,7 +234,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// ★原因究明の本体：数秒間、Animatorのステート変化を毎フレームログ
+    /// 数秒間、Animatorのステート変化を毎フレームログ
     /// </summary>
     private IEnumerator LogAnimatorStatesForSeconds(Animator anim, float seconds)
     {
@@ -252,13 +252,6 @@ public class PlayerController : MonoBehaviour
 
             if (stateChanged || jumpedBack)
             {
-                Debug.Log(
-                    $"[DeathDebug] Animator state change frame={Time.frameCount} " +
-                    $"hash={st.shortNameHash} norm={st.normalizedTime:F2} len={st.length:F2} " +
-                    $"tagDead={st.IsTag("Dead")} nameDead={st.IsName("Dead")} timeScale={Time.timeScale}",
-                    this
-                );
-
                 lastHash = st.shortNameHash;
                 lastNorm = st.normalizedTime;
             }

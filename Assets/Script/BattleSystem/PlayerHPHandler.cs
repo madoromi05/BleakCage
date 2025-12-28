@@ -1,34 +1,38 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
-public class PlayerHPHandler
+public class PlayerHpHandler
 {
-    public event Action<PlayerRuntime> OnDead;
-    public event Action<float, float> OnHPChanged;
-
     private readonly PlayerRuntime _ownerRuntime;
-    public PlayerHPHandler(PlayerRuntime ownerRuntime)
+
+    public event Action<PlayerRuntime> OnDead;
+    public event Action<float, float> OnHpChanged;
+
+    public PlayerHpHandler(PlayerRuntime ownerRuntime)
     {
         _ownerRuntime = ownerRuntime;
     }
 
     public void Heal(float amount)
     {
+        if (_ownerRuntime == null) return;
+        if (_ownerRuntime.CurrentHP <= 0f) return;
+
         _ownerRuntime.CurrentHP = Mathf.Min(_ownerRuntime.CurrentHP + amount, _ownerRuntime.MaxHP);
-        OnHPChanged?.Invoke(_ownerRuntime.CurrentHP, _ownerRuntime.MaxHP);
+        OnHpChanged?.Invoke(_ownerRuntime.CurrentHP, _ownerRuntime.MaxHP);
     }
 
     public void TakeDamage(float damage)
     {
-        if (_ownerRuntime.CurrentHP <= 0) return;
+        if (_ownerRuntime == null) return;
+        if (_ownerRuntime.CurrentHP <= 0f) return;
 
-        float oldHP = _ownerRuntime.CurrentHP;
-        _ownerRuntime.CurrentHP = Mathf.Clamp(_ownerRuntime.CurrentHP - damage, 0, _ownerRuntime.MaxHP);
-        Debug.Log($"[{_ownerRuntime.PlayerModel.PlayerName}] Damaged: {damage} (HP: {oldHP} -> {_ownerRuntime.CurrentHP})");
-        OnHPChanged?.Invoke(_ownerRuntime.CurrentHP, _ownerRuntime.MaxHP);
+        float oldHp = _ownerRuntime.CurrentHP;
+        _ownerRuntime.CurrentHP = Mathf.Clamp(_ownerRuntime.CurrentHP - damage, 0f, _ownerRuntime.MaxHP);
 
-        // Ž€–S”»’è
-        if (_ownerRuntime.CurrentHP <= 0)
+        OnHpChanged?.Invoke(_ownerRuntime.CurrentHP, _ownerRuntime.MaxHP);
+
+        if (oldHp > 0f && _ownerRuntime.CurrentHP <= 0f)
         {
             OnDead?.Invoke(_ownerRuntime);
         }

@@ -14,19 +14,25 @@ public class EnemyRuntime
     public float MaxHP => EnemyModel.MaxHP;
     public EnemyModel EnemyModel { get; private set; }
     public StatusEffectHandler StatusHandler { get; private set; }
-    public EnemyHPHandler HPHandler { get; private set; }
+     public EnemyHpHandler HpHandler { get; private set; }
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
     public EnemyRuntime(EnemyModel model, string instanceID)
     {
-        this.EnemyModel = model;
-        this.ID = model.EnemyID;
-        this.InstanceID = Guid.Parse(instanceID);
-        this.CurrentHP = model.EnemyHP;
-        this.StatusHandler = new StatusEffectHandler(model.EnemyName);
-        this.HPHandler = new EnemyHPHandler(this);
+        EnemyModel = model;
+        ID = model.EnemyID;
+
+        if (!Guid.TryParse(instanceID, out Guid guid))
+        {
+            guid = Guid.NewGuid();
+        }
+        InstanceID = guid;
+        CurrentHP = model.EnemyHP;
+
+        StatusHandler = new StatusEffectHandler(model.EnemyName);
+        HpHandler = new EnemyHpHandler(this);
     }
 
     /// <summary>

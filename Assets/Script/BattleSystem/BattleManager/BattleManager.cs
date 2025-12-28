@@ -90,9 +90,9 @@ public class BattleManager : MonoBehaviour
                 EnemyRuntime newRuntime = new EnemyRuntime(enemyModel, System.Guid.NewGuid().ToString());
                 enemyRuntimes.Add(newRuntime);
 
-                if (newRuntime.HPHandler != null)
+                if (newRuntime.HpHandler != null)
                 {
-                    newRuntime.HPHandler.OnDead += OnEnemyDead;
+                    newRuntime.HpHandler.OnDead += OnEnemyDead;
                 }
             }
         }

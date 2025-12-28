@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -13,32 +14,36 @@ public class PlayerRuntime : IAttackComponent
     public System.Guid InstanceID { get; private set; }
     public float CurrentHP { get; set; }
     public float MaxHP => PlayerModel.MaxHP;
-    public WeaponRuntime CaracterCardWeapon { get; private set; }
+    public WeaponRuntime CharacterCardWeapon { get; private set; }
     public PlayerModel PlayerModel { get; private set; }
     public PlayerController PlayerController { get; set; }
     public int Level { get; private set; }
     public StatusEffectHandler StatusHandler { get; private set; }
-    public PlayerHPHandler HPHandler { get; private set; }
+    public PlayerHpHandler playerHpHandler { get; private set; }
     public WeaponRuntime EquippedWeapon { get; private set; }
-    public IReadOnlyList<WeaponRuntime> Weapons => equippedWeapons;
+    public IReadOnlyList<WeaponRuntime> Weapons => _equippedWeapons;
+
     public List<CardModel> Deck { get; set; } = new List<CardModel>();
-    private readonly List<WeaponRuntime> equippedWeapons = new List<WeaponRuntime>();
+    private readonly List<WeaponRuntime> _equippedWeapons = new List<WeaponRuntime>();
     private const float PlayerAttackPower = 10f;
 
     /// <summary>
     /// Jsonファイルから読み込んだカードのインスタンスを生成するコンストラクタ
     /// </summary>
-    public PlayerRuntime(PlayerModel model,string instanceID, int level)
+        public PlayerRuntime(PlayerModel model, string instanceID, int level)
     {
+        PlayerModel = model;
         ID = model.PlayerID;
-        InstanceID = Guid.Parse(instanceID);
-        CurrentHP = model.PlayerHP;
-        this.CurrentHP = model.MaxHP;
-        this.PlayerModel = model;
-        this.Level = model.PlayerLevel;
-        this.StatusHandler = new StatusEffectHandler(model.PlayerName);
-        this.HPHandler = new PlayerHPHandler(this);
-        this.EquipWeapon(CaracterCardWeapon);
+
+        if (!Guid.TryParse(instanceID, out Guid guid))
+        {
+            guid = Guid.NewGuid();
+        }
+        InstanceID = guid;
+        CurrentHP = model.MaxHP;
+        Level = level;
+        StatusHandler = new StatusEffectHandler(model.PlayerName);
+        playerHpHandler = new PlayerHpHandler(this);
     }
 
     /// <summary>
@@ -46,9 +51,10 @@ public class PlayerRuntime : IAttackComponent
     /// </summary>
     public void EquipWeapon(WeaponRuntime weapon)
     {
-        this.EquippedWeapon = weapon;
+        EquippedWeapon = weapon;
         if (weapon == null) return;
-        equippedWeapons.Add(weapon);
+
+        _equippedWeapons.Add(weapon);
         weapon.SetParent(this);
     }
 
@@ -59,8 +65,7 @@ public class PlayerRuntime : IAttackComponent
     {
         List<CardRuntime> cards = new List<CardRuntime>();
 
-        // 装備している武器があれば、そのカード（武器技＋キャラ技）を全て返す
-        foreach (var weapon in equippedWeapons)
+        foreach (WeaponRuntime weapon in _equippedWeapons)
         {
             if (weapon != null && weapon.Cards != null)
             {

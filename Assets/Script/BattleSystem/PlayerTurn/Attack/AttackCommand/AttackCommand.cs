@@ -58,7 +58,7 @@ public class AttackCommand : ICommand
                 attackedSoundEffect(card.attribute);        // 味方の攻撃音
                 PlayEnemyDamageSound(card.attribute);       // 敵の被弾音
                 // ターゲットのHPを減算
-                targetEnemy.HPHandler.TakeDamage(damage);
+                targetEnemy.HpHandler.TakeDamage(damage);
                 enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
 
                 // 状態異常の付与

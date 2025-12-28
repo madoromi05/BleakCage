@@ -1,43 +1,52 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
-public class EnemyHPHandler
+public class EnemyHpHandler
 {
-    // 修正: プライベート変数は _ + camelCase
     private readonly EnemyRuntime _ownerRuntime;
 
     public event Action<EnemyRuntime> OnDead;
+    public event Action<float, float> OnHpChanged;
 
-    public EnemyHPHandler(EnemyRuntime ownerRuntime)
+    public EnemyHpHandler(EnemyRuntime ownerRuntime)
     {
         _ownerRuntime = ownerRuntime;
     }
 
     public void TakeDamage(float damage)
     {
-        Debug.Log($"[EnemyHPHandler] TakeDamage Called: Target={_ownerRuntime.EnemyModel.EnemyName}, Damage={damage}, CurrentHP={_ownerRuntime.CurrentHP}");
+        if (_ownerRuntime == null) return;
 
-        if (_ownerRuntime.CurrentHP <= 0) return;
+        if (_ownerRuntime.CurrentHP <= 0f) return;
 
-        // 【援護(Cover)】チェック
-        if (_ownerRuntime.StatusHandler.GetStackCount(StatusEffectType.Cover) > 0)
+        // 【援護(Cover)】チェック（StatusHandler が null の可能性があるならガード）
+        if (_ownerRuntime.StatusHandler != null &&
+            _ownerRuntime.StatusHandler.GetStackCount(StatusEffectType.Cover) > 0)
         {
-            Debug.Log($"[{_ownerRuntime.EnemyModel.EnemyName}] 【援護】発動！ダメージ無効化。");
             _ownerRuntime.StatusHandler.ConsumeStack(StatusEffectType.Cover, 1);
             return;
         }
 
-        // 通常ダメージ処理
-        _ownerRuntime.CurrentHP -= damage;
+        float oldHp = _ownerRuntime.CurrentHP;
+        _ownerRuntime.CurrentHP = Mathf.Max(0f, _ownerRuntime.CurrentHP - damage);
+        float maxHp = _ownerRuntime.MaxHP;
 
-        //  HPが減ったか確認
-        // Debug.Log($"[EnemyHPHandler] HP Updated: NewHP={_ownerRuntime.CurrentHP}");
+        OnHpChanged?.Invoke(_ownerRuntime.CurrentHP, maxHp);
 
-        if (_ownerRuntime.CurrentHP <= 0)
+        if (oldHp > 0f && _ownerRuntime.CurrentHP <= 0f)
         {
-            _ownerRuntime.CurrentHP = 0;
-            Debug.Log($"[EnemyHPHandler] {_ownerRuntime.EnemyModel.EnemyName} is DEAD. Invoking OnDead event...");
             OnDead?.Invoke(_ownerRuntime);
         }
+    }
+
+    public void Heal(float amount)
+    {
+        if (_ownerRuntime == null) return;
+        if (_ownerRuntime.CurrentHP <= 0f) return;
+
+        float maxHp = _ownerRuntime.MaxHP;
+
+        _ownerRuntime.CurrentHP = Mathf.Min(maxHp, _ownerRuntime.CurrentHP + amount);
+        OnHpChanged?.Invoke(_ownerRuntime.CurrentHP, maxHp);
     }
 }

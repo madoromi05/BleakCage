@@ -10,20 +10,23 @@ using UnityEngine;
 /// </summary>
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] private float deadMoveDuration = 1.0f;
-    [SerializeField] private Vector3 deadTargetPosition = new Vector3(-30f, 0f, 10f);
+    [SerializeField] private float _deadMoveDurationSeconds = 1.0f;
+    [SerializeField] private Vector3 _deadTargetPosition = new Vector3(-30f, 0f, 10f);
+
     public event System.Action OnAttackHitMoment;
-    private EnemyModel model;
-    private EnemyStatusUIController statusUI;
-    private Animator animator;
-    private Dictionary<string, float> clipLengthCache = new Dictionary<string, float>();
-    private Vector3 originalPosition;
-    private EnemyHeightAdjuster heightAdjuster;
-    private EnemyMeleeMovement meleeMovement;
-    private bool isDead = false;
+
+    private EnemyModel _model;
+    private EnemyStatusUIController _statusUI;
+    private Animator _animator;
+
+    private readonly Dictionary<string, float> _clipLengthCache = new Dictionary<string, float>();
+
+    private EnemyHeightAdjuster _heightAdjuster;
+    private MeleeMovement _meleeMovement;
+    private bool _isDead;
 
     private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
-    private static readonly int AttackIDHash = Animator.StringToHash("AttackID");
+    private static readonly int AttackIdHash = Animator.StringToHash("AttackID");
 
     private static readonly List<string> AnimatorAttackStateNames = new List<string>
     {
@@ -32,40 +35,50 @@ public class EnemyController : MonoBehaviour
         "Attack3",
     };
 
-    /// <summary>
-    /// 初期化処理
-    /// </summary>
     public void Init(EnemyModel enemyModel, Transform targetPlayer)
     {
-        this.model = enemyModel;
-        this.originalPosition = transform.position;
+        _model = enemyModel;
 
-        if (model.CharacterPrefab != null)
+        if (_model == null)
         {
-            Quaternion desiredLocalRotation = Quaternion.Euler(model.InitialRotation);
-            Quaternion desiredWorldRotation = this.transform.rotation * desiredLocalRotation;
-            GameObject instance = Instantiate(model.CharacterPrefab, this.transform.position, desiredWorldRotation, this.transform);
+            Debug.LogError("EnemyController.Init: enemyModel is null.", this);
+            return;
+        }
 
-            // 高さ調整が必要ならコンポーネント追加
-            if (Mathf.Abs(model.AttackHeightOffset) > 0.001f)
+        if (_model.CharacterPrefab != null)
+        {
+            Quaternion desiredLocalRotation = Quaternion.Euler(_model.InitialRotation);
+            Quaternion desiredWorldRotation = transform.rotation * desiredLocalRotation;
+
+            GameObject instance = Instantiate(_model.CharacterPrefab, transform.position, desiredWorldRotation, transform);
+
+            // 高さ調整
+            if (Mathf.Abs(_model.AttackHeightOffset) > 0.001f)
             {
-                this.heightAdjuster = instance.AddComponent<EnemyHeightAdjuster>();
+                _heightAdjuster = instance.GetComponent<EnemyHeightAdjuster>();
+                if (_heightAdjuster == null) _heightAdjuster = instance.AddComponent<EnemyHeightAdjuster>();
+                _heightAdjuster.Setup(instance.transform.position);
             }
 
-            // アニメーションイベント受信
-            var receiver = instance.AddComponent<EnemyAnimationReceiver>();
-            receiver.Setup(this);
-
-            if (model.AttackType == EnemyAttackType.Melee)
+            // 近接移動
+            if (_model.AttackType == EnemyAttackType.Melee)
             {
-                this.meleeMovement = instance.AddComponent<EnemyMeleeMovement>();
+                _meleeMovement = instance.GetComponent<MeleeMovement>();
+                if (_meleeMovement == null) _meleeMovement = instance.AddComponent<MeleeMovement>();
             }
-            this.animator = instance.GetComponent<Animator>();
-            if (this.animator == null)
+
+            // Animator
+            _animator = instance.GetComponent<Animator>();
+            if (_animator == null)
             {
-                Debug.LogError("生成したキャラクタープレハブに Animator がありません！", instance);
+                Debug.LogError("EnemyController: CharacterPrefab has no Animator.", instance);
                 return;
             }
+
+            // 共通Relay（敵もプレイヤーも同じイベント名）
+            AnimationHitRelay relay = instance.GetComponent<AnimationHitRelay>();
+            if (relay == null) relay = instance.AddComponent<AnimationHitRelay>();
+            relay.OnHit += TriggerAttackHit;
         }
 
         CacheAnimationLengths();
@@ -76,14 +89,14 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     private void CacheAnimationLengths()
     {
-        if (animator == null || animator.runtimeAnimatorController == null) return;
+        if (_animator == null || _animator.runtimeAnimatorController == null) return;
 
-        clipLengthCache.Clear();
-        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
+        _clipLengthCache.Clear();
+        foreach (AnimationClip clip in _animator.runtimeAnimatorController.animationClips)
         {
-            if (!clipLengthCache.ContainsKey(clip.name))
+            if (!_clipLengthCache.ContainsKey(clip.name))
             {
-                clipLengthCache.Add(clip.name, clip.length);
+                _clipLengthCache.Add(clip.name, clip.length);
             }
         }
     }
@@ -93,18 +106,18 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     private float GetAnimationLengthByStateName(string stateName)
     {
-        if (clipLengthCache.TryGetValue(stateName, out float length))
+        if (_clipLengthCache.TryGetValue(stateName, out float length))
         {
             return length;
         }
 
-        var match = clipLengthCache.Keys.FirstOrDefault(k => k.Contains(stateName));
-        if (match != null)
+        string match = _clipLengthCache.Keys.FirstOrDefault(k => k.Contains(stateName));
+        if (!string.IsNullOrEmpty(match))
         {
-            return clipLengthCache[match];
+            return _clipLengthCache[match];
         }
 
-        Debug.LogWarning($"EnemyController: クリップが見つからないためデフォルト値を使用します (State: {stateName})", this);
+        Debug.LogWarning($"EnemyController: clip not found. (State: {stateName})", this);
         return 1.0f;
     }
 
@@ -113,21 +126,20 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public float PlayRandomAttackAnimation()
     {
-        int availableAttackCount = AnimatorAttackStateNames.Count;
-        int randomAttackID = Random.Range(0, availableAttackCount);
+        if (_animator == null) return 0.5f;
 
-        Debug.Log($"[EnemyController] アニメーション再生: AttackID = {randomAttackID}");
+        int availableCount = AnimatorAttackStateNames.Count;
+        int randomAttackId = Random.Range(0, availableCount);
 
-        animator.SetInteger(AttackIDHash, randomAttackID);
-        animator.SetTrigger(AttackTriggerHash);
+        _animator.SetInteger(AttackIdHash, randomAttackId);
+        _animator.SetTrigger(AttackTriggerHash);
 
-        string stateName = AnimatorAttackStateNames[randomAttackID];
+        string stateName = AnimatorAttackStateNames[randomAttackId];
         float clipLength = GetAnimationLengthByStateName(stateName);
 
-        // 高さ調整
-        if (heightAdjuster != null)
+        if (_heightAdjuster != null)
         {
-            heightAdjuster.ApplyHeightOffset(clipLength, model.AttackHeightOffset);
+            _heightAdjuster.ApplyHeightOffset(clipLength, _model.AttackHeightOffset);
         }
 
         return clipLength;
@@ -138,10 +150,12 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public void PlayAttackEffect(EnemyAttackType type, Vector3 targetPosition)
     {
-        if (model.AttackEffectPrefab != null)
-        {
-            Instantiate(model.AttackEffectPrefab, targetPosition + Vector3.up, Quaternion.identity);
-        }
+        if (_model == null) return;
+        if (_model.AttackEffectPrefab == null) return;
+
+        // 共通エフェクト生成（寿命自動）
+        Vector3 pos = targetPosition + Vector3.up;
+        EffectSpawner.SpawnAndAutoDestroy(_model.AttackEffectPrefab, pos, Quaternion.identity);
     }
 
     /// <summary>
@@ -149,9 +163,9 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public IEnumerator MoveToTarget(Vector3 targetPosition)
     {
-        if (meleeMovement != null)
+        if (_meleeMovement != null)
         {
-            yield return meleeMovement.MoveToTarget(targetPosition);
+            yield return _meleeMovement.MoveToTarget(targetPosition);
         }
     }
 
@@ -160,22 +174,22 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public IEnumerator ReturnToOriginalPosition()
     {
-        if (meleeMovement != null)
+        if (_meleeMovement != null)
         {
-            yield return meleeMovement.ReturnToPosition();
+            yield return _meleeMovement.ReturnToOriginLocal();
         }
     }
 
     public void SetStatusUI(EnemyStatusUIController ui)
     {
-        this.statusUI = ui;
+        _statusUI = ui;
     }
 
-    public void UpdateHealthUI(float currentHP)
+    public void UpdateHealthUI(float currentHp)
     {
-        if (statusUI != null)
+        if (_statusUI != null)
         {
-            statusUI.UpdateHP(currentHP);
+            _statusUI.UpdateHP(currentHp);
         }
     }
 
@@ -189,16 +203,19 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public IEnumerator DeadSequence()
     {
-        if (isDead) yield break;
-        isDead = true;
-        var collider = GetComponent<Collider>();
+        if (_isDead) yield break;
+        _isDead = true;
+
+        Collider collider = GetComponent<Collider>();
         if (collider != null) collider.enabled = false;
+
         Sequence seq = DOTween.Sequence();
-        seq.Join(transform.DOMove(deadTargetPosition, deadMoveDuration).SetEase(Ease.InBack));
-        var sprite = GetComponentInChildren<SpriteRenderer>();
+        seq.Join(transform.DOMove(_deadTargetPosition, _deadMoveDurationSeconds).SetEase(Ease.InBack));
+
+        SpriteRenderer sprite = GetComponentInChildren<SpriteRenderer>();
         if (sprite != null)
         {
-            seq.Join(sprite.DOFade(0f, deadMoveDuration));
+            seq.Join(sprite.DOFade(0f, _deadMoveDurationSeconds));
         }
 
         yield return seq.WaitForCompletion();

@@ -266,9 +266,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb2f594b209b9ff4f98f4eb80b5b3593, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleManager: {fileID: 120127625}
-  entitiesManager: {fileID: 120127634}
-  defenseHandler: {fileID: 147126859}
+  _battleManager: {fileID: 120127625}
+  _entitiesManager: {fileID: 120127634}
+  _defenseHandler: {fileID: 147126859}
 --- !u!114 &120127630
 MonoBehaviour:
   m_ObjectHideFlags: 0

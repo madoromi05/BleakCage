@@ -6,21 +6,25 @@ public class EnemyAttackCommand : ICommand
     public PlayerRuntime PlayerTarget { get; }
     public EnemyModel Attacker { get; }
     public int HitCount { get; }
-    private EnemyAttackDamage calculator = new EnemyAttackDamage();
-    private EnemyController _enemyController;
-    private PlayerController _playerController;
-    private PlayerStatusUIController _playerStatusUIController;
 
-    public EnemyAttackCommand(PlayerRuntime player, EnemyModel enemy,
-                              EnemyController enemyController,
-                              PlayerController playerController,
-                              PlayerStatusUIController playerStatusUIController)
+    private readonly EnemyAttackDamage _calculator = new EnemyAttackDamage();
+    private readonly EnemyController _enemyController;
+    private readonly PlayerController _playerController;
+    private readonly PlayerStatusUIController _playerStatusUiController;
+
+    public EnemyAttackCommand(
+       PlayerRuntime playerTarget,
+       EnemyModel attacker,
+       EnemyController enemyController,
+       PlayerController playerController,
+       PlayerStatusUIController playerStatusUiController)
     {
-        this.PlayerTarget = player;
-        this.Attacker = enemy;
+        PlayerTarget = playerTarget;
+        Attacker = attacker;
         _enemyController = enemyController;
-        _playerStatusUIController = playerStatusUIController;
         _playerController = playerController;
+        _playerStatusUiController = playerStatusUiController;
+
         HitCount = (Attacker != null && Attacker.EnemyID == 4) ? 3 : 1;
     }
 
@@ -30,54 +34,53 @@ public class EnemyAttackCommand : ICommand
     /// </summary>
     public IEnumerator Do()
     {
-        EnemyAttackType attackType = Attacker.AttackType;
-        bool isMelee = (attackType == EnemyAttackType.Melee);
-        if (isMelee)
+        if (Attacker == null) yield break;
+
+        bool isMelee = (Attacker.AttackType == EnemyAttackType.Melee);
+
+        if (isMelee && _enemyController != null && _playerController != null)
         {
-            if (_enemyController != null && _playerController != null)
-            {
-                yield return _enemyController.MoveToTarget(_playerController.transform.position);
-            }
+            yield return _enemyController.MoveToTarget(_playerController.transform.position);
         }
-        //Debug.Log($"攻撃実行: Enemy='{Attacker.EnemyID}' が Player='{PlayerTarget.PlayerModel.PlayerID}' に攻撃開始！");
+
         float attackAnimTime = 0.5f;
         if (_enemyController != null)
         {
             attackAnimTime = _enemyController.PlayRandomAttackAnimation();
         }
 
-        // アニメーションが終了するまで待機する
         yield return new WaitForSeconds(attackAnimTime);
-        if (isMelee)
+
+        if (isMelee && _enemyController != null)
         {
-            if (_enemyController != null)
-            {
-                yield return _enemyController.ReturnToOriginalPosition();
-            }
+            yield return _enemyController.ReturnToOriginalPosition();
         }
     }
+
 
     /// <summary>
     ///  EnemyTurn から呼び出される実際のダメージ処理
     /// </summary>
     public void ApplyDamageAfterJudgement()
     {
-        if (PlayerTarget == null || PlayerTarget.HPHandler == null) return;
-        float damage = calculator.CalculateFinalDamage(
-            Attacker,
-            PlayerTarget.PlayerModel
-        );
+        if (PlayerTarget == null || PlayerTarget.playerHpHandler == null) return;
+        if (Attacker == null) return;
+
+        float damage = _calculator.CalculateFinalDamage(Attacker, PlayerTarget.PlayerModel);
 
         if (_enemyController != null && PlayerTarget.PlayerController != null)
         {
             Vector3 targetPos = PlayerTarget.PlayerController.transform.position;
             _enemyController.PlayAttackEffect(Attacker.AttackType, targetPos);
         }
-        SoundManager.Instance.PlaySE(SEType.damagedPlayer);
-        PlayerTarget.HPHandler.TakeDamage(damage);
-        _playerStatusUIController.UpdateHP(PlayerTarget.CurrentHP);
 
-        Debug.Log($"[EnemyAttackCardCommand] {PlayerTarget.PlayerModel.PlayerName} に {damage:F2} ダメージを与えた。残りHP: {PlayerTarget.CurrentHP:F2}");
+        SoundManager.Instance.PlaySE(SEType.damagedPlayer);
+
+        PlayerTarget.playerHpHandler.TakeDamage(damage);
+        if (_playerStatusUiController != null)
+        {
+            _playerStatusUiController.UpdateHP(PlayerTarget.CurrentHP);
+        }
     }
 
     public bool Undo()
