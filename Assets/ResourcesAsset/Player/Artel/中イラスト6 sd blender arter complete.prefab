@@ -1086,6 +1086,7 @@ GameObject:
   - component: {fileID: 990676638178158709}
   - component: {fileID: 7867192336792286025}
   - component: {fileID: 8760030030526133617}
+  - component: {fileID: 36281930341514932}
   m_Layer: 0
   m_Name: "\u4E2D\u30A4\u30E9\u30B9\u30C86 sd blender arter complete"
   m_TagString: Untagged
@@ -1224,6 +1225,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RightHandTransform: {fileID: 5165272261755423572}
   LeftHandTransform: {fileID: 8735554295207959243}
+--- !u!114 &36281930341514932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345631006696095944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11617330bb50cb54887f17de6ef2c118, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 990676638178158709}
+  deadTag: Dead
+  deadStateName: Dead
+  watchSeconds: 6
 --- !u!1 &1428255339815543170
 GameObject:
   m_ObjectHideFlags: 0

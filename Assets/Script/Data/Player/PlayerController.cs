@@ -8,17 +8,15 @@ using System;
 public class PlayerController : MonoBehaviour
 {
     [Header("Death Debug")]
-    [SerializeField] private bool logDeathDebug = false;
-    [SerializeField] private float deathLogDuration = 3.0f;
+    [SerializeField] private bool _logDeathDebug = false;
+    [SerializeField] private float _deathLogDuration = 3.0f;
 
-
-    public void SetStatusUI(PlayerStatusUIController ui) => this.statusUI = ui;
     public bool IsDead { get; private set; } = false;
 
-    private PlayerAnimationController animCtrl;
-    private PlayerMovementController moveCtrl;
-    private PlayerCombatController combatCtrl;
-    private PlayerStatusUIController statusUI;
+    private PlayerAnimationController _animCtrl;
+    private PlayerMovementController _moveCtrl;
+    private PlayerCombatController _combatCtrl;
+    private PlayerStatusUIController _statusUi;
 
     private Transform _characterRoot;
     private float _guardVisualYOffset = 0f;
@@ -26,26 +24,31 @@ public class PlayerController : MonoBehaviour
     private Coroutine _guardVisualCoroutine;
     private float _guardHoldUntilTime = 0f;
     private bool _isGuardHeld = false;
-    private Vector3 _guardBaseLocalPos; // ガード開始時の基準位置
-    private Animator _anim;
+    private Vector3 _guardBaseLocalPos;
+    private Animator _animator;
+
+    // ★追加：死亡中は他のアニメ更新を完全停止する
+    private bool _isInDeathSequence = false;
+
+    public void SetStatusUI(PlayerStatusUIController ui) => _statusUi = ui;
 
     // イベント中継
     public event Action OnAttackHitTriggered
     {
-        add => combatCtrl.OnAttackHitTriggered += value;
-        remove => combatCtrl.OnAttackHitTriggered -= value;
+        add => _combatCtrl.OnAttackHitTriggered += value;
+        remove => _combatCtrl.OnAttackHitTriggered -= value;
     }
 
     private void Awake()
     {
-        animCtrl = GetComponent<PlayerAnimationController>();
-        moveCtrl = GetComponent<PlayerMovementController>();
-        combatCtrl = GetComponent<PlayerCombatController>();
+        _animCtrl = GetComponent<PlayerAnimationController>();
+        _moveCtrl = GetComponent<PlayerMovementController>();
+        _combatCtrl = GetComponent<PlayerCombatController>();
     }
 
     public void Init(PlayerModel model)
     {
-        moveCtrl.Init(transform.localPosition);
+        _moveCtrl.Init(transform.localPosition);
         _guardVisualYOffset = model != null ? model.GuardVisualYOffset : 0f;
 
         if (model.CharacterPrefab != null)
@@ -53,11 +56,9 @@ public class PlayerController : MonoBehaviour
             GameObject instance = Instantiate(model.CharacterPrefab, transform);
             _characterRoot = instance.transform;
 
-            // Prefabのローカル座標・スケールを適用
             instance.transform.localPosition = model.CharacterPrefab.transform.localPosition;
             instance.transform.localScale = model.CharacterPrefab.transform.localScale;
 
-            // 回転の適用: Prefabの回転 × Entityで設定した初期回転(InitialRotation)
             Quaternion prefabRot = model.CharacterPrefab.transform.localRotation;
             Quaternion adjustRot = Quaternion.Euler(model.InitialRotation);
             instance.transform.localRotation = prefabRot * adjustRot;
@@ -66,44 +67,52 @@ public class PlayerController : MonoBehaviour
             _isGuardVisualRaised = false;
 
             Animator anim = instance.GetComponent<Animator>();
-            CharacterBoneHolder boneHolder = instance.GetComponent<CharacterBoneHolder>();
+            _animator = anim;
 
+            CharacterBoneHolder boneHolder = instance.GetComponent<CharacterBoneHolder>();
             Transform rightHandSocket = boneHolder != null ? boneHolder.RightHandTransform : null;
             Transform leftHandSocket = boneHolder != null ? boneHolder.LeftHandTransform : null;
 
             if (anim != null)
             {
-                animCtrl.Init(anim);
+                _animCtrl.Init(anim);
             }
-            combatCtrl.Init(animCtrl, moveCtrl, rightHandSocket, leftHandSocket);
+
+            _combatCtrl.Init(_animCtrl, _moveCtrl, rightHandSocket, leftHandSocket);
         }
     }
 
     public void SetInitialWeapon(WeaponRuntime weaponRuntime)
     {
-        if (combatCtrl != null && weaponRuntime != null)
+        if (_combatCtrl != null && weaponRuntime != null)
         {
-            combatCtrl.EquipMainWeapon(weaponRuntime);
+            _combatCtrl.EquipMainWeapon(weaponRuntime);
         }
     }
 
     public IEnumerator AttackSequence(CardModel cardModel, WeaponRuntime weaponRuntime, Transform target)
     {
-        yield return combatCtrl.ExecuteAttackSequence(cardModel, weaponRuntime, target);
+        if (IsDead) yield break;
+        yield return _combatCtrl.ExecuteAttackSequence(cardModel, weaponRuntime, target);
     }
 
     public IEnumerator SupportEffect(CardModel cardModel)
     {
-        yield return combatCtrl.ExecuteSupportEffect(cardModel);
+        if (IsDead) yield break;
+        yield return _combatCtrl.ExecuteSupportEffect(cardModel);
     }
 
     public void SetGuardAnimation(bool isGuarding)
     {
-        // アニメはあくまで見た目（無くても座標上げはしたい）
-        if (animCtrl != null)
-            animCtrl.SetGuard(isGuarding);
-        if (_isGuardHeld == isGuarding) return;
+        // ★死亡中は絶対に触らない（割り込み防止）
+        if (IsDead || _isInDeathSequence) return;
 
+        if (_animCtrl != null)
+        {
+            _animCtrl.SetGuard(isGuarding);
+        }
+
+        if (_isGuardHeld == isGuarding) return;
         _isGuardHeld = isGuarding;
 
         if (isGuarding)
@@ -117,20 +126,16 @@ public class PlayerController : MonoBehaviour
             ExtendGuardVisualHold();
         }
     }
+
     private void CaptureGuardBasePosition()
     {
         if (_characterRoot == null) return;
 
-        Debug.Log(
-       $"[CaptureBase] frame={Time.frameCount} " +
-       $"before base={_guardBaseLocalPos} current={_characterRoot.localPosition} raised={_isGuardVisualRaised}"
-   );
         _guardBaseLocalPos = _characterRoot.localPosition;
 
         if (_isGuardVisualRaised)
         {
             _guardBaseLocalPos.y -= _guardVisualYOffset;
-            Debug.Log($"[CaptureBase] adjusted base={_guardBaseLocalPos}");
         }
     }
 
@@ -149,37 +154,43 @@ public class PlayerController : MonoBehaviour
     {
         if (_characterRoot == null || Mathf.Approximately(_guardVisualYOffset, 0f)) return;
 
-        float len = (animCtrl != null) ? animCtrl.GetGuardAnimationLength() : 0.5f;
-        // “いまからlen秒”まで保持。すでに保持中なら延長。
+        float len = (_animCtrl != null) ? _animCtrl.GetGuardAnimationLength() : 0.5f;
         _guardHoldUntilTime = Mathf.Max(_guardHoldUntilTime, Time.time + len);
 
         if (_guardVisualCoroutine == null)
+        {
             _guardVisualCoroutine = StartCoroutine(GuardVisualHoldCoroutine());
+        }
     }
 
     private IEnumerator GuardVisualHoldCoroutine()
     {
         while (true)
         {
-            // ガード入力中は“絶対に下げない”
+            // ★死亡中はガード見た目処理も止める（座標が変になるの防止）
+            if (IsDead || _isInDeathSequence)
+            {
+                _guardVisualCoroutine = null;
+                yield break;
+            }
+
             if (_isGuardHeld)
             {
-                // 念のため上がってなければ上げる（ここでも二重上げはしない）
                 RaiseGuardVisualNow();
                 yield return null;
                 continue;
             }
 
-            // 入力解除後：保持時間が切れるまで待つ
             if (Time.time < _guardHoldUntilTime)
             {
                 yield return null;
                 continue;
             }
 
-            // 時間切れで戻す
             if (_characterRoot != null)
+            {
                 _characterRoot.localPosition = _guardBaseLocalPos;
+            }
 
             _isGuardVisualRaised = false;
             _guardVisualCoroutine = null;
@@ -187,55 +198,57 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     /// <summary>
-    /// 死亡アニメーションを再生する（ログ付き）
+    /// 死亡アニメーションを再生する（割り込みを完全停止して再生しきる）
     /// </summary>
     public void PlayDeadAnimation()
     {
         if (IsDead) return;
+
         IsDead = true;
+        _isInDeathSequence = true;
 
-        if (logDeathDebug)
+        // 死亡アニメーションの割り込み元を止める（PlayerDeathController と同じ思想）
+        if (_moveCtrl != null) _moveCtrl.enabled = false;
+        if (_combatCtrl != null) _combatCtrl.enabled = false;
+        if (_animCtrl != null) _animCtrl.SetDeathMode(true);
+
+        // ガード見た目も止める
+        _isGuardHeld = false;
+        if (_guardVisualCoroutine != null)
         {
-            Debug.Log($"[DeathDebug] PlayDeadAnimation START frame={Time.frameCount} timeScale={Time.timeScale}", this);
+            StopCoroutine(_guardVisualCoroutine);
+            _guardVisualCoroutine = null;
         }
 
-        if (_anim == null) _anim = GetComponentInChildren<Animator>();
-
-        if (_anim != null)
-        {
-            // Deadトリガー投入
-            _anim.SetTrigger("IsDead");
-
-            if (logDeathDebug)
-            {
-                var st = _anim.GetCurrentAnimatorStateInfo(0);
-                Debug.Log($"[DeathDebug] Trigger set. currentState={st.shortNameHash} normalized={st.normalizedTime:F2} length={st.length:F2}", this);
-            }
-
-            // ★ここが重要：死亡中の状態遷移を追跡する
-            StartCoroutine(LogAnimatorStatesForSeconds(_anim, deathLogDuration));
-        }
-        else
-        {
-            if (logDeathDebug) Debug.LogWarning("[DeathDebug] Animator not found.", this);
-        }
-
-        // ガード見た目は戻す（これはOK）
-        if (_characterRoot != null)
-        {
-            _characterRoot.localPosition = _guardBaseLocalPos;
-            _isGuardVisualRaised = false;
-        }
-
+        // Collider off
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
+
+        if (_animator == null) _animator = GetComponentInChildren<Animator>();
+        if (_animator == null)
+        {
+            if (_logDeathDebug) Debug.LogWarning("[DeathDebug] Animator not found.", this);
+            _isInDeathSequence = false;
+            return;
+        }
+
+        // 死亡開始時に “割り込みパラメータ” を全部落とす
+        _animCtrl?.ResetForDeath();
+
+        // Deadトリガー投入
+        _animator.SetTrigger("IsDead");
+
+        // デバッグログ
+        if (_logDeathDebug)
+        {
+            StartCoroutine(LogAnimatorStatesForSeconds(_animator, _deathLogDuration));
+        }
+
+        // ★「最後まで再生してその場に残す」なら PlayDeadAndFreeze を使うのが安全
+        StartCoroutine(PlayDeadAndFreeze());
     }
 
-    /// <summary>
-    /// 数秒間、Animatorのステート変化を毎フレームログ
-    /// </summary>
     private IEnumerator LogAnimatorStatesForSeconds(Animator anim, float seconds)
     {
         int lastHash = 0;
@@ -246,12 +259,17 @@ public class PlayerController : MonoBehaviour
         {
             var st = anim.GetCurrentAnimatorStateInfo(0);
 
-            // ステートが変わった or normalizedTimeが急に戻った（割り込み）ときだけ出す
             bool stateChanged = st.shortNameHash != lastHash;
             bool jumpedBack = lastNorm >= 0f && st.normalizedTime + 0.05f < lastNorm;
 
             if (stateChanged || jumpedBack)
             {
+                Debug.Log(
+                    $"[DeathDebug] frame={Time.frameCount} hash={st.shortNameHash} norm={st.normalizedTime:F2} len={st.length:F2} " +
+                    $"tagDead={st.IsTag("Dead")} nameDead={st.IsName("Dead")}",
+                    this
+                );
+
                 lastHash = st.shortNameHash;
                 lastNorm = st.normalizedTime;
             }
@@ -268,29 +286,28 @@ public class PlayerController : MonoBehaviour
 
     public IEnumerator PlayDeadAndFreeze()
     {
-        if (_anim == null) _anim = GetComponentInChildren<Animator>();
-        if (_anim == null) yield break;
+        if (_animator == null) _animator = GetComponentInChildren<Animator>();
+        if (_animator == null) yield break;
 
-        _anim.SetTrigger("IsDead");
+        // Deadステートに入るのを待つ
         yield return null;
 
         float t = 0.5f;
         while (t > 0f)
         {
-            var st = _anim.GetCurrentAnimatorStateInfo(0);
+            var st = _animator.GetCurrentAnimatorStateInfo(0);
             if (st.IsTag("Dead") || st.IsName("Dead")) break;
             t -= Time.deltaTime;
             yield return null;
         }
 
-        var state = _anim.GetCurrentAnimatorStateInfo(0);
+        var state = _animator.GetCurrentAnimatorStateInfo(0);
         float remain = Mathf.Max(0.0f, (1f - state.normalizedTime) * state.length);
         if (remain <= 0.01f) remain = 1.0f;
 
-        // ★timeScale=0対策（ここが重要）
         yield return new WaitForSecondsRealtime(remain);
 
-        _anim.enabled = false;
+        _animator.enabled = false;
+        _isInDeathSequence = false;
     }
-
 }

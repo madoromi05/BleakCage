@@ -65,6 +65,7 @@ public class EnemyAttackCommand : ICommand
     {
         if (PlayerTarget == null || PlayerTarget.playerHpHandler == null) return;
         if (Attacker == null) return;
+        if (PlayerTarget.CurrentHP <= 0f) return;
 
         float damage = _calculator.CalculateFinalDamage(Attacker, PlayerTarget.PlayerModel);
 
@@ -79,7 +80,7 @@ public class EnemyAttackCommand : ICommand
         PlayerTarget.playerHpHandler.TakeDamage(damage);
         if (_playerStatusUiController != null)
         {
-            _playerStatusUiController.UpdateHP(PlayerTarget.CurrentHP);
+            _playerStatusUiController.UpdateHp(PlayerTarget.CurrentHP);
         }
     }
 

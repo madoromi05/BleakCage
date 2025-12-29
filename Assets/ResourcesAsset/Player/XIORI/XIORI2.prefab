@@ -1077,6 +1077,7 @@ GameObject:
   - component: {fileID: 8534119380590152246}
   - component: {fileID: -1730530049000147221}
   - component: {fileID: 587244269697929441}
+  - component: {fileID: 318699190156214684}
   m_Layer: 0
   m_Name: XIORI2
   m_TagString: Untagged
@@ -1190,6 +1191,22 @@ MonoBehaviour:
     showGizmo: 1
   - color: {r: 0, g: 1, b: 0, a: 1}
     showGizmo: 1
+--- !u!114 &318699190156214684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080054730939816206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11617330bb50cb54887f17de6ef2c118, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 8534119380590152246}
+  deadTag: Dead
+  deadStateName: Dead
+  watchSeconds: 6
 --- !u!1 &3174420072721490862
 GameObject:
   m_ObjectHideFlags: 0

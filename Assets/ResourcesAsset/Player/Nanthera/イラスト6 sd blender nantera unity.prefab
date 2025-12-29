@@ -4418,6 +4418,7 @@ GameObject:
   - component: {fileID: 3838339731714532497}
   - component: {fileID: 1384352759331635906}
   - component: {fileID: 1988390390496285519}
+  - component: {fileID: 6685696052824707403}
   m_Layer: 0
   m_Name: "\u30A4\u30E9\u30B9\u30C86 sd blender nantera unity"
   m_TagString: Untagged
@@ -4549,6 +4550,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RightHandTransform: {fileID: 3561912147143207660}
   LeftHandTransform: {fileID: 7253667456881813676}
+--- !u!114 &6685696052824707403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7323712652299439833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11617330bb50cb54887f17de6ef2c118, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 3838339731714532497}
+  deadTag: Dead
+  deadStateName: Dead
+  watchSeconds: 6
 --- !u!1 &7755163128039702231
 GameObject:
   m_ObjectHideFlags: 0

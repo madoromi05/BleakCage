@@ -49,9 +49,6 @@ public class PlayerDataLoader
             // PlayerRuntime生成
             PlayerRuntime playerRuntime = new PlayerRuntime(model, System.Guid.NewGuid().ToString(), charData.Level);
 
-            // 武器を装備したかどうかのフラグ
-            bool hasEquippedAnyWeapon = false;
-
             // ---  プリセット武器 (Deck) のロード ---
             if (charData.Weapons != null && charData.Weapons.Count > 0)
             {
@@ -78,7 +75,6 @@ public class PlayerDataLoader
 
                         // プレイヤーに装備
                         playerRuntime.EquipWeapon(wRuntime);
-                        hasEquippedAnyWeapon = true;
                     }
                     else
                     {

@@ -29,7 +29,7 @@ public class HealCommand : ICommand
         if (player.playerHpHandler != null)
         {
             player.playerHpHandler.Heal(healAmount);
-            uiController.UpdateHP(player.CurrentHP);
+            uiController.UpdateHp(player.CurrentHP);
         }
 
         // ƒTƒEƒ“ƒhÄ¶

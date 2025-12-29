@@ -8,6 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class PlayerStatusUIController : MonoBehaviour
 {
+
     [SerializeField] private Image characterIcon;
     [SerializeField] private Text nameText;
     [SerializeField] private Text levelText;
@@ -22,107 +23,142 @@ public class PlayerStatusUIController : MonoBehaviour
     [SerializeField] private StatusIconUI statusIconPrefab;     // プレハブ
     [SerializeField] private StatusIconDatabase iconDatabase;   // データベース
 
-    private Color originalBackgroundColor;
-    private Coroutine hpAnimationCoroutine;
-    private PlayerRuntime playerRuntime;
-    private float maxHP;
+    private Color _originalBackgroundColor;
+    private Coroutine _hpAnimationCoroutine;
+    private PlayerRuntime _playerRuntime;
+    private float _maxHp;
 
-    public int PlayerID { get; private set; }
+    public int PlayerId { get; private set; }
 
     private void Awake()
     {
         // 起動時に元の背景色を記憶しておく
         if (background != null)
         {
-            originalBackgroundColor = background.color;
+            _originalBackgroundColor = background.color;
         }
     }
 
+    private void OnDisable()
+    {
+        // 非アクティブ化されるとコルーチンが止められず事故りやすいので明示停止
+        if (_hpAnimationCoroutine != null)
+        {
+            StopCoroutine(_hpAnimationCoroutine);
+            _hpAnimationCoroutine = null;
+        }
+    }
     /// <summary>
     /// Playerのデータを使ってUIを初期設定する
     /// </summary>
     public void SetPlayerStatus(PlayerRuntime playerRuntime)
     {
-        this.playerRuntime = playerRuntime;
-        PlayerModel model = playerRuntime.PlayerModel;
-
-        this.PlayerID = model.PlayerID;
-        nameText.text = model.PlayerName;
-        levelText.text = model.PlayerLevel.ToString();
-        attackText.text = (model.PlayerLevel * 10).ToString();
-        defenseText.text = model.PlayerDefensePower.ToString();
-
-        if (model.PlayerIcon != null)
+        _playerRuntime = playerRuntime;
+        if (_playerRuntime == null || _playerRuntime.PlayerModel == null)
         {
-            characterIcon.sprite = model.PlayerIcon;
-        }
-        else
-        {
-            Debug.LogWarning($"PlayerModel '{model.PlayerName}' にUI用のPlayerIconが設定されていません。", this.gameObject);
+            Debug.LogError("SetPlayerStatus: playerRuntime or PlayerModel is null.", this);
+            return;
         }
 
-        this.maxHP = model.PlayerHP;
-        hpSlider.maxValue = model.PlayerHP;
-        hpSlider.value = playerRuntime.CurrentHP;
+        PlayerModel model = _playerRuntime.PlayerModel;
+
+        PlayerId = model.PlayerID;
+
+        if (nameText != null) nameText.text = model.PlayerName;
+        if (levelText != null) levelText.text = model.PlayerLevel.ToString();
+        if (attackText != null) attackText.text = (model.PlayerLevel * 10).ToString();
+        if (defenseText != null) defenseText.text = model.PlayerDefensePower.ToString();
+
+        if (characterIcon != null)
+        {
+            if (model.PlayerIcon != null)
+            {
+                characterIcon.sprite = model.PlayerIcon;
+            }
+            else
+            {
+                Debug.LogWarning($"PlayerModel '{model.PlayerName}' にUI用のPlayerIconが設定されていません。", this);
+            }
+        }
+
+        _maxHp = model.PlayerHP;
+
+        if (hpSlider != null)
+        {
+            hpSlider.minValue = 0f;
+            hpSlider.maxValue = _maxHp;
+
+            float clamped = Mathf.Clamp(_playerRuntime.CurrentHP, 0f, _maxHp);
+            hpSlider.value = clamped;
+        }
+    }
+
+    /// <summary>
+    /// HPバーの表示を更新する（HP実数で扱う）
+    /// </summary>
+    public void UpdateHp(float currentHp)
+    {
+        if (!isActiveAndEnabled || !gameObject.activeInHierarchy) return;
+        if (hpSlider == null) return;
+
+        float targetHp = Mathf.Clamp(currentHp, 0f, _maxHp);
+
+        if (_hpAnimationCoroutine != null)
+        {
+            StopCoroutine(_hpAnimationCoroutine);
+            _hpAnimationCoroutine = null;
+        }
+
+        _hpAnimationCoroutine = StartCoroutine(AnimateHpBarCoroutine(targetHp));
     }
 
     public void UpdateStatusIcons(StatusEffectHandler statusHandler)
     {
-        // 既存のアイコンをすべて削除
+        if (statusIconRowContainer == null) return;
+
         foreach (Transform child in statusIconRowContainer)
         {
             Destroy(child.gameObject);
         }
 
-        if (statusHandler == null) return;
+        if (statusHandler == null || iconDatabase == null || statusIconPrefab == null) return;
 
-        // 有効なものを生成
         foreach (var effect in statusHandler.ActiveStatusEffects)
         {
             Sprite iconSprite = iconDatabase.GetIcon(effect.Type);
+            if (iconSprite == null) continue;
 
-            if (iconSprite != null)
-            {
-                StatusIconUI newIcon = Instantiate(statusIconPrefab, statusIconRowContainer);
-                newIcon.Setup(iconSprite, effect.StackCount);
-            }
+            StatusIconUI newIcon = Instantiate(statusIconPrefab, statusIconRowContainer);
+            newIcon.Setup(iconSprite, effect.StackCount);
         }
     }
 
-    /// <summary>
-    /// HPバーの表示を更新する
-    /// </summary>
-    public void UpdateHP(float currentHP)
+    private IEnumerator AnimateHpBarCoroutine(float targetHp)
     {
-        // 既にHP減少アニメーションが実行中なら、それを停止する
-        if (hpAnimationCoroutine != null)
+        float startHp = hpSlider.value;
+        float elapsed = 0f;
+
+        // durationが0以下なら即反映
+        if (hpAnimationDuration <= 0f)
         {
-            StopCoroutine(hpAnimationCoroutine);
+            hpSlider.value = targetHp;
+            _hpAnimationCoroutine = null;
+            yield break;
         }
 
-        float hpPercentage = (maxHP > 0) ? (currentHP / maxHP) * 100f : 0f;
-        hpAnimationCoroutine = StartCoroutine(AnimateHPBarCoroutine(hpPercentage));
-    }
-
-    /// <summary>
-    /// HPバーをアニメーションさせるコルーチン
-    /// </summary>
-    private IEnumerator AnimateHPBarCoroutine(float targetHP)
-    {
-        float startHP = hpSlider.value; // アニメーション開始時のHP
-        float elapsedTime = 0f;         // 経過時間
-
-        while (elapsedTime < hpAnimationDuration)
+        while (elapsed < hpAnimationDuration)
         {
-            // 経過時間に応じて、開始時のHPと目標のHPの間を線形補間する
-            elapsedTime += Time.deltaTime;
-            float newHP = Mathf.Lerp(startHP, targetHP, elapsedTime / hpAnimationDuration);
-            hpSlider.value = newHP;
+            // 途中でUIが消されたら安全に終了
+            if (!isActiveAndEnabled || !gameObject.activeInHierarchy) yield break;
+
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / hpAnimationDuration);
+            hpSlider.value = Mathf.Lerp(startHp, targetHp, t);
             yield return null;
         }
 
-        hpSlider.value = targetHP;
-        hpAnimationCoroutine = null;
+        hpSlider.value = targetHp;
+        _hpAnimationCoroutine = null;
     }
 
     /// <summary>
@@ -143,7 +179,7 @@ public class PlayerStatusUIController : MonoBehaviour
     {
         if (background != null)
         {
-            background.color = originalBackgroundColor;
+            background.color = _originalBackgroundColor;
         }
     }
 
@@ -152,6 +188,6 @@ public class PlayerStatusUIController : MonoBehaviour
     /// </summary>
     public PlayerRuntime GetPlayerRuntime()
     {
-        return this.playerRuntime;
+        return this._playerRuntime;
     }
 }

@@ -15,12 +15,14 @@ public class PlayerAnimationController : MonoBehaviour
     private const string GuardClipName = "Guard";
     private const string AttackClipName = "DummyAttack";
 
+    // 死亡中は一切操作しない
+    private bool _isDeathMode = false;
+
     public void Init(Animator animator)
     {
         _animator = animator;
         if (_animator == null) return;
 
-        // 共通Relayを付ける（敵もプレイヤーも OnAnimationHit を同名で呼ぶ）
         AnimationHitRelay relay = _animator.gameObject.GetComponent<AnimationHitRelay>();
         if (relay == null)
         {
@@ -28,7 +30,6 @@ public class PlayerAnimationController : MonoBehaviour
         }
         relay.OnHit += HandleAnimationHit;
 
-        // OverrideController
         if (_animator.runtimeAnimatorController != null)
         {
             _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
@@ -36,13 +37,36 @@ public class PlayerAnimationController : MonoBehaviour
         }
     }
 
+    public void SetDeathMode(bool isDeathMode)
+    {
+        _isDeathMode = isDeathMode;
+        if (_animator == null) return;
+
+        if (_isDeathMode)
+        {
+            ResetForDeath();
+        }
+    }
+
+    // 死亡割り込み対策：攻撃/ガードの残留を消す
+    public void ResetForDeath()
+    {
+        if (_animator == null) return;
+
+        _animator.ResetTrigger(AttackTriggerHash);
+        _animator.SetBool(IsGuardingHash, false);
+    }
+
     private void HandleAnimationHit()
     {
+        if (_isDeathMode) return;
         OnAttackHitTriggered?.Invoke();
     }
 
     public void PlayAttackAnimation(AnimationClip clip)
     {
+        if (_isDeathMode) return;
+
         if (clip == null)
         {
             Debug.LogError("PlayAttackAnimation: clip is null.");
@@ -61,6 +85,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void SetGuard(bool isGuarding)
     {
+        if (_isDeathMode) return;
         if (_animator == null) return;
         _animator.SetBool(IsGuardingHash, isGuarding);
     }

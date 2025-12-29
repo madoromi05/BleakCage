@@ -11,6 +11,10 @@ GameObject:
   - component: {fileID: 8823396006305052355}
   - component: {fileID: 4907457471680127871}
   - component: {fileID: 2884156627264705810}
+  - component: {fileID: 7440025967627566828}
+  - component: {fileID: 4067915010325019067}
+  - component: {fileID: 5359533720820860545}
+  - component: {fileID: -7857024544519584108}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -49,6 +53,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55467fe858f3af64891f3d08b44b9833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _logDeathDebug: 0
+  _deathLogDuration: 3
 --- !u!222 &2884156627264705810
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -57,3 +63,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3098188571546078390}
   m_CullTransparentMesh: 1
+--- !u!114 &7440025967627566828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3098188571546078390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a003ebea26130a04b8e0afb97fd4dd11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _animator: {fileID: 0}
+--- !u!114 &4067915010325019067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3098188571546078390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dad310b11aa96b9439b534eb3c363766, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDuration: 0.3
+  returnDuration: 0.5
+--- !u!114 &5359533720820860545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3098188571546078390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ca32058b115e94fb0dba6aa214df76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-7857024544519584108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3098188571546078390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a0b4f2c101c14d48b37deb5a766c79b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vanishByMove: 0
+  deadMoveDuration: 1
+  deadTargetPosition: {x: -30, y: 0, z: 10}
+  deadTrigger: IsDead
+  disableAnimatorAfterDead: 1

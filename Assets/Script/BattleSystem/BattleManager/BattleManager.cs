@@ -171,9 +171,11 @@ public class BattleManager : MonoBehaviour
         if (entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out var controller))
         {
             var death = controller.GetComponent<PlayerDeathController>();
+
             if (death != null)
             {
                 StartCoroutine(death.DeadSequence());
+                Debug.Log($"[OnPlayerDead] Started DeadSequence for player={controller.name}", controller);
             }
             else
             {

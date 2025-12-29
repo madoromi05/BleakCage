@@ -203,8 +203,10 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public IEnumerator DeadSequence()
     {
+        Debug.Log($"[Death] DeadSequence called name={gameObject.name} active={gameObject.activeInHierarchy}", this);
         if (_isDead) yield break;
         _isDead = true;
+        Debug.Log($"[Death] DeadSequence START name={gameObject.name} active={gameObject.activeInHierarchy}", this);
 
         Collider collider = GetComponent<Collider>();
         if (collider != null) collider.enabled = false;
