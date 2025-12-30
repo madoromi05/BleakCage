@@ -63,31 +63,24 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
     // --- BattleAction (カード選択) ---
     public void OnCardSelectOne(InputAction.CallbackContext context)
     {
-        // 画面にログを出す
-        //if (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
         if (!context.ReadValueAsButton()) { return; }
         CardSelectEvent?.Invoke(0);
     }
 
     public void OnCardSelectTwo(InputAction.CallbackContext context)
     {
-        //if (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
-
         if (!context.performed) { return; }
         CardSelectEvent?.Invoke(1);
     }
 
     public void OnCardSelectTree(InputAction.CallbackContext context)
     {
-        //if (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
-
         if (!context.performed) { return; }
         CardSelectEvent?.Invoke(2);
     }
 
     public void OnDisCard(InputAction.CallbackContext context)
     {
-        //f (debugText != null) debugText.text = $"Key 1: Phase={context.phase}, Performed={context.performed}";
         if (!context.performed) { return; }
         DisCardEvent?.Invoke();
     }
@@ -112,12 +105,10 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
 
     public void OnDefenseTwo(InputAction.CallbackContext context)
     {
-        // キーが押された瞬間に OnDefend を発行
         if (context.performed)
         {
             OnDefend?.Invoke(2);
         }
-        // キーが離された瞬間に OnDefendCanceled を発行
         else if (context.canceled)
         {
             OnDefendCanceled?.Invoke(2);
@@ -126,15 +117,21 @@ public class BattleInputReader : MonoBehaviour, InputControls.IBattleActionActio
 
     public void OnDefenseTree(InputAction.CallbackContext context)
     {
-        // キーが押された瞬間に OnDefend を発行
         if (context.performed)
         {
             OnDefend?.Invoke(3);
         }
-        // キーが離された瞬間に OnDefendCanceled を発行
         else if (context.canceled)
         {
             OnDefendCanceled?.Invoke(3);
         }
     }
+    public void OnDefenseFour(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+            OnDefend?.Invoke(4);
+        else if (context.canceled)
+            OnDefendCanceled?.Invoke(4);
+    }
+
 }

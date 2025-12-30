@@ -149,8 +149,16 @@ public class EnemyTurn : MonoBehaviour
 
             if (targetPlayerIndex != -1 && _entitiesManager != null && _battleManager != null)
             {
-                _entitiesManager.ShowTargetMarkerOnPlayer(_battleManager.MarkerInstance, targetPlayerIndex);
+                var marker = _battleManager.MarkerInstance;
+                _entitiesManager.ShowTargetMarkerOnPlayer(marker, targetPlayerIndex);
+
+                var markerUI = marker.GetComponent<TargetMarkerUI>();
+                if (markerUI != null)
+                {
+                    markerUI.SetKeyNumber(targetPlayerIndex + 1);
+                }
             }
+
 
             yield return new WaitForSeconds(0.5f);
 
