@@ -2,51 +2,53 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// ステージIDと戦闘前後フラグに基づき、シナリオのロードとシーン遷移を管理するクラス
+/// </summary>
 public class ScenarioSceneManager : MonoBehaviour
 {
     [Header("UI参照")]
-    [SerializeField] private Text mainText;
-    [SerializeField] private Button nextButton;
+    [SerializeField] private Text _mainText;
+    [SerializeField] private Button _nextButton;
 
     [Header("【デバッグ設定】(エディタ実行時のみ有効)")]
-    [SerializeField] private bool useDebugSettings = false;
-    [SerializeField] private int debugStageID;
-    [SerializeField] private bool debugIsPostBattle = false;
+    [SerializeField] private bool _useDebugSettings = false;
+    [SerializeField] private int _debugStageID;
+    [SerializeField] private bool _debugIsPostBattle = false;
 
-    // 現在の状態を保持する変数
-    private int currentStageID;
-    private bool currentIsPost;
+    private int _currentStageID;
+    private bool _currentIsPost;
 
-    void Start()
+    private void Start()
     {
         if (StageManager.SelectedStageID != -1)
         {
-            currentStageID = StageManager.SelectedStageID;
-            currentIsPost = StageManager.IsPostBattle;
+            _currentStageID = StageManager.SelectedStageID;
+            _currentIsPost = StageManager.IsPostBattle;
         }
-        else if (Application.isEditor && useDebugSettings)
+        else if (Application.isEditor && _useDebugSettings)
         {
-            currentStageID = debugStageID;
-            currentIsPost = debugIsPostBattle;
-            Debug.Log($"<color=yellow>デバッグモード: Stage {currentStageID} (Post={currentIsPost}) を表示します</color>");
-        }
-        else
-        {
-            
+            // エディタ実行時かつデバッグ設定が有効な場合Editor状のIDを参照
+            _currentStageID = _debugStageID;
+            _currentIsPost = _debugIsPostBattle;
+            DebugCostom.Log($"<color=yellow>デバッグモード: Stage {_currentStageID} (Post={_currentIsPost}) を表示します</color>");
         }
 
-        Debug.Log($"<color=cyan>現在のシナリオ: Stage {currentStageID} ({(currentIsPost ? "戦闘後" : "戦闘前")})</color>");
-        if (currentStageID == 0 || (currentStageID == 1 && currentIsPost))
+        DebugCostom.Log($"<color=cyan>現在のシナリオ: Stage {_currentStageID} {(_currentIsPost ? "戦闘後" : "戦闘前")}</color>");
+
+        if (_currentStageID == 0 || (_currentStageID == 1 && _currentIsPost))
         {
             NavigateToNextScene();
             return;
         }
 
-        // シナリオのロードと表示
-        LoadAndShowScenario(currentStageID, currentIsPost);
-        nextButton.onClick.AddListener(OnNextButtonClicked);
+        LoadAndShowScenario(_currentStageID, _currentIsPost);
+        _nextButton.onClick.AddListener(OnNextButtonClicked);
     }
 
+    /// <summary>
+    /// Resourcesフォルダからテキストファイルを読み込み、UIに表示します
+    /// </summary>
     private void LoadAndShowScenario(int stageID, bool isPost)
     {
         string suffix = isPost ? "_End" : "_Start";
@@ -57,33 +59,38 @@ public class ScenarioSceneManager : MonoBehaviour
 
         if (textFile != null)
         {
-            // 全文をそのまま流し込む
-            mainText.text = textFile.text;
+            _mainText.text = textFile.text;
         }
         else
         {
             string errorMsg = $"シナリオファイルが見つかりません: {fileName}";
-            Debug.LogWarning(errorMsg);
-            mainText.text = errorMsg;
+
+            DebugCostom.LogWarning(errorMsg);
+            _mainText.text = errorMsg;
         }
     }
 
+    /// <summary>
+    /// 次へボタンがクリックされた時の処理
+    /// </summary>
     public void OnNextButtonClicked()
     {
         NavigateToNextScene();
     }
 
+    /// <summary>
+    /// 現在の状態（戦闘前/後）に応じて、適切な次のシーンへ遷移します
+    /// </summary>
     private void NavigateToNextScene()
     {
-        // メンバ変数に保存した値を使用
-        if (!currentIsPost)
+        if (!_currentIsPost)
         {
-            // 「戦闘前」だったので、次は「バトル」へ
+            // 「戦闘前」だったので、次はデッキ編成（バトル準備）へ
             SceneManager.LoadScene("DeckViewScene");
         }
         else
         {
-            // 「戦闘後」だったので、次は「ステージ選択（またはエンディング）」へ
+            // 「戦闘後」だったので、次はホーム（ステージ選択）へ
             SceneManager.LoadScene("HomeScene");
         }
     }

@@ -9,52 +9,51 @@ using Unity.VisualScripting;
 public class BattlePhaseManager : MonoBehaviour
 {
     [Header("UI & Time")]
-    [SerializeField] private PhaseAnnouncementUIController phaseUI;
+    [SerializeField] private PhaseAnnouncementUIController _phaseUI;
     [SerializeField] private BattleInputReader _inputReader;
 
-    private SelectTurn selectTurn;
-    private PlayerTurn playerTurn;
-    private EnemyTurn enemyTurn;
-    private GameObject selectionChoicePanel;
-    private BattleManager battleManager;
-    private BattleEntitiesManager entitiesManager;
+    private SelectTurn _selectTurn;
+    private PlayerTurn _playerTurn;
+    private EnemyTurn _enemyTurn;
+    private GameObject _selectionChoicePanel;
+    private BattleManager _battleManager;
+    private BattleEntitiesManager _entitiesManager;
 
-    private IPhase currentPhase;
-    private List<PlayerRuntime> players;
-    private List<EnemyModel> enemies;
-    private List<PlayerStatusUIController> playerStatusUIs;
-    private List<EnemyStatusUIController> enemyStatusUIs;
-    private Coroutine selectionChoiceCoroutine;
-    private bool isFirstSelectionPhase = true;
-    private int currentTurn = 1;
-    private bool isExtraTurnSegmentFinished = false; // エクストラターン用フラグ
-    private GuardGaugeSystem guardGaugeSystem; // カウンター回数の取得とリセットのため
+    private IPhase _currentPhase;
+    private List<PlayerRuntime> _players;
+    private List<EnemyModel> _enemies;
+    private List<PlayerStatusUIController> _playerStatusUIs;
+    private List<EnemyStatusUIController> _enemyStatusUIs;
+    private Coroutine _selectionChoiceCoroutine;
+    private bool _isFirstSelectionPhase = true;
+    private int _currentTurn = 1;
+    private bool _isExtraTurnSegmentFinished = false;
+    private GuardGaugeSystem _guardGaugeSystem;
 
     public void Init(
-                     BattleEntitiesManager entitiesManager,
-                     List<PlayerRuntime> players, List<EnemyModel> enemies,
-                     List<PlayerStatusUIController> playerStatusUIs, List<EnemyStatusUIController> enemyStatusUIs,
-                     SelectTurn selectTurn, PlayerTurn playerTurn, EnemyTurn enemyTurn,
-                     GameObject selectionChoicePanel, BattleManager battleManager,
-                     BattleCardDeck battleCardDeck, GuardGaugeSystem guardGaugeSystem)
+                      BattleEntitiesManager entitiesManager,
+                      List<PlayerRuntime> players, List<EnemyModel> enemies,
+                      List<PlayerStatusUIController> playerStatusUIs, List<EnemyStatusUIController> enemyStatusUIs,
+                      SelectTurn selectTurn, PlayerTurn playerTurn, EnemyTurn enemyTurn,
+                      GameObject selectionChoicePanel, BattleManager battleManager,
+                      BattleCardDeck battleCardDeck, GuardGaugeSystem guardGaugeSystem)
     {
-        this.entitiesManager = entitiesManager;
-        this.players = players;
-        this.enemies = enemies;
-        this.playerStatusUIs = playerStatusUIs;
-        this.enemyStatusUIs = enemyStatusUIs;
-        this.selectTurn = selectTurn;
-        this.playerTurn = playerTurn;
-        this.enemyTurn = enemyTurn;
-        this.selectionChoicePanel = selectionChoicePanel;
-        this.battleManager = battleManager;
-        this.entitiesManager = entitiesManager;
-        this.guardGaugeSystem = guardGaugeSystem;
+        _entitiesManager = entitiesManager;
+        _players = players;
+        _enemies = enemies;
+        _playerStatusUIs = playerStatusUIs;
+        _enemyStatusUIs = enemyStatusUIs;
+        _selectTurn = selectTurn;
+        _playerTurn = playerTurn;
+        _enemyTurn = enemyTurn;
+        _selectionChoicePanel = selectionChoicePanel;
+        _battleManager = battleManager;
+        _guardGaugeSystem = guardGaugeSystem;
 
         InitializeNonTutorialPhases();
 
-        playerTurn.OnTurnFinished += OnPlayerTurnFinished;
-        enemyTurn.TurnFinished += OnEnemyTurnFinished;
+        _playerTurn.OnTurnFinished += OnPlayerTurnFinished;
+        _enemyTurn.TurnFinished += OnEnemyTurnFinished;
     }
 
     /// <summary>
@@ -62,9 +61,8 @@ public class BattlePhaseManager : MonoBehaviour
     /// </summary>
     private void InitializeNonTutorialPhases()
     {
-        selectTurn.Initialize(players, enemies, playerStatusUIs, enemyStatusUIs);
-        currentPhase = selectTurn;
-        // currentPhase.OnPhaseFinished の購読は ProcessSelectionPhase 内で行う
+        _selectTurn.Initialize(_players, _enemies, _playerStatusUIs, _enemyStatusUIs);
+        _currentPhase = _selectTurn;
     }
 
     /// <summary>
@@ -72,13 +70,13 @@ public class BattlePhaseManager : MonoBehaviour
     /// </summary>
     public IEnumerator ShowPhaseUI(string phaseName)
     {
-        if (phaseUI != null)
+        if (_phaseUI != null)
         {
-            yield return StartCoroutine(phaseUI.ShowPhaseAnnouncement(currentTurn, phaseName));
+            yield return StartCoroutine(_phaseUI.ShowPhaseAnnouncement(_currentTurn, phaseName));
         }
         else
         {
-            Debug.LogWarning("PhaseAnnouncementUIController が設定されていません。");
+            DebugCostom.LogWarning("PhaseAnnouncementUIController が設定されていません。");
             yield return null;
         }
     }
@@ -86,21 +84,21 @@ public class BattlePhaseManager : MonoBehaviour
     // --- ターン進行 ---
     public void StartSelectionPhase()
     {
-        if (battleManager.IsBattleEnded) return;
-        Debug.Log("【攻撃対象選択ターン開始】");
+        if (_battleManager.IsBattleEnded) return;
+        DebugCostom.Log("【攻撃対象選択ターン開始】");
         SoundManager.Instance.PlaySE(SEType.startedSelectCard);
 
-        if (isFirstSelectionPhase)
+        if (_isFirstSelectionPhase)
         {
-            isFirstSelectionPhase = false;
+            _isFirstSelectionPhase = false;
             StartCoroutine(ProcessSelectionPhase(keepSelections: false));
         }
         else
         {
-            if (selectionChoicePanel != null)
+            if (_selectionChoicePanel != null)
             {
-                selectionChoicePanel.SetActive(true);
-                selectionChoiceCoroutine = StartCoroutine(WaitForSelectionChoice());
+                _selectionChoicePanel.SetActive(true);
+                _selectionChoiceCoroutine = StartCoroutine(WaitForSelectionChoice());
             }
         }
     }
@@ -110,12 +108,12 @@ public class BattlePhaseManager : MonoBehaviour
     /// </summary>
     private void OnSelectionPhaseFinished()
     {
-        if (battleManager.IsBattleEnded) return;
-        if (currentPhase != null)
+        if (_battleManager.IsBattleEnded) return;
+        if (_currentPhase != null)
         {
-            currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
+            _currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
         }
-        Debug.Log("【攻撃対象選択ターン終了】");
+        DebugCostom.Log("【攻撃対象選択ターン終了】");
 
 
         StartCoroutine(StartPlayerTurnCoroutine());
@@ -123,37 +121,36 @@ public class BattlePhaseManager : MonoBehaviour
 
     public IEnumerator StartPlayerTurnCoroutine(string phaseName = "Player Phase")
     {
-        // PlayerTurnのStartPlayerTurnWithTimerはBattleManagerで実行
-        yield return battleManager.StartPlayerTurnWithTimer(phaseName);
+        yield return _battleManager.StartPlayerTurnWithTimer(phaseName);
     }
 
     private void OnPlayerTurnFinished()
     {
-        if (battleManager.IsBattleEnded) return;
-        Debug.Log("【カード選択ターン終了】");
-        StartCoroutine(EnemyTurnCoroutine());
+        if (_battleManager.IsBattleEnded) return;
+        DebugCostom.Log("【カード選択ターン終了】");
+        StartCoroutine(ExecuteEnemyTurnCoroutine());
     }
 
-    private IEnumerator EnemyTurnCoroutine()
+    private IEnumerator ExecuteEnemyTurnCoroutine()
     {
         yield return StartCoroutine(ShowPhaseUI("Enemy Phase"));
-        Debug.Log("【敵ターン開始】");
+        DebugCostom.Log("【敵ターン開始】");
         SoundManager.Instance.PlaySE(SEType.SwitchingPhases);
-        enemyTurn.StartEnemyTurn();
+        _enemyTurn.StartEnemyTurn();
         yield return null;
     }
 
     private void OnEnemyTurnFinished()
     {
-        if (battleManager.IsBattleEnded) return;
-        Debug.Log("【敵ターン終了】");
-        currentTurn++;
+        if (_battleManager.IsBattleEnded) return;
+        DebugCostom.Log("【敵ターン終了】");
+        _currentTurn++;
 
-        int counterCount = guardGaugeSystem.PopCounterCount();
+        int counterCount = _guardGaugeSystem.PopCounterCount();
 
         if (counterCount > 0)
         {
-            Debug.Log($"カウンターが {counterCount} 回あります。エクストラターンに移行します。");
+            DebugCostom.Log($"カウンターが {counterCount} 回あります。エクストラターンに移行します。");
             StartCoroutine(HandleExtraTurnsAndContinue(counterCount));
         }
         else
@@ -166,38 +163,35 @@ public class BattlePhaseManager : MonoBehaviour
 
     private void OnExtraTurnFinished()
     {
-        Debug.Log("【エクストラターン カード選択/攻撃 完了】");
-        isExtraTurnSegmentFinished = true;
+        DebugCostom.Log("【エクストラターン カード選択/攻撃 完了】");
+        _isExtraTurnSegmentFinished = true;
     }
 
     private IEnumerator HandleExtraTurnsAndContinue(int initialCounterCount)
     {
-        playerTurn.OnTurnFinished -= OnPlayerTurnFinished;
-        playerTurn.OnTurnFinished += OnExtraTurnFinished;
+        _playerTurn.OnTurnFinished -= OnPlayerTurnFinished;
+        _playerTurn.OnTurnFinished += OnExtraTurnFinished;
 
         int remainingCounters = initialCounterCount;
         while (remainingCounters > 0)
         {
             remainingCounters--;
-            Debug.Log($"エクストラターン開始！ (残り: {remainingCounters})");
+            DebugCostom.Log($"エクストラターン開始！ (残り: {remainingCounters})");
 
-            isExtraTurnSegmentFinished = false;
-            // エクストラターン開始
-            yield return battleManager.StartPlayerTurnWithTimer("Extra Turn");
-            yield return new WaitUntil(() => isExtraTurnSegmentFinished == true);
+            _isExtraTurnSegmentFinished = false;
+            yield return _battleManager.StartPlayerTurnWithTimer("Extra Turn");
+            yield return new WaitUntil(() => _isExtraTurnSegmentFinished == true);
         }
 
-        playerTurn.OnTurnFinished -= OnExtraTurnFinished;
-        playerTurn.OnTurnFinished += OnPlayerTurnFinished;
+        _playerTurn.OnTurnFinished -= OnExtraTurnFinished;
+        _playerTurn.OnTurnFinished += OnPlayerTurnFinished;
 
         StartSelectionPhase();
     }
 
-    // 選択フェーズのロジック (BattleManagerから移動)
 
     private IEnumerator ProcessSelectionPhase(bool keepSelections)
     {
-        // 継続処理が有効でない、または強制選択の場合
         if (!keepSelections)
         {
             if (!keepSelections)
@@ -207,37 +201,37 @@ public class BattlePhaseManager : MonoBehaviour
         }
 
         SoundManager.Instance.PlaySE(SEType.SwitchingPhases);
-        currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
+        _currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
 
-        if (currentPhase is SelectTurn concreteSelectTurn)
+        if (_currentPhase is SelectTurn concreteSelectTurn)
         {
             concreteSelectTurn.StartPhase(keepSelections);
         }
         else
         {
-            currentPhase.StartPhase();
+            _currentPhase.StartPhase();
         }
     }
 
     private IEnumerator WaitForSelectionChoice()
     {
-        yield return new WaitUntil(() => selectionChoicePanel.activeSelf == false);
-        selectionChoiceCoroutine = null;
+        yield return new WaitUntil(() => _selectionChoicePanel.activeSelf == false);
+        _selectionChoiceCoroutine = null;
     }
 
     public void OnKeepSelections()
     {
-        Debug.Log("選択を保持して続行が選択されました。");
-        selectionChoicePanel.SetActive(false);
-        if (selectionChoiceCoroutine != null)
+        DebugCostom.Log("選択を保持して続行が選択されました。");
+        _selectionChoicePanel.SetActive(false);
+        if (_selectionChoiceCoroutine != null)
         {
-            StopCoroutine(selectionChoiceCoroutine);
-            selectionChoiceCoroutine = null;
+            StopCoroutine(_selectionChoiceCoroutine);
+            _selectionChoiceCoroutine = null;
         }
 
-        if (selectTurn != null)
+        if (_selectTurn != null)
         {
-            selectTurn.ValidateSelections();
+            _selectTurn.ValidateSelections();
         }
 
         StartCoroutine(ProcessSelectionPhase(keepSelections: true));
@@ -245,17 +239,17 @@ public class BattlePhaseManager : MonoBehaviour
 
     public void OnChangeSelections()
     {
-        Debug.Log("選択を変更して続行が選択されました。");
-        selectionChoicePanel.SetActive(false);
-        if (selectionChoiceCoroutine != null)
+        DebugCostom.Log("選択を変更して続行が選択されました。");
+        _selectionChoicePanel.SetActive(false);
+        if (_selectionChoiceCoroutine != null)
         {
-            StopCoroutine(selectionChoiceCoroutine);
-            selectionChoiceCoroutine = null;
+            StopCoroutine(_selectionChoiceCoroutine);
+            _selectionChoiceCoroutine = null;
         }
 
-        if (selectTurn != null)
+        if (_selectTurn != null)
         {
-            selectTurn.ClearSelections();
+            _selectTurn.ClearSelections();
         }
 
         StartCoroutine(ProcessSelectionPhase(keepSelections: false));

@@ -55,7 +55,6 @@ public class CardTextScroller : MonoBehaviour
     {
         if (!TryGetComponent<Text>(out var textComponent))
         {
-            Debug.LogWarning("TMP_Textがアタッチされていないのでスクロールは機能しません");
             return;
         }
 

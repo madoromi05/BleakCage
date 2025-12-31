@@ -37,11 +37,9 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
 
     public void StartPhase()
     {
-        Debug.Log("Starting Select Turn Tutorial Phase");
-
         if (_inputReader == null)
         {
-            Debug.LogError("【Critical】TutorialInputReader が null です！TutorialFlowManager の Inspector でアサインを確認してください。");
+            DebugCostom.LogError("【Critical】TutorialInputReader が null です！TutorialFlowManager の Inspector でアサインを確認してください。");
             return;
         }
 
@@ -53,7 +51,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         }
         else
         {
-            Debug.LogError("TutorialUIPanel がアサインされていません！");
+            DebugCostom.LogError("TutorialUIPanel がアサインされていません！");
         }
 
         StartCoroutine(TutorialCoroutine());
@@ -96,7 +94,7 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
         // 敵選択の実践
         if (_selectInputReader == null)
         {
-            Debug.LogError("SelectInputReader が SelectTurnTutorialManager にアサインされていません！");
+            DebugCostom.LogError("SelectInputReader が SelectTurnTutorialManager にアサインされていません！");
             yield break;
         }
 
@@ -112,14 +110,14 @@ public class SelectTurnTutorialManager : MonoBehaviour, IPhase
             PlayerStatusUIController tutorialPlayerUI = _playerUIs[0];
             tutorialPlayerUI.SetHighlight(new Color(0.5f, 0.8f, 1f));
             yield return StartCoroutine(_selectTurn.SelectOneTargetCoroutine(tutorialPlayer, 1, (selectedEnemy) => {
-                Debug.Log($"Tutorial selection complete: {selectedEnemy.EnemyName}");
+                DebugCostom.Log($"Tutorial selection complete: {selectedEnemy.EnemyName}");
             }));
 
             tutorialPlayerUI.ResetHighlight();
         }
         else
         {
-            Debug.LogError("チュートリアル用のプレイヤーデータが存在しません。");
+            DebugCostom.LogError("チュートリアル用のプレイヤーデータが存在しません。");
         }
 
         _selectInputReader.DisableActionMap();

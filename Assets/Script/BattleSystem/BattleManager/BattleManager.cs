@@ -6,89 +6,92 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// Battleのターン、順番とデータ管理 (PhaseManagerへの委譲が主)
+/// Battleのターン、時間とデータ管理 (PhaseManagerへの依存を含む)
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
     [Header("コアコンポーネント参照")]
-    [SerializeField] public BattleCardDeck battleCardDeck;
-    [SerializeField] public GuardGaugeSystem guardGaugeSystem;
-    [SerializeField] private GameObject gameOverUIPanel;
-    [SerializeField] private BattlePhaseManager normalPhaseManager;
-    [SerializeField] private TutorialFlowManager tutorialFlowManager;
-    [SerializeField] private BattleEntitiesManager entitiesManager;
-    [SerializeField] private DefenseFeedbackUI defenseFeedbackUI;
-    [SerializeField] private PlayerTurn playerTurn;
-    [SerializeField] private EnemyTurn enemyTurn;
-    [SerializeField] private SelectTurn selectTurn;
+    [SerializeField] public BattleCardDeck BattleCardDeck;
+    [SerializeField] public GuardGaugeSystem GuardGaugeSystem;
+
+    [SerializeField] private GameObject _gameOverUIPanel;
+    [SerializeField] private BattlePhaseManager _normalPhaseManager;
+    [SerializeField] private TutorialFlowManager _tutorialFlowManager;
+    [SerializeField] private BattleEntitiesManager _entitiesManager;
+    [SerializeField] private DefenseFeedbackUI _defenseFeedbackUI;
+    [SerializeField] private PlayerTurn _playerTurn;
+    [SerializeField] private EnemyTurn _enemyTurn;
+    [SerializeField] private SelectTurn _selectTurn;
 
     [Header("UI関連")]
-    [SerializeField] public GameObject selectionChoicePanel;
-    [SerializeField] private Text timeText;
-    [SerializeField] private Button keepSelectionsButton;
-    [SerializeField] private Button changeSelectionsButton;
-    [SerializeField] private GameObject targetMarkerPrefab;
+    [SerializeField] public GameObject SelectionChoicePanel;
 
-    public void ShowDefenseFeedback(string message, Color color) => defenseFeedbackUI.ShowDefenseFeedback(message, color);
+    [SerializeField] private Text _timeText;
+    [SerializeField] private Button _keepSelectionsButton;
+    [SerializeField] private Button _changeSelectionsButton;
+    [SerializeField] private GameObject _targetMarkerPrefab;
+
+    public void ShowDefenseFeedback(string message, Color color) => _defenseFeedbackUI.ShowDefenseFeedback(message, color);
 
     public GameObject MarkerInstance { get; private set; }
     public bool IsBattleEnded { get; private set; } = false;
-    private float playerTurnDuration = 10f; // PhaseManager に移動しても良い
-    private float turnTime = 10f; // PlayerTurnWithTimer で使用
-    private Coroutine feedbackCoroutine;
-    private List<EnemyRuntime> enemyRuntimes = new List<EnemyRuntime>();
+
+    private float _playerTurnDuration = 10f;
+    private float _turnTime = 10f;
+    private Coroutine _feedbackCoroutine;
+    private List<EnemyRuntime> _enemyRuntimes = new List<EnemyRuntime>();
+
     void Start()
     {
-        if (targetMarkerPrefab != null)
+        if (_targetMarkerPrefab != null)
         {
-            MarkerInstance = Instantiate(targetMarkerPrefab, Vector3.zero, targetMarkerPrefab.transform.rotation, this.transform);
+            MarkerInstance = Instantiate(_targetMarkerPrefab, Vector3.zero, _targetMarkerPrefab.transform.rotation, this.transform);
             MarkerInstance.SetActive(false);
         }
 
-        selectionChoicePanel.SetActive(false);
+        SelectionChoicePanel.SetActive(false);
 
-        guardGaugeSystem.Init();
-        entitiesManager.Setup(this);
+        GuardGaugeSystem.Init();
+        _entitiesManager.Setup(this);
 
         InitializeBattleFlow();
     }
 
     /// <summary>
-    /// 通常モードかチュートリアルモードに応じて、
-    /// 起動するフローマネージャーを切り替える
+    /// 通常モードかチュートリアルモードか確認して、
+    /// 適切なフェーズマネージャーへ処理を委譲する
     /// </summary>
     private void InitializeBattleFlow()
     {
-        if (entitiesManager.LoadedDeckData == null || entitiesManager.LoadedDeckData.Party == null)
+        if (_entitiesManager.LoadedDeckData == null || _entitiesManager.LoadedDeckData.Party == null)
         {
-            Debug.LogError("entitiesManager がデッキデータ(Party)をロードしていません！");
+            DebugCostom.LogError("entitiesManager にデッキデータ(Party)がロードされていません！");
             return;
         }
 
         List<CardRuntime> allCards = new List<CardRuntime>();
-        foreach (var player in entitiesManager.LoadedDeckData.Party)
+        foreach (var player in _entitiesManager.LoadedDeckData.Party)
         {
             allCards.AddRange(player.GetAllCards());
         }
-        battleCardDeck.InitFromCardList(allCards);
+        BattleCardDeck.InitFromCardList(allCards);
 
         Dictionary<PlayerRuntime, PlayerController> runtimeControllerMap = new Dictionary<PlayerRuntime, PlayerController>();
-        foreach (var runtime in entitiesManager.Players)
+        foreach (var runtime in _entitiesManager.Players)
         {
-            if (entitiesManager.PlayerControllers.TryGetValue(runtime.PlayerModel, out var controller))
+            if (_entitiesManager.PlayerControllers.TryGetValue(runtime.PlayerModel, out var controller))
             {
                 runtimeControllerMap[runtime] = controller;
             }
         }
 
-        enemyRuntimes.Clear();
-        if (entitiesManager.Enemies != null)
+        _enemyRuntimes.Clear();
+        if (_entitiesManager.Enemies != null)
         {
-            foreach (var enemyModel in entitiesManager.Enemies)
+            foreach (var enemyModel in _entitiesManager.Enemies)
             {
-                // GUIDとRuntimeを生成
                 EnemyRuntime newRuntime = new EnemyRuntime(enemyModel, System.Guid.NewGuid().ToString());
-                enemyRuntimes.Add(newRuntime);
+                _enemyRuntimes.Add(newRuntime);
 
                 if (newRuntime.HpHandler != null)
                 {
@@ -97,58 +100,58 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        enemyTurn.EnemySetup(
-            entitiesManager.Players,
-            entitiesManager.Enemies,
-            entitiesManager.EnemyControllers,
+        _enemyTurn.EnemySetup(
+            _entitiesManager.Players,
+            _entitiesManager.Enemies,
+            _entitiesManager.EnemyControllers,
             runtimeControllerMap,
-            entitiesManager.PlayerStatusUIs,
-            enemyRuntimes
+            _entitiesManager.PlayerStatusUIs,
+            _enemyRuntimes
         );
-        // === フローの分岐 ===
-        bool isTutorial = entitiesManager.IsTutorialMode;
+        // チュートリアルフローの分岐
+        bool isTutorial = _entitiesManager.IsTutorialMode;
 
         if (isTutorial)
         {
-            // --- チュートリアルフローを開始 ---
-            tutorialFlowManager.gameObject.SetActive(true);
-            tutorialFlowManager.Init(
+            // --- チュートリアルフロー開始 ---
+            _tutorialFlowManager.gameObject.SetActive(true);
+            _tutorialFlowManager.Init(
                 this,
-                normalPhaseManager,
-                entitiesManager,
-                entitiesManager.Players,
-                entitiesManager.Enemies,
-                entitiesManager.PlayerStatusUIs,
-                entitiesManager.EnemyStatusUIs,
-                selectTurn,
-                playerTurn,
-                battleCardDeck,
-                enemyRuntimes
+                _normalPhaseManager,
+                _entitiesManager,
+                _entitiesManager.Players,
+                _entitiesManager.Enemies,
+                _entitiesManager.PlayerStatusUIs,
+                _entitiesManager.EnemyStatusUIs,
+                _selectTurn,
+                _playerTurn,
+                BattleCardDeck,
+                _enemyRuntimes
             );
 
-            tutorialFlowManager.StartTutorialFlow();
+            _tutorialFlowManager.StartTutorialFlow();
         }
         else
         {
-            // --- 通常フローを開始 ---
-            normalPhaseManager.gameObject.SetActive(true);
-            tutorialFlowManager.gameObject.SetActive(false);
-            normalPhaseManager.Init(
-                entitiesManager,
-                entitiesManager.Players,
-                entitiesManager.Enemies,
-                entitiesManager.PlayerStatusUIs,
-                entitiesManager.EnemyStatusUIs,
-                selectTurn,
-                playerTurn,
-                enemyTurn,
-                selectionChoicePanel,
+            // --- 通常フロー開始 ---
+            _normalPhaseManager.gameObject.SetActive(true);
+            _tutorialFlowManager.gameObject.SetActive(false);
+            _normalPhaseManager.Init(
+                _entitiesManager,
+                _entitiesManager.Players,
+                _entitiesManager.Enemies,
+                _entitiesManager.PlayerStatusUIs,
+                _entitiesManager.EnemyStatusUIs,
+                _selectTurn,
+                _playerTurn,
+                _enemyTurn,
+                SelectionChoicePanel,
                 this,
-                battleCardDeck,
-                this.guardGaugeSystem
+                BattleCardDeck,
+                this.GuardGaugeSystem
             );
 
-            normalPhaseManager.StartSelectionPhase();
+            _normalPhaseManager.StartSelectionPhase();
         }
     }
 
@@ -157,25 +160,22 @@ public class BattleManager : MonoBehaviour
         if (IsBattleEnded) return;
         if (player == null) return;
 
-        Debug.Log($"味方死亡: {player.PlayerModel.PlayerName}");
+        DebugCostom.Log($"味方死亡: {player.PlayerModel.PlayerName}");
 
-        // 選択から除外
-        selectTurn?.RemovePlayerFromSelections(player);
-
-        // UI非表示
-        var pui = entitiesManager.PlayerStatusUIs
+        _selectTurn?.RemovePlayerFromSelections(player);
+        var pui = _entitiesManager.PlayerStatusUIs
             .FirstOrDefault(u => u != null && u.GetPlayerRuntime() == player);
         if (pui != null) pui.gameObject.SetActive(false);
 
-        // 死亡演出（敵と同等の完成度へ）
-        if (entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out var controller))
+        // 死亡演出（コントローラーのアニメ再生へ）
+        if (_entitiesManager.PlayerControllers.TryGetValue(player.PlayerModel, out var controller))
         {
             var death = controller.GetComponent<PlayerDeathController>();
 
             if (death != null)
             {
                 StartCoroutine(death.DeadSequence());
-                Debug.Log($"[OnPlayerDead] Started DeadSequence for player={controller.name}", controller);
+                DebugCostom.Log($"[OnPlayerDead] Started DeadSequence for player={controller.name}", controller);
             }
             else
             {
@@ -183,7 +183,7 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        bool allPlayersDead = entitiesManager.Players.All(p => p.CurrentHP <= 0);
+        bool allPlayersDead = _entitiesManager.Players.All(p => p.CurrentHP <= 0);
         if (allPlayersDead)
         {
             StartCoroutine(BattleLoseProcess());
@@ -196,13 +196,13 @@ public class BattleManager : MonoBehaviour
         Debug.Log("【BATTLE WIN】");
         yield return new WaitForSeconds(1.5f);
 
-        // チュートリアルの場合は終了処理
-        if (entitiesManager.IsTutorialMode)
+        // チュートリアルの場合は終了しない
+        if (_entitiesManager.IsTutorialMode)
         {
             SceneManager.LoadScene("HomeScene");
             yield break;
         }
-        // 現在のステージをクリアしたので、セーブデータを更新する
+        // 現在のステージをクリア済みのし、セーブデータを更新
         StageManager.OnStageCleared(StageManager.SelectedStageID);
         StageManager.IsPostBattle = true;
         SceneManager.LoadScene("ScenarioScene");
@@ -212,9 +212,9 @@ public class BattleManager : MonoBehaviour
     {
         IsBattleEnded = true;
         yield return new WaitForSeconds(1.5f);
-        if (gameOverUIPanel != null)
+        if (_gameOverUIPanel != null)
         {
-            gameOverUIPanel.SetActive(true);
+            _gameOverUIPanel.SetActive(true);
         }
 
         yield return new WaitForSeconds(3.0f);
@@ -225,41 +225,43 @@ public class BattleManager : MonoBehaviour
     {
         if (IsBattleEnded) yield break;
 
-        yield return StartCoroutine(normalPhaseManager.ShowPhaseUI(phaseName));
-        Debug.Log("【カード選択ターン開始】");
-        timeText.enabled = true;
+        yield return StartCoroutine(_normalPhaseManager.ShowPhaseUI(phaseName));
+        DebugCostom.Log("【カード入力ターン開始】");
+        _timeText.enabled = true;
 
-        playerTurn.Setup(
-            selectTurn.PlayerSelections,
-            entitiesManager.Players,
-            battleCardDeck,
-            entitiesManager.EnemyStatusUIs,
-            entitiesManager.PlayerStatusUIs,
-            entitiesManager.EnemyControllers,
-            enemyRuntimes
+        _playerTurn.Setup(
+            _selectTurn.PlayerSelections,
+            _entitiesManager.Players,
+            BattleCardDeck,
+            _entitiesManager.EnemyStatusUIs,
+            _entitiesManager.PlayerStatusUIs,
+            _entitiesManager.EnemyControllers,
+            _enemyRuntimes
         );
 
-        playerTurn.StartPlayerTurn();
+        _playerTurn.StartPlayerTurn();
 
-        turnTime = playerTurnDuration;
+        _turnTime = _playerTurnDuration;
         float soundTime = 1f;
-        while (turnTime >= 0 && !playerTurn.isTurnFinished && !IsBattleEnded)
+
+        // playerTurn.isTurnFinished -> IsTurnFinished (前回の修正を反映)
+        while (_turnTime >= 0 && !_playerTurn.IsTurnFinished && !IsBattleEnded)
         {
             if (soundTime <= 0f)
             {
                 SoundManager.Instance.PlaySE(SEType.CountDown);
                 soundTime = 1f;
             }
-            turnTime -= Time.deltaTime;
+            _turnTime -= Time.deltaTime;
             soundTime -= Time.deltaTime;
-            timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
+            _timeText.text = _turnTime.ToString("f2") + " <size=70%>SECOND</size>";
             yield return null;
         }
-        turnTime = 0f;
-        timeText.text = turnTime.ToString("f2") + " <size=70%>SECOND</size>";
+        _turnTime = 0f;
+        _timeText.text = _turnTime.ToString("f2") + " <size=70%>SECOND</size>";
         if (!IsBattleEnded)
         {
-            playerTurn.FinishPlayerTurn();
+            _playerTurn.FinishPlayerTurn();
         }
     }
     public void OnEnemyDead(EnemyRuntime enemy)
@@ -267,33 +269,32 @@ public class BattleManager : MonoBehaviour
         if (IsBattleEnded) return;
         if (enemy == null) return;
 
-        Debug.Log($"敵撃破: {enemy.EnemyModel.EnemyName}");
+        DebugCostom.Log($"敵死亡: {enemy.EnemyModel.EnemyName}");
 
-        if (enemyRuntimes.Contains(enemy))
+        if (_enemyRuntimes.Contains(enemy))
         {
-            enemyRuntimes.Remove(enemy);
+            _enemyRuntimes.Remove(enemy);
         }
 
-        if (selectTurn != null)
+        if (_selectTurn != null)
         {
-            selectTurn.RemoveEnemyFromSelections(enemy.EnemyModel);
+            _selectTurn.RemoveEnemyFromSelections(enemy.EnemyModel);
         }
 
-        if (entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
+        if (_entitiesManager.EnemyControllers.TryGetValue(enemy.EnemyModel, out EnemyController controller))
         {
             StartCoroutine(controller.DeadSequence());
 
-            var ui = entitiesManager.EnemyStatusUIs
+            var ui = _entitiesManager.EnemyStatusUIs
                 .FirstOrDefault(u => u != null && u.GetEnemyModel() == enemy.EnemyModel);
             if (ui != null) ui.gameObject.SetActive(false);
         }
 
         // 勝利判定
-        bool allEnemiesDead = enemyRuntimes.All(e => e.CurrentHP <= 0);
+        bool allEnemiesDead = _enemyRuntimes.All(e => e.CurrentHP <= 0);
         if (allEnemiesDead)
         {
             StartCoroutine(BattleWinProcess());
         }
     }
-
 }

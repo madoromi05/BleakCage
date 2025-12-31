@@ -34,10 +34,10 @@ public class AttackCommand : ICommand
 
     public IEnumerator Do()
     {
-        Debug.Log($"[AttackCommand] 実行開始。 CardID: {card.ID}, Attribute: {card.attribute} (これがBuffなら設定ミスです)");
+        DebugCostom.Log($"[AttackCommand] 実行開始。 CardID: {card.ID}, Attribute: {card.attribute} (これがBuffなら設定ミスです)");
         if (weapon == null)
         {
-            Debug.LogWarning("[AttackCommand] WeaponRuntime is null. Using default or aborting.");
+            DebugCostom.LogWarning("[AttackCommand] WeaponRuntime is null. Using default or aborting.");
         }
         PlayerController controller = player.PlayerController;
         CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
@@ -64,7 +64,7 @@ public class AttackCommand : ICommand
                 // 状態異常の付与
                 ApplyStatusEffectToEnemy(cardModel, targetEnemy);
 
-                Debug.Log($"[{hitCount}ヒット目] EnemyID：{targetEnemy.ID} に {damage:F2} ダメージ");
+                DebugCostom.Log($"[{hitCount}ヒット目] EnemyID：{targetEnemy.ID} に {damage:F2} ダメージ");
             }
         };
 
@@ -75,13 +75,12 @@ public class AttackCommand : ICommand
         yield return controller.AttackSequence(cardModel, weapon, targetTransform);
 
         controller.OnAttackHitTriggered -= onHitAction;
-        // Debug.Log("攻撃コマンド終了");
         yield return new WaitForSeconds(0.1f);
     }
 
     public bool Undo()
     {
-        Debug.Log("[AttackCardCommand] Undo not implemented.");
+        DebugCostom.LogError("[AttackCardCommand] Undo not implemented.");
         return false;
     }
     private void attackedSoundEffect(AttributeType attribute)
@@ -117,7 +116,7 @@ public class AttackCommand : ICommand
                 {
                     targetEnemy.StatusHandler.ApplyStatus(newEffect);
                     enemyStatusUIController.UpdateStatusIcons(targetEnemy.StatusHandler);
-                    Debug.Log($"[Debuff] 敵(ID:{targetEnemy.ID})に {newEffect.Type} を付与");
+                    DebugCostom.Log($"[Debuff] 敵(ID:{targetEnemy.ID})に {newEffect.Type} を付与");
                 }
                 break;
 
@@ -130,12 +129,12 @@ public class AttackCommand : ICommand
                 {
                     player.StatusHandler.ApplyStatus(newEffect);
                     playerStatusUIController.UpdateStatusIcons(player.StatusHandler);
-                    Debug.Log($"[Buff] プレイヤー(ID:{player.ID})に {newEffect.Type} を付与");
+                    DebugCostom.Log($"[Buff] プレイヤー(ID:{player.ID})に {newEffect.Type} を付与");
                 }
                 break;
 
             default:
-                Debug.LogWarning($"[AttackCommand] 未対応のステータスタイプです: {newEffect.Type}");
+                DebugCostom.LogWarning($"[AttackCommand] 未対応のステータスタイプです: {newEffect.Type}");
                 break;
         }
     }
@@ -157,7 +156,7 @@ public class AttackCommand : ICommand
                 SoundManager.Instance.PlaySE(SEType.damagedSlashEnemy);
                 break;
             default:
-                // デフォルトあるいは物理など
+                // デフォルト
                 SoundManager.Instance.PlaySE(SEType.damagedBluntEnemy);
                 break;
         }

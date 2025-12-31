@@ -120,7 +120,7 @@ public class EnemyTurnTutorialManager : MonoBehaviour, IPhase
         _canProceed = false;
 
         TutorialUIPanel.SetActive(false);
-        Debug.Log("敵ターンチュートリアル完了");
+        DebugCostom.Log("敵ターンチュートリアル完了");
     }
 
     private void SetTutorialText(string text)

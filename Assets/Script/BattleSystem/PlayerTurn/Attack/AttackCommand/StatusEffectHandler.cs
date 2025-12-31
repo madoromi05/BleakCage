@@ -60,7 +60,6 @@ public class StatusEffectHandler
         if (effect != null)
         {
             effect.StackCount -= amount;
-            // Debug.Log($"[{ownerName}] {type} Stack Consumed. Remaining: {effect.StackCount}");
 
             if (effect.StackCount <= 0)
             {

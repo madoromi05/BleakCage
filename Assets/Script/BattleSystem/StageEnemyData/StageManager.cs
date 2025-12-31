@@ -32,7 +32,7 @@ public static class StageManager
         PlayerPrefs.SetInt(PREF_KEY_MAX_STAGE, nextStage);
         PlayerPrefs.Save();
 
-        Debug.Log($"セーブ完了: 次のStage = {nextStage}");
+        DebugCostom.Log($"セーブ完了: 次のStage = {nextStage}");
     }
 
     /// <summary>
@@ -43,28 +43,8 @@ public static class StageManager
     {
         if (currentStageID >= MAX_STAGE)
         {
-            return MIN_STAGE; // ループ
-        }
-        return currentStageID + 1;
-    }
-
-    /// <summary>
-    /// Story開始時に使うステージID
-    /// </summary>
-    public static int GetStageForStoryStart()
-    {
-        int stage = GetMaxReachedStage();
-
-        // 念のためガード
-        if (stage < MIN_STAGE || stage > MAX_STAGE)
-        {
             return MIN_STAGE;
         }
-        return stage;
-    }
-
-    public static void ResetProgress()
-    {
-        PlayerPrefs.DeleteKey(PREF_KEY_MAX_STAGE);
+        return currentStageID + 1;
     }
 }

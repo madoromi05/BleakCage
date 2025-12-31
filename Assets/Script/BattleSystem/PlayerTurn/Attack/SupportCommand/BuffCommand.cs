@@ -18,12 +18,12 @@ public class BuffCommand : ICommand
 
     public IEnumerator Do()
     {
-        Debug.Log($"{player.PlayerModel.PlayerName} のバフ実行: {cardModel.StatusEffect.Type}");
+        DebugCostom.Log($"{player.PlayerModel.PlayerName} のバフ実行: {cardModel.StatusEffect.Type}");
 
-        // 1. エフェクト再生
+        // エフェクト再生
         yield return player.PlayerController.SupportEffect(cardModel);
 
-        // 2. ステータス効果生成
+        // ステータス効果生成
         StatusEffect newEffect = new StatusEffect(
             cardModel.StatusEffect.Type,
             cardModel.StatusEffect.Value,
@@ -31,7 +31,7 @@ public class BuffCommand : ICommand
             cardModel.StatusEffect.InflictStacks
         );
 
-        // 3. Handlerへ適用
+        // Handlerへ適用
         if (player.StatusHandler != null)
         {
             player.StatusHandler.ApplyStatus(newEffect);

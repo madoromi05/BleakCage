@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// プレイヤーのアニメーション再生と、ステート（攻撃・ガード）を制御するクラス
+/// </summary>
 public class PlayerAnimationController : MonoBehaviour
 {
     [SerializeField] private Animator _animator;
-
     public event Action OnAttackHitTriggered;
 
     private AnimatorOverrideController _overrideController;
@@ -15,21 +17,25 @@ public class PlayerAnimationController : MonoBehaviour
     private const string GuardClipName = "Guard";
     private const string AttackClipName = "DummyAttack";
 
-    // 死亡中は一切操作しない
     private bool _isDeathMode = false;
 
+    /// <summary>
+    /// アニメーターの初期化と、イベント中継用コンポーネントのセットアップ
+    /// </summary>
+    /// <param name="animator">対象のアニメーター</param>
     public void Init(Animator animator)
     {
         _animator = animator;
         if (_animator == null) return;
-
         AnimationHitRelay relay = _animator.gameObject.GetComponent<AnimationHitRelay>();
         if (relay == null)
         {
             relay = _animator.gameObject.AddComponent<AnimationHitRelay>();
         }
+
         relay.OnHit += HandleAnimationHit;
 
+        // 実行時にアニメーションを差し替えるためのOverrideControllerを作成
         if (_animator.runtimeAnimatorController != null)
         {
             _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
@@ -37,6 +43,9 @@ public class PlayerAnimationController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 死亡モード（操作不可状態）の有効/無効を切り替えます
+    /// </summary>
     public void SetDeathMode(bool isDeathMode)
     {
         _isDeathMode = isDeathMode;
@@ -48,7 +57,9 @@ public class PlayerAnimationController : MonoBehaviour
         }
     }
 
-    // 死亡割り込み対策：攻撃/ガードの残留を消す
+    /// <summary>
+    /// 死亡割り込み対策：再生中の攻撃やガードの残留パラメータを消去します
+    /// </summary>
     public void ResetForDeath()
     {
         if (_animator == null) return;
@@ -57,39 +68,51 @@ public class PlayerAnimationController : MonoBehaviour
         _animator.SetBool(IsGuardingHash, false);
     }
 
+    /// <summary>
+    /// AnimationHitRelayからのイベントを受け取り、外部へ通知します
+    /// </summary>
     private void HandleAnimationHit()
     {
+        // 死亡中はヒット判定を無視
         if (_isDeathMode) return;
+
+        // 外部（CombatController等）に通知
         OnAttackHitTriggered?.Invoke();
     }
 
+    /// <summary>
+    /// 指定されたクリップを攻撃アニメーションとして再生します
+    /// </summary>
+    /// <param name="clip">再生するAnimationClip</param>
     public void PlayAttackAnimation(AnimationClip clip)
     {
         if (_isDeathMode) return;
 
         if (clip == null)
         {
-            Debug.LogError("PlayAttackAnimation: clip is null.");
+            DebugCostom.LogError("PlayAttackAnimation: clip is null.");
             return;
         }
-
-        if (_overrideController == null)
-        {
-            Debug.LogError("PlayAttackAnimation: OverrideController is null. Did you call Init()?");
-            return;
-        }
-
         _overrideController[AttackClipName] = clip;
         _animator.SetTrigger(AttackTriggerHash);
     }
 
+    /// <summary>
+    /// ガードアニメーションの再生フラグを制御します
+    /// </summary>
+    /// <param name="isGuarding">ガード中かどうか</param>
     public void SetGuard(bool isGuarding)
     {
         if (_isDeathMode) return;
         if (_animator == null) return;
+
         _animator.SetBool(IsGuardingHash, isGuarding);
     }
 
+    /// <summary>
+    /// 現在設定されているガードアニメーションの長さを取得します
+    /// </summary>
+    /// <returns>秒数（設定がない場合はデフォルトの0.5秒）</returns>
     public float GetGuardAnimationLength()
     {
         if (_overrideController != null && _overrideController[GuardClipName] != null)

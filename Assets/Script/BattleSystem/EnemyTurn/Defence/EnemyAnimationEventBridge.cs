@@ -14,7 +14,7 @@ public class EnemyAnimationEventBridge : MonoBehaviour
 
         if (_parentController == null)
         {
-            Debug.LogError("親に EnemyController が見つかりません！", this.gameObject);
+            DebugCostom.LogError("親に EnemyController が見つかりません！", this.gameObject);
         }
     }
 

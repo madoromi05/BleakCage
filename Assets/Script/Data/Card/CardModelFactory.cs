@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class CardModelFactory
 {
@@ -26,7 +25,7 @@ public class CardModelFactory
             return new CardModel(entity);
         }
 
-        Debug.LogError($"ID: {cardId} のカードが見つかりません。Resources/{BaseLoadPath} 以下のどこかにファイルが存在するか、IDが正しいか確認してください。");
+        DebugCostom.LogError($"ID: {cardId} のカードが見つかりません。Resources/{BaseLoadPath} 以下のどこかにファイルが存在するか、IDが正しいか確認してください。");
         return null;
     }
 
@@ -39,7 +38,7 @@ public class CardModelFactory
 
         if (allCards.Length == 0)
         {
-            Debug.LogWarning($"パス: {BaseLoadPath} にカードデータが一つも見つかりません！パスが合っているか確認してください。");
+            DebugCostom.LogWarning($"パス: {BaseLoadPath} にカードデータが一つも見つかりません！パスが合っているか確認してください。");
             return;
         }
 
@@ -52,7 +51,7 @@ public class CardModelFactory
             }
             else if (card != null)
             {
-                Debug.LogWarning($"ID重複エラー: ID {card.ID} が複数のファイルで使われています: {card.name}");
+                DebugCostom.LogWarning($"ID重複エラー: ID {card.ID} が複数のファイルで使われています: {card.name}");
             }
         }
     }

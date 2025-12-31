@@ -29,7 +29,7 @@ public class PlayerModel
     {
         if (entity == null)
         {
-            Debug.LogError("PlayerEntity is null");
+            DebugCostom.LogError("PlayerEntity is null");
             return;
         }
 

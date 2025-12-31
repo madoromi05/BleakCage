@@ -33,7 +33,7 @@ public class CardModel
     {
         if (entity == null)
         {
-            Debug.LogError("CardEntity is null.");
+            DebugCostom.LogError("CardEntity is null.");
             return;
         }
 

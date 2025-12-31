@@ -41,7 +41,7 @@ public class EnemyController : MonoBehaviour
 
         if (_model == null)
         {
-            Debug.LogError("EnemyController.Init: enemyModel is null.", this);
+            DebugCostom.LogError("EnemyController.Init: enemyModel is null.", this);
             return;
         }
 
@@ -71,7 +71,7 @@ public class EnemyController : MonoBehaviour
             _animator = instance.GetComponent<Animator>();
             if (_animator == null)
             {
-                Debug.LogError("EnemyController: CharacterPrefab has no Animator.", instance);
+                DebugCostom.LogError("EnemyController: CharacterPrefab has no Animator.", instance);
                 return;
             }
 
@@ -117,7 +117,7 @@ public class EnemyController : MonoBehaviour
             return _clipLengthCache[match];
         }
 
-        Debug.LogWarning($"EnemyController: clip not found. (State: {stateName})", this);
+        DebugCostom.LogWarning($"EnemyController: clip not found. (State: {stateName})", this);
         return 1.0f;
     }
 
@@ -203,10 +203,10 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public IEnumerator DeadSequence()
     {
-        Debug.Log($"[Death] DeadSequence called name={gameObject.name} active={gameObject.activeInHierarchy}", this);
+        DebugCostom.Log($"[Death] DeadSequence called name={gameObject.name} active={gameObject.activeInHierarchy}", this);
         if (_isDead) yield break;
         _isDead = true;
-        Debug.Log($"[Death] DeadSequence START name={gameObject.name} active={gameObject.activeInHierarchy}", this);
+        DebugCostom.Log($"[Death] DeadSequence START name={gameObject.name} active={gameObject.activeInHierarchy}", this);
 
         Collider collider = GetComponent<Collider>();
         if (collider != null) collider.enabled = false;

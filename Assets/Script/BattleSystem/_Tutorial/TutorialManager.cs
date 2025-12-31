@@ -48,7 +48,7 @@ public class TutorialManager : MonoBehaviour, IPhase
         }
         if (_battleInputReader == null)
         {
-            Debug.LogError("BattleInputReader が TutorialManager にアサインされていません！");
+            DebugCostom.LogError("BattleInputReader が TutorialManager にアサインされていません！");
         }
 
         _playerTurn.OnCardSelectedForTutorial += HandleCardSelectedForTutorial;
@@ -138,22 +138,19 @@ public class TutorialManager : MonoBehaviour, IPhase
         _canProceed = false;
 
         _battleInputReader.EnableBattleActionMap();
-        Debug.Log("BattleInputReader enabled for tutorial card selection.");
 
         SetTutorialText(_tutorialMessages.Dequeue());
         _playerTurn.StartPlayerTurn(); // カードを表示
 
-        // WaitUntil: カード0と1が選択されるのを待つ
+        // カード0と1が選択されるのを待つ
         yield return new WaitUntil(() => CardsSelectedProsess());
-        Debug.Log("Tutorial cards (0 and 1) selected.");
 
-        // 4. Enterキーで次に進む
+        // Enterキーで次に進む
         SetTutorialText(_tutorialMessages.Dequeue());
 
-        // WaitUntil: Enterキー (Confirm) が押されるのを待つ
+        // Enterキー (Confirm) が押されるのを待つ
         yield return new WaitUntil(() => _hasConfirmedSelection);
         _hasConfirmedSelection = false;
-        Debug.Log("Tutorial card confirmation received.");
 
         _battleInputReader.DisableAllActionMaps();
         SetTutorialText(_tutorialMessages.Dequeue());
@@ -188,7 +185,7 @@ public class TutorialManager : MonoBehaviour, IPhase
 
     private void OnPlayerTurnFinished()
     {
-        Debug.Log("[OnPlayerTurnFinished] 発火");
+        DebugCostom.Log("[OnPlayerTurnFinished] 発火");
         _hasTurnFinished = true;
     }
 
@@ -209,7 +206,7 @@ public class TutorialManager : MonoBehaviour, IPhase
         _canProceed = false;
 
         TutorialUIPanel.SetActive(false);
-        Debug.Log("カード選択チュートリアル完了");
+        DebugCostom.Log("カード選択チュートリアル完了");
     }
 }
 #endif

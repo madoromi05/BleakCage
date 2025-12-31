@@ -31,7 +31,7 @@ public class PlayerDataLoader
 
         if (preset == null)
         {
-            Debug.LogError("プリセットデータがnullです！");
+            DebugCostom.LogError("プリセットデータがnullです！");
             return new DeckSetupRepository(party);
         }
 
@@ -42,7 +42,7 @@ public class PlayerDataLoader
             PlayerModel model = playerFactory.CreateFromId(charData.CharacterID);
             if (model == null)
             {
-                Debug.LogError($"CharacterID: {charData.CharacterID} が見つかりません。スキップします。");
+                DebugCostom.LogError($"CharacterID: {charData.CharacterID} が見つかりません。スキップします。");
                 continue;
             }
 
@@ -78,7 +78,7 @@ public class PlayerDataLoader
                     }
                     else
                     {
-                        Debug.LogWarning($"WeaponID: {weaponData.WeaponID} の生成に失敗しました。");
+                        DebugCostom.LogWarning($"WeaponID: {weaponData.WeaponID} の生成に失敗しました。");
                     }
                 }
             }

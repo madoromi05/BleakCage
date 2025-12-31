@@ -12,7 +12,7 @@ public class SelectTurn : MonoBehaviour, IPhase
 
     public Dictionary<int, List<EnemyModel>> PlayerSelections { get; private set; }
 
-    // ★PlayerID -> UI の辞書（UIは辞書参照に統一）
+    // PlayerID -> UI の辞書（UIは辞書参照に統一）
     private Dictionary<int, PlayerStatusUIController> _playerUiById;
 
     public event System.Action SelectTurnFinished;
@@ -136,7 +136,7 @@ public class SelectTurn : MonoBehaviour, IPhase
                 PlayerSelections[player.ID].Clear();
             }
         }
-        Debug.Log("全プレイヤーのターゲット選択がクリアされました。");
+        DebugCostom.Log("全プレイヤーのターゲット選択がクリアされました。");
     }
 
     public void ValidateSelections()
@@ -180,7 +180,7 @@ public class SelectTurn : MonoBehaviour, IPhase
     {
         ValidateSelections();
 
-        // ★プレイヤーごとの選択
+        // プレイヤーごとの選択
         for (int pIndex = 0; pIndex < _currentPlayers.Count; pIndex++)
         {
             PlayerRuntime currentPlayer = _currentPlayers[pIndex];
@@ -201,7 +201,7 @@ public class SelectTurn : MonoBehaviour, IPhase
                 break;
             }
 
-            // ★B案：優先順位は「敵の生存数まで」
+            // 優先順位は「敵の生存数まで」
             for (int priority = 1; ; priority++)
             {
                 ValidateSelections(); // ターン中に死んだ場合の安全策
@@ -214,11 +214,7 @@ public class SelectTurn : MonoBehaviour, IPhase
                 if (PlayerSelections.ContainsKey(currentPlayer.ID))
                     currentSelectedCount = PlayerSelections[currentPlayer.ID].Count;
 
-                if (currentSelectedCount >= aliveEnemyCount)
-                {
-                    Debug.Log("これ以上選べる敵がいません（全敵選択済み）。次のプレイヤーへ進みます。");
-                    break;
-                }
+                if (currentSelectedCount >= aliveEnemyCount) { break; }
 
                 bool hasValidSelection = false;
 

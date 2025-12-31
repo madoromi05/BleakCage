@@ -34,7 +34,7 @@ public class EnemyModel
     {
         if (Entity == null)
         {
-            Debug.LogError("enemyEntity is null");
+            DebugCostom.LogError("enemyEntity is null");
             return;
         }
         EnemyID = Entity.EnemyID;

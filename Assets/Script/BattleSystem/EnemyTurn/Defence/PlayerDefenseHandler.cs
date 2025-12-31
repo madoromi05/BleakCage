@@ -52,7 +52,6 @@ public class PlayerDefenseHandler : MonoBehaviour
 
     public void EnableDefenseInput()
     {
-        Debug.Log("Defense input enabled.");
         _inputReader.EnableDefenseActionMap();
         _inputReader.OnDefend += HandleDefenseInput;
         _inputReader.OnDefendCanceled += HandleDefenseInputCanceled;
@@ -138,7 +137,7 @@ public class PlayerDefenseHandler : MonoBehaviour
                     if (!_gaugeSystem.TrySpendGuardGauge(drainAmount))
                     {
                         _isDefending[i] = false;
-                        Debug.Log($"P{i + 1} ゲージが尽きた！");
+                        DebugCostom.Log($"P{i + 1} ゲージが尽きた！");
                         if (_playerControllers.TryGetValue(_players[i], out PlayerController pc))
                         {
                             pc.SetGuardAnimation(false);
@@ -158,7 +157,7 @@ public class PlayerDefenseHandler : MonoBehaviour
     {
         if (_isDefenseWindowOpen)
         {
-            Debug.LogWarning("防御ウィンドウが既に開いています。新しいリクエストを即時解決します。");
+            DebugCostom.LogWarning("防御ウィンドウが既に開いています。新しいリクエストを即時解決します。");
             onResolved?.Invoke();
             yield break;
         }
@@ -178,7 +177,7 @@ public class PlayerDefenseHandler : MonoBehaviour
         int targetPlayerIndex = _players.FindIndex(p => p == _currentPlayerTarget);
         if (targetPlayerIndex == -1)
         {
-            Debug.LogWarning("防御ターゲットが見つかりません。");
+            DebugCostom.LogWarning("防御ターゲットが見つかりません。");
             _isDefenseWindowOpen = false;
             _currentDefenseResolutionCallback?.Invoke();
             _currentDefenseResolutionCallback = null;
@@ -232,13 +231,13 @@ public class PlayerDefenseHandler : MonoBehaviour
         {
             _pressedDuringJustWindow = true;
             _pressedDuringNormalWindow = true; // 通常ガードの条件も満たす
-            _defenseInput = 0; // 入力を消費
+            _defenseInput = 0;
         }
 
         // "離した" 瞬間を検知
         if (_defenseInputCanceled == targetPlayerNum)
         {
-            _defenseInputCanceled = 0; // 入力を消費
+            _defenseInputCanceled = 0;
 
             // ジャスト時間内に「押して」かつ「離した」か？
             if (_pressedDuringJustWindow)
@@ -255,14 +254,14 @@ public class PlayerDefenseHandler : MonoBehaviour
     {
         if (_defenseInput == targetPlayerNum)
         {
-            _pressedDuringNormalWindow = true; // 押したことを記録
-            _defenseInput = 0; // 入力を消費
+            _pressedDuringNormalWindow = true;
+            _defenseInput = 0;
         }
 
         // "離した" 瞬間を検知 (このフェーズでは特に何もしないが、入力は消費する)
         if (_defenseInputCanceled == targetPlayerNum)
         {
-            _defenseInputCanceled = 0; // 入力を消費
+            _defenseInputCanceled = 0;
         }
     }
 
@@ -271,7 +270,7 @@ public class PlayerDefenseHandler : MonoBehaviour
     /// </summary>
     private void TriggerCounter(int targetPlayerNum)
     {
-        Debug.Log($"P{targetPlayerNum}: カウンター成功！ (ジャスト時間内に押して離した)");
+        DebugCostom.Log($"P{targetPlayerNum}: カウンター成功！ (ジャスト時間内に押して離した)");
         _gaugeSystem.IncrementCounterCount();
         _gaugeSystem.AddGuardGauge(COUNTER_RECOVERY_LARGE);
         OnDefenseResultFeedback?.Invoke("COUNTER!!", Color.yellow);

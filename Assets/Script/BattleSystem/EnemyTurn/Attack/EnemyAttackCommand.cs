@@ -86,7 +86,7 @@ public class EnemyAttackCommand : ICommand
 
     public bool Undo()
     {
-        Debug.Log("[EnemyAttackCardCommand] Undo not implemented.");
+        DebugCostom.LogWarning("[EnemyAttackCardCommand] Undo not implemented.");
         return false;
     }
 }

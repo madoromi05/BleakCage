@@ -44,11 +44,11 @@ public class AnimationEventFixer : Editor
         if (fixedCount > 0)
         {
             AssetDatabase.SaveAssets();
-            Debug.Log($"完了: {fixedCount}個のアニメーションクリップを修正しました！");
+            DebugCostom.Log($"完了: {fixedCount}個のアニメーションクリップを修正しました！");
         }
         else
         {
-            Debug.Log("修正が必要なクリップは見つかりませんでした（またはクリップが選択されていません）。");
+            DebugCostom.Log("修正が必要なクリップは見つかりませんでした（またはクリップが選択されていません）。");
         }
     }
 }

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 #if TUTORIAL_ENABLED
 
 /// <summary>
-/// チュートリアルのフェーズ進行（SelectTutorial -> CardTutorial -> EnemyTutorial）のみを管理する
-/// 完了後は BattlePhaseManager に処理を移譲する
+/// チュートリアルのフェーズ進行（Select -> Card -> Enemy）を管理するクラス。
+/// 完了後は BattlePhaseManager に処理を移譲します。
 /// </summary>
 public class TutorialFlowManager : MonoBehaviour
 {
@@ -33,7 +33,9 @@ public class TutorialFlowManager : MonoBehaviour
     private BattleCardDeck _battleCardDeck;
     private IPhase _currentPhase;
 
-    // BattleManagerから呼ばれる初期化
+    /// <summary>
+    /// 各マネージャーの初期化と、チュートリアル専用設定の適用を行います。
+    /// </summary>
     public void Init(
         BattleManager battleManager, BattlePhaseManager normalPhaseManager,
         BattleEntitiesManager entitiesManager,
@@ -43,7 +45,6 @@ public class TutorialFlowManager : MonoBehaviour
         BattleCardDeck battleCardDeck,
         List<EnemyRuntime> enemyRuntimes)
     {
-        Debug.Log($"[TutorialFlowManager] Init called.");
         _battleManager = battleManager;
         _normalPhaseManager = normalPhaseManager;
         _entitiesManager = entitiesManager;
@@ -56,7 +57,6 @@ public class TutorialFlowManager : MonoBehaviour
         _battleCardDeck = battleCardDeck;
         _enemyRuntimes = enemyRuntimes;
 
-        // --- BattlePhaseManager の Init から持ってきたロジック ---
         if (_tutorialObjectsParent != null)
         {
             _tutorialObjectsParent.SetActive(true);
@@ -65,10 +65,12 @@ public class TutorialFlowManager : MonoBehaviour
         _selectTurnTutorialManager.Initialize(_tortrialInputReader, players, enemies, playerStatusUIs, enemyStatusUIs);
         _currentPhase = _selectTurnTutorialManager;
         _currentPhase.OnPhaseFinished += OnSelectionPhaseFinished;
+
         _tutorialManager.Initialize(battleManager, _tortrialInputReader, enemyStatusUIs, _entitiesManager.EnemyControllers, selectTurn);
         _enemyTurnTutorialManager.Initialize(_tortrialInputReader);
-        playerTurn.SetTutorialMode(true);
-        playerTurn.Setup(
+
+        _playerTurn.SetTutorialMode(true);
+        _playerTurn.Setup(
             selectTurn.PlayerSelections,
             entitiesManager.Players,
             battleCardDeck,
@@ -79,80 +81,73 @@ public class TutorialFlowManager : MonoBehaviour
         );
     }
 
-    // チュートリアルフローを開始する
     public void StartTutorialFlow()
     {
         _currentPhase.StartPhase();
     }
 
     /// <summary>
-    /// 攻撃対象選択チュートリアルが完了
+    /// 攻撃対象選択チュートリアルが完了した際のコールバック
     /// </summary>
     private void OnSelectionPhaseFinished()
     {
         _currentPhase.OnPhaseFinished -= OnSelectionPhaseFinished;
-        Debug.Log("チュートリアル：カード選択フェーズに移行します。");
+        DebugCostom.Log("チュートリアル：カード選択フェーズに移行します。");
 
         _currentPhase = _tutorialManager;
         _currentPhase.OnPhaseFinished += OnCardTutorialPhaseFinished;
         if (_tutorialUIPanel != null)
         {
-            Debug.Log("チュートリアル：UIPanelを表示します。");
             _tutorialUIPanel.SetActive(true);
         }
         _currentPhase.StartPhase();
     }
 
     /// <summary>
-    /// カード選択チュートリアル完了 → 敵ターンチュートリアルへ
+    /// カード選択チュートリアル完了時のコールバック。敵ターンチュートリアルへ移行。
     /// </summary>
     private void OnCardTutorialPhaseFinished()
     {
         _currentPhase.OnPhaseFinished -= OnCardTutorialPhaseFinished;
-        Debug.Log("【カードチュートリアル完了】-> 敵ターンチュートリアルへ移行します");
+        DebugCostom.Log("【カードチュートリアル完了】-> 敵ターンチュートリアルへ移行します");
+
         _currentPhase = _enemyTurnTutorialManager;
         _currentPhase.OnPhaseFinished += OnEnemyTurnTutorialFinished;
         _currentPhase.StartPhase();
     }
 
     /// <summary>
-    /// 敵ターンチュートリアル完了 → 通常の戦闘へ
+    /// 敵ターンチュートリアル完了時のコールバック。全てのチュートリアルを終え通常戦闘へ移行。
     /// </summary>
     private void OnEnemyTurnTutorialFinished()
     {
         _currentPhase.OnPhaseFinished -= OnEnemyTurnTutorialFinished;
-        Debug.Log("【敵ターンチュートリアル完了】-> 通常戦闘へ移行します");
+        DebugCostom.Log("【敵ターンチュートリアル完了】-> 通常戦闘へ移行します");
 
         _playerTurn.SetTutorialMode(false);
 
-        if(_tutorialObjectsParent != null)
-        {
-            _tutorialObjectsParent.SetActive(false);
-        }
-        if (_tutorialUIPanel != null)
-        {
-            _tutorialUIPanel.SetActive(false);
-        }
+        if (_tutorialObjectsParent != null) _tutorialObjectsParent.SetActive(false);
+        if (_tutorialUIPanel != null) _tutorialUIPanel.SetActive(false);
 
-        // 1. 通常モードのフェーズ管理を初期化
+        // --- エラー修正箇所：公開プロパティ経由でアクセス ---
         _normalPhaseManager.Init(
             _entitiesManager,
             _players, _enemies,
             _playerStatusUIs, _enemyStatusUIs,
-            _selectTurn, 
+            _selectTurn,
             _playerTurn,
             _enemyTurn,
-            _battleManager.selectionChoicePanel,
+            _battleManager.SelectionChoicePanel,
             _battleManager,
             _battleCardDeck,
-            _battleManager.guardGaugeSystem
-);
+            _battleManager.GuardGaugeSystem
+        );
 
-        // 2. 通常マネージャーをアクティブにし、自分を非アクティブにする
+        // 通常モードのマネージャーを起動
         _normalPhaseManager.gameObject.SetActive(true);
         gameObject.SetActive(false);
 
-        // 3. 通常の選択フェーズを開始
+        // 最初の選択フェーズを開始
         _normalPhaseManager.StartSelectionPhase();
     }
 }

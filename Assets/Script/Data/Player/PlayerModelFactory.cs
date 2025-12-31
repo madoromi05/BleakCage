@@ -2,16 +2,11 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// PlayerModelを生成するファクトリクラス
-/// 責任：PlayerEntityの読み込みとPlayerModelの生成
+/// ID からPlayerModelを生成するファクトリクラス
+/// PlayerEntityの読み込みとPlayerModelの生成
 /// </summary>
 public class PlayerModelFactory
 {
-    /// <summary>
-    /// IDからPlayerModelを生成
-    /// </summary>
-    /// <param name="playerId">プレイヤーID</param>
-    /// <returns>PlayerModel。生成に失敗した場合はnull</returns>
     public PlayerModel CreateFromId(int playerId)
     {
         string folderPath = "EntityDataList/PlayerEntityList";
@@ -23,7 +18,7 @@ public class PlayerModelFactory
 
         if (targetEntity == null)
         {
-            Debug.LogError($"ID: {playerId} (検索名: {searchPrefix}...) に一致するファイルが見つかりません。");
+            DebugCostom.LogError($"ID: {playerId} (検索名: {searchPrefix}...) に一致するファイルが見つかりません。");
             return null;
         }
 

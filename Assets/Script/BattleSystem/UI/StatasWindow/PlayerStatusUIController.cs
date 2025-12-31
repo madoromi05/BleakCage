@@ -56,7 +56,7 @@ public class PlayerStatusUIController : MonoBehaviour
         _playerRuntime = playerRuntime;
         if (_playerRuntime == null || _playerRuntime.PlayerModel == null)
         {
-            Debug.LogError("SetPlayerStatus: playerRuntime or PlayerModel is null.", this);
+            DebugCostom.LogError("SetPlayerStatus: playerRuntime or PlayerModel is null.", this);
             return;
         }
 
@@ -77,7 +77,7 @@ public class PlayerStatusUIController : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"PlayerModel '{model.PlayerName}' にUI用のPlayerIconが設定されていません。", this);
+                DebugCostom.LogWarning($"PlayerModel '{model.PlayerName}' にUI用のPlayerIconが設定されていません。", this);
             }
         }
 

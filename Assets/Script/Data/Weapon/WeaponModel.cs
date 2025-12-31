@@ -25,7 +25,7 @@ public class WeaponModel
     {
         if (entity == null)
         {
-            Debug.LogError("weaponEntity is null");
+            DebugCostom.LogError("weaponEntity is null");
             return;
         }
 

@@ -30,7 +30,7 @@ public class CardController : MonoBehaviour
     {
         if (canvasGroup == null)
         {
-            Debug.LogError("CardControllerにCanvasGroupがアタッチされていません！");
+            DebugCostom.LogError("CardControllerにCanvasGroupがアタッチされていません！");
             return;
         }
 

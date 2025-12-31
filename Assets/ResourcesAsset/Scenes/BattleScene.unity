@@ -153,21 +153,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f4f9bac9e4b25439af32db63acbc3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleCardDeck: {fileID: 782690699}
-  guardGaugeSystem: {fileID: 147126858}
-  gameOverUIPanel: {fileID: 1177548476}
-  normalPhaseManager: {fileID: 120127635}
-  tutorialFlowManager: {fileID: 1655738824}
-  entitiesManager: {fileID: 120127634}
-  defenseFeedbackUI: {fileID: 147126857}
-  playerTurn: {fileID: 120127628}
-  enemyTurn: {fileID: 120127629}
-  selectTurn: {fileID: 120127630}
-  selectionChoicePanel: {fileID: 1991256336}
-  timeText: {fileID: 691840769}
-  keepSelectionsButton: {fileID: 1705824226}
-  changeSelectionsButton: {fileID: 1987222925}
-  targetMarkerPrefab: {fileID: 7812197052377839266, guid: 5439037ea6d9baf4f99b7efc775794b0, type: 3}
+  BattleCardDeck: {fileID: 782690699}
+  GuardGaugeSystem: {fileID: 147126858}
+  _gameOverUIPanel: {fileID: 1177548476}
+  _normalPhaseManager: {fileID: 120127635}
+  _tutorialFlowManager: {fileID: 1655738824}
+  _entitiesManager: {fileID: 120127634}
+  _defenseFeedbackUI: {fileID: 147126857}
+  _playerTurn: {fileID: 120127628}
+  _enemyTurn: {fileID: 120127629}
+  _selectTurn: {fileID: 120127630}
+  SelectionChoicePanel: {fileID: 1991256336}
+  _timeText: {fileID: 691840769}
+  _keepSelectionsButton: {fileID: 1705824226}
+  _changeSelectionsButton: {fileID: 1987222925}
+  _targetMarkerPrefab: {fileID: 7812197052377839266, guid: 5439037ea6d9baf4f99b7efc775794b0, type: 3}
 --- !u!4 &120127626
 Transform:
   m_ObjectHideFlags: 0
@@ -198,18 +198,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d956f475424842b4798417ed6d77a867, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 7699136889019067178, guid: 9db2d9eed3b92c54db8b383069db691c, type: 3}
-  playerHandTransform: {fileID: 457889571}
-  inputReader: {fileID: 1817250752}
-  guardGaugeSystem: {fileID: 147126858}
-  damageCalculator: {fileID: 1853685102}
-  battleCardPresenter: {fileID: 457889575}
-  cardSelectionYOffset: 30
-  EnterUI: {fileID: 354554895}
-  key1UI: {fileID: 2209804418455305071, guid: 67435c19acd588e4fb819d5d1ecddb66, type: 3}
-  key2UI: {fileID: 6543906636060047022, guid: 7c78b4bf1ae21b340be19fabd87686f8, type: 3}
-  key3UI: {fileID: 4648013577742724883, guid: b83522bf74b180b46baf5430c97da127, type: 3}
-  isTurnFinished: 0
+  _cardPrefab: {fileID: 7699136889019067178, guid: 9db2d9eed3b92c54db8b383069db691c, type: 3}
+  _playerHandTransform: {fileID: 457889571}
+  _inputReader: {fileID: 1817250752}
+  _guardGaugeSystem: {fileID: 147126858}
+  _damageCalculator: {fileID: 1853685102}
+  _battleCardPresenter: {fileID: 457889575}
+  _cardSelectionYOffset: 30
+  _enterUI: {fileID: 354554895}
+  _key1UI: {fileID: 2209804418455305071, guid: 67435c19acd588e4fb819d5d1ecddb66, type: 3}
+  _key2UI: {fileID: 6543906636060047022, guid: 7c78b4bf1ae21b340be19fabd87686f8, type: 3}
+  _key3UI: {fileID: 4648013577742724883, guid: b83522bf74b180b46baf5430c97da127, type: 3}
+  IsTurnFinished: 0
 --- !u!114 &120127629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,29 +253,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a47308e8001a4ed428ce8cb189e8f141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useDebugSettings: 1
-  debugStageID: 2
-  enemyBasePrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
-  playerBasePrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
-  playerPositions:
+  _useDebugSettings: 1
+  _debugStageID: 2
+  _enemyBasePrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
+  _playerBasePrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
+  _playerPositions:
   - {fileID: 2020118549}
   - {fileID: 655441560}
   - {fileID: 1346862380}
   - {fileID: 466863122}
-  enemyPositions:
+  _enemyPositions:
   - {fileID: 1132369701}
   - {fileID: 2141864182}
   - {fileID: 1365322185}
-  playerStatusUIPrefab: {fileID: 3674847010971381577, guid: 1f6773378f3553943b400135a3211d39, type: 3}
-  enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
-  playerStatusBarTransform: {fileID: 334436847}
-  enemyStatusBarTransform: {fileID: 727143522}
-  allStageEnemyData:
+  _playerStatusUIPrefab: {fileID: 3674847010971381577, guid: 1f6773378f3553943b400135a3211d39, type: 3}
+  _enemyStatusUIPrefab: {fileID: 3674847010971381577, guid: 0037673d6214e2c48a3b07b4d784f01e, type: 3}
+  _playerStatusBarTransform: {fileID: 334436847}
+  _enemyStatusBarTransform: {fileID: 727143522}
+  _allStageEnemyData:
   - {fileID: 11400000, guid: 9d954007fbb42714fbe8efc6ce3953f1, type: 2}
   - {fileID: 11400000, guid: 216c6be24867f3945a8031f797c8d1f6, type: 2}
   - {fileID: 11400000, guid: f39fce833e5bd6e44ac6c65e82842d51, type: 2}
   - {fileID: 11400000, guid: dd44614e00fd49940aae3ce6f584be94, type: 2}
-  stagePlayerPresets:
+  _stagePlayerPresets:
   - {fileID: 11400000, guid: 380242edaba581542bd64538b74f3932, type: 2}
   - {fileID: 11400000, guid: 43318904ac21ed34591c6de3903aab4c, type: 2}
   - {fileID: 11400000, guid: e993a066ede447a4fa4d52492396ee3d, type: 2}
@@ -292,7 +292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a166351bc3f4fe249b3ed223b0159df1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  phaseUI: {fileID: 1717322608}
+  _phaseUI: {fileID: 1717322608}
   _inputReader: {fileID: 1817250752}
 --- !u!1 &147126855
 GameObject:
@@ -723,7 +723,7 @@ GameObject:
   - component: {fileID: 354554898}
   - component: {fileID: 354554897}
   m_Layer: 5
-  m_Name: PlayerTurnEnterkey
+  m_Name: EnterkeyUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

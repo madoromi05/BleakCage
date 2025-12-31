@@ -45,7 +45,7 @@ public class DeckViewManager : MonoBehaviour
 
     private void Start()
     {
-        // 1. ボタンイベントの登録
+        // ボタンイベントの登録
         if (battleStartButton != null)
             battleStartButton.onClick.AddListener(OnClickBattleStart);
 
@@ -55,7 +55,7 @@ public class DeckViewManager : MonoBehaviour
         if (nextCharButton != null)
             nextCharButton.onClick.AddListener(OnClickNextChar);
 
-        // 2. ステージIDの決定
+        // ステージIDの決定
         int targetStageID = 0;
         if (StageManager.SelectedStageID != -1)
         {
@@ -64,13 +64,12 @@ public class DeckViewManager : MonoBehaviour
         else if (Application.isEditor && useDebugSettings)
         {
             targetStageID = debugStageID;
-            Debug.Log($"<color=yellow>【Debug】DeckView: DebugStageID {targetStageID} を使用して表示します</color>");
         }
 
-        // 3. データロード
+        // データロード
         LoadDeckData(targetStageID);
 
-        // 4. 初期表示
+        // 初期表示
         if (currentDeckData != null && currentDeckData.Party.Count > 0)
         {
             currentPlayerIndex = 0;
@@ -118,7 +117,7 @@ public class DeckViewManager : MonoBehaviour
     {
         if (player == null) return;
 
-        // --- 1. 左側(武器名エリア)クリア ---
+        // --- 左側(武器名エリア)クリア ---
         foreach (Transform child in leftSidePanelRoot)
         {
             if (characterNameText != null && child.gameObject == characterNameText.gameObject) continue;
@@ -128,7 +127,7 @@ public class DeckViewManager : MonoBehaviour
         // --- 右側(カードエリア)クリア ---
         ClearUI(rightSidePanelRoot);
 
-        // --- 2. キャラ基本情報 ---
+        // --- キャラ基本情報 ---
         if (characterNameText != null) characterNameText.text = player.PlayerModel.PlayerName;
         if (characterIconImage != null && player.PlayerModel.PlayerIcon != null)
         {
@@ -138,7 +137,7 @@ public class DeckViewManager : MonoBehaviour
 
         if (player.Weapons == null) return;
 
-        // ★修正1: ソート処理
+        // ソート処理
         // ルール: 「IDが0（キャラ）」なら優先度0、それ以外は優先度1。
         //         優先度が同じなら、「IDが大きい順」に並べる。
         // 結果: ID0(最上段) -> ID100 -> ID99 ... と並びます。
@@ -147,11 +146,11 @@ public class DeckViewManager : MonoBehaviour
             .ThenByDescending(w => w.Model.ID)
             .ToList();
 
-        // ★修正2: 1対1で生成 (HashSetによる重複チェックを削除)
+        // 1対1で生成 (HashSetによる重複チェックを削除)
         // 武器が3つあれば、左に名前3つ、右にカード行3つを作る。これで左右の高さがズレません。
         foreach (var weapon in sortedWeapons)
         {
-            // --- A. 左側パネル: 武器名の表示 ---
+            // --- 左側パネル: 武器名の表示 ---
             GameObject nameObj = Instantiate(weaponNameTextPrefab, leftSidePanelRoot);
 
             Text nameText = nameObj.GetComponentInChildren<Text>();
@@ -263,7 +262,7 @@ public class DeckViewManager : MonoBehaviour
     {
         if (btn == null)
         {
-            Debug.Log($"[DeckView]{label} btn is NULL");
+            DebugCostom.Log($"[DeckView]{label} btn is NULL");
             return;
         }
 
@@ -272,7 +271,7 @@ public class DeckViewManager : MonoBehaviour
         var cg = btn.GetComponent<CanvasGroup>();            // 付いてる場合あり
         var rt = btn.GetComponent<RectTransform>();
 
-        Debug.Log(
+        DebugCostom.Log(
             $"[DeckView]{label} activeSelf={go.activeSelf} activeInHierarchy={go.activeInHierarchy} " +
             $"interactable={btn.interactable} enabled={btn.enabled} " +
             $"img={(img ? "Y" : "N")} imgEnabled={(img ? img.enabled : false)} imgAlpha={(img ? img.color.a : -1f)} " +

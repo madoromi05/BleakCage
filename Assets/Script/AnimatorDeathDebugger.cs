@@ -50,7 +50,7 @@ public class AnimatorDeathDebugger : MonoBehaviour
             // 重要イベントだけ出す
             if (stateChanged)
             {
-                Debug.Log(
+                DebugCostom.Log(
                     $"[AnimDbg] STATE CHANGED hash={st.shortNameHash} norm={st.normalizedTime:F3} len={st.length:F3} " +
                     $"isDead={isDead} timeScale={Time.timeScale} animSpeed={animator.speed} " +
                     $"updateMode={animator.updateMode} culling={animator.cullingMode}",
@@ -62,7 +62,7 @@ public class AnimatorDeathDebugger : MonoBehaviour
             // 「止まった疑い」を検知（0.4秒くらい動かなかったら）
             if (udt > 0.4f && normNotMoving)
             {
-                Debug.LogWarning(
+                DebugCostom.LogWarning(
                     $"[AnimDbg] NORM NOT MOVING norm={st.normalizedTime:F3} (POSSIBLE STOP) " +
                     $"isDead={isDead} timeScale={Time.timeScale} animSpeed={animator.speed} " +
                     $"updateMode={animator.updateMode} culling={animator.cullingMode}",

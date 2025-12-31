@@ -39,7 +39,7 @@ public class PlayerActionExecutor
             PlayerRuntime player = weaponRuntime.ParentPlayer;
             if (player == null || player.CurrentHP <= 0)
             {
-                Debug.LogWarning($"[Executor] dead player card skipped: playerID={player?.ID}");
+                DebugCostom.LogWarning($"[Executor] dead player card skipped: playerID={player?.ID}");
                 continue;
             }
             AttributeType attribute = selectedCardRuntime.attribute;
@@ -175,13 +175,13 @@ public class PlayerActionExecutor
             }
             else
             {
-                Debug.LogError($"Target UI or Controller not found for EnemyID: {targetRuntime.ID}");
+                DebugCostom.LogError($"Target UI or Controller not found for EnemyID: {targetRuntime.ID}");
             }
         }
 
         if (actualTargets.Count == 0)
         {
-            Debug.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象がいません。");
+            DebugCostom.LogWarning($"プレイヤー {attackPlayer.PlayerModel.PlayerName} の攻撃対象がいません。");
         }
     }
 

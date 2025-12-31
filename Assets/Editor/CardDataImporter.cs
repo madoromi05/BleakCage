@@ -4,6 +4,9 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// csvファイルからカードデータをインポートするエディタ拡張   
+/// </summary>
 public class CardDataImporter : AssetPostprocessor
 {
     private const string CSV_FILE_NAME = "CardEntityData.csv";
@@ -62,7 +65,7 @@ public class CardDataImporter : AssetPostprocessor
 
                 if (values.Length < 16)
                 {
-                    Debug.LogWarning($"[CardImporter] Line {i + 1}: 列数が足りません。スキップします。");
+                    DebugCostom.LogWarning($"[CardImporter] Line {i + 1}: 列数が足りません。スキップします。");
                     continue;
                 }
 
@@ -70,7 +73,7 @@ public class CardDataImporter : AssetPostprocessor
                 {
                     if (!int.TryParse(values[0], out int cardID))
                     {
-                        Debug.LogError($"[CardImporter] Line {i + 1}: IDが数値ではありません ({values[0]})");
+                        DebugCostom.LogError($"[CardImporter] Line {i + 1}: IDが数値ではありません ({values[0]})");
                         continue;
                     }
 
@@ -113,7 +116,7 @@ public class CardDataImporter : AssetPostprocessor
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"[CardImporter] Error Line {i + 1}: {ex.Message}");
+                    DebugCostom.LogError($"[CardImporter] Error Line {i + 1}: {ex.Message}");
                 }
             }
         }
@@ -123,8 +126,6 @@ public class CardDataImporter : AssetPostprocessor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
-
-        Debug.Log($"CardEntity Import Complete: {csvPath}");
     }
 
     private static void BuildNameCache()

@@ -2,6 +2,9 @@
 using System.Collections;
 using System;
 
+/// <summary>
+/// プレイヤーの移動、戦闘、アニメーションを統合管理するメインコントローラー
+/// </summary>
 [RequireComponent(typeof(PlayerAnimationController))]
 [RequireComponent(typeof(PlayerMovementController))]
 [RequireComponent(typeof(PlayerCombatController))]
@@ -9,7 +12,6 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Death Debug")]
     [SerializeField] private bool _logDeathDebug = false;
-    [SerializeField] private float _deathLogDuration = 3.0f;
 
     public bool IsDead { get; private set; } = false;
 
@@ -18,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private PlayerCombatController _combatCtrl;
     private PlayerStatusUIController _statusUi;
 
+    // --- ビジュアル・ガード制御用変数 ---
     private Transform _characterRoot;
     private float _guardVisualYOffset = 0f;
     private bool _isGuardVisualRaised = false;
@@ -27,12 +30,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 _guardBaseLocalPos;
     private Animator _animator;
 
-    // ★追加：死亡中は他のアニメ更新を完全停止する
     private bool _isInDeathSequence = false;
 
     public void SetStatusUI(PlayerStatusUIController ui) => _statusUi = ui;
 
-    // イベント中継
+    /// <summary>
+    /// 戦闘用コンポーネントからの攻撃ヒットイベントを中継
+    /// </summary>
     public event Action OnAttackHitTriggered
     {
         add => _combatCtrl.OnAttackHitTriggered += value;
@@ -46,6 +50,9 @@ public class PlayerController : MonoBehaviour
         _combatCtrl = GetComponent<PlayerCombatController>();
     }
 
+    /// <summary>
+    /// モデルデータに基づきプレイヤーを初期化し、キャラクターモデルを生成します
+    /// </summary>
     public void Init(PlayerModel model)
     {
         _moveCtrl.Init(transform.localPosition);
@@ -53,12 +60,14 @@ public class PlayerController : MonoBehaviour
 
         if (model.CharacterPrefab != null)
         {
+            // モデルの生成とトランスフォーム設定
             GameObject instance = Instantiate(model.CharacterPrefab, transform);
             _characterRoot = instance.transform;
 
             instance.transform.localPosition = model.CharacterPrefab.transform.localPosition;
             instance.transform.localScale = model.CharacterPrefab.transform.localScale;
 
+            // 回転補正の計算（プレハブ本来の回転 × 初期設定の回転）
             Quaternion prefabRot = model.CharacterPrefab.transform.localRotation;
             Quaternion adjustRot = Quaternion.Euler(model.InitialRotation);
             instance.transform.localRotation = prefabRot * adjustRot;
@@ -82,6 +91,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 初期装備を設定します
+    /// </summary>
     public void SetInitialWeapon(WeaponRuntime weaponRuntime)
     {
         if (_combatCtrl != null && weaponRuntime != null)
@@ -90,21 +102,29 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 攻撃シーケンスを開始します
+    /// </summary>
     public IEnumerator AttackSequence(CardModel cardModel, WeaponRuntime weaponRuntime, Transform target)
     {
         if (IsDead) yield break;
         yield return _combatCtrl.ExecuteAttackSequence(cardModel, weaponRuntime, target);
     }
 
+    /// <summary>
+    /// 補助効果を発動します
+    /// </summary>
     public IEnumerator SupportEffect(CardModel cardModel)
     {
         if (IsDead) yield break;
         yield return _combatCtrl.ExecuteSupportEffect(cardModel);
     }
 
+    /// <summary>
+    /// ガードアニメーションとビジュアル（位置のオフセット）を設定
+    /// </summary>
     public void SetGuardAnimation(bool isGuarding)
     {
-        // ★死亡中は絶対に触らない（割り込み防止）
         if (IsDead || _isInDeathSequence) return;
 
         if (_animCtrl != null)
@@ -117,13 +137,13 @@ public class PlayerController : MonoBehaviour
 
         if (isGuarding)
         {
-            CaptureGuardBasePosition();
-            RaiseGuardVisualNow();
-            ExtendGuardVisualHold();
+            CaptureGuardBasePosition();  // ガード開始時の基準位置を記録
+            RaiseGuardVisualNow();       // モデルを浮かす（またはオフセットさせる）演出
+            ExtendGuardVisualHold();     // 維持時間の更新
         }
         else
         {
-            ExtendGuardVisualHold();
+            ExtendGuardVisualHold();     // ガードを解いてもアニメーションが終わるまでは維持
         }
     }
 
@@ -132,7 +152,6 @@ public class PlayerController : MonoBehaviour
         if (_characterRoot == null) return;
 
         _guardBaseLocalPos = _characterRoot.localPosition;
-
         if (_isGuardVisualRaised)
         {
             _guardBaseLocalPos.y -= _guardVisualYOffset;
@@ -154,6 +173,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_characterRoot == null || Mathf.Approximately(_guardVisualYOffset, 0f)) return;
 
+        // アニメーションクリップの長さを取得して維持時間を計算
         float len = (_animCtrl != null) ? _animCtrl.GetGuardAnimationLength() : 0.5f;
         _guardHoldUntilTime = Mathf.Max(_guardHoldUntilTime, Time.time + len);
 
@@ -163,11 +183,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ガード演出（位置オフセット）を管理するコルーチン
+    /// </summary>
     private IEnumerator GuardVisualHoldCoroutine()
     {
         while (true)
         {
-            // ★死亡中はガード見た目処理も止める（座標が変になるの防止）
             if (IsDead || _isInDeathSequence)
             {
                 _guardVisualCoroutine = null;
@@ -199,7 +221,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 死亡アニメーションを再生する（割り込みを完全停止して再生しきる）
+    /// 死亡処理を開始し、他のアクションを強制停止します
     /// </summary>
     public void PlayDeadAnimation()
     {
@@ -208,12 +230,12 @@ public class PlayerController : MonoBehaviour
         IsDead = true;
         _isInDeathSequence = true;
 
-        // 死亡アニメーションの割り込み元を止める（PlayerDeathController と同じ思想）
+        // 他の制御コンポーネントを停止して入力を遮断
         if (_moveCtrl != null) _moveCtrl.enabled = false;
         if (_combatCtrl != null) _combatCtrl.enabled = false;
         if (_animCtrl != null) _animCtrl.SetDeathMode(true);
 
-        // ガード見た目も止める
+        // ガード演出の停止
         _isGuardHeld = false;
         if (_guardVisualCoroutine != null)
         {
@@ -221,67 +243,24 @@ public class PlayerController : MonoBehaviour
             _guardVisualCoroutine = null;
         }
 
-        // Collider off
+        // 当たり判定の無効化
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
         if (_animator == null) _animator = GetComponentInChildren<Animator>();
         if (_animator == null)
         {
-            if (_logDeathDebug) Debug.LogWarning("[DeathDebug] Animator not found.", this);
+            if (_logDeathDebug) DebugCostom.LogWarning("[DeathDebug] Animator not found.", this);
             _isInDeathSequence = false;
             return;
         }
 
-        // 死亡開始時に “割り込みパラメータ” を全部落とす
+        // 再生中のアニメーションをリセットし、死亡ステートへ遷移
         _animCtrl?.ResetForDeath();
-
-        // Deadトリガー投入
         _animator.SetTrigger("IsDead");
 
-        // デバッグログ
-        if (_logDeathDebug)
-        {
-            StartCoroutine(LogAnimatorStatesForSeconds(_animator, _deathLogDuration));
-        }
-
-        // ★「最後まで再生してその場に残す」なら PlayDeadAndFreeze を使うのが安全
+        // アニメーション終了後にフリーズさせる処理を開始
         StartCoroutine(PlayDeadAndFreeze());
-    }
-
-    private IEnumerator LogAnimatorStatesForSeconds(Animator anim, float seconds)
-    {
-        int lastHash = 0;
-        float lastNorm = -1f;
-
-        float end = Time.realtimeSinceStartup + seconds;
-        while (Time.realtimeSinceStartup < end && anim != null)
-        {
-            var st = anim.GetCurrentAnimatorStateInfo(0);
-
-            bool stateChanged = st.shortNameHash != lastHash;
-            bool jumpedBack = lastNorm >= 0f && st.normalizedTime + 0.05f < lastNorm;
-
-            if (stateChanged || jumpedBack)
-            {
-                Debug.Log(
-                    $"[DeathDebug] frame={Time.frameCount} hash={st.shortNameHash} norm={st.normalizedTime:F2} len={st.length:F2} " +
-                    $"tagDead={st.IsTag("Dead")} nameDead={st.IsName("Dead")}",
-                    this
-                );
-
-                lastHash = st.shortNameHash;
-                lastNorm = st.normalizedTime;
-            }
-            else
-            {
-                lastNorm = st.normalizedTime;
-            }
-
-            yield return null;
-        }
-
-        Debug.Log($"[DeathDebug] Animator logging finished. frame={Time.frameCount}", this);
     }
 
     public IEnumerator PlayDeadAndFreeze()
@@ -289,15 +268,14 @@ public class PlayerController : MonoBehaviour
         if (_animator == null) _animator = GetComponentInChildren<Animator>();
         if (_animator == null) yield break;
 
-        // Deadステートに入るのを待つ
         yield return null;
 
-        float t = 0.5f;
-        while (t > 0f)
+        float timeout = 0.5f;
+        while (timeout > 0f)
         {
             var st = _animator.GetCurrentAnimatorStateInfo(0);
             if (st.IsTag("Dead") || st.IsName("Dead")) break;
-            t -= Time.deltaTime;
+            timeout -= Time.deltaTime;
             yield return null;
         }
 
@@ -305,6 +283,7 @@ public class PlayerController : MonoBehaviour
         float remain = Mathf.Max(0.0f, (1f - state.normalizedTime) * state.length);
         if (remain <= 0.01f) remain = 1.0f;
 
+        // 終了まで待機してAnimatorをオフにする（ポーズ状態で残す）
         yield return new WaitForSecondsRealtime(remain);
 
         _animator.enabled = false;
