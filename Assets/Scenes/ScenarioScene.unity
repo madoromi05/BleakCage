@@ -148,11 +148,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6494178fdd13aae468c5f1e62f7bcfba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainText: {fileID: 809959782}
-  nextButton: {fileID: 1508000998}
-  useDebugSettings: 0
-  debugStageID: 0
-  debugIsPostBattle: 0
+  _mainText: {fileID: 809959782}
+  _nextButton: {fileID: 1508000998}
+  _useDebugSettings: 0
+  _debugStageID: 0
+  _debugIsPostBattle: 0
 --- !u!4 &38896227
 Transform:
   m_ObjectHideFlags: 0

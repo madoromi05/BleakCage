@@ -23,4 +23,3 @@ VScCardID,OwnerID,Name,Type,Attribute,AttackCount,TargetCount,TargetScope,Passiv
 604,1,カラドボルグ,Weapon,Pierce,1,1,Single,FALSE,0.7,1.6,1,FALSE,Meltdown,1,3,1
 605,1,裂甲の一閃,Weapon,Pierce,1,1,Single,FALSE,1,1,1.5,FALSE,Fracture,0,3,1
 606,1,猪突猛進,Weapon,Pierce,1,1,Single,FALSE,0.7,1.8,1,FALSE,Fracture,0,3,1
-,,,,,,,,,,,,,,,,

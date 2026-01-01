@@ -253,7 +253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a47308e8001a4ed428ce8cb189e8f141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _useDebugSettings: 1
+  _useDebugSettings: 0
   _debugStageID: 2
   _enemyBasePrefab: {fileID: 3098188571546078390, guid: 1ba14d7b779facd48ab3ff66742cc2ae, type: 3}
   _playerBasePrefab: {fileID: 3098188571546078390, guid: d1976d542edd8fd44a9fd954faf0b3e4, type: 3}
@@ -1834,7 +1834,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &736989034
 AudioSource:
   m_ObjectHideFlags: 0

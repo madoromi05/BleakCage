@@ -51,8 +51,8 @@ public class ScenarioSceneManager : MonoBehaviour
     /// </summary>
     private void LoadAndShowScenario(int stageID, bool isPost)
     {
-        string suffix = isPost ? "_End" : "_Start";
-        string fileName = $"Scenario_{stageID}{suffix}";
+        string suffix = isPost ? "End" : "Start";
+        string fileName = $"Scenario_{stageID}_{suffix}";
 
         string filePath = $"Scenarios/{fileName}";
         TextAsset textFile = Resources.Load<TextAsset>(filePath);
