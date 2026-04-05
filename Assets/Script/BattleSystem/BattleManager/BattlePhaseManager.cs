@@ -115,7 +115,6 @@ public class BattlePhaseManager : MonoBehaviour
         }
         DebugCostom.Log("【攻撃対象選択ターン終了】");
 
-
         StartCoroutine(StartPlayerTurnCoroutine());
     }
 
@@ -194,10 +193,7 @@ public class BattlePhaseManager : MonoBehaviour
     {
         if (!keepSelections)
         {
-            if (!keepSelections)
-            {
-                yield return StartCoroutine(ShowPhaseUI("Select Phase"));
-            }
+           yield return StartCoroutine(ShowPhaseUI("Select Phase"));
         }
 
         SoundManager.Instance.PlaySE(SEType.SwitchingPhases);
@@ -217,41 +213,5 @@ public class BattlePhaseManager : MonoBehaviour
     {
         yield return new WaitUntil(() => _selectionChoicePanel.activeSelf == false);
         _selectionChoiceCoroutine = null;
-    }
-
-    public void OnKeepSelections()
-    {
-        DebugCostom.Log("選択を保持して続行が選択されました。");
-        _selectionChoicePanel.SetActive(false);
-        if (_selectionChoiceCoroutine != null)
-        {
-            StopCoroutine(_selectionChoiceCoroutine);
-            _selectionChoiceCoroutine = null;
-        }
-
-        if (_selectTurn != null)
-        {
-            _selectTurn.ValidateSelections();
-        }
-
-        StartCoroutine(ProcessSelectionPhase(keepSelections: true));
-    }
-
-    public void OnChangeSelections()
-    {
-        DebugCostom.Log("選択を変更して続行が選択されました。");
-        _selectionChoicePanel.SetActive(false);
-        if (_selectionChoiceCoroutine != null)
-        {
-            StopCoroutine(_selectionChoiceCoroutine);
-            _selectionChoiceCoroutine = null;
-        }
-
-        if (_selectTurn != null)
-        {
-            _selectTurn.ClearSelections();
-        }
-
-        StartCoroutine(ProcessSelectionPhase(keepSelections: false));
     }
 }

@@ -3643,7 +3643,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 43318904ac21ed34591c6de3903aab4c, type: 2}
   - {fileID: 11400000, guid: e993a066ede447a4fa4d52492396ee3d, type: 2}
   - {fileID: 11400000, guid: 2ecc3c8ff157f884e997d40827c4a7e1, type: 2}
-  useDebugSettings: 0
+  useDebugSettings: 1
   debugStageID: 2
 --- !u!1 &1812244146
 GameObject:

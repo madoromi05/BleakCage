@@ -7,64 +7,64 @@ using System;
 ///</summary>
 public class AttackCommand : ICommand
 {
-    private PlayerRuntime player;
-    private EnemyRuntime targetEnemy;
-    private CardRuntime card;
-    private WeaponRuntime weapon;
-    private EnemyStatusUIController enemyStatusUIController;
-    private PlayerStatusUIController playerStatusUIController;
-    private CardModelFactory cardModelFactory;
-    private Transform targetTransform;
-    private DamageCalculator damageCalculator;
+    private PlayerRuntime _player;
+    private EnemyRuntime _targetEnemy;
+    private CardRuntime _card;
+    private WeaponRuntime _weapon;
+    private EnemyStatusUIController _enemyStatusUIController;
+    private PlayerStatusUIController _playerStatusUIController;
+    private CardModelFactory _cardModelFactory;
+    private Transform _targetTransform;
+    private DamageCalculator _damageCalculator;
 
     public AttackCommand(PlayerRuntime player, WeaponRuntime weapon, CardRuntime card,
                             EnemyStatusUIController enemyStatusUIController, PlayerStatusUIController playerStatusUIController,
                             EnemyRuntime enemy, Transform targetTransform, DamageCalculator damageCalculator, CardModelFactory cardModelFactory)
     {
-        this.targetEnemy = enemy;
-        this.playerStatusUIController = playerStatusUIController;
-        this.player = player;
-        this.card = card;
-        this.weapon = weapon;
-        this.enemyStatusUIController = enemyStatusUIController;
-        this.cardModelFactory = cardModelFactory;
-        this.targetTransform = targetTransform;
-        this.damageCalculator = damageCalculator;
+        this._targetEnemy = enemy;
+        this._playerStatusUIController = playerStatusUIController;
+        this._player = player;
+        this._card = card;
+        this._weapon = weapon;
+        this._enemyStatusUIController = enemyStatusUIController;
+        this._cardModelFactory = cardModelFactory;
+        this._targetTransform = targetTransform;
+        this._damageCalculator = damageCalculator;
     }
 
     public IEnumerator Do()
     {
-        DebugCostom.Log($"[AttackCommand] 実行開始。 CardID: {card.ID}, Attribute: {card.attribute} (これがBuffなら設定ミスです)");
-        if (weapon == null)
+        DebugCostom.Log($"[AttackCommand] 実行開始。 CardID: {_card.ID}, Attribute: {_card.attribute} (これがBuffなら設定ミスです)");
+        if (_weapon == null)
         {
             DebugCostom.LogWarning("[AttackCommand] WeaponRuntime is null. Using default or aborting.");
         }
-        PlayerController controller = player.PlayerController;
-        CardModel cardModel = cardModelFactory.CreateFromID(card.ID);
+        PlayerController controller = _player.PlayerController;
+        CardModel cardModel = _cardModelFactory.CreateFromID(_card.ID);
 
         // 攻撃ヒット時の処理を定義（ローカル関数）
         int hitCount = 0;
         Action onHitAction = () =>
         {
             // 敵が生きていればダメージ処理
-            if (targetEnemy.CurrentHP > 0)
+            if (_targetEnemy.CurrentHP > 0)
             {
                 hitCount++;
 
                 // ダメージ計算
-                float damage = damageCalculator.CalculateFinalDamage(player, weapon, card, targetEnemy);
+                float damage = _damageCalculator.CalculateFinalDamage(_player, _weapon, _card, _targetEnemy);
 
                 // 効果音
-                attackedSoundEffect(card.attribute);        // 味方の攻撃音
-                PlayEnemyDamageSound(card.attribute);       // 敵の被弾音
+                AttackedSoundEffect(_card.attribute);        // 味方の攻撃音
+                PlayEnemyDamageSound(_card.attribute);       // 敵の被弾音
                 // ターゲットのHPを減算
-                targetEnemy.HpHandler.TakeDamage(damage);
-                enemyStatusUIController.UpdateHP(targetEnemy.CurrentHP);
+                _targetEnemy.HpHandler.TakeDamage(damage);
+                _enemyStatusUIController.UpdateHP(_targetEnemy.CurrentHP);
 
                 // 状態異常の付与
-                ApplyStatusEffectToEnemy(cardModel, targetEnemy);
+                ApplyStatusEffectToEnemy(cardModel, _targetEnemy);
 
-                DebugCostom.Log($"[{hitCount}ヒット目] EnemyID：{targetEnemy.ID} に {damage:F2} ダメージ");
+                DebugCostom.Log($"[{hitCount}ヒット目] EnemyID：{_targetEnemy.ID} に {damage:F2} ダメージ");
             }
         };
 
@@ -72,7 +72,7 @@ public class AttackCommand : ICommand
         controller.OnAttackHitTriggered += onHitAction;
 
         // アニメーションシーケンスの実行
-        yield return controller.AttackSequence(cardModel, weapon, targetTransform);
+        yield return controller.AttackSequence(cardModel, _weapon, _targetTransform);
 
         controller.OnAttackHitTriggered -= onHitAction;
         yield return new WaitForSeconds(0.1f);
@@ -83,7 +83,7 @@ public class AttackCommand : ICommand
         DebugCostom.LogError("[AttackCardCommand] Undo not implemented.");
         return false;
     }
-    private void attackedSoundEffect(AttributeType attribute)
+    private void AttackedSoundEffect(AttributeType attribute)
     {
         if (attribute == AttributeType.Slash) SoundManager.Instance.PlaySE(SEType.SlashAttack);
         else if (attribute == AttributeType.Blunt) SoundManager.Instance.PlaySE(SEType.BluntAttack);
@@ -112,11 +112,11 @@ public class AttackCommand : ICommand
             case StatusEffectType.Fracture:     // 【破砕】: 防御貫通UP
             case StatusEffectType.Laceration:   // 【損傷】: ターン終了時ダメージ
             case StatusEffectType.Meltdown:     // 【熔鉄】: 攻防ダウン
-                if (targetEnemy.StatusHandler != null)
+                if (_targetEnemy.StatusHandler != null)
                 {
-                    targetEnemy.StatusHandler.ApplyStatus(newEffect);
-                    enemyStatusUIController.UpdateStatusIcons(targetEnemy.StatusHandler);
-                    DebugCostom.Log($"[Debuff] 敵(ID:{targetEnemy.ID})に {newEffect.Type} を付与");
+                    _targetEnemy.StatusHandler.ApplyStatus(newEffect);
+                    _enemyStatusUIController.UpdateStatusIcons(_targetEnemy.StatusHandler);
+                    DebugCostom.Log($"[Debuff] 敵(ID:{_targetEnemy.ID})に {newEffect.Type} を付与");
                 }
                 break;
 
@@ -125,11 +125,11 @@ public class AttackCommand : ICommand
             case StatusEffectType.Target:       // 【目標】: 命中率UP
             case StatusEffectType.DefenceUp:    // 【防御力UP】
             case StatusEffectType.AttackUp:     // 【攻撃力UP】       
-                if (player.StatusHandler != null)
+                if (_player.StatusHandler != null)
                 {
-                    player.StatusHandler.ApplyStatus(newEffect);
-                    playerStatusUIController.UpdateStatusIcons(player.StatusHandler);
-                    DebugCostom.Log($"[Buff] プレイヤー(ID:{player.ID})に {newEffect.Type} を付与");
+                    _player.StatusHandler.ApplyStatus(newEffect);
+                    _enemyStatusUIController.UpdateStatusIcons(_targetEnemy.StatusHandler);
+                    DebugCostom.Log($"[Buff] プレイヤー(ID:{_player.ID})に {newEffect.Type} を付与");
                 }
                 break;
 
